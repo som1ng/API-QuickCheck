@@ -254,7 +254,7 @@ export default function App() {
             <Zap className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-3 tracking-tight">
-            API Key 连通性测试
+            API-QuickCheck
           </h1>
           <p className="text-slate-400 font-medium">快速验证你的大模型密钥是否有效</p>
         </div>
