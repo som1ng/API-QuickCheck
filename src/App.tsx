@@ -163,6 +163,7 @@ export default function App() {
   const [platformId, setPlatformId] = useState(PLATFORMS[0].id);
   const [apiKey, setApiKey] = useState('');
   const [customBaseUrl, setCustomBaseUrl] = useState(PLATFORMS[0].defaultBaseUrl);
+  const [useProxy, setUseProxy] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
   const [status, setStatus] = useState<TestStatus>('idle');
@@ -191,7 +192,8 @@ export default function App() {
     setErrorMessage('');
 
     const startTime = Date.now();
-    const url = `${customBaseUrl.replace(/\/$/, '')}${currentPlatform.testEndpoint}`;
+    const rawUrl = `${customBaseUrl.replace(/\/$/, '')}${currentPlatform.testEndpoint}`;
+    const url = useProxy ? `https://corsproxy.io/?${encodeURIComponent(rawUrl)}` : rawUrl;
 
     try {
       const response = await fetch(url, {
@@ -230,7 +232,9 @@ export default function App() {
       // Browser fetch throws TypeError on network error or CORS
       if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
         setStatus('error_cors');
-        setErrorMessage('接口不支持在浏览器直接测试（跨域 CORS 拦截），或者网络不通。请尝试更换 Base URL 或使用中转服务。');
+        const msg = '这通常是由于浏览器跨域拦截 (CORS) 导致的，请尝试在高级设置中开启「CORS 代理」开关，或使用浏览器跨域插件。';
+        setErrorMessage(msg);
+        setTimeout(() => alert('⚠️ 测试失败 (Failed to fetch):\n\n' + msg), 50);
       } else {
         setStatus('error_other');
         setErrorMessage(`网络请求异常：${err.message || '未知错误'}`);
@@ -296,6 +300,19 @@ export default function App() {
                   onChange={(e) => setCustomBaseUrl(e.target.value)}
                   placeholder="https://api.openai.com"
                 />
+                
+                <div className="flex items-center mb-4 mt-2">
+                  <input
+                    type="checkbox"
+                    id="proxy-toggle"
+                    className="w-4 h-4 text-blue-500 bg-slate-900 border-slate-700 rounded focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer"
+                    checked={useProxy}
+                    onChange={(e) => setUseProxy(e.target.checked)}
+                  />
+                  <label htmlFor="proxy-toggle" className="ml-2 text-sm font-medium text-slate-300 cursor-pointer select-none">
+                    使用 CORS 代理转发请求 (支持绕过严格跨域限制)
+                  </label>
+                </div>
                 {/* @ts-ignore */}
                 {currentPlatform.helpText && (
                   <div className="flex items-start bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
