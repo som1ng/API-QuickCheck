@@ -193,7 +193,13 @@ export default function App() {
 
     const startTime = Date.now();
     const rawUrl = `${customBaseUrl.replace(/\/$/, '')}${currentPlatform.testEndpoint}`;
-    const url = useProxy ? `https://corsproxy.io/?${encodeURIComponent(rawUrl)}` : rawUrl;
+    let url = rawUrl;
+    if (useProxy) {
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      url = isLocalhost 
+        ? `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`
+        : `/api/proxy?url=${encodeURIComponent(rawUrl)}`;
+    }
 
     try {
       const response = await fetch(url, {

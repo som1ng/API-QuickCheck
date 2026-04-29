@@ -16,15 +16,7 @@
 - **🔌 跨域支持**：内置 **CORS 代理转发**功能，轻松解决浏览器直接请求官方 API 时的跨域拦截问题。
 - **🎨 现代 UI 设计**：基于 React + Vite + Tailwind CSS，极简、顺滑，具有详细的状态反馈。
 
-## 🖥️ 页面预览
 
-![Preview]() *(可在此处添加截图)*
-
-## 🚀 一键部署
-
-只需点击下方按钮，即可将本项目一键部署到你的 Vercel 中：
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/som1ng/API-QuickCheck)
 
 ## 📦 本地运行
 
