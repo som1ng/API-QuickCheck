@@ -87,6 +87,45 @@ const PLATFORMS = [
     placeholder: 'sk-...',
   },
   {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    defaultBaseUrl: 'https://openrouter.ai/api/v1',
+    testEndpoint: '/auth/key',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-or-v1-...',
+    helpText: '知名海外模型聚合平台，提供大量免费开源模型额度。'
+  },
+  {
+    id: 'nvidia',
+    name: 'NVIDIA NIM (英伟达)',
+    defaultBaseUrl: 'https://integrate.api.nvidia.com/v1',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'nvapi-...',
+    helpText: '英伟达提供顶级开源模型免费体验额度，非常适合测试前沿模型。'
+  },
+  {
+    id: 'groq',
+    name: 'Groq',
+    defaultBaseUrl: 'https://api.groq.com/openai/v1',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'gsk_...',
+    helpText: '提供极速的 LPU 推理服务，当前支持众多免费开源模型。'
+  },
+  {
+    id: 'together',
+    name: 'Together AI',
+    defaultBaseUrl: 'https://api.together.xyz/v1',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: '... (API Key)',
+  },
+  {
     id: 'gemini',
     name: 'Google Gemini',
     defaultBaseUrl: 'https://generativelanguage.googleapis.com',
