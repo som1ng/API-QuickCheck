@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2 } from 'lucide-react';
+import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info } from 'lucide-react';
 
 const PLATFORMS = [
   {
@@ -10,11 +10,77 @@ const PLATFORMS = [
     method: 'GET',
     headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
     placeholder: 'sk-...',
+    helpText: '如果是第三方中转 API，请在下方高级设置中修改 Base URL 为中转地址。',
   },
   {
     id: 'deepseek',
     name: 'DeepSeek',
     defaultBaseUrl: 'https://api.deepseek.com',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+  },
+  {
+    id: 'siliconflow',
+    name: '硅基流动 (SiliconFlow)',
+    defaultBaseUrl: 'https://api.siliconflow.cn/v1',
+    testEndpoint: '/user/info',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+    helpText: '注册即可获取海量免费开源模型额度。',
+  },
+  {
+    id: 'moonshot',
+    name: 'Kimi (月之暗面)',
+    defaultBaseUrl: 'https://api.moonshot.cn/v1',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+  },
+  {
+    id: 'qwen',
+    name: '通义千问 (DashScope)',
+    defaultBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+  },
+  {
+    id: 'zhipu',
+    name: '智谱 GLM (BigModel)',
+    defaultBaseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+  },
+  {
+    id: 'doubao',
+    name: '豆包 (火山引擎)',
+    defaultBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+    helpText: '火山引擎接口可能测试通过，但在实际使用时需在控制台获取对应的接入点 (Endpoint ID) 作为模型名称。',
+  },
+  {
+    id: 'stepfun',
+    name: '阶跃星辰 (StepFun)',
+    defaultBaseUrl: 'https://api.stepfun.com/v1',
+    testEndpoint: '/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+  },
+  {
+    id: '01ai',
+    name: '零一万物 (01.AI)',
+    defaultBaseUrl: 'https://api.lingyiwanwu.com/v1',
     testEndpoint: '/models',
     method: 'GET',
     headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
@@ -28,15 +94,27 @@ const PLATFORMS = [
     method: 'GET',
     headers: (key: string) => ({ 'x-goog-api-key': key }),
     placeholder: 'AIzaSy...',
+    helpText: '国内直连通常会失败，请确保全局代理或在此处使用国内可访问的代理 Base URL。'
   },
   {
     id: 'claude',
     name: 'Claude (Anthropic)',
     defaultBaseUrl: 'https://api.anthropic.com',
-    testEndpoint: '/v1/models', // Anthropic doesn't have a simple GET endpoint usually, but we try GET /v1/models or just expect CORS
+    testEndpoint: '/v1/models',
     method: 'GET',
     headers: (key: string) => ({ 'x-api-key': key, 'anthropic-version': '2023-06-01' }),
     placeholder: 'sk-ant-...',
+    helpText: '官方接口严禁浏览器直接测试（CORS拦截），通常直接报错。建议仅用来测试第三方中转的 Claude 接口。'
+  },
+  {
+    id: 'custom',
+    name: '自定义 API (兼容 OpenAI)',
+    defaultBaseUrl: '',
+    testEndpoint: '/v1/models',
+    method: 'GET',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    placeholder: 'sk-...',
+    helpText: '在此填入任何兼容 OpenAI 格式的服务商 Base URL（例如：https://api.example.com）。',
   }
 ];
 
@@ -166,7 +244,7 @@ export default function App() {
               className="flex items-center text-sm text-slate-400 hover:text-slate-200 transition-colors"
             >
               <Settings2 className="w-4 h-4 mr-1" />
-              {showAdvanced ? '收起高级设置' : '高级设置 (自定义 Base URL)'}
+              {showAdvanced ? '收起高级设置' : '高级设置 (自定义 Base URL & 平台提示)'}
             </button>
             
             {showAdvanced && (
@@ -174,11 +252,21 @@ export default function App() {
                 <label className="block text-xs font-semibold text-slate-400 mb-2">接口地址 (Base URL)</label>
                 <input
                   type="text"
-                  className="w-full bg-slate-900/50 border border-slate-700 text-slate-300 text-sm rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full bg-slate-900/50 border border-slate-700 text-slate-300 text-sm rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all mb-3"
                   value={customBaseUrl}
                   onChange={(e) => setCustomBaseUrl(e.target.value)}
                   placeholder="https://api.openai.com"
                 />
+                {/* @ts-ignore */}
+                {currentPlatform.helpText && (
+                  <div className="flex items-start bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                    <Info className="w-4 h-4 text-blue-400 mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-blue-300 leading-relaxed">
+                      {/* @ts-ignore */}
+                      {currentPlatform.helpText}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
