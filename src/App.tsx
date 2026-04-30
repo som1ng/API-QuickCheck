@@ -191,6 +191,7 @@ export default function App() {
   const [shellType, setShellType] = useState<'bash' | 'ps'>(
     navigator.userAgent.indexOf('Win') !== -1 ? 'ps' : 'bash'
   );
+  const [configPersistence, setConfigPersistence] = useState<'session' | 'permanent'>('session');
 
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
@@ -529,45 +530,85 @@ export default function App() {
 
                   {activeTab === 'Claude Code' && (
                     <div className="relative group animate-in fade-in duration-300">
-                      <div className="flex gap-2 mb-3">
-                        <button 
-                          onClick={() => setShellType('bash')}
-                          className={`px-3 py-1 text-xs rounded-full border transition-all ${shellType === 'bash' ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'}`}
-                        >
-                          Bash / Zsh
-                        </button>
-                        <button 
-                          onClick={() => setShellType('ps')}
-                          className={`px-3 py-1 text-xs rounded-full border transition-all ${shellType === 'ps' ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'}`}
-                        >
-                          PowerShell
-                        </button>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="flex bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+                          <button 
+                            onClick={() => setShellType('bash')}
+                            className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                          >
+                            Bash / Zsh
+                          </button>
+                          <button 
+                            onClick={() => setShellType('ps')}
+                            className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                          >
+                            PowerShell
+                          </button>
+                        </div>
+                        
+                        <div className="flex bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+                          <button 
+                            onClick={() => setConfigPersistence('session')}
+                            className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${configPersistence === 'session' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                          >
+                            当前会话
+                          </button>
+                          <button 
+                            onClick={() => setConfigPersistence('permanent')}
+                            className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${configPersistence === 'permanent' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                          >
+                            永久生效
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="absolute right-3 top-[44px] z-10">
-                        <CopyButton text={shellType === 'bash' 
-                          ? `export ANTHROPIC_API_KEY="${apiKey}"\nexport ANTHROPIC_BASE_URL="${customBaseUrl}"` 
-                          : `$env:ANTHROPIC_API_KEY = "${apiKey}"\n$env:ANTHROPIC_BASE_URL = "${customBaseUrl}"`} />
+                      <div className="absolute right-3 top-[60px] z-10">
+                        <CopyButton text={
+                          configPersistence === 'session' 
+                            ? (shellType === 'bash' 
+                                ? `export ANTHROPIC_API_KEY="${apiKey}"\nexport ANTHROPIC_BASE_URL="${customBaseUrl}"` 
+                                : `$env:ANTHROPIC_API_KEY = "${apiKey}"\n$env:ANTHROPIC_BASE_URL = "${customBaseUrl}"`)
+                            : (shellType === 'bash'
+                                ? `echo 'export ANTHROPIC_API_KEY="${apiKey}"' >> ~/.bashrc\necho 'export ANTHROPIC_BASE_URL="${customBaseUrl}"' >> ~/.bashrc\nsource ~/.bashrc`
+                                : `setx ANTHROPIC_API_KEY "${apiKey}"\nsetx ANTHROPIC_BASE_URL "${customBaseUrl}"`)
+                        } />
                       </div>
                       <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
                         <pre className="text-sm font-mono text-emerald-400 overflow-x-auto pb-2 custom-scrollbar">
-                          {shellType === 'bash' ? (
-                            <code>
-                              <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                              <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"{customBaseUrl}"</span>
-                            </code>
+                          {configPersistence === 'session' ? (
+                            shellType === 'bash' ? (
+                              <code>
+                                <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                                <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"{customBaseUrl}"</span>
+                              </code>
+                            ) : (
+                              <code>
+                                <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY = <span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                                <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL = <span className="text-amber-300">"{customBaseUrl}"</span>
+                              </code>
+                            )
                           ) : (
-                            <code>
-                              <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY = <span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                              <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL = <span className="text-amber-300">"{customBaseUrl}"</span>
-                            </code>
+                            shellType === 'bash' ? (
+                              <code>
+                                <span className="text-slate-500"># 写入配置文件并生效</span>{'\n'}
+                                <span className="text-purple-400">echo</span> <span className="text-amber-300">'export ANTHROPIC_API_KEY="{apiKey}"'</span> &gt;&gt; ~/.bashrc{'\n'}
+                                <span className="text-purple-400">echo</span> <span className="text-amber-300">'export ANTHROPIC_BASE_URL="{customBaseUrl}"'</span> &gt;&gt; ~/.bashrc{'\n'}
+                                <span className="text-purple-400">source</span> ~/.bashrc
+                              </code>
+                            ) : (
+                              <code>
+                                <span className="text-slate-500"># 设置永久环境变量 (需重启终端生效)</span>{'\n'}
+                                <span className="text-purple-400">setx</span> ANTHROPIC_API_KEY <span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                                <span className="text-purple-400">setx</span> ANTHROPIC_BASE_URL <span className="text-amber-300">"{customBaseUrl}"</span>
+                              </code>
+                            )
                           )}
                         </pre>
                       </div>
                       <p className="text-xs text-slate-500 mt-3 flex items-center">
                         <Info className="w-3.5 h-3.5 mr-1.5" />
-                        在终端中运行以上命令，即可为当前会话配置 Claude Code。
+                        {configPersistence === 'session' ? '运行以上命令，即可为当前会话配置环境。' : '运行以上命令，将配置保存到系统全局变量中。'}
                       </p>
 
                       {/* Conflict Tip */}
