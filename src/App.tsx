@@ -195,6 +195,11 @@ export default function App() {
 
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
+  const litellmEnvKey = currentPlatform.id === 'custom' ? 'OPENAI_API_KEY' : `${currentPlatform.id.toUpperCase()}_API_KEY`;
+  const litellmDefaultModel = currentPlatform.id === 'deepseek' 
+    ? 'deepseek/deepseek-chat' 
+    : `${currentPlatform.id === 'custom' ? 'openai' : currentPlatform.id}/${availableModels && availableModels.length > 0 ? availableModels[0] : 'your-model'}`;
+
   const handlePlatformChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newId = e.target.value;
     setPlatformId(newId);
@@ -546,17 +551,31 @@ export default function App() {
 
                           {/* Step 1 */}
                           <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
-                            <h5 className="text-sm font-semibold text-blue-400 mb-2 flex items-center"><span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded mr-2 text-xs">1</span> 清理环境变量冲突</h5>
-                            <p className="text-xs text-slate-400 mb-3">如果你之前登录过官方账号，必须先清理残留的 Token（解决 <code>Auth conflict</code>）：</p>
+                            <h5 className="text-sm font-semibold text-blue-400 mb-2 flex items-center"><span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded mr-2 text-xs">1</span> 清理并设置环境</h5>
+                            <p className="text-xs text-slate-400 mb-3">清理残留登录态，并设置目标平台的 API Key 环境变量：</p>
                             
                             <div className="flex gap-2 mb-2">
                               <button onClick={() => setShellType('bash')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'bash' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>Bash / Zsh</button>
                               <button onClick={() => setShellType('ps')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'ps' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>PowerShell</button>
                             </div>
                             <div className="relative">
-                              <div className="absolute right-2 top-2 z-10"><CopyButton text={shellType === 'bash' ? 'unset ANTHROPIC_AUTH_TOKEN' : 'Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue'} /></div>
-                              <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800">
-                                <code>{shellType === 'bash' ? 'unset ANTHROPIC_AUTH_TOKEN' : 'Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue'}</code>
+                              <div className="absolute right-2 top-2 z-10">
+                                <CopyButton text={shellType === 'bash' 
+                                  ? `unset ANTHROPIC_AUTH_TOKEN\nexport ${litellmEnvKey}="${apiKey}"` 
+                                  : `$env:ANTHROPIC_AUTH_TOKEN=""\n$env:${litellmEnvKey}="${apiKey}"`} />
+                              </div>
+                              <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
+                                {shellType === 'bash' ? (
+                                  <code>
+                                    <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
+                                    <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>
+                                  </code>
+                                ) : (
+                                  <code>
+                                    <span className="text-purple-400">$env:</span>ANTHROPIC_AUTH_TOKEN=<span className="text-amber-300">""</span>{'\n'}
+                                    <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>
+                                  </code>
+                                )}
                               </pre>
                             </div>
                           </div>
@@ -564,16 +583,24 @@ export default function App() {
                           {/* Step 2 */}
                           <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
                             <h5 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center"><span className="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded mr-2 text-xs">2</span> 启动本地协议中转站</h5>
-                            <p className="text-xs text-slate-400 mb-3">这是最稳妥的方案，使用 LiteLLM 在本地运行一个轻量级代理，将 Claude 协议实时翻译：</p>
+                            <p className="text-xs text-slate-400 mb-3">使用 LiteLLM 开启带有 <code>--drop_params</code> 的翻译代理：</p>
                             
                             <div className="relative">
-                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install litellm\nlitellm --model openai/${availableModels && availableModels.length > 0 ? availableModels[0] : 'your-model'} --api_base ${customBaseUrl.replace(/\/$/, '')} --api_key ${apiKey}`} /></div>
+                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install litellm\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
                               <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
                                 <code>
                                   <span className="text-purple-400">pip</span> install litellm{'\n'}
-                                  <span className="text-purple-400">litellm</span> --model openai/<span className="text-emerald-300">{availableModels && availableModels.length > 0 ? availableModels[0] : 'your-model'}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --api_key <span className="text-amber-300">{apiKey}</span>
+                                  <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
                                 </code>
                               </pre>
+                            </div>
+                            
+                            <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded p-3">
+                              <p className="text-xs text-blue-300 leading-relaxed space-y-1">
+                                <span className="font-bold flex items-center"><Info className="w-3.5 h-3.5 mr-1" />常见排错：</span>
+                                <span className="block">1. <span className="text-amber-300">为什么加 --drop_params？</span> Claude 会发送特定的参数 (如 thinking)，DeepSeek 等模型不认识会报错 400，该标志能自动过滤多余参数。</span>
+                                <span className="block">2. <span className="text-amber-300">提示 No such option: --api_key？</span> 新版 LiteLLM 已弃用该启动参数，请务必先执行步骤一设置环境变量。</span>
+                              </p>
                             </div>
                           </div>
 
