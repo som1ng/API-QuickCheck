@@ -586,10 +586,10 @@ export default function App() {
                             <p className="text-xs text-slate-400 mb-3">使用 LiteLLM 开启带有 <code>--drop_params</code> 的翻译代理：</p>
                             
                             <div className="relative">
-                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install litellm\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
+                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
                               <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
                                 <code>
-                                  <span className="text-purple-400">pip</span> install litellm{'\n'}
+                                  <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
                                   <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
                                 </code>
                               </pre>
@@ -600,6 +600,7 @@ export default function App() {
                                 <span className="font-bold flex items-center"><Info className="w-3.5 h-3.5 mr-1" />常见排错：</span>
                                 <span className="block">1. <span className="text-amber-300">为什么加 --drop_params？</span> Claude 会发送特定的参数 (如 thinking)，DeepSeek 等模型不认识会报错 400，该标志能自动过滤多余参数。</span>
                                 <span className="block">2. <span className="text-amber-300">提示 No such option: --api_key？</span> 新版 LiteLLM 已弃用该启动参数，请务必先执行步骤一设置环境变量。</span>
+                                <span className="block">3. <span className="text-amber-300">报错 ModuleNotFoundError?</span> 请确保执行的是 <code>pip install "litellm[proxy]"</code>，proxy 插件包含服务器所需的完整依赖。</span>
                               </p>
                             </div>
                           </div>
