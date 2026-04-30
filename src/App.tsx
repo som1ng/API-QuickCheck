@@ -569,6 +569,21 @@ export default function App() {
                         <Info className="w-3.5 h-3.5 mr-1.5" />
                         在终端中运行以上命令，即可为当前会话配置 Claude Code。
                       </p>
+
+                      {/* Conflict Tip */}
+                      <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg animate-in shake duration-500">
+                        <p className="text-xs text-red-400 leading-relaxed">
+                          <span className="font-bold">⚠️ 认证冲突提醒：</span> 如果遇到 `Auth conflict` 报错，说明你同时设置了 Token 和 API Key。请运行以下命令清除冲突：
+                        </p>
+                        <div className="mt-2 relative group/item">
+                          <div className="absolute right-2 top-1">
+                             <CopyButton text={shellType === 'bash' ? 'unset ANTHROPIC_AUTH_TOKEN' : 'Remove-Item Env:ANTHROPIC_AUTH_TOKEN'} />
+                          </div>
+                          <code className="block bg-slate-950 p-2 rounded text-xs text-slate-300 font-mono border border-slate-800">
+                            {shellType === 'bash' ? 'unset ANTHROPIC_AUTH_TOKEN' : 'Remove-Item Env:ANTHROPIC_AUTH_TOKEN'}
+                          </code>
+                        </div>
+                      </div>
                     </div>
                   )}
 
