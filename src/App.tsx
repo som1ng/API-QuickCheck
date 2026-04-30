@@ -188,6 +188,9 @@ export default function App() {
 
   const [availableModels, setAvailableModels] = useState<string[] | null>(null);
   const [activeTab, setActiveTab] = useState('Claude Code');
+  const [shellType, setShellType] = useState<'bash' | 'ps'>(
+    navigator.userAgent.indexOf('Win') !== -1 ? 'ps' : 'bash'
+  );
 
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
@@ -526,16 +529,40 @@ export default function App() {
 
                   {activeTab === 'Claude Code' && (
                     <div className="relative group animate-in fade-in duration-300">
-                      <div className="absolute right-3 top-3 z-10">
-                        <CopyButton text={`export ANTHROPIC_API_KEY="${apiKey}"\nexport ANTHROPIC_BASE_URL="${customBaseUrl}"`} />
+                      <div className="flex gap-2 mb-3">
+                        <button 
+                          onClick={() => setShellType('bash')}
+                          className={`px-3 py-1 text-xs rounded-full border transition-all ${shellType === 'bash' ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'}`}
+                        >
+                          Bash / Zsh
+                        </button>
+                        <button 
+                          onClick={() => setShellType('ps')}
+                          className={`px-3 py-1 text-xs rounded-full border transition-all ${shellType === 'ps' ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'}`}
+                        >
+                          PowerShell
+                        </button>
+                      </div>
+
+                      <div className="absolute right-3 top-[44px] z-10">
+                        <CopyButton text={shellType === 'bash' 
+                          ? `export ANTHROPIC_API_KEY="${apiKey}"\nexport ANTHROPIC_BASE_URL="${customBaseUrl}"` 
+                          : `$env:ANTHROPIC_API_KEY = "${apiKey}"\n$env:ANTHROPIC_BASE_URL = "${customBaseUrl}"`} />
                       </div>
                       <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
                         <pre className="text-sm font-mono text-emerald-400 overflow-x-auto pb-2 custom-scrollbar">
-                          <code>
-                            <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                            <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"{customBaseUrl}"</span>
-                          </code>
+                          {shellType === 'bash' ? (
+                            <code>
+                              <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                              <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"{customBaseUrl}"</span>
+                            </code>
+                          ) : (
+                            <code>
+                              <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY = <span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                              <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL = <span className="text-amber-300">"{customBaseUrl}"</span>
+                            </code>
+                          )}
                         </pre>
                       </div>
                       <p className="text-xs text-slate-500 mt-3 flex items-center">
