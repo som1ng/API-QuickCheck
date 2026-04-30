@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check } from 'lucide-react';
 
 const PLATFORMS = [
@@ -192,6 +192,25 @@ export default function App() {
     navigator.userAgent.indexOf('Win') !== -1 ? 'ps' : 'bash'
   );
   const [configPersistence, setConfigPersistence] = useState<'session' | 'permanent'>('session');
+  const [errorLog, setErrorLog] = useState('');
+  const [diagnosis, setDiagnosis] = useState<{ type: 'error' | 'warning' | 'success', message: string } | null>(null);
+
+  useEffect(() => {
+    if (!errorLog.trim()) {
+      setDiagnosis(null);
+      return;
+    }
+    const log = errorLog.toLowerCase();
+    if (log.includes('modulenotfounderror') || log.includes('missing dependency')) {
+      setDiagnosis({ type: 'error', message: "⚠️ 检测到依赖缺失！请务必执行带 [proxy] 标志的安装命令：pip install --upgrade \"litellm[proxy]\"" });
+    } else if (log.includes('no such option')) {
+      setDiagnosis({ type: 'warning', message: "⚠️ 检测到版本或参数不兼容！新版 LiteLLM 已弃用 --api_key 参数。请按【步骤 1】先配置环境变量，并在启动命令中去除该参数。" });
+    } else if (log.includes('400') || log.includes('validation') || log.includes('thinking')) {
+      setDiagnosis({ type: 'error', message: "⚠️ 检测到参数传递错误！请确保在启动 litellm 时加入了 --drop_params 参数以过滤不支持的特定字段。" });
+    } else {
+      setDiagnosis({ type: 'success', message: "✅ 暂未匹配到常见错误模式。建议查阅下方的官方文档或检查网络连接。" });
+    }
+  }, [errorLog]);
 
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
@@ -586,10 +605,10 @@ export default function App() {
                             <p className="text-xs text-slate-400 mb-3">使用 LiteLLM 开启带有 <code>--drop_params</code> 的翻译代理：</p>
                             
                             <div className="relative">
-                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
+                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
                               <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
                                 <code>
-                                  <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
+                                  <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
                                   <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
                                 </code>
                               </pre>
@@ -600,7 +619,7 @@ export default function App() {
                                 <span className="font-bold flex items-center"><Info className="w-3.5 h-3.5 mr-1" />常见排错：</span>
                                 <span className="block">1. <span className="text-amber-300">为什么加 --drop_params？</span> Claude 会发送特定的参数 (如 thinking)，DeepSeek 等模型不认识会报错 400，该标志能自动过滤多余参数。</span>
                                 <span className="block">2. <span className="text-amber-300">提示 No such option: --api_key？</span> 新版 LiteLLM 已弃用该启动参数，请务必先执行步骤一设置环境变量。</span>
-                                <span className="block">3. <span className="text-amber-300">报错 ModuleNotFoundError?</span> 请确保执行的是 <code>pip install "litellm[proxy]"</code>，proxy 插件包含服务器所需的完整依赖。</span>
+                                <span className="block">3. <span className="text-amber-300">报错 ModuleNotFoundError?</span> 提示：如果您在运行中遇到 'ModuleNotFoundError'，说明某些依赖未装全，请务必执行带 [proxy] 标志的安装命令。建议执行 <code>pip install --upgrade "litellm[proxy]"</code>。</span>
                               </p>
                             </div>
                           </div>
@@ -738,6 +757,52 @@ export default function App() {
                           </div>
                         </>
                       )}
+
+                      {/* Official Docs Bridge */}
+                      <div className="mt-6 border-t border-slate-800/50 pt-5 animate-in fade-in duration-500">
+                        <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                          <Box className="w-4 h-4 mr-2 text-blue-400" />
+                          实时参考 (Official Docs Bridge)
+                        </h4>
+                        <p className="text-xs text-slate-400 mb-3">代码可能会随版本更新，如遇报错，请第一时间查看官方最新手册：</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <a href="https://docs.litellm.ai/docs/proxy/quick_start" target="_blank" rel="noopener noreferrer" className="block p-3 bg-slate-900/50 border border-slate-800 rounded-lg hover:border-blue-500/50 hover:bg-slate-800 transition-colors group">
+                            <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 block mb-1">LiteLLM Proxy</span>
+                            <span className="text-xs text-slate-500">官方配置指南</span>
+                          </a>
+                          <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank" rel="noopener noreferrer" className="block p-3 bg-slate-900/50 border border-slate-800 rounded-lg hover:border-purple-500/50 hover:bg-slate-800 transition-colors group">
+                            <span className="text-sm font-semibold text-purple-400 group-hover:text-purple-300 block mb-1">Claude Code</span>
+                            <span className="text-xs text-slate-500">官方环境手册</span>
+                          </a>
+                          <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener noreferrer" className="block p-3 bg-slate-900/50 border border-slate-800 rounded-lg hover:border-emerald-500/50 hover:bg-slate-800 transition-colors group">
+                            <span className="text-sm font-semibold text-emerald-400 group-hover:text-emerald-300 block mb-1">DeepSeek API</span>
+                            <span className="text-xs text-slate-500">官方参数说明</span>
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Error Log Analyzer */}
+                      <div className="mt-6 border-t border-slate-800/50 pt-5 animate-in fade-in duration-500">
+                        <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                          <Terminal className="w-4 h-4 mr-2 text-amber-400" />
+                          报错自诊断 (Error Log Analyzer)
+                        </h4>
+                        <textarea
+                          value={errorLog}
+                          onChange={(e) => setErrorLog(e.target.value)}
+                          placeholder="在此粘贴您的终端报错日志..."
+                          className="w-full h-24 bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 custom-scrollbar mb-3 placeholder:text-slate-600 transition-all"
+                        />
+                        {diagnosis && (
+                          <div className={`p-3 rounded-lg border ${
+                            diagnosis.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                            diagnosis.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                            'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                          }`}>
+                            <p className="text-xs font-medium leading-relaxed">{diagnosis.message}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
