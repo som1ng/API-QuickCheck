@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info } from 'lucide-react';
+import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check } from 'lucide-react';
 
 const PLATFORMS = [
   {
@@ -159,6 +159,22 @@ const PLATFORMS = [
 
 type TestStatus = 'idle' | 'loading' | 'success' | 'error_quota' | 'error_key' | 'error_cors' | 'error_other';
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button onClick={handleCopy} className="p-2 hover:bg-slate-800 rounded-lg transition-colors group bg-slate-900/80 border border-slate-700" title="点击复制">
+      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400 group-hover:text-white" />}
+    </button>
+  );
+}
+
 export default function App() {
   const [platformId, setPlatformId] = useState(PLATFORMS[0].id);
   const [apiKey, setApiKey] = useState('');
@@ -170,6 +186,9 @@ export default function App() {
   const [delay, setDelay] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [availableModels, setAvailableModels] = useState<string[] | null>(null);
+  const [activeTab, setActiveTab] = useState('Claude Code');
+
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
   const handlePlatformChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -178,6 +197,7 @@ export default function App() {
     const newPlatform = PLATFORMS.find(p => p.id === newId)!;
     setCustomBaseUrl(newPlatform.defaultBaseUrl);
     setStatus('idle');
+    setAvailableModels(null);
   };
 
   const handleTest = async () => {
@@ -190,12 +210,14 @@ export default function App() {
     setStatus('loading');
     setDelay(null);
     setErrorMessage('');
+    setAvailableModels(null);
 
     const startTime = Date.now();
     const rawUrl = `${customBaseUrl.replace(/\/$/, '')}${currentPlatform.testEndpoint}`;
     let url = rawUrl;
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
     if (useProxy) {
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       url = isLocalhost 
         ? `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`
         : `/api/proxy?url=${encodeURIComponent(rawUrl)}`;
@@ -212,6 +234,42 @@ export default function App() {
 
       if (response.ok) {
         setStatus('success');
+        
+        // 自动探测模型
+        let models: string[] = [];
+        try {
+          const data = await response.clone().json().catch(() => null);
+          if (data) {
+            if (Array.isArray(data.data)) {
+              models = data.data.map((m: any) => m.id).filter(Boolean);
+            } else if (Array.isArray(data.models)) {
+              models = data.models.map((m: any) => m.name || m.id).filter(Boolean);
+            } else if (Array.isArray(data)) {
+              models = data.map((m: any) => m.id || m.name).filter(Boolean);
+            }
+          }
+          
+          if (models.length === 0 && !currentPlatform.testEndpoint.includes('model')) {
+            const modelsRawUrl = customBaseUrl.replace(/\/$/, '') + '/v1/models';
+            const modelsUrl = useProxy 
+              ? (isLocalhost ? `https://corsproxy.io/?${encodeURIComponent(modelsRawUrl)}` : `/api/proxy?url=${encodeURIComponent(modelsRawUrl)}`)
+              : modelsRawUrl;
+            
+            const mResp = await fetch(modelsUrl, { method: 'GET', headers: currentPlatform.headers(apiKey.trim()) });
+            if (mResp.ok) {
+              const mData = await mResp.json().catch(() => null);
+              if (mData && Array.isArray(mData.data)) {
+                models = mData.data.map((m: any) => m.id).filter(Boolean);
+              } else if (mData && Array.isArray(mData.models)) {
+                models = mData.models.map((m: any) => m.name || m.id).filter(Boolean);
+              }
+            }
+          }
+        } catch(e) {
+           console.error('Failed to probe models', e);
+        }
+        setAvailableModels(models);
+
       } else {
         const status = response.status;
         const text = await response.text().catch(() => '');
@@ -249,12 +307,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-slate-950">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-y-auto bg-slate-950 py-12">
       {/* Background glowing effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-md z-10">
+      <div className="w-full max-w-xl z-10">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/30">
             <Zap className="w-8 h-8 text-white" />
@@ -262,7 +320,7 @@ export default function App() {
           <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-3 tracking-tight">
             API-QuickCheck
           </h1>
-          <p className="text-slate-400 font-medium">快速验证你的大模型密钥是否有效</p>
+          <p className="text-slate-400 font-medium">快速验证密钥并一键生成 Agent 配置</p>
         </div>
 
         <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-slate-800 shadow-2xl">
@@ -382,18 +440,189 @@ export default function App() {
                 {(status === 'error_key' || status === 'error_quota' || status === 'error_other') && <XCircle className="w-6 h-6 mr-3 flex-shrink-0" />}
                 {status === 'error_cors' && <AlertTriangle className="w-6 h-6 mr-3 flex-shrink-0" />}
                 
-                <div>
-                  <h3 className="font-bold mb-1">
-                    {status === 'success' ? '测试通过！' :
-                     status === 'error_cors' ? '跨域拦截 / 网络不通' : '测试失败'}
+                <div className="w-full">
+                  <h3 className="font-bold mb-1 flex items-center justify-between">
+                    <span>
+                      {status === 'success' ? '测试通过！' :
+                       status === 'error_cors' ? '跨域拦截 / 网络不通' : '测试失败'}
+                    </span>
+                    {status === 'success' && delay !== null && (
+                      <span className="text-xs font-mono opacity-80 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                        {delay}ms
+                      </span>
+                    )}
                   </h3>
-                  <p className="text-sm opacity-90 leading-relaxed">
+                  <p className="text-sm opacity-90 leading-relaxed mb-1">
                     {status === 'success' ? `你的 Key 可以正常使用。` : errorMessage}
                   </p>
-                  {status === 'success' && delay !== null && (
-                    <p className="text-xs mt-2 opacity-70 font-mono">
-                      响应延迟: {delay}ms
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Model Probe & Agent Guide */}
+          {status === 'success' && (
+            <div className="mt-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              
+              {/* Models Area */}
+              {availableModels !== null && (
+                <div className="p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
+                  <h4 className="text-sm font-semibold text-slate-300 mb-3 flex items-center">
+                    <Box className="w-4 h-4 mr-2 text-blue-400" />
+                    可用模型探测 {availableModels.length > 0 && `(${availableModels.length})`}
+                  </h4>
+                  {availableModels.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                      {availableModels.map(m => (
+                        <span key={m} className="px-2 py-1 text-xs bg-slate-700/50 text-slate-200 rounded-md border border-slate-600/50 hover:bg-slate-600 transition-colors">
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-amber-400/90 flex items-center bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                      <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
+                      无法获取模型列表，请手动尝试在 Agent 中填写模型 ID
                     </p>
+                  )}
+                </div>
+              )}
+
+              {/* Agent Guide */}
+              <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-blue-500/30 shadow-2xl overflow-hidden">
+                <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-blue-500/20 flex justify-between items-center">
+                  <h3 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center">
+                    <Terminal className="w-5 h-5 mr-2 text-blue-400" />
+                    Agent 一键接入指南
+                  </h3>
+                </div>
+                
+                {/* Tabs */}
+                <div className="flex border-b border-slate-800 overflow-x-auto custom-scrollbar">
+                  {['Claude Code', 'OpenClaw', 'Cline / Roo Code'].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex-1 min-w-[120px] py-3 text-sm font-medium transition-all ${
+                        activeTab === tab 
+                          ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5' 
+                          : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="p-5">
+                  {customBaseUrl !== currentPlatform.defaultBaseUrl && (
+                    <div className="mb-5 flex items-start bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 shadow-lg shadow-amber-500/5">
+                      <AlertTriangle className="w-5 h-5 text-amber-400 mr-3 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-amber-300 leading-relaxed font-medium">
+                        <span className="font-bold">⚠️ 检测到您使用的是非官方 API</span>，请务必在 Agent 设置中开启「自定义 Endpoint」功能（或修改 Base URL），否则将无法使用。
+                      </p>
+                    </div>
+                  )}
+
+                  {activeTab === 'Claude Code' && (
+                    <div className="relative group animate-in fade-in duration-300">
+                      <div className="absolute right-3 top-3 z-10">
+                        <CopyButton text={`export ANTHROPIC_API_KEY="${apiKey}"\nexport ANTHROPIC_BASE_URL="${customBaseUrl}"`} />
+                      </div>
+                      <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
+                        <pre className="text-sm font-mono text-emerald-400 overflow-x-auto pb-2 custom-scrollbar">
+                          <code>
+                            <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                            <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"{customBaseUrl}"</span>
+                          </code>
+                        </pre>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-3 flex items-center">
+                        <Info className="w-3.5 h-3.5 mr-1.5" />
+                        在终端中运行以上命令，即可为当前会话配置 Claude Code。
+                      </p>
+                    </div>
+                  )}
+
+                  {activeTab === 'OpenClaw' && (
+                    <div className="relative group animate-in fade-in duration-300">
+                      <div className="absolute right-3 top-3 z-10">
+                        <CopyButton text={`{\n  "api_key": "${apiKey}",\n  "base_url": "${customBaseUrl}"\n}`} />
+                      </div>
+                      <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/50" />
+                        <pre className="text-sm font-mono text-slate-300 overflow-x-auto pb-2 custom-scrollbar">
+                          <code>
+                            {'{'}{'\n'}
+                            {'  '}<span className="text-blue-400">"api_key"</span>: <span className="text-amber-300">"{apiKey}"</span>,{'\n'}
+                            {'  '}<span className="text-blue-400">"base_url"</span>: <span className="text-amber-300">"{customBaseUrl}"</span>{'\n'}
+                            {'}'}
+                          </code>
+                        </pre>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-3 flex items-center">
+                        <Info className="w-3.5 h-3.5 mr-1.5" />
+                        将以上配置片段合并到您的 config.json 对应模型提供商配置中。
+                      </p>
+                    </div>
+                  )}
+
+                  {activeTab === 'Cline / Roo Code' && (
+                    <div className="animate-in fade-in duration-300">
+                      <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-inner relative">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-purple-500/50" />
+                        <table className="w-full text-sm text-left">
+                          <tbody className="divide-y divide-slate-800/50">
+                            <tr className="hover:bg-slate-900/50 transition-colors group">
+                              <td className="py-3.5 px-5 text-slate-400 font-medium w-32 border-r border-slate-800/30">Provider</td>
+                              <td className="py-3.5 px-5 text-slate-200 font-semibold flex items-center justify-between">
+                                <span>
+                                  {currentPlatform.id === 'anthropic' || currentPlatform.id === 'claude' ? 'Anthropic' : 
+                                   currentPlatform.id === 'gemini' ? 'Google Gemini' : 'OpenAI Compatible'}
+                                </span>
+                                <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <CopyButton text={currentPlatform.id === 'anthropic' || currentPlatform.id === 'claude' ? 'Anthropic' : currentPlatform.id === 'gemini' ? 'Google Gemini' : 'OpenAI Compatible'} />
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-900/50 transition-colors group">
+                              <td className="py-3.5 px-5 text-slate-400 font-medium border-r border-slate-800/30">Base URL</td>
+                              <td className="py-3.5 px-5 text-amber-300 font-mono text-xs flex justify-between items-center">
+                                <span className="truncate max-w-[200px] sm:max-w-xs">{customBaseUrl}</span>
+                                <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <CopyButton text={customBaseUrl} />
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-900/50 transition-colors group">
+                              <td className="py-3.5 px-5 text-slate-400 font-medium border-r border-slate-800/30">API Key</td>
+                              <td className="py-3.5 px-5 text-emerald-400 font-mono text-xs flex justify-between items-center">
+                                <span>{apiKey.substring(0, 8)}...</span>
+                                <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <CopyButton text={apiKey} />
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-900/50 transition-colors group">
+                              <td className="py-3.5 px-5 text-slate-400 font-medium border-r border-slate-800/30">建议模型</td>
+                              <td className="py-3.5 px-5 text-blue-300 font-mono text-xs flex justify-between items-center">
+                                <span className="truncate max-w-[200px] sm:max-w-xs">
+                                  {availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / claude-3-5-sonnet'}
+                                </span>
+                                <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <CopyButton text={availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / claude-3-5-sonnet'} />
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-3 flex items-center">
+                        <Info className="w-3.5 h-3.5 mr-1.5" />
+                        在 VSCode 扩展设置中，依次填入上述表格内容。
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
