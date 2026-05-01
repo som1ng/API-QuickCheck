@@ -401,9 +401,13 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           
           {/* Left: Logo */}
-          <div className="flex items-center gap-3 cursor-pointer z-10">
-            <img src="image_5b30bb.png" alt="Logo" className="h-8 w-auto" />
-            <span className="text-lg font-bold text-white tracking-wide">API-QuickCheck</span>
+          <div className="flex items-center group cursor-pointer z-10">
+            <div className="inline-flex items-center justify-center p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-3 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tight">
+              API-QuickCheck
+            </span>
           </div>
 
           {/* Middle: Tab Navigation */}
