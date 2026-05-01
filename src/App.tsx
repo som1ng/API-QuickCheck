@@ -6,9 +6,10 @@ const PLATFORMS = [
     id: 'openai',
     name: 'OpenAI (官方或中转)',
     defaultBaseUrl: 'https://api.openai.com',
-    testEndpoint: '/v1/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/v1/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
     helpText: '如果是第三方中转 API，请在下方高级设置中修改 Base URL 为中转地址。',
   },
@@ -16,18 +17,20 @@ const PLATFORMS = [
     id: 'deepseek',
     name: 'DeepSeek',
     defaultBaseUrl: 'https://api.deepseek.com',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/v1/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'deepseek-chat', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
   },
   {
     id: 'siliconflow',
     name: '硅基流动 (SiliconFlow)',
     defaultBaseUrl: 'https://api.siliconflow.cn/v1',
-    testEndpoint: '/user/info',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'deepseek-ai/DeepSeek-V3', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
     helpText: '注册即可获取海量免费开源模型额度。',
   },
@@ -35,36 +38,40 @@ const PLATFORMS = [
     id: 'moonshot',
     name: 'Kimi (月之暗面)',
     defaultBaseUrl: 'https://api.moonshot.cn/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'moonshot-v1-8k', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
   },
   {
     id: 'qwen',
     name: '通义千问 (DashScope)',
     defaultBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'qwen-plus', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
   },
   {
     id: 'zhipu',
     name: '智谱 GLM (BigModel)',
     defaultBaseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'glm-4', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
   },
   {
     id: 'doubao',
     name: '豆包 (火山引擎)',
     defaultBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
     helpText: '火山引擎接口可能测试通过，但在实际使用时需在控制台获取对应的接入点 (Endpoint ID) 作为模型名称。',
   },
@@ -72,27 +79,30 @@ const PLATFORMS = [
     id: 'stepfun',
     name: '阶跃星辰 (StepFun)',
     defaultBaseUrl: 'https://api.stepfun.com/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'step-1-8k', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
   },
   {
     id: '01ai',
     name: '零一万物 (01.AI)',
     defaultBaseUrl: 'https://api.lingyiwanwu.com/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'yi-34b-chat-0205', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
   },
   {
     id: 'openrouter',
     name: 'OpenRouter',
     defaultBaseUrl: 'https://openrouter.ai/api/v1',
-    testEndpoint: '/auth/key',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-or-v1-...',
     helpText: '知名海外模型聚合平台，提供大量免费开源模型额度。'
   },
@@ -100,9 +110,10 @@ const PLATFORMS = [
     id: 'nvidia',
     name: 'NVIDIA NIM (英伟达)',
     defaultBaseUrl: 'https://integrate.api.nvidia.com/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'nvidia/llama-3.1-8b-instruct', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'nvapi-...',
     helpText: '英伟达提供顶级开源模型免费体验额度，非常适合测试前沿模型。'
   },
@@ -110,9 +121,10 @@ const PLATFORMS = [
     id: 'groq',
     name: 'Groq',
     defaultBaseUrl: 'https://api.groq.com/openai/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'llama3-8b-8192', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'gsk_...',
     helpText: '提供极速的 LPU 推理服务，当前支持众多免费开源模型。'
   },
@@ -120,18 +132,20 @@ const PLATFORMS = [
     id: 'together',
     name: 'Together AI',
     defaultBaseUrl: 'https://api.together.xyz/v1',
-    testEndpoint: '/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { model: 'togethercomputer/llama-2-7b-chat', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: '... (API Key)',
   },
   {
     id: 'gemini',
     name: 'Google Gemini',
     defaultBaseUrl: 'https://generativelanguage.googleapis.com',
-    testEndpoint: '/v1beta/models',
-    method: 'GET',
-    headers: (key: string) => ({ 'x-goog-api-key': key }),
+    testEndpoint: '/v1beta/models/gemini-1.5-flash:generateContent',
+    method: 'POST',
+    headers: (key: string) => ({ 'x-goog-api-key': key, 'Content-Type': 'application/json' }),
+    body: { contents: [{ parts: [{ text: 'hi' }] }], generationConfig: { max_output_tokens: 1 } },
     placeholder: 'AIzaSy...',
     helpText: '国内直连通常会失败，请确保全局代理或在此处使用国内可访问的代理 Base URL。'
   },
@@ -139,9 +153,10 @@ const PLATFORMS = [
     id: 'claude',
     name: 'Claude (Anthropic)',
     defaultBaseUrl: 'https://api.anthropic.com',
-    testEndpoint: '/v1/models',
-    method: 'GET',
-    headers: (key: string) => ({ 'x-api-key': key, 'anthropic-version': '2023-06-01' }),
+    testEndpoint: '/v1/messages',
+    method: 'POST',
+    headers: (key: string) => ({ 'x-api-key': key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' }),
+    body: { model: 'claude-3-5-sonnet-20240620', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-ant-...',
     helpText: '官方接口严禁浏览器直接测试（CORS拦截），通常直接报错。建议仅用来测试第三方中转的 Claude 接口。'
   },
@@ -149,9 +164,10 @@ const PLATFORMS = [
     id: 'custom',
     name: '自定义 API (兼容 OpenAI)',
     defaultBaseUrl: '',
-    testEndpoint: '/v1/models',
-    method: 'GET',
-    headers: (key: string) => ({ Authorization: `Bearer ${key}` }),
+    testEndpoint: '/v1/chat/completions',
+    method: 'POST',
+    headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    body: { messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-...',
     helpText: '在此填入任何兼容 OpenAI 格式的服务商 Base URL（例如：https://api.example.com）。',
   }
@@ -255,42 +271,49 @@ export default function App() {
       const response = await fetch(url, {
         method: currentPlatform.method,
         headers: currentPlatform.headers(apiKey.trim()),
+        // @ts-ignore
+        body: currentPlatform.body ? JSON.stringify(currentPlatform.body) : undefined,
       });
 
       const endTime = Date.now();
       setDelay(endTime - startTime);
 
-      if (response.ok) {
+      const status = response.status;
+      const data = await response.json().catch(() => null);
+      const text = JSON.stringify(data || {});
+      const lowerText = text.toLowerCase();
+      
+      const isQuotaError = status === 402 || 
+                          status === 429 || 
+                          lowerText.includes('quota') || 
+                          lowerText.includes('insufficient') || 
+                          lowerText.includes('balance') ||
+                          (data?.error?.code === 'insufficient_quota') ||
+                          (data?.error?.type === 'insufficient_balance');
+
+      if (response.ok && !isQuotaError) {
         setStatus('success');
         
         // 自动探测模型
         let models: string[] = [];
         try {
-          const data = await response.clone().json().catch(() => null);
-          if (data) {
-            if (Array.isArray(data.data)) {
-              models = data.data.map((m: any) => m.id).filter(Boolean);
-            } else if (Array.isArray(data.models)) {
-              models = data.models.map((m: any) => m.name || m.id).filter(Boolean);
-            } else if (Array.isArray(data)) {
-              models = data.map((m: any) => m.id || m.name).filter(Boolean);
-            }
-          }
+          // 如果是 chat/completions 成功，说明 Key 没问题，尝试获取模型列表
+          const modelsRawUrl = customBaseUrl.replace(/\/$/, '') + (currentPlatform.id === 'gemini' ? '/v1beta/models' : '/v1/models');
+          const modelsUrl = useProxy 
+            ? (isLocalhost ? `https://corsproxy.io/?${encodeURIComponent(modelsRawUrl)}` : `/api/proxy?url=${encodeURIComponent(modelsRawUrl)}`)
+            : modelsRawUrl;
           
-          if (models.length === 0 && !currentPlatform.testEndpoint.includes('model')) {
-            const modelsRawUrl = customBaseUrl.replace(/\/$/, '') + '/v1/models';
-            const modelsUrl = useProxy 
-              ? (isLocalhost ? `https://corsproxy.io/?${encodeURIComponent(modelsRawUrl)}` : `/api/proxy?url=${encodeURIComponent(modelsRawUrl)}`)
-              : modelsRawUrl;
-            
-            const mResp = await fetch(modelsUrl, { method: 'GET', headers: currentPlatform.headers(apiKey.trim()) });
-            if (mResp.ok) {
-              const mData = await mResp.json().catch(() => null);
-              if (mData && Array.isArray(mData.data)) {
-                models = mData.data.map((m: any) => m.id).filter(Boolean);
-              } else if (mData && Array.isArray(mData.models)) {
-                models = mData.models.map((m: any) => m.name || m.id).filter(Boolean);
-              }
+          const mResp = await fetch(modelsUrl, { 
+            method: 'GET', 
+            headers: currentPlatform.headers(apiKey.trim()) 
+          });
+          
+          if (mResp.ok) {
+            const mData = await mResp.json().catch(() => null);
+            if (mData && Array.isArray(mData.data)) {
+              models = mData.data.map((m: any) => m.id).filter(Boolean);
+            } else if (mData && Array.isArray(mData.models)) {
+              models = mData.models.map((m: any) => m.name || m.id).filter(Boolean);
             }
           }
         } catch(e) {
@@ -299,34 +322,24 @@ export default function App() {
         setAvailableModels(models);
 
       } else {
-        const status = response.status;
-        const text = await response.text().catch(() => '');
-        const lowerText = text.toLowerCase();
-        
-        if (status === 401 || status === 403 || status === 402) {
-          if (lowerText.includes('quota') || lowerText.includes('insufficient') || lowerText.includes('balance') || status === 402) {
-             setStatus('error_quota');
-             setErrorMessage(`测试失败：额度已耗尽或需要绑卡 (HTTP ${status})`);
-          } else {
-             setStatus('error_key');
-             setErrorMessage(`测试失败：API Key 无效，请检查是否复制完整 (HTTP ${status})`);
-          }
-        } else if (status === 429) {
-          setStatus('error_quota');
-          setErrorMessage(`测试失败：额度已耗尽或请求频率过高 (HTTP ${status})`);
+        if (isQuotaError) {
+           setStatus('error_quota');
+           setErrorMessage(`测试失败：余额不足或额度已耗尽，请前往官网充值 (HTTP ${status})`);
+        } else if (status === 401 || status === 403) {
+           setStatus('error_key');
+           setErrorMessage(`测试失败：API Key 无效或权限不足 (HTTP ${status})`);
         } else {
           setStatus('error_other');
-          setErrorMessage(`测试失败：接口返回错误 (HTTP ${status})`);
+          const errorMsg = data?.error?.message || data?.message || '接口返回错误';
+          setErrorMessage(`测试失败：${errorMsg} (HTTP ${status})`);
         }
       }
     } catch (err: any) {
       console.error(err);
-      // Browser fetch throws TypeError on network error or CORS
       if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
         setStatus('error_cors');
         const msg = '这通常是由于浏览器跨域拦截 (CORS) 导致的，请尝试在高级设置中开启「CORS 代理」开关，或使用浏览器跨域插件。';
         setErrorMessage(msg);
-        setTimeout(() => alert('⚠️ 测试失败 (Failed to fetch):\n\n' + msg), 50);
       } else {
         setStatus('error_other');
         setErrorMessage(`网络请求异常：${err.message || '未知错误'}`);
@@ -460,19 +473,21 @@ export default function App() {
           {status !== 'idle' && status !== 'loading' && (
             <div className={`mt-6 p-4 rounded-xl border animate-in zoom-in-95 duration-200 ${
               status === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+              status === 'error_quota' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
               status === 'error_cors' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
               'bg-red-500/10 border-red-500/20 text-red-400'
             }`}>
               <div className="flex items-start">
                 {status === 'success' && <CheckCircle2 className="w-6 h-6 mr-3 flex-shrink-0" />}
-                {(status === 'error_key' || status === 'error_quota' || status === 'error_other') && <XCircle className="w-6 h-6 mr-3 flex-shrink-0" />}
-                {status === 'error_cors' && <AlertTriangle className="w-6 h-6 mr-3 flex-shrink-0" />}
+                {(status === 'error_key' || status === 'error_other') && <XCircle className="w-6 h-6 mr-3 flex-shrink-0" />}
+                {(status === 'error_cors' || status === 'error_quota') && <AlertTriangle className="w-6 h-6 mr-3 flex-shrink-0" />}
                 
                 <div className="w-full">
                   <h3 className="font-bold mb-1 flex items-center justify-between">
                     <span>
                       {status === 'success' ? '测试通过！' :
-                       status === 'error_cors' ? '跨域拦截 / 网络不通' : '测试失败'}
+                       status === 'error_cors' ? '跨域拦截 / 网络不通' : 
+                       status === 'error_quota' ? '额度异常' : '测试失败'}
                     </span>
                     {status === 'success' && delay !== null && (
                       <span className="text-xs font-mono opacity-80 bg-emerald-500/20 px-2 py-0.5 rounded-full">
@@ -480,12 +495,9 @@ export default function App() {
                       </span>
                     )}
                   </h3>
-                                    <p className="text-sm opacity-90 leading-relaxed mb-1">
+                  <p className="text-sm opacity-90 leading-relaxed mb-1">
                     {status === 'success' ? `你的 Key 可以正常使用。` : errorMessage}
                   </p>
-                  {status === 'success' && (
-                    <div className="mt-4 flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      <div className="flex-1 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 flex items-center shadow-inner">
                         <Zap className="w-4 h-4 text-emerald-400 mr-2 flex-shrink-0" />
                         <span className="text-xs text-emerald-500/90 font-medium">API 状态：<span className="text-emerald-400 font-bold ml-1">健康可用</span></span>
                       </div>
