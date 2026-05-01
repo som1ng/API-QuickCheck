@@ -191,7 +191,7 @@ export default function App() {
   const [shellType, setShellType] = useState<'bash' | 'ps'>(
     navigator.userAgent.indexOf('Win') !== -1 ? 'ps' : 'bash'
   );
-  const [configPersistence, setConfigPersistence] = useState<'session' | 'permanent'>('session');
+
   const [errorLog, setErrorLog] = useState('');
   const [diagnosis, setDiagnosis] = useState<{ type: 'error' | 'warning' | 'success', message: string } | null>(null);
 
@@ -672,9 +672,6 @@ export default function App() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  
 
                       {/* Official Docs Bridge */}
                       <div className="mt-6 border-t border-slate-800/50 pt-5 animate-in fade-in duration-500">
