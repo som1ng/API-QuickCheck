@@ -10,11 +10,18 @@ export default async function handler(req, res) {
     if (req.headers['x-api-key']) headers.set('x-api-key', req.headers['x-api-key']);
     if (req.headers['x-goog-api-key']) headers.set('x-goog-api-key', req.headers['x-goog-api-key']);
     if (req.headers['anthropic-version']) headers.set('anthropic-version', req.headers['anthropic-version']);
+    if (req.headers['content-type']) headers.set('Content-Type', req.headers['content-type']);
 
-    const response = await fetch(targetUrl, {
+    const fetchOptions = {
       method: req.method,
       headers: headers,
-    });
+    };
+
+    if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+      fetchOptions.body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    }
+
+    const response = await fetch(targetUrl, fetchOptions);
     
     const data = await response.text();
     res.status(response.status).send(data);

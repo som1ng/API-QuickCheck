@@ -113,7 +113,7 @@ const PLATFORMS = [
     testEndpoint: '/chat/completions',
     method: 'POST',
     headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
-    body: { model: 'meta/llama3-8b-instruct', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
+    body: { model: 'meta/llama-3.1-8b-instruct', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'nvapi-...',
     helpText: '英伟达提供顶级开源模型免费体验额度，非常适合测试前沿模型。'
   },
@@ -268,18 +268,29 @@ export default function App() {
     }
 
     try {
+      const fetchHeaders = currentPlatform.headers(apiKey.trim());
+      const fetchBody = currentPlatform.body ? JSON.stringify(currentPlatform.body) : undefined;
+
       const response = await fetch(url, {
         method: currentPlatform.method,
-        headers: currentPlatform.headers(apiKey.trim()),
-        // @ts-ignore
-        body: currentPlatform.body ? JSON.stringify(currentPlatform.body) : undefined,
+        headers: fetchHeaders,
+        body: fetchBody,
       });
 
       const endTime = Date.now();
       setDelay(endTime - startTime);
 
       const status = response.status;
-      const data = await response.json().catch(() => null);
+      let data: any = null;
+      let rawText = '';
+      
+      try {
+        rawText = await response.text();
+        data = JSON.parse(rawText);
+      } catch (e) {
+        data = rawText ? { message: rawText } : null;
+      }
+
       const text = JSON.stringify(data || {});
       const lowerText = text.toLowerCase();
       
@@ -297,7 +308,6 @@ export default function App() {
         // 自动探测模型
         let models: string[] = [];
         try {
-          // 如果是 chat/completions 成功，说明 Key 没问题，尝试获取模型列表
           const modelsRawUrl = customBaseUrl.replace(/\/$/, '') + (currentPlatform.id === 'gemini' ? '/v1beta/models' : '/v1/models');
           const modelsUrl = useProxy 
             ? (isLocalhost ? `https://corsproxy.io/?${encodeURIComponent(modelsRawUrl)}` : `/api/proxy?url=${encodeURIComponent(modelsRawUrl)}`)
@@ -330,8 +340,8 @@ export default function App() {
            setErrorMessage(`测试失败：API Key 无效或权限不足 (HTTP ${status})`);
         } else {
           setStatus('error_other');
-          const errorMsg = data?.error?.message || data?.message || '接口返回错误';
-          setErrorMessage(`测试失败：${errorMsg} (HTTP ${status})`);
+          const errorDetail = data?.error?.message || data?.message || rawText || '未返回具体错误内容';
+          setErrorMessage(`测试失败 (HTTP ${status}): ${errorDetail}`);
         }
       }
     } catch (err: any) {
