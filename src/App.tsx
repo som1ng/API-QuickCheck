@@ -191,6 +191,15 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+const DOC_URLS: Record<string, string | null> = {
+  'openrouter': "https://openrouter.ai/models",
+  'deepseek': "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+  'openai': "https://platform.openai.com/docs/models",
+  'nvidia': "https://build.nvidia.com/explore/discover",
+  'siliconflow': "https://docs.siliconflow.cn/models/list",
+  'groq': "https://console.groq.com/docs/models",
+};
+
 export default function App() {
   const [platformId, setPlatformId] = useState(PLATFORMS[0].id);
   const [apiKey, setApiKey] = useState('');
@@ -436,7 +445,19 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Platform Selector */}
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-300 ml-1">测试平台</label>
+              <div className="flex items-center justify-between mb-2 ml-1">
+                <label className="block text-sm font-bold text-slate-300">测试平台</label>
+                {DOC_URLS[platformId] && (
+                  <a 
+                    href={DOC_URLS[platformId]!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-bold text-blue-400/80 hover:text-blue-300 transition-colors flex items-center group/link"
+                  >
+                    <span className="group-hover/link:underline">🔗 查找可用模型</span>
+                  </a>
+                )}
+              </div>
               <div className="relative">
                 <select
                   className="w-full appearance-none bg-black/40 border border-white/10 text-white rounded-xl py-3.5 px-4 pr-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner cursor-pointer"
