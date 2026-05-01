@@ -483,23 +483,22 @@ export default function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow pt-32 md:pt-24 pb-16 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
-        
-        {/* Header Text */}
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            LLM API <span className={activeTab === 'test' ? "text-blue-400" : "text-purple-400"}>{activeTab === 'test' ? '快速验证工具' : '接入配置文档'}</span>
-          </h1>
-          <p className="text-slate-400 font-medium text-base max-w-xl mx-auto">
-            {activeTab === 'test' 
-              ? '一键探测模型可用性与额度状态，适配主流 Agent 接入配置。'
-              : '一站式查看各类模型平台的官方地址与终极代理配置方案。'}
-          </p>
-        </div>
-
-        {activeTab === 'docs' ? (
+      {activeTab === 'docs' ? (
+        <main className="flex-grow pt-[64px] md:pt-[64px] w-full flex flex-col h-[calc(100vh-64px)] overflow-hidden">
           <DocsView />
-        ) : (
+        </main>
+      ) : (
+        <main className="flex-grow pt-32 md:pt-24 pb-16 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
+          {/* Header Text */}
+          <div className="text-center space-y-3">
+            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              LLM API <span className="text-blue-400">快速验证工具</span>
+            </h1>
+            <p className="text-slate-400 font-medium text-base max-w-xl mx-auto">
+              一键探测模型可用性与额度状态，适配主流 Agent 接入配置。
+            </p>
+          </div>
+
           <>
             {/* Card 1: Main Control Panel */}
             <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 md:p-10 hover:border-white/20 transition-all duration-300">
@@ -758,18 +757,20 @@ export default function App() {
           </div>
         )}
         </>
-      )}
       </main>
+      )}
 
       {/* Footer */}
-      <footer className="w-full py-10 text-center border-t border-white/5 mt-auto bg-black/40 backdrop-blur-3xl">
-        <div className="max-w-7xl mx-auto px-4">
-          <p className="text-slate-500 text-xs font-bold flex items-center justify-center space-x-3 tracking-wide">
-            <ShieldCheck className="w-5 h-5 text-emerald-500/40" />
-            <span>纯前端沙盒环境 · 隐私安全保障 · 拒绝 Key 泄露</span>
-          </p>
-        </div>
-      </footer>
+      {activeTab !== 'docs' && (
+        <footer className="w-full py-10 text-center border-t border-white/5 mt-auto bg-black/40 backdrop-blur-3xl">
+          <div className="max-w-7xl mx-auto px-4">
+            <p className="text-slate-500 text-xs font-bold flex items-center justify-center space-x-3 tracking-wide">
+              <ShieldCheck className="w-5 h-5 text-emerald-500/40" />
+              <span>纯前端沙盒环境 · 隐私安全保障 · 拒绝 Key 泄露</span>
+            </p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
