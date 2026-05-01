@@ -273,8 +273,51 @@ export default function App() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
+      // 第一步：动态模型嗅探 (Dynamic Model Fetching)
+      let dynamicModelId = currentPlatform.body?.model || 'gpt-3.5-turbo';
+      let models: string[] = [];
+
+      try {
+        const modelsRawUrl = customBaseUrl.replace(/\/$/, '') + (currentPlatform.id === 'gemini' ? '/v1beta/models' : '/v1/models');
+        const modelsUrl = useProxy 
+          ? (isLocalhost ? `https://corsproxy.io/?${encodeURIComponent(modelsRawUrl)}` : `/api/proxy?url=${encodeURIComponent(modelsRawUrl)}`)
+          : modelsRawUrl;
+        
+        const mResp = await fetch(modelsUrl, { 
+          method: 'GET', 
+          headers: currentPlatform.headers(apiKey.trim()),
+          signal: controller.signal
+        });
+        
+        if (mResp.status === 401 || mResp.status === 403) {
+           setStatus('error_key');
+           setErrorMessage(`测试失败：API Key 无效或权限不足 (HTTP ${mResp.status})`);
+           clearTimeout(timeoutId);
+           return;
+        }
+
+        if (mResp.ok) {
+          const mData = await mResp.json().catch(() => null);
+          if (mData && Array.isArray(mData.data)) {
+            models = mData.data.map((m: any) => m.id).filter(Boolean);
+          } else if (mData && Array.isArray(mData.models)) {
+            models = mData.models.map((m: any) => m.name || m.id).filter(Boolean);
+          }
+          if (models.length > 0) {
+            dynamicModelId = models[0];
+          }
+        }
+      } catch (e) {
+        console.error('Failed to dynamically fetch models', e);
+      }
+
+      setAvailableModels(models.length > 0 ? models : null);
+
+      // 第二步：发起真实的余额探测 (POST /v1/chat/completions)
       const fetchHeaders = currentPlatform.headers(apiKey.trim());
-      const fetchBody = currentPlatform.body ? JSON.stringify(currentPlatform.body) : undefined;
+      // 构造最终的 payload，动态覆盖 model 字段
+      const finalBodyObj = currentPlatform.body ? { ...currentPlatform.body, model: dynamicModelId } : undefined;
+      const fetchBody = finalBodyObj ? JSON.stringify(finalBodyObj) : undefined;
 
       const response = await fetch(url, {
         method: currentPlatform.method,
@@ -315,33 +358,6 @@ export default function App() {
 
       if (response.ok && !isQuotaError) {
         setStatus('success');
-        
-        // 自动探测模型
-        let models: string[] = [];
-        try {
-          const modelsRawUrl = customBaseUrl.replace(/\/$/, '') + (currentPlatform.id === 'gemini' ? '/v1beta/models' : '/v1/models');
-          const modelsUrl = useProxy 
-            ? (isLocalhost ? `https://corsproxy.io/?${encodeURIComponent(modelsRawUrl)}` : `/api/proxy?url=${encodeURIComponent(modelsRawUrl)}`)
-            : modelsRawUrl;
-          
-          const mResp = await fetch(modelsUrl, { 
-            method: 'GET', 
-            headers: currentPlatform.headers(apiKey.trim()) 
-          });
-          
-          if (mResp.ok) {
-            const mData = await mResp.json().catch(() => null);
-            if (mData && Array.isArray(mData.data)) {
-              models = mData.data.map((m: any) => m.id).filter(Boolean);
-            } else if (mData && Array.isArray(mData.models)) {
-              models = mData.models.map((m: any) => m.name || m.id).filter(Boolean);
-            }
-          }
-        } catch(e) {
-           console.error('Failed to probe models', e);
-        }
-        setAvailableModels(models);
-
       } else {
         if (isQuotaError) {
            setStatus('error_quota');
