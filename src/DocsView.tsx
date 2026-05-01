@@ -216,14 +216,17 @@ function ClaudeCodeDoc() {
         <div>
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            步骤 3：终端内模型显式重定向
+            步骤 3：直接开始对话 (底层劫持原理解释)
           </p>
-          <div className="flex items-start bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 gap-4 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
-            <BookOpen className="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-200/90 leading-relaxed space-y-2">
-              <p className="font-bold text-amber-300 text-base mb-3">进入 Claude Code 后，切勿直接对话！</p>
-              <p>必须立刻输入 <code className="bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono font-bold">/model</code> <strong>手动选中代理模型</strong>，否则将触发 404 错误。</p>
+          <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+            启动完成后，请无视 Claude Code 界面显示的默认模型（如 <code className="bg-white/10 px-1.5 py-0.5 rounded font-mono">Using Haiku</code> 或 <code className="bg-white/10 px-1.5 py-0.5 rounded font-mono">Sonnet</code>），直接输入文本开始对话即可。
+          </p>
+          <div className="flex items-start bg-blue-500/10 border border-blue-500/20 rounded-xl p-5 gap-4 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500" />
+            <Info className="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-200/90 leading-relaxed space-y-2">
+              <p className="font-bold text-blue-300 text-base mb-2">💡 偷梁换柱的网关魔法</p>
+              <p>由于我们在步骤 1 中为 LiteLLM 指定了 <code className="bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-mono">--model</code> 参数，它已开启单模型劫持模式。无论客户端请求什么模型，LiteLLM 都会在底层自动将其替换为我们指定的第三方大模型。您的 Agent 毫无察觉，但却拥有了全新的大脑！</p>
             </div>
           </div>
         </div>
