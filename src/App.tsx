@@ -199,6 +199,7 @@ export default function App() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   
   const [status, setStatus] = useState<TestStatus>('idle');
+  const [isLoading, setIsLoading] = useState(false);
   const [delay, setDelay] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -251,7 +252,8 @@ export default function App() {
       return;
     }
 
-    setStatus('loading');
+    setStatus('idle');
+    setIsLoading(true);
     setDelay(null);
     setErrorMessage('');
     setAvailableModels(null);
@@ -267,6 +269,9 @@ export default function App() {
         : `/api/proxy?url=${encodeURIComponent(rawUrl)}`;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const fetchHeaders = currentPlatform.headers(apiKey.trim());
       const fetchBody = currentPlatform.body ? JSON.stringify(currentPlatform.body) : undefined;
@@ -275,8 +280,10 @@ export default function App() {
         method: currentPlatform.method,
         headers: fetchHeaders,
         body: fetchBody,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const endTime = Date.now();
       setDelay(endTime - startTime);
 
@@ -286,9 +293,13 @@ export default function App() {
       
       try {
         rawText = await response.text();
-        data = JSON.parse(rawText);
+        try {
+          data = JSON.parse(rawText);
+        } catch (e) {
+          data = rawText ? { message: rawText } : null;
+        }
       } catch (e) {
-        data = rawText ? { message: rawText } : null;
+        // 解析响应体失败时不阻断流程
       }
 
       const text = JSON.stringify(data || {});
@@ -346,7 +357,11 @@ export default function App() {
       }
     } catch (err: any) {
       console.error(err);
-      if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        setStatus('error_other');
+        setErrorMessage('测试失败：请求超时（超过15秒），请检查网络或更换 CORS 代理。');
+      } else if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
         setStatus('error_cors');
         const msg = '这通常是由于浏览器跨域拦截 (CORS) 导致的，请尝试在高级设置中开启「CORS 代理」开关，或使用浏览器跨域插件。';
         setErrorMessage(msg);
@@ -354,6 +369,8 @@ export default function App() {
         setStatus('error_other');
         setErrorMessage(`网络请求异常：${err.message || '未知错误'}`);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -500,11 +517,11 @@ export default function App() {
           {/* Submit Button */}
           <button
             onClick={handleTest}
-            disabled={status === 'loading'}
+            disabled={isLoading}
             className="w-full relative group overflow-hidden rounded-2xl font-black text-white shadow-2xl shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4 flex items-center justify-center border border-white/10"
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            {status === 'loading' ? (
+            {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 mr-3 animate-spin" />
                 正在深度探测中...
@@ -519,7 +536,7 @@ export default function App() {
         </div>
 
         {/* Results Area */}
-        {status !== 'idle' && status !== 'loading' && (
+        {status !== 'idle' && !isLoading && (
           <div className={`p-6 rounded-3xl border shadow-2xl backdrop-blur-3xl animate-in zoom-in-95 duration-300 ${
             status === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' :
             status === 'error_cors' ? 'bg-amber-500/10 border-amber-500/20' :
