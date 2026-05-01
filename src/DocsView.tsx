@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, ChevronRight, Copy, Info, Construction } from 'lucide-react';
+import { BookOpen, ChevronRight, Copy, Info, Construction, Database } from 'lucide-react';
 
 export default function DocsView() {
   const [activeDoc, setActiveDoc] = useState('quick-start');
@@ -184,7 +184,7 @@ function ClaudeCodeDoc() {
             在终端 1 中注入对应平台的真实 API Key，并指定你想代理的具体模型。LiteLLM 会自动处理 Base URL 和底层路由。
           </p>
           <div className="pl-8">
-            <div className="relative group">
+            <div className="relative group mb-6">
               <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-slate-300">
                   <Copy className="w-4 h-4" />
@@ -193,14 +193,66 @@ function ClaudeCodeDoc() {
               <div className="bg-black/50 border border-white/10 rounded-lg p-5 font-mono text-sm overflow-x-auto shadow-inner">
                 <pre className="text-slate-300">
                   <code>
-                    <span className="text-slate-500"># 1. 注入真实的 API Key (以 OpenRouter 为例)</span>{'\n'}
-                    <span className="text-purple-400">$env:</span>OPENROUTER_API_KEY=<span className="text-amber-300">"sk-or-v1-你的真实密钥"</span>{'\n'}
+                    <span className="text-slate-500"># 1. 注入真实平台的 API Key (注意变量名因平台而异)</span>{'\n'}
+                    <span className="text-purple-400">$env:</span>【平台对应的环境变量】=<span className="text-amber-300">"你的真实密钥"</span>{'\n'}
                     {'\n'}
-                    <span className="text-slate-500"># 2. 启动代理 (使用原生前缀，严禁添加 --api_base)</span>{'\n'}
-                    <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">openrouter/tencent/hy3-preview:free</span> --drop_params
+                    <span className="text-slate-500"># 2. 启动代理 (使用对应原生前缀，严禁添加 --api_base)</span>{'\n'}
+                    <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">【平台前缀】/【具体模型ID】</span> --drop_params
                   </code>
                 </pre>
               </div>
+            </div>
+
+            {/* 平台对照表 */}
+            <h4 className="text-sm font-bold text-slate-300 mt-6 mb-3 flex items-center gap-2">
+              <Database className="w-4 h-4 text-blue-400" />
+              🗂️ 主流平台配置速查表
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+              {[
+                { 
+                  name: 'OpenRouter', 
+                  env: 'OPENROUTER_API_KEY', 
+                  prefix: 'openrouter/', 
+                  example: 'openrouter/deepseek/deepseek-chat' 
+                },
+                { 
+                  name: 'DeepSeek (官方)', 
+                  env: 'DEEPSEEK_API_KEY', 
+                  prefix: 'deepseek/', 
+                  example: 'deepseek/deepseek-chat' 
+                },
+                { 
+                  name: 'SiliconFlow (硅基流动)', 
+                  env: 'SILICONFLOW_API_KEY', 
+                  prefix: 'siliconflow/', 
+                  example: 'siliconflow/deepseek-ai/DeepSeek-V3' 
+                },
+                { 
+                  name: 'OpenAI (官方)', 
+                  env: 'OPENAI_API_KEY', 
+                  prefix: 'openai/', 
+                  example: 'openai/gpt-4o' 
+                }
+              ].map((platform) => (
+                <div key={platform.name} className="bg-black/30 border border-white/10 rounded-lg p-3 hover:border-white/20 transition-colors">
+                  <div className="text-xs font-bold text-white mb-2 pb-2 border-b border-white/5">{platform.name}</div>
+                  <div className="space-y-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">环境变量</span>
+                      <code className="bg-white/5 text-blue-300 px-1.5 py-0.5 rounded font-mono text-[10px] w-fit leading-none">{platform.env}</code>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">模型前缀</span>
+                      <code className="bg-white/5 text-emerald-300 px-1.5 py-0.5 rounded font-mono text-[10px] w-fit leading-none">{platform.prefix}</code>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">示例</span>
+                      <code className="text-slate-400 font-mono text-[10px] break-all">{platform.example}</code>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
