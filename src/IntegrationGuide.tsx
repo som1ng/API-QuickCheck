@@ -114,8 +114,29 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
     }
 
     // Non-Anthropic → LiteLLM gateway
-    const bashCode = `# Step 1: 清理环境 & 反劫持\nunset ANTHROPIC_AUTH_TOKEN\nexport NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n\n# Step 2: 启动 LiteLLM 网关\nexport ${litellmEnvKey}="${displayKey}"\ncommand -v litellm >/dev/null 2>&1 || pip install "litellm[proxy]"\nlitellm --model ${litellmModel} --drop_params\n\n# Step 3: (新终端) 启动 Claude Code\nexport ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`;
-    const psCode = `# Step 1: 清理环境 & 反劫持\nRemove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n\n# Step 2: 启动 LiteLLM 网关\n$env:${litellmEnvKey}="${displayKey}"\nif (!(Get-Command litellm -ErrorAction SilentlyContinue)) { pip install "litellm[proxy]" }\nlitellm --model ${litellmModel} --drop_params\n\n# Step 3: (新终端) 启动 Claude Code\n$env:ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`;
+    const bashCode1 = `# 终端 1: 启动服务端 (LiteLLM 本地网关)
+export ${litellmEnvKey}="${displayKey}"
+command -v litellm >/dev/null 2>&1 || pip install "litellm[proxy]"
+litellm --model ${litellmModel} --drop_params`;
+
+    const bashCode2 = `# 终端 2: 启动客户端 (Agent 交互终端)
+unset ANTHROPIC_AUTH_TOKEN
+export NO_PROXY="127.0.0.1,localhost,0.0.0.0"
+export ANTHROPIC_BASE_URL="http://127.0.0.1:4000"
+export ANTHROPIC_API_KEY="sk-litellm-local-proxy"
+claude`;
+
+    const psCode1 = `# 终端 1: 启动服务端 (LiteLLM 本地网关)
+$env:${litellmEnvKey}="${displayKey}"
+if (!(Get-Command litellm -ErrorAction SilentlyContinue)) { pip install "litellm[proxy]" }
+litellm --model ${litellmModel} --drop_params`;
+
+    const psCode2 = `# 终端 2: 启动客户端 (Agent 交互终端)
+Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue
+$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"
+$env:ANTHROPIC_BASE_URL="http://127.0.0.1:4000"
+$env:ANTHROPIC_API_KEY="sk-litellm-local-proxy"
+claude`;
 
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
@@ -127,41 +148,58 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
           </p>
         </div>
         <ShellSwitch shell={shellType} onChange={setShellType} />
-        <CodeBlock code={shellType === 'bash' ? bashCode : psCode}>
+        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mt-6 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-500 rounded-full inline-block" />
+          终端 1：启动服务端 (LiteLLM 本地网关)
+        </p>
+        <CodeBlock code={shellType === 'bash' ? bashCode1 : psCode1}>
           {shellType === 'bash' ? (
             <>
-              <span className="text-slate-500"># Step 1: 清理环境 & 反劫持</span>{'\n'}
-              <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
-              <span className="text-purple-400">export</span> NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>{'\n'}
-              {'\n'}
-              <span className="text-slate-500"># Step 2: 启动 LiteLLM 网关</span>{'\n'}
               <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
               <span className="text-purple-400">command</span> -v litellm {'>'}/dev/null 2{'>'}{'&'}1 || <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params{'\n'}
-              {'\n'}
-              <span className="text-slate-500"># Step 3: (新终端) 启动 Claude Code</span>{'\n'}
+              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params
+            </>
+          ) : (
+            <>
+              <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
+              <span className="text-purple-400">if</span> (!(<span className="text-emerald-400">Get-Command</span> litellm -ErrorAction SilentlyContinue)) {'{'} <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span> {'}'}{'\n'}
+              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params
+            </>
+          )}
+        </CodeBlock>
+
+        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mt-6 flex items-center gap-2">
+          <span className="w-2 h-2 bg-purple-500 rounded-full inline-block" />
+          终端 2：启动客户端 (Agent 交互终端)
+        </p>
+        <CodeBlock code={shellType === 'bash' ? bashCode2 : psCode2}>
+          {shellType === 'bash' ? (
+            <>
+              <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
+              <span className="text-purple-400">export</span> NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>{'\n'}
               <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://127.0.0.1:4000"</span>{'\n'}
-              <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
+              <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm-local-proxy"</span>{'\n'}
               <span className="text-emerald-400">claude</span>
             </>
           ) : (
             <>
-              <span className="text-slate-500"># Step 1: 清理环境 & 反劫持</span>{'\n'}
-              <span className="text-emerald-400">Remove-Item</span> Env:\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue{'\n'}
+              <span className="text-emerald-400">Remove-Item</span> Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue{'\n'}
               <span className="text-purple-400">$env:</span>NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>{'\n'}
-              {'\n'}
-              <span className="text-slate-500"># Step 2: 启动 LiteLLM 网关</span>{'\n'}
-              <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
-              <span className="text-purple-400">if</span> (!(<span className="text-emerald-400">Get-Command</span> litellm -ErrorAction SilentlyContinue)) {'{'} <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span> {'}'}{'\n'}
-              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params{'\n'}
-              {'\n'}
-              <span className="text-slate-500"># Step 3: (新终端) 启动 Claude Code</span>{'\n'}
               <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://127.0.0.1:4000"</span>{'\n'}
-              <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
+              <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm-local-proxy"</span>{'\n'}
               <span className="text-emerald-400">claude</span>
             </>
           )}
         </CodeBlock>
+
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="text-xs text-red-200/80 leading-relaxed space-y-1">
+            <p className="font-bold text-red-300 text-[13px] mb-2">终端内模型显式重定向 (防 404 必做)</p>
+            <p>进入 Agent 交互界面后，<strong className="text-red-400">绝对不能直接开始对话</strong>（会触发默认模型的 404 错误）。</p>
+            <p>必须第一时间执行 Agent 的模型切换命令（例如 Claude Code 中的 <code className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded font-mono">/model</code>），并在弹出的列表中手动高亮选中通过 LiteLLM 映射进来的代理模型，回车确认后方可开始对话。</p>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-3">
           <DocLink href="https://docs.litellm.ai/docs/proxy/quick_start" label="LiteLLM Proxy 文档" color="blue" />
           <DocLink href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" label="Claude Code 官方指南" color="purple" />

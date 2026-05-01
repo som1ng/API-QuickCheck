@@ -41,23 +41,19 @@ export default function DocsView() {
       <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-3xl hover:border-white/20 transition-all shadow-2xl">
         <h3 className="text-xl font-bold text-white flex items-center mb-6">
           <Terminal className="w-6 h-6 mr-3 text-emerald-400" />
-          LiteLLM 万能中转配置
+          终端 1：启动服务端 (LiteLLM 本地网关)
         </h3>
         <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-          LiteLLM 是一款强大的本地协议转换工具，能将所有主流厂商（如 DeepSeek、OpenRouter）的接口转换为标准的 OpenAI 格式。
-          <br />使用时 <strong className="text-emerald-300">务必注意 model 参数的拼写</strong>，通常需要带上服务商前缀。
+          LiteLLM 是一款强大的本地协议转换工具。必须使用对应平台原生的前缀（如 <code className="bg-white/10 px-1.5 py-0.5 rounded font-mono">openrouter/</code>），以确保正确寻找环境变量，<strong className="text-emerald-400">严禁添加 --api_base 参数</strong>。
         </p>
         <div className="bg-black/40 border border-white/10 rounded-xl p-6 font-mono text-sm shadow-inner overflow-x-auto">
           <pre className="text-slate-300">
             <code>
-              <span className="text-slate-500"># 安装依赖</span>{'\n'}
-              <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
+              <span className="text-slate-500"># 1. 注入对应平台的真实 API Key (以 OpenRouter 为例)</span>{'\n'}
+              <span className="text-purple-400">$env:</span>OPENROUTER_API_KEY=<span className="text-amber-300">"[填入真实的平台_API_KEY]"</span>{'\n'}
               {'\n'}
-              <span className="text-slate-500"># 设置对应平台的 API Key</span>{'\n'}
-              <span className="text-purple-400">export</span> OPENROUTER_API_KEY=<span className="text-amber-300">"sk-or-v1-..."</span>{'\n'}
-              {'\n'}
-              <span className="text-slate-500"># 启动 LiteLLM（将 OpenRouter 转换为本地服务，并过滤不兼容参数）</span>{'\n'}
-              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">openrouter/meta-llama/llama-3.1-8b-instruct:free</span> --drop_params
+              <span className="text-slate-500"># 2. 启动代理网关 (格式要求：litellm --model [平台前缀]/[目标模型ID] --drop_params)</span>{'\n'}
+              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">openrouter/[填入平台支持的具体模型ID]</span> --drop_params
             </code>
           </pre>
         </div>
@@ -67,26 +63,36 @@ export default function DocsView() {
       <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-3xl hover:border-white/20 transition-all shadow-2xl">
         <h3 className="text-xl font-bold text-white flex items-center mb-6">
           <Code2 className="w-6 h-6 mr-3 text-purple-400" />
-          Claude Code 终极接入法
+          终端 2：启动客户端 (Agent 交互终端)
         </h3>
         <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-          Claude Code 原生仅支持 Anthropic 接口。启动上述 LiteLLM 网关后，开启一个<strong>新的终端窗口</strong>，执行以下环境变量注入：
+          必须在<strong>全新的终端窗口</strong>执行。目标是清理网络干扰，并将流量完全劫持到本地 <code className="bg-white/10 px-1.5 py-0.5 rounded font-mono">127.0.0.1:4000</code>。
         </p>
         <div className="bg-black/40 border border-white/10 rounded-xl p-6 font-mono text-sm shadow-inner overflow-x-auto">
           <pre className="text-slate-300">
             <code>
-              <span className="text-slate-500"># Windows PowerShell</span>{'\n'}
+              <span className="text-slate-500"># 1. 清理 Auth 干扰并设置正确的本地回环地址 (注意必须是 127.0.0.1)</span>{'\n'}
+              <span className="text-emerald-400">Remove-Item</span> Env:\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue{'\n'}
+              <span className="text-purple-400">$env:</span>NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>{'\n'}
+              {'\n'}
+              <span className="text-slate-500"># 2. 劫持官方请求至本地 LiteLLM (以 Claude Code 为例)</span>{'\n'}
               <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://127.0.0.1:4000"</span>{'\n'}
-              <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
+              <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm-local-proxy"</span>{'\n'}
+              {'\n'}
+              <span className="text-slate-500"># 3. 启动 Agent 应用</span>{'\n'}
               <span className="text-emerald-400">claude</span>
             </code>
           </pre>
         </div>
-        <div className="mt-6 flex items-start bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 gap-3">
-          <BookOpen className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-purple-200/70 leading-relaxed">
-            此方案完美解决了非 Anthropic 模型（如 DeepSeek 等）与 Claude Code 之间的协议兼容性问题，是目前社区公认的最优解。
-          </p>
+        
+        <div className="mt-8 flex items-start bg-red-500/10 border border-red-500/20 rounded-xl p-5 gap-4 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500" />
+          <BookOpen className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-red-200/90 leading-relaxed space-y-2">
+            <p className="font-bold text-red-300 text-base mb-3">终端内模型显式重定向 (防 404 必做)</p>
+            <p>进入 Agent 交互界面后，<strong className="text-red-400 font-extrabold text-white">绝对不能直接开始对话</strong>（会触发默认模型的 404 错误）。</p>
+            <p>必须第一时间执行 Agent 的模型切换命令（例如 Claude Code 中的 <code className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">/model</code>），并在弹出的列表中<strong className="text-white">手动高亮选中</strong>通过 LiteLLM 映射进来的代理模型，回车确认后方可开始对话。</p>
+          </div>
         </div>
       </div>
     </div>
