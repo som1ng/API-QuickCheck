@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Box, Check, Database, ChevronDown, ChevronUp, Globe } from 'lucide-react';
 import IntegrationGuide from './IntegrationGuide';
+import DocsView from './DocsView';
 
 const PLATFORMS = [
   {
@@ -226,6 +227,8 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [availableModels, setAvailableModels] = useState<string[] | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<'test' | 'docs'>('test');
 
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
@@ -395,17 +398,52 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-[#0B0F19] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0f1c] to-black text-slate-200 relative overflow-y-auto font-sans">
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-slate-900/60 backdrop-blur-xl border-b border-white/10 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center group cursor-pointer">
-            <div className="inline-flex items-center justify-center p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-3 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-              <Zap className="w-5 h-5 text-white" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0">
+          <div className="flex justify-between items-center w-full md:w-auto">
+            <div className="flex items-center group cursor-pointer">
+              <div className="inline-flex items-center justify-center p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-3 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tight">
+                API-QuickCheck
+              </span>
             </div>
-            <span className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tight">
-              API-QuickCheck
-            </span>
+            {/* Mobile Right Icons */}
+            <div className="flex md:hidden items-center space-x-3">
+              <span className="px-2 py-0.5 text-[10px] font-bold text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20">v1.1</span>
+              <a href="https://github.com/som1ng/API-QuickCheck" target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-slate-400 hover:text-white transition-colors">
+                GitHub
+              </a>
+            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <span className="hidden sm:inline-block px-2.5 py-1 text-xs font-bold text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20">v1.1</span>
+          
+          {/* Tab Navigation */}
+          <div className="flex items-center p-1 bg-black/40 rounded-xl border border-white/10 shadow-inner w-full md:w-auto justify-center">
+            <button
+              onClick={() => setActiveTab('test')}
+              className={`flex-1 md:flex-none px-6 py-2 text-sm font-bold rounded-lg transition-all ${
+                activeTab === 'test'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              API 连通性测试
+            </button>
+            <button
+              onClick={() => setActiveTab('docs')}
+              className={`flex-1 md:flex-none px-6 py-2 text-sm font-bold rounded-lg transition-all ${
+                activeTab === 'docs'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              Agent 接入指南
+            </button>
+          </div>
+
+          {/* Desktop Right Icons */}
+          <div className="hidden md:flex items-center space-x-4">
+            <span className="inline-block px-2.5 py-1 text-xs font-bold text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20">v1.1</span>
             <a href="https://github.com/som1ng/API-QuickCheck" target="_blank" rel="noopener noreferrer" className="flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors">
               <span className="mr-1">GitHub</span>
             </a>
@@ -414,20 +452,26 @@ export default function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow pt-28 pb-16 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
+      <main className="flex-grow pt-32 md:pt-28 pb-16 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
         
         {/* Header Text */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            LLM API <span className="text-blue-400">快速验证工具</span>
+            LLM API <span className={activeTab === 'test' ? "text-blue-400" : "text-purple-400"}>{activeTab === 'test' ? '快速验证工具' : '接入配置文档'}</span>
           </h1>
           <p className="text-slate-400 font-medium text-base max-w-xl mx-auto">
-            一键探测模型可用性与额度状态，适配主流 Agent 接入配置。
+            {activeTab === 'test' 
+              ? '一键探测模型可用性与额度状态，适配主流 Agent 接入配置。'
+              : '一站式查看各类模型平台的官方地址与终极代理配置方案。'}
           </p>
         </div>
 
-        {/* Card 1: Main Control Panel */}
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 md:p-10 hover:border-white/20 transition-all duration-300">
+        {activeTab === 'docs' ? (
+          <DocsView />
+        ) : (
+          <>
+            {/* Card 1: Main Control Panel */}
+            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 md:p-10 hover:border-white/20 transition-all duration-300">
           
           <div className="space-y-6 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -682,6 +726,8 @@ export default function App() {
             />
           </div>
         )}
+        </>
+      )}
       </main>
 
       {/* Footer */}
