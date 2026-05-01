@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check } from 'lucide-react';
+import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check, Database } from 'lucide-react';
 
 const PLATFORMS = [
   {
@@ -480,9 +480,21 @@ export default function App() {
                       </span>
                     )}
                   </h3>
-                  <p className="text-sm opacity-90 leading-relaxed mb-1">
+                                    <p className="text-sm opacity-90 leading-relaxed mb-1">
                     {status === 'success' ? `你的 Key 可以正常使用。` : errorMessage}
                   </p>
+                  {status === 'success' && (
+                    <div className="mt-4 flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      <div className="flex-1 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 flex items-center shadow-inner">
+                        <Zap className="w-4 h-4 text-emerald-400 mr-2 flex-shrink-0" />
+                        <span className="text-xs text-emerald-500/90 font-medium">API 状态：<span className="text-emerald-400 font-bold ml-1">健康可用</span></span>
+                      </div>
+                      <div className="flex-1 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20 flex items-center shadow-inner">
+                        <Database className="w-4 h-4 text-blue-400 mr-2 flex-shrink-0" />
+                        <span className="text-xs text-blue-500/90 font-medium">当前额度：<span className="text-blue-400 font-bold ml-1">充沛 (未耗尽)</span></span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -554,209 +566,115 @@ export default function App() {
 
                   {activeTab === 'Claude Code' && (
                     <div className="relative group animate-in fade-in duration-300">
-                      {currentPlatform.id !== 'claude' ? (
-                        <div className="space-y-4">
-                          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 shadow-lg animate-in slide-in-from-top-2">
-                            <h4 className="text-sm font-bold text-amber-400 flex items-center mb-2">
-                              <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0" />
-                              注意：格式不兼容提醒
-                            </h4>
-                            <p className="text-xs text-amber-300/90 leading-relaxed">
-                              Claude Code 原生仅支持 Anthropic 格式。直接接入 {currentPlatform.name} 将导致 <code className="bg-amber-900/50 px-1 rounded">ECONNREFUSED</code> 或通信报错。您必须使用协议转换工具（如 LiteLLM）或支持格式转换的中转 API。
-                              <br/><br/>
-                              <span className="text-amber-200">💡 提示：如果您使用的中转站已经原生支持将 <code>/v1/messages</code> 转换为 OpenAI 格式，则可以直接参考下方的【步骤三】设置 BASE_URL，无需本地代理。</span>
-                            </p>
-                          </div>
-
-                          {/* Step 1 */}
-                          <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
-                            <h5 className="text-sm font-semibold text-blue-400 mb-2 flex items-center"><span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded mr-2 text-xs">1</span> 清理并设置环境</h5>
-                            <p className="text-xs text-slate-400 mb-3">清理残留登录态，并设置目标平台的 API Key 环境变量：</p>
-                            
-                            <div className="flex gap-2 mb-2">
-                              <button onClick={() => setShellType('bash')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'bash' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>Bash / Zsh</button>
-                              <button onClick={() => setShellType('ps')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'ps' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>PowerShell</button>
-                            </div>
-                            <div className="relative">
-                              <div className="absolute right-2 top-2 z-10">
-                                <CopyButton text={shellType === 'bash' 
-                                  ? `unset ANTHROPIC_AUTH_TOKEN\nexport ${litellmEnvKey}="${apiKey}"` 
-                                  : `$env:ANTHROPIC_AUTH_TOKEN=""\n$env:${litellmEnvKey}="${apiKey}"`} />
-                              </div>
-                              <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
-                                {shellType === 'bash' ? (
-                                  <code>
-                                    <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
-                                    <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>
-                                  </code>
-                                ) : (
-                                  <code>
-                                    <span className="text-purple-400">$env:</span>ANTHROPIC_AUTH_TOKEN=<span className="text-amber-300">""</span>{'\n'}
-                                    <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>
-                                  </code>
-                                )}
-                              </pre>
-                            </div>
-                          </div>
-
-                          {/* Step 2 */}
-                          <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
-                            <h5 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center"><span className="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded mr-2 text-xs">2</span> 启动本地协议中转站</h5>
-                            <p className="text-xs text-slate-400 mb-3">使用 LiteLLM 开启带有 <code>--drop_params</code> 的翻译代理：</p>
-                            
-                            <div className="relative">
-                              <div className="absolute right-2 top-2 z-10"><CopyButton text={`pip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
-                              <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
-                                <code>
-                                  <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-                                  <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
-                                </code>
-                              </pre>
-                            </div>
-                            
-                            <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded p-3">
-                              <p className="text-xs text-blue-300 leading-relaxed space-y-1">
-                                <span className="font-bold flex items-center"><Info className="w-3.5 h-3.5 mr-1" />常见排错：</span>
-                                <span className="block">1. <span className="text-amber-300">为什么加 --drop_params？</span> Claude 会发送特定的参数 (如 thinking)，DeepSeek 等模型不认识会报错 400，该标志能自动过滤多余参数。</span>
-                                <span className="block">2. <span className="text-amber-300">提示 No such option: --api_key？</span> 新版 LiteLLM 已弃用该启动参数，请务必先执行步骤一设置环境变量。</span>
-                                <span className="block">3. <span className="text-amber-300">报错 ModuleNotFoundError?</span> 提示：如果您在运行中遇到 'ModuleNotFoundError'，说明某些依赖未装全，请务必执行带 [proxy] 标志的安装命令。建议执行 <code>pip install --upgrade "litellm[proxy]"</code>。</span>
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Step 3 */}
-                          <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
-                            <h5 className="text-sm font-semibold text-purple-400 mb-2 flex items-center"><span className="bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded mr-2 text-xs">3</span> 正确配置 Claude Code</h5>
-                            <p className="text-xs text-slate-400 mb-3">保持 LiteLLM 运行，打开新的终端窗口执行：</p>
-                            
-                            <div className="flex gap-2 mb-2">
-                              <button onClick={() => setShellType('bash')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'bash' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>Bash / Zsh</button>
-                              <button onClick={() => setShellType('ps')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'ps' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>PowerShell</button>
-                            </div>
-                            <div className="relative">
-                              <div className="absolute right-2 top-2 z-10">
-                                <CopyButton text={shellType === 'bash' 
-                                  ? `export ANTHROPIC_BASE_URL="http://0.0.0.0:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`
-                                  : `$env:ANTHROPIC_BASE_URL="http://0.0.0.0:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`
-                                } />
-                              </div>
-                              <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
-                                {shellType === 'bash' ? (
-                                  <code>
-                                    <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://0.0.0.0:4000"</span>{'\n'}
-                                    <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
-                                    <span className="text-emerald-400">claude</span>
-                                  </code>
-                                ) : (
-                                  <code>
-                                    <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://0.0.0.0:4000"</span>{'\n'}
-                                    <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
-                                    <span className="text-emerald-400">claude</span>
-                                  </code>
-                                )}
-                              </pre>
-                            </div>
-                          </div>
+                      <div className="space-y-4">
+                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 shadow-lg animate-in slide-in-from-top-2">
+                          <h4 className="text-sm font-bold text-blue-400 flex items-center mb-2">
+                            <Box className="w-5 h-5 mr-2 flex-shrink-0" />
+                            统一本地网关模式（基于 LiteLLM）
+                          </h4>
+                          <p className="text-xs text-blue-300/90 leading-relaxed">
+                            为了保证跨平台模型协议的绝对兼容性，避免复杂的手动 JSON 配置。我们采用 LiteLLM 作为本地网关，无论测试什么平台，只需按以下三步【无脑复制】即可完美驱动 Claude Code。
+                          </p>
                         </div>
-                      ) : (
-                        <>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            <div className="flex bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                              <button 
-                                onClick={() => setShellType('bash')}
-                                className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                              >
-                                Bash / Zsh
-                              </button>
-                              <button 
-                                onClick={() => setShellType('ps')}
-                                className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                              >
-                                PowerShell
-                              </button>
-                            </div>
-                            
-                            <div className="flex bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                              <button 
-                                onClick={() => setConfigPersistence('session')}
-                                className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${configPersistence === 'session' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                              >
-                                当前会话
-                              </button>
-                              <button 
-                                onClick={() => setConfigPersistence('permanent')}
-                                className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${configPersistence === 'permanent' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                              >
-                                永久生效
-                              </button>
-                            </div>
-                          </div>
 
-                          <div className="absolute right-3 top-[60px] z-10">
-                            <CopyButton text={
-                              configPersistence === 'session' 
-                                ? (shellType === 'bash' 
-                                    ? `export ANTHROPIC_API_KEY="${apiKey}"\nexport ANTHROPIC_BASE_URL="${customBaseUrl}"` 
-                                    : `$env:ANTHROPIC_API_KEY = "${apiKey}"\n$env:ANTHROPIC_BASE_URL = "${customBaseUrl}"`)
-                                : (shellType === 'bash'
-                                    ? `echo 'export ANTHROPIC_API_KEY="${apiKey}"' >> ~/.bashrc\necho 'export ANTHROPIC_BASE_URL="${customBaseUrl}"' >> ~/.bashrc\nsource ~/.bashrc`
-                                    : `setx ANTHROPIC_API_KEY "${apiKey}"\nsetx ANTHROPIC_BASE_URL "${customBaseUrl}"`)
-                            } />
+                        {/* Step 1 */}
+                        <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
+                          <h5 className="text-sm font-semibold text-slate-200 mb-2 flex items-center"><span className="bg-slate-700/50 text-slate-300 px-1.5 py-0.5 rounded mr-2 text-xs">第一步</span> 环境大扫除（防劫持排雷）</h5>
+                          <p className="text-xs text-slate-400 mb-3">说明：清理可能被第三方工具篡改的隐藏配置或环境变量。</p>
+                          
+                          <div className="flex gap-2 mb-2">
+                            <button onClick={() => setShellType('bash')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'bash' ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>Bash / Zsh</button>
+                            <button onClick={() => setShellType('ps')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'ps' ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>PowerShell</button>
                           </div>
-                          <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden relative">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
-                            <pre className="text-sm font-mono text-emerald-400 overflow-x-auto pb-2 custom-scrollbar">
-                              {configPersistence === 'session' ? (
-                                shellType === 'bash' ? (
-                                  <code>
-                                    <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                                    <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"{customBaseUrl}"</span>
-                                  </code>
-                                ) : (
-                                  <code>
-                                    <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY = <span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                                    <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL = <span className="text-amber-300">"{customBaseUrl}"</span>
-                                  </code>
-                                )
+                          <div className="relative">
+                            <div className="absolute right-2 top-2 z-10">
+                              <CopyButton text={shellType === 'bash' 
+                                ? `unset ANTHROPIC_AUTH_TOKEN\nexport NO_PROXY="127.0.0.1,localhost,0.0.0.0"` 
+                                : `Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"`} />
+                            </div>
+                            <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
+                              {shellType === 'bash' ? (
+                                <code>
+                                  <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
+                                  <span className="text-purple-400">export</span> NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>
+                                </code>
                               ) : (
-                                shellType === 'bash' ? (
-                                  <code>
-                                    <span className="text-slate-500"># 写入配置文件并生效</span>{'\n'}
-                                    <span className="text-purple-400">echo</span> <span className="text-amber-300">'export ANTHROPIC_API_KEY="{apiKey}"'</span> &gt;&gt; ~/.bashrc{'\n'}
-                                    <span className="text-purple-400">echo</span> <span className="text-amber-300">'export ANTHROPIC_BASE_URL="{customBaseUrl}"'</span> &gt;&gt; ~/.bashrc{'\n'}
-                                    <span className="text-purple-400">source</span> ~/.bashrc
-                                  </code>
-                                ) : (
-                                  <code>
-                                    <span className="text-slate-500"># 设置永久环境变量 (需重启终端生效)</span>{'\n'}
-                                    <span className="text-purple-400">setx</span> ANTHROPIC_API_KEY <span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                                    <span className="text-purple-400">setx</span> ANTHROPIC_BASE_URL <span className="text-amber-300">"{customBaseUrl}"</span>
-                                  </code>
-                                )
+                                <code>
+                                  <span className="text-slate-500"># Windows</span>{'\n'}
+                                  <span className="text-emerald-400">Remove-Item</span> Env:\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue{'\n'}
+                                  <span className="text-purple-400">$env:</span>NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>
+                                </code>
                               )}
                             </pre>
                           </div>
-                          <p className="text-xs text-slate-500 mt-3 flex items-center">
-                            <Info className="w-3.5 h-3.5 mr-1.5" />
-                            {configPersistence === 'session' ? '运行以上命令，即可为当前会话配置环境。' : '运行以上命令，将配置保存到系统全局变量中。'}
-                          </p>
+                        </div>
 
-                          {/* Conflict Tip */}
-                          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg animate-in shake duration-500">
-                            <p className="text-xs text-red-400 leading-relaxed">
-                              <span className="font-bold">⚠️ 认证冲突提醒：</span> 如果遇到 `Auth conflict` 报错，说明你同时设置了 Token 和 API Key。请运行以下命令清除冲突：
-                            </p>
-                            <div className="mt-2 relative group/item">
-                              <div className="absolute right-2 top-1">
-                                 <CopyButton text={shellType === 'bash' ? 'unset ANTHROPIC_AUTH_TOKEN' : 'Remove-Item Env:ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue'} />
-                              </div>
-                              <code className="block bg-slate-950 p-2 rounded text-xs text-slate-300 font-mono border border-slate-800">
-                                {shellType === 'bash' ? 'unset ANTHROPIC_AUTH_TOKEN' : 'Remove-Item Env:ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue'}
-                              </code>
-                            </div>
+                        {/* Step 2 */}
+                        <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
+                          <h5 className="text-sm font-semibold text-slate-200 mb-2 flex items-center"><span className="bg-slate-700/50 text-slate-300 px-1.5 py-0.5 rounded mr-2 text-xs">第二步</span> 启动万能翻译官 (LiteLLM)</h5>
+                          <p className="text-xs text-slate-400 mb-3">说明：让代理工具在后台帮你将协议翻译成 Claude 能懂的语言。<span className="text-amber-400 font-bold">请勿关闭此窗口！</span></p>
+                          
+                          <div className="flex gap-2 mb-2">
+                            <button onClick={() => setShellType('bash')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'bash' ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>Bash / Zsh</button>
+                            <button onClick={() => setShellType('ps')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'ps' ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>PowerShell</button>
                           </div>
-                        </>
-                      )}
+                          <div className="relative">
+                            <div className="absolute right-2 top-2 z-10"><CopyButton text={shellType === 'bash' 
+                              ? `export ${litellmEnvKey}="${apiKey}"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params` 
+                              : `$env:${litellmEnvKey}="${apiKey}"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
+                            <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
+                              {shellType === 'bash' ? (
+                                <code>
+                                  <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                                  <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
+                                </code>
+                              ) : (
+                                <code>
+                                  <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
+                                  <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
+                                </code>
+                              )}
+                            </pre>
+                          </div>
+                        </div>
+
+                        {/* Step 3 */}
+                        <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4">
+                          <h5 className="text-sm font-semibold text-slate-200 mb-2 flex items-center"><span className="bg-slate-700/50 text-slate-300 px-1.5 py-0.5 rounded mr-2 text-xs">第三步</span> 启动 Claude Code</h5>
+                          <p className="text-xs text-slate-400 mb-3">说明：打开一个<span className="text-emerald-400 font-bold">【全新】</span>的终端窗口，粘贴以下命令。</p>
+                          
+                          <div className="flex gap-2 mb-2">
+                            <button onClick={() => setShellType('bash')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'bash' ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>Bash / Zsh</button>
+                            <button onClick={() => setShellType('ps')} className={`px-2 py-1 text-[10px] rounded transition-colors ${shellType === 'ps' ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>PowerShell</button>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute right-2 top-2 z-10">
+                              <CopyButton text={shellType === 'bash' 
+                                ? `export ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`
+                                : `$env:ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`
+                              } />
+                            </div>
+                            <pre className="bg-slate-950 p-3 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto custom-scrollbar">
+                              {shellType === 'bash' ? (
+                                <code>
+                                  <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://127.0.0.1:4000"</span>{'\n'}
+                                  <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
+                                  <span className="text-emerald-400">claude</span>
+                                </code>
+                              ) : (
+                                <code>
+                                  <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://127.0.0.1:4000"</span>{'\n'}
+                                  <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
+                                  <span className="text-emerald-400">claude</span>
+                                </code>
+                              )}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
 
                       {/* Official Docs Bridge */}
                       <div className="mt-6 border-t border-slate-800/50 pt-5 animate-in fade-in duration-500">
