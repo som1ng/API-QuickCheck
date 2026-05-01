@@ -114,8 +114,8 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
     }
 
     // Non-Anthropic → LiteLLM gateway
-    const bashCode = `# Step 1: 清理环境 & 反劫持\nunset ANTHROPIC_AUTH_TOKEN\nexport NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n\n# Step 2: 启动 LiteLLM 网关\nexport ${litellmEnvKey}="${displayKey}"\npip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmModel} --drop_params\n\n# Step 3: (新终端) 启动 Claude Code\nexport ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`;
-    const psCode = `# Step 1: 清理环境 & 反劫持\nRemove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n\n# Step 2: 启动 LiteLLM 网关\n$env:${litellmEnvKey}="${displayKey}"\npip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmModel} --drop_params\n\n# Step 3: (新终端) 启动 Claude Code\n$env:ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`;
+    const bashCode = `# Step 1: 清理环境 & 反劫持\nunset ANTHROPIC_AUTH_TOKEN\nexport NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n\n# Step 2: 启动 LiteLLM 网关\nexport ${litellmEnvKey}="${displayKey}"\ncommand -v litellm >/dev/null 2>&1 || pip install "litellm[proxy]"\nlitellm --model ${litellmModel} --drop_params\n\n# Step 3: (新终端) 启动 Claude Code\nexport ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`;
+    const psCode = `# Step 1: 清理环境 & 反劫持\nRemove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n\n# Step 2: 启动 LiteLLM 网关\n$env:${litellmEnvKey}="${displayKey}"\nif (!(Get-Command litellm -ErrorAction SilentlyContinue)) { pip install "litellm[proxy]" }\nlitellm --model ${litellmModel} --drop_params\n\n# Step 3: (新终端) 启动 Claude Code\n$env:ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`;
 
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
@@ -136,7 +136,7 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
               {'\n'}
               <span className="text-slate-500"># Step 2: 启动 LiteLLM 网关</span>{'\n'}
               <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
-              <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
+              <span className="text-purple-400">command</span> -v litellm {'>'}/dev/null 2{'>'}{'&'}1 || <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
               <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params{'\n'}
               {'\n'}
               <span className="text-slate-500"># Step 3: (新终端) 启动 Claude Code</span>{'\n'}
@@ -152,7 +152,7 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
               {'\n'}
               <span className="text-slate-500"># Step 2: 启动 LiteLLM 网关</span>{'\n'}
               <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
-              <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
+              <span className="text-purple-400">if</span> (!(<span className="text-emerald-400">Get-Command</span> litellm -ErrorAction SilentlyContinue)) {'{'} <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span> {'}'}{'\n'}
               <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params{'\n'}
               {'\n'}
               <span className="text-slate-500"># Step 3: (新终端) 启动 Claude Code</span>{'\n'}
