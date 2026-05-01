@@ -204,6 +204,7 @@ export default function App() {
   const [platformId, setPlatformId] = useState(PLATFORMS[0].id);
   const [apiKey, setApiKey] = useState('');
   const [customBaseUrl, setCustomBaseUrl] = useState(PLATFORMS[0].defaultBaseUrl);
+  const [manualModel, setManualModel] = useState('');
   const [useProxy, setUseProxy] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -250,6 +251,7 @@ export default function App() {
     setPlatformId(newId);
     const newPlatform = PLATFORMS.find(p => p.id === newId)!;
     setCustomBaseUrl(newPlatform.defaultBaseUrl);
+    setManualModel('');
     setStatus('idle');
     setAvailableModels(null);
   };
@@ -283,7 +285,7 @@ export default function App() {
 
     try {
       // 第一步：动态模型嗅探 (Dynamic Model Fetching)
-      let dynamicModelId = currentPlatform.body?.model || 'gpt-3.5-turbo';
+      let dynamicModelId = manualModel || currentPlatform.body?.model || 'gpt-3.5-turbo';
       let models: string[] = [];
 
       try {
@@ -442,41 +444,58 @@ export default function App() {
         {/* Card 1: Main Control Panel */}
         <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 md:p-10 hover:border-white/20 transition-all duration-300">
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Platform Selector */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between mb-2 ml-1">
-                <label className="block text-sm font-bold text-slate-300">测试平台</label>
-                {DOC_URLS[platformId] && (
-                  <a 
-                    href={DOC_URLS[platformId]!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-bold text-blue-400/80 hover:text-blue-300 transition-colors flex items-center group/link"
+          <div className="space-y-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Platform Selector */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-300 ml-1 mb-2">测试平台</label>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none bg-black/40 border border-white/10 text-white rounded-xl py-3.5 px-4 pr-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner cursor-pointer"
+                    value={platformId}
+                    onChange={handlePlatformChange}
                   >
-                    <span className="group-hover/link:underline">🔗 查找可用模型</span>
-                  </a>
-                )}
+                    {PLATFORMS.map(p => (
+                      <option key={p.id} value={p.id} className="bg-[#1a1f2e] text-white py-2">{p.name}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <ChevronDown className="w-5 h-5 text-slate-500" />
+                  </div>
+                </div>
               </div>
-              <div className="relative">
-                <select
-                  className="w-full appearance-none bg-black/40 border border-white/10 text-white rounded-xl py-3.5 px-4 pr-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner cursor-pointer"
-                  value={platformId}
-                  onChange={handlePlatformChange}
-                >
-                  {PLATFORMS.map(p => (
-                    <option key={p.id} value={p.id} className="bg-[#1a1f2e] text-white py-2">{p.name}</option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown className="w-5 h-5 text-slate-500" />
+
+              {/* Model Input */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2 ml-1">
+                  <label className="block text-sm font-bold text-slate-300">测试模型 (Model)</label>
+                  {DOC_URLS[platformId] && (
+                    <a 
+                      href={DOC_URLS[platformId]!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold text-blue-400/80 hover:text-blue-300 transition-colors flex items-center group/link"
+                    >
+                      <span className="group-hover/link:underline">🔗 查找可用模型</span>
+                    </a>
+                  )}
+                </div>
+                <div className="relative">
+                  <Box className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <input
+                    type="text"
+                    className="w-full bg-black/40 border border-white/10 text-white rounded-xl py-3.5 pl-10 pr-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-700 font-mono shadow-inner text-sm"
+                    value={manualModel}
+                    onChange={(e) => setManualModel(e.target.value)}
+                    placeholder="留空则自动探测或用默认"
+                  />
                 </div>
               </div>
             </div>
 
             {/* API Key Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-300 ml-1">API Key</label>
+              <label className="block text-sm font-bold text-slate-300 ml-1 mb-2">API Key</label>
               <div className="relative">
                 <input
                   type="password"
