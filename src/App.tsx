@@ -102,7 +102,7 @@ const PLATFORMS = [
     testEndpoint: '/chat/completions',
     method: 'POST',
     headers: (key: string) => ({ Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }),
-    body: { model: 'google/gemini-2.5-flash-free', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
+    body: { model: 'google/gemini-2.0-flash-lite-preview-02-05:free', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 },
     placeholder: 'sk-or-v1-...',
     helpText: '知名海外模型聚合平台，提供大量免费开源模型额度。'
   },
@@ -305,10 +305,15 @@ export default function App() {
           }
           if (models.length > 0) {
             dynamicModelId = models[0];
+            console.log("✅ 动态获取模型成功:", dynamicModelId);
+          } else {
+            console.warn("⚠️ 动态获取模型列表为空，使用兜底模型:", dynamicModelId);
           }
+        } else {
+          console.warn("⚠️ 动态获取模型接口返回非 200 状态:", mResp.status, "使用兜底模型:", dynamicModelId);
         }
       } catch (e) {
-        console.error('Failed to dynamically fetch models', e);
+        console.warn("⚠️ 动态获取网络请求失败，使用兜底模型:", dynamicModelId, e);
       }
 
       setAvailableModels(models.length > 0 ? models : null);
