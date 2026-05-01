@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { ChevronRight, Database, Folder, FileText, ChevronDown } from 'lucide-react';
 import QuickStartDoc from './docs/QuickStartDoc';
 import ClaudeCodeDoc from './docs/ClaudeCodeDoc';
+import CursorDoc from './docs/CursorDoc';
+import LiteLLMDoc from './docs/LiteLLMDoc';
 import EmptyStateDoc from './docs/EmptyStateDoc';
 
 export default function DocsView() {
@@ -22,6 +24,10 @@ export default function DocsView() {
         return <QuickStartDoc />;
       case 'claude-code':
         return <ClaudeCodeDoc />;
+      case 'cursor':
+        return <CursorDoc />;
+      case 'lite-llm':
+        return <LiteLLMDoc />;
       default:
         return <EmptyStateDoc />;
     }
