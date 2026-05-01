@@ -1,55 +1,87 @@
-# API-QuickCheck
+# ⚡ API-QuickCheck
 
-> ⚡ 快速、极简、本地化的 API Key 连通性测试工具
+<p align="center">
+  <img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=blue" alt="license">
+  <img src="https://img.shields.io/github/stars/som1ng/API-QuickCheck?style=flat-square&color=gold" alt="stars">
+  <img src="https://img.shields.io/github/forks/som1ng/API-QuickCheck?style=flat-square&color=gray" alt="forks">
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
+  <img src="https://img.shields.io/badge/Vercel-Deployed-black?style=flat-square&logo=vercel" alt="Vercel">
+</p>
 
-**立即使用：[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
+[**English**](./README.md) | [**中文说明**](./README_zh.md)
 
-这是一个纯前端的开源小工具，旨在帮助用户快速验证各大 AI 平台的 API Key 是否连通有效。无论你是开发者还是普通用户，只需输入 Key，点击测试，即可知道是否可用、额度是否耗尽。
+**Live Demo: [https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
 
-## ✨ 核心特性
+---
 
-- **🚀 极简操作**：傻瓜式交互设计，下拉选择平台，粘贴 Key 即可一键测试。
-- **🌐 全面覆盖**：
-    - **国内平台**：DeepSeek, 硅基流动 (SiliconFlow), Kimi, 通义千问, 智谱 AI, 豆包, 阶跃星辰, 零一万物等。
-    - **国外平台**：OpenAI, OpenRouter, NVIDIA NIM, Groq, Together, Gemini, Claude 等。
-- **🔒 纯本地运行**：100% 前端请求，所有测试直接在你的浏览器与服务商服务器之间进行，**绝不经过任何第三方服务器，不收集任何 Key**。
-- **🔌 跨域支持**：内置 **CORS 代理转发**功能，轻松解决浏览器直接请求官方 API 时的跨域拦截问题。
-- **🎨 现代 UI 设计**：基于 React + Vite + Tailwind CSS，极简、顺滑，具有详细的状态反馈。
+## 🌟 What is API-QuickCheck?
 
+**API-QuickCheck** is a professional, high-speed, and **frontend-only** utility designed to validate LLM API keys instantly. Stop wrestling with `curl` commands or suspicious third-party proxies. Check your **DeepSeek**, **OpenAI**, **Claude**, and **Gemini** keys with absolute confidence and privacy.
 
+### 🚀 Why choose us?
+- **Zero Backend**: All requests originate directly from your browser. Your API keys never touch our servers.
+- **Accurate Quota Detection**: Specifically handles `402 Payment Required` and `401 Unauthorized` errors to tell you if your key is invalid or just out of balance.
+- **One-Click Agent Config**: Automatically generates configuration snippets for **Claude Code**, **Cline**, and **OpenClaw** once your key is verified.
 
-## 📦 本地运行
+---
 
-如果你希望在本地运行或二次开发：
+## ✨ Key Features
 
-1. 克隆项目：
-```bash
-git clone https://github.com/som1ng/API-QuickCheck.git
-cd API-QuickCheck
-```
+- 🔒 **Absolute Privacy**: 100% Client-side execution. Your data stays in your browser.
+- 💸 **Smart Balance Probe**: Precise detection of account validity and quota status. Perfect for answering: *"How to check DeepSeek API key balance?"*
+- 🔀 **Protocol Translation**: Built-in guides for using **LiteLLM** to bridge protocol gaps between non-Anthropic models and **Claude Code**.
+- 🎨 **Premium UI**: Modern SaaS-style minimalist interface with glassmorphism effects and smooth micro-animations.
+- 🌐 **Wide Provider Support**: 
+  - **Global**: OpenAI, Claude (Anthropic), Gemini (Google), OpenRouter, Groq, Together AI, NVIDIA NIM.
+  - **Regional**: DeepSeek, SiliconFlow, Kimi (Moonshot), Qwen (DashScope), Zhipu GLM, and more.
 
-2. 安装依赖：
-```bash
-npm install
-```
+---
 
-3. 启动开发服务器：
-```bash
-npm run dev
-```
+## 🛠️ Quick Start
 
-4. 构建生产环境：
-```bash
-npm run build
-```
+### Online Usage
+Visit the [Web Version](https://api-quick-check.vercel.app/) and start testing immediately.
 
-## ⚠️ 常见问题
+### Local Development
+1. **Clone & Install**
+   ```bash
+   git clone https://github.com/som1ng/API-QuickCheck.git
+   cd API-QuickCheck
+   npm install
+   ```
+2. **Run Dev Server**
+   ```bash
+   npm run dev
+   ```
+3. **Build for Production**
+   ```bash
+   npm run build
+   ```
 
-- **测试失败：跨域拦截 (CORS)**
-  一些官方服务商（如 NVIDIA, Anthropic）严禁在浏览器环境中直接跨域请求。如果遇到 `Failed to fetch` 提示，请在“高级设置”中开启 **「使用 CORS 代理」** 开关，或在浏览器安装跨域插件。
-- **自定义 Base URL**
-  对于使用 OpenAI 格式的各类第三方中转 API，点击“高级设置”修改 Base URL 即可。
+---
 
-## 📜 许可证
+## 🔍 SEO & Use Cases
 
-MIT License.
+Whether you are looking for an **OpenAI balance checker**, trying to **test Claude API key validity**, or need to **verify DeepSeek API connectivity**, API-QuickCheck is the ultimate tool.
+
+- **Check DeepSeek API Key**: Verify if your key supports `deepseek-chat` or `deepseek-reasoner`.
+- **OpenAI Key Validation**: Instantly see if your key is active or revoked.
+- **Agent Integration**: Seamlessly get the `BASE_URL` and `ENV` variables for your favorite AI agents.
+
+---
+
+## 🛡️ Privacy & Disclaimer
+
+This project is built for developers and AI enthusiasts.
+- **No data collection**: We do not use cookies, tracking, or any backend storage.
+- **Security**: Since it is open-source, you can audit the source code to verify that your API keys are only sent to the official endpoints you specify.
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+<p align="center">Made with ❤️ for the AI Open Source Community.</p>
