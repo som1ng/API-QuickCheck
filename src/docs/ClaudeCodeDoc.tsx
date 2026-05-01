@@ -1,4 +1,4 @@
-import { ChevronRight, BookOpen, Copy, Info, CheckCircle2, Terminal } from 'lucide-react';
+import { ChevronRight, BookOpen, Copy, CheckCircle2, Terminal, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ClaudeCodeDoc() {
@@ -51,54 +51,20 @@ export default function ClaudeCodeDoc() {
             第一步 — 启动服务端 (LiteLLM 网关)
           </h3>
           <p className="text-slate-400 text-sm mb-6 leading-relaxed pl-8">
-            通过指定正确的平台前缀，LiteLLM 会自动处理所有底层的 Base URL 和鉴权握手，切勿画蛇添足手动添加 <code className="bg-white/10 px-1 rounded">--api_base</code> 参数。
+            在<strong>独立的终端窗口</strong>中启动 LiteLLM。你需要根据你选择的供应商配置 API Key 并指定模型 ID。
           </p>
 
-          <div className="pl-8 space-y-6">
-            {/* 模板区块 */}
-            <div>
-              <h4 className="text-slate-300 font-semibold mb-2 flex items-center gap-2">
-                <span>📐 通用配置公式 (模板)</span>
-              </h4>
-              <div className="bg-black/50 border border-white/10 rounded-lg p-5 font-mono text-sm overflow-x-auto shadow-inner relative group">
-                <pre className="text-slate-300">
-                  <code>
-                    <span className="text-slate-500"># 1. 注入你所选平台的 API Key (注意环境变量名需与平台匹配)</span>{'\n'}
-                    <span className="text-purple-400">$env:</span><span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【平台对应环境变量】</span>=<span className="text-amber-300">"你的真实密钥"</span>{'\n\n'}
-                    <span className="text-slate-500"># 2. 启动代理 (使用平台专属前缀，开启参数过滤)</span>{'\n'}
-                    <span className="text-purple-400">litellm</span> --model <span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【平台前缀】</span>/<span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【具体模型ID】</span> --drop_params
-                  </code>
-                </pre>
-              </div>
-            </div>
-
-
-            {/* 平台对照表 */}
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 mt-4">
-              <h4 className="text-white font-bold mb-4 flex items-center gap-2">
-                <Info className="w-5 h-5 text-blue-400" />
-                🗂️ 常见平台参数速查表
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1">OpenRouter</div>
-                  <div className="text-xs text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">OPENROUTER_API_KEY</code></div>
-                  <div className="text-xs text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">openrouter/</code></div>
-                </div>
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1">DeepSeek (官方)</div>
-                  <div className="text-xs text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">DEEPSEEK_API_KEY</code></div>
-                  <div className="text-xs text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">deepseek/</code></div>
-                </div>
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1">硅基流动 (SiliconFlow)</div>
-                  <div className="text-xs text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">SILICONFLOW_API_KEY</code></div>
-                  <div className="text-xs text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">siliconflow/</code></div>
-                </div>
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1">OpenAI (官方)</div>
-                  <div className="text-xs text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">OPENAI_API_KEY</code></div>
-                  <div className="text-xs text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">openai/</code></div>
+          <div className="pl-8">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-5 flex items-start gap-4 shadow-lg">
+              <ExternalLink className="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-blue-300 font-bold mb-2">详细配置请参考 LiteLLM 进阶指南</h4>
+                <p className="text-blue-200/80 text-sm leading-relaxed mb-4">
+                  关于如何针对 OpenRouter、DeepSeek 或硅基流动等不同平台进行配置，请点击左侧边栏的 <strong>“LiteLLM 配置”</strong> 查看通用公式与参数对照表。
+                </p>
+                <div className="bg-black/30 border border-white/10 rounded-lg p-4 font-mono text-xs text-slate-300 italic">
+                  # 启动示例 (劫持模式)<br/>
+                  litellm --model [平台前缀]/[模型ID] --drop_params
                 </div>
               </div>
             </div>
@@ -112,7 +78,7 @@ export default function ClaudeCodeDoc() {
             第二步 — 启动客户端 (配置 Agent)
           </h3>
           <p className="text-slate-400 text-sm mb-4 leading-relaxed pl-8">
-            在<strong>全新的终端 2</strong> 中执行。清理掉可能干扰的鉴权 Token，将所有请求劫持到本地的 4000 端口，并随便塞一个假的 Key 糊弄 Claude Code 的本地检查。
+            在<strong>另一个全新的终端</strong>中执行。清理掉可能干扰的鉴权 Token，将所有请求劫持到本地的 4000 端口，并随便塞一个假的 Key 糊弄 Claude Code 的本地检查。
           </p>
           <div className="pl-8">
             <div className="bg-black/50 border border-white/10 rounded-lg p-5 font-mono text-sm overflow-x-auto shadow-inner relative group">
@@ -174,7 +140,7 @@ export default function ClaudeCodeDoc() {
               <span className="text-slate-500">Q:</span> 启动 LiteLLM 报错 401 Unauthorized
             </h4>
             <p className="text-slate-400 text-sm leading-relaxed pl-6 border-l-2 border-slate-700 ml-1.5">
-              <span className="font-semibold text-slate-300">A:</span> 通常是因为环境变量前缀和模型前缀不匹配（例如使用了 <code className="bg-white/10 px-1 rounded">openai/</code> 前缀但只配置了 <code className="bg-white/10 px-1 rounded">OPENROUTER_API_KEY</code>）。请参照上方速查表，确保严格对应。
+              <span className="font-semibold text-slate-300">A:</span> 通常是因为环境变量前缀和模型前缀不匹配。请参照 <strong>LiteLLM 配置</strong> 中的速查表，确保严格对应。
             </p>
           </div>
 
@@ -184,15 +150,6 @@ export default function ClaudeCodeDoc() {
             </h4>
             <p className="text-slate-400 text-sm leading-relaxed pl-6 border-l-2 border-slate-700 ml-1.5">
               <span className="font-semibold text-slate-300">A:</span> 路由劫持失败，请求错误地发往了 OpenAI 官方。请检查启动 LiteLLM 时是否遗漏了平台前缀。
-            </p>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-colors">
-            <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-              <span className="text-slate-500">Q:</span> 终端一直提示 Lollygagging... 或报错 404 Not Found
-            </h4>
-            <p className="text-slate-400 text-sm leading-relaxed pl-6 border-l-2 border-slate-700 ml-1.5">
-              <span className="font-semibold text-slate-300">A:</span> 代理链路已通，但上游的特定模型可能下线或繁忙（常见于免费探针模型）。请在第一步更换一个稳定可用的模型名称。
             </p>
           </div>
         </div>
