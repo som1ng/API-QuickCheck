@@ -191,6 +191,32 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function ModelTag({ model, onSelect }: { model: string, onSelect: (m: string) => void }) {
+  const [copied, setCopied] = useState(false);
+  const handleClick = () => {
+    navigator.clipboard.writeText(model);
+    onSelect(model);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button 
+      onClick={handleClick}
+      className="px-3 py-1.5 text-xs font-mono font-medium bg-black/40 text-slate-300 rounded-lg border border-white/10 hover:border-blue-500/60 hover:bg-blue-500/10 transition-all flex items-center group relative min-w-[80px] justify-center"
+      title="点击复制并自动填入测试输入框"
+    >
+      <span className={`transition-opacity duration-200 ${copied ? 'opacity-0' : 'opacity-100'}`}>{model}</span>
+      {copied ? (
+        <span className="absolute inset-0 flex items-center justify-center bg-emerald-600/90 text-white text-[10px] font-bold animate-in fade-in zoom-in-95 duration-200">
+          <Check className="w-3 h-3 mr-1" /> 已填入
+        </span>
+      ) : (
+        <Copy className="w-3 h-3 ml-2 opacity-0 group-hover:opacity-40 transition-opacity text-slate-400" />
+      )}
+    </button>
+  );
+}
+
 const DOC_URLS: Record<string, string | null> = {
   'openrouter': "https://openrouter.ai/models",
   'deepseek': "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
@@ -674,9 +700,7 @@ export default function App() {
                 {availableModels.length > 0 ? (
                   <div className="flex flex-wrap gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
                     {availableModels.map(m => (
-                      <span key={m} className="px-3 py-1.5 text-xs font-mono font-medium bg-black/40 text-slate-300 rounded-lg border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all cursor-default">
-                        {m}
-                      </span>
+                      <ModelTag key={m} model={m} onSelect={setManualModel} />
                     ))}
                   </div>
                 ) : (
