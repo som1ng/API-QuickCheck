@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check, Database, ChevronDown, ChevronUp, Globe } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Box, Check, Database, ChevronDown, ChevronUp, Globe } from 'lucide-react';
+import IntegrationGuide from './IntegrationGuide';
 
 const PLATFORMS = [
   {
@@ -175,21 +176,6 @@ const PLATFORMS = [
 
 type TestStatus = 'idle' | 'loading' | 'success' | 'error_quota' | 'error_key' | 'error_cors' | 'error_other';
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button onClick={handleCopy} className="p-2 hover:bg-slate-800 rounded-lg transition-colors group bg-slate-900/80 border border-slate-700" title="点击复制">
-      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400 group-hover:text-white" />}
-    </button>
-  );
-}
 
 function ModelTag({ model, onSelect }: { model: string, onSelect: (m: string) => void }) {
   const [copied, setCopied] = useState(false);
@@ -240,37 +226,10 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [availableModels, setAvailableModels] = useState<string[] | null>(null);
-  const [activeTab, setActiveTab] = useState('Claude Code');
-  const [shellType, setShellType] = useState<'bash' | 'ps'>(
-    navigator.userAgent.indexOf('Win') !== -1 ? 'ps' : 'bash'
-  );
-
-  const [errorLog, setErrorLog] = useState('');
-  const [diagnosis, setDiagnosis] = useState<{ type: 'error' | 'warning' | 'success', message: string } | null>(null);
-
-  useEffect(() => {
-    if (!errorLog.trim()) {
-      setDiagnosis(null);
-      return;
-    }
-    const log = errorLog.toLowerCase();
-    if (log.includes('modulenotfounderror') || log.includes('missing dependency')) {
-      setDiagnosis({ type: 'error', message: "⚠️ 检测到依赖缺失！请务必执行带 [proxy] 标志的安装命令：pip install --upgrade \"litellm[proxy]\"" });
-    } else if (log.includes('no such option')) {
-      setDiagnosis({ type: 'warning', message: "⚠️ 检测到版本或参数不兼容！新版 LiteLLM 已弃用 --api_key 参数。请按【步骤 1】先配置环境变量，并在启动命令中去除该参数。" });
-    } else if (log.includes('400') || log.includes('validation') || log.includes('thinking')) {
-      setDiagnosis({ type: 'error', message: "⚠️ 检测到参数传递错误！请确保在启动 litellm 时加入了 --drop_params 参数以过滤不支持的特定字段。" });
-    } else {
-      setDiagnosis({ type: 'success', message: "✅ 暂未匹配到常见错误模式。建议查阅下方的官方文档或检查网络连接。" });
-    }
-  }, [errorLog]);
 
   const currentPlatform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0];
 
-  const litellmEnvKey = currentPlatform.id === 'custom' ? 'OPENAI_API_KEY' : `${currentPlatform.id.toUpperCase()}_API_KEY`;
-  const litellmDefaultModel = currentPlatform.id === 'deepseek' 
-    ? 'deepseek/deepseek-chat' 
-    : `${currentPlatform.id === 'custom' ? 'openai' : currentPlatform.id}/${availableModels && availableModels.length > 0 ? availableModels[0] : 'your-model'}`;
+
 
   const handlePlatformChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newId = e.target.value;
@@ -714,276 +673,13 @@ export default function App() {
               </div>
             )}
 
-            {/* Agent Guide */}
-            <div className="bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-              <div className="p-6 bg-black/20 border-b border-white/10 flex justify-between items-center">
-                <h3 className="font-black text-white flex items-center text-lg tracking-tight">
-                  <Terminal className="w-5 h-5 mr-3 text-blue-500" />
-                  Agent 一键接入指南
-                </h3>
-              </div>
-              
-              {/* Tabs */}
-              <div className="flex border-b border-white/5 bg-black/10 overflow-x-auto custom-scrollbar px-3 pt-2">
-                {['Claude Code', 'OpenClaw', 'Cline / Roo Code'].map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
-                      activeTab === tab 
-                        ? 'text-blue-400 border-blue-500 bg-white/5' 
-                        : 'text-slate-500 border-transparent hover:text-slate-300 hover:bg-white/5'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              <div className="p-8">
-                {customBaseUrl !== currentPlatform.defaultBaseUrl && (
-                  <div className="mb-8 flex items-start bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 shadow-inner">
-                    <AlertTriangle className="w-6 h-6 text-amber-500 mr-4 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-amber-100/80 leading-relaxed font-bold">
-                      ⚠️ 正在使用自定义 API 地址。请务必在 Agent 设置中开启「自定义 Endpoint」或修改 API Base，否则请求将指向默认官方接口导致鉴权失败。
-                    </p>
-                  </div>
-                )}
-
-                {activeTab === 'Claude Code' && (
-                  <div className="relative animate-in fade-in duration-500">
-                    <div className="space-y-8">
-                      <div className="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-5 shadow-inner">
-                        <div className="flex items-center mb-3">
-                          <Box className="w-5 h-5 mr-3 text-blue-400" />
-                          <h4 className="text-sm font-black text-blue-300 uppercase tracking-wider">统一本地网关模式 (LiteLLM)</h4>
-                        </div>
-                        <p className="text-xs text-blue-100/60 leading-relaxed">
-                          采用 LiteLLM 作为本地中转网关是目前最稳定的方案。它能完美解决所有非 Anthropic 模型与 Claude Code 之间的协议兼容性问题，真正实现“无脑接入”。
-                        </p>
-                      </div>
-
-                      {/* Step 1 */}
-                      <div className="space-y-4">
-                        <h5 className="text-sm font-bold text-white flex items-center"><span className="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg mr-3 text-[10px] font-black">01</span> 环境清理与反劫持</h5>
-                        <div className="flex gap-2">
-                          <button onClick={() => setShellType('bash')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>Bash / Zsh</button>
-                          <button onClick={() => setShellType('ps')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>PowerShell</button>
-                        </div>
-                        <div className="relative group">
-                          <div className="absolute right-3 top-3 z-10">
-                            <CopyButton text={shellType === 'bash' 
-                              ? `unset ANTHROPIC_AUTH_TOKEN\nexport NO_PROXY="127.0.0.1,localhost,0.0.0.0"` 
-                              : `Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"`} />
-                          </div>
-                          <pre className="bg-[#05070a] p-5 rounded-2xl text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-2xl">
-                            {shellType === 'bash' ? (
-                              <code>
-                                <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
-                                <span className="text-purple-400">export</span> NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>
-                              </code>
-                            ) : (
-                              <code>
-                                <span className="text-slate-500"># Windows PowerShell</span>{'\n'}
-                                <span className="text-emerald-400">Remove-Item</span> Env:\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue{'\n'}
-                                <span className="text-purple-400">$env:</span>NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>
-                              </code>
-                            )}
-                          </pre>
-                        </div>
-                      </div>
-
-                      {/* Step 2 */}
-                      <div className="space-y-4">
-                        <h5 className="text-sm font-bold text-white flex items-center"><span className="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg mr-3 text-[10px] font-black">02</span> 启动 LiteLLM 翻译官</h5>
-                        <div className="flex gap-2">
-                          <button onClick={() => setShellType('bash')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>Bash / Zsh</button>
-                          <button onClick={() => setShellType('ps')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>PowerShell</button>
-                        </div>
-                        <div className="relative group">
-                          <div className="absolute right-3 top-3 z-10"><CopyButton text={shellType === 'bash' 
-                            ? `export ${litellmEnvKey}="${apiKey}"\npip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params` 
-                            : `$env:${litellmEnvKey}="${apiKey}"\npip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
-                          <pre className="bg-[#05070a] p-5 rounded-2xl text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-2xl">
-                            {shellType === 'bash' ? (
-                              <code>
-                                <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                                <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-                                <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
-                              </code>
-                            ) : (
-                              <code>
-                                <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
-                                <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-                                <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
-                              </code>
-                            )}
-                          </pre>
-                        </div>
-                        <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4">
-                          <p className="text-[10px] text-amber-200/50 leading-relaxed italic">
-                            提示：保持此终端窗口运行。<code>--drop_params</code> 是关键，它能防止 Claude 特有参数（如 Thinking）导致 DeepSeek 报错。
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Step 3 */}
-                      <div className="space-y-4">
-                        <h5 className="text-sm font-bold text-white flex items-center"><span className="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg mr-3 text-[10px] font-black">03</span> 唤醒 Claude Code</h5>
-                        <div className="flex gap-2">
-                          <button onClick={() => setShellType('bash')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>Bash / Zsh</button>
-                          <button onClick={() => setShellType('ps')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>PowerShell</button>
-                        </div>
-                        <div className="relative group">
-                          <div className="absolute right-3 top-3 z-10">
-                            <CopyButton text={shellType === 'bash' 
-                              ? `export ANTHROPIC_BASE_URL="http://0.0.0.0:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`
-                              : `$env:ANTHROPIC_BASE_URL="http://0.0.0.0:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`
-                            } />
-                          </div>
-                          <pre className="bg-[#05070a] p-5 rounded-2xl text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-2xl">
-                            {shellType === 'bash' ? (
-                              <code>
-                                <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://0.0.0.0:4000"</span>{'\n'}
-                                <span className="text-purple-400">export</span> ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
-                                <span className="text-emerald-400">claude</span>
-                              </code>
-                            ) : (
-                              <code>
-                                <span className="text-purple-400">$env:</span>ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://0.0.0.0:4000"</span>{'\n'}
-                                <span className="text-purple-400">$env:</span>ANTHROPIC_API_KEY=<span className="text-amber-300">"sk-litellm"</span>{'\n'}
-                                <span className="text-emerald-400">claude</span>
-                              </code>
-                            )}
-                          </pre>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Official Docs */}
-                    <div className="mt-12 pt-8 border-t border-white/5">
-                      <div className="flex items-center mb-6">
-                        <Globe className="w-4 h-4 text-slate-600 mr-2" />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">官方文档直连</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <a href="https://docs.litellm.ai/docs/proxy/quick_start" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-blue-500/5 hover:border-blue-500/30 transition-all group">
-                          <div className="text-xs font-black text-blue-400 mb-1">LiteLLM Proxy</div>
-                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400">快速入门手册 →</div>
-                        </a>
-                        <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-purple-500/5 hover:border-purple-500/30 transition-all group">
-                          <div className="text-xs font-black text-purple-400 mb-1">Claude Code</div>
-                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400">官方环境指南 →</div>
-                        </a>
-                        <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-emerald-500/5 hover:border-emerald-500/30 transition-all group">
-                          <div className="text-xs font-black text-emerald-400 mb-1">DeepSeek API</div>
-                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400">官方参数说明 →</div>
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Analyzer */}
-                    <div className="mt-12 pt-8 border-t border-white/5">
-                      <div className="flex items-center mb-4">
-                        <Terminal className="w-4 h-4 text-amber-500 mr-2" />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">报错自诊断分析</span>
-                      </div>
-                      <textarea
-                        value={errorLog}
-                        onChange={(e) => setErrorLog(e.target.value)}
-                        placeholder="粘贴终端报错日志，自动为您匹配解决方案..."
-                        className="w-full h-32 bg-[#05070a] border border-white/5 rounded-2xl p-5 text-xs font-mono text-slate-300 focus:outline-none focus:border-blue-500 transition-all shadow-2xl placeholder-slate-800"
-                      />
-                      {diagnosis && (
-                        <div className={`mt-4 p-5 rounded-2xl border shadow-2xl animate-in fade-in duration-300 ${
-                          diagnosis.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                          diagnosis.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                          'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                        }`}>
-                          <p className="text-xs font-bold leading-relaxed">{diagnosis.message}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'OpenClaw' && (
-                  <div className="relative group animate-in fade-in duration-300">
-                    <div className="absolute right-4 top-4 z-10">
-                      <CopyButton text={`{\n  "api_key": "${apiKey}",\n  "base_url": "${customBaseUrl}"\n}`} />
-                    </div>
-                    <div className="bg-[#05070a] p-6 rounded-2xl border border-white/5 relative shadow-2xl">
-                      <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 rounded-l-2xl" />
-                      <pre className="text-sm font-mono text-slate-300 overflow-x-auto pb-2 custom-scrollbar pl-4">
-                        <code>
-                          {'{'}{'\n'}
-                          {'  '}<span className="text-blue-400">"api_key"</span>: <span className="text-amber-300">"{apiKey}"</span>,{'\n'}
-                          {'  '}<span className="text-blue-400">"base_url"</span>: <span className="text-amber-300">"{customBaseUrl}"</span>{'\n'}
-                          {'}'}
-                        </code>
-                      </pre>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-5 flex items-center font-medium">
-                      <Info className="w-4 h-4 mr-2" />
-                      将生成的配置片段粘贴至 OpenClaw 的 config.json 文件中即可。
-                    </p>
-                  </div>
-                )}
-
-                {activeTab === 'Cline / Roo Code' && (
-                  <div className="animate-in fade-in duration-300 space-y-4">
-                    <div className="bg-black/40 rounded-2xl border border-white/10 overflow-hidden shadow-2xl relative">
-                      <div className="absolute top-0 left-0 w-1.5 h-full bg-purple-600" />
-                      <table className="w-full text-sm text-left border-collapse">
-                        <tbody className="divide-y divide-white/5">
-                          <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest w-40 border-r border-white/5">Provider</td>
-                            <td className="py-4 px-6 text-white font-black flex items-center justify-between">
-                              <span>
-                                {currentPlatform.id === 'anthropic' || currentPlatform.id === 'claude' ? 'Anthropic' : 
-                                 currentPlatform.id === 'gemini' ? 'Google Gemini' : 'OpenAI Compatible'}
-                              </span>
-                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
-                                <CopyButton text={currentPlatform.id === 'anthropic' || currentPlatform.id === 'claude' ? 'Anthropic' : currentPlatform.id === 'gemini' ? 'Google Gemini' : 'OpenAI Compatible'} />
-                              </div>
-                            </td>
-                          </tr>
-                          <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest border-r border-white/5">Base URL</td>
-                            <td className="py-4 px-6 text-amber-300 font-mono text-xs flex justify-between items-center bg-black/20">
-                              <span className="truncate max-w-[200px] sm:max-w-xs">{customBaseUrl}</span>
-                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
-                                <CopyButton text={customBaseUrl} />
-                              </div>
-                            </td>
-                          </tr>
-                          <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest border-r border-white/5">API Key</td>
-                            <td className="py-4 px-6 text-emerald-400 font-mono text-xs flex justify-between items-center bg-black/20">
-                              <span>{apiKey.substring(0, 10)}...</span>
-                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
-                                <CopyButton text={apiKey} />
-                              </div>
-                            </td>
-                          </tr>
-                          <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest border-r border-white/5">Target Model</td>
-                            <td className="py-4 px-6 text-blue-400 font-mono text-xs flex justify-between items-center bg-black/20">
-                              <span className="truncate max-w-[200px] sm:max-w-xs">
-                                {availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / deepseek-chat'}
-                              </span>
-                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
-                                <CopyButton text={availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / deepseek-chat'} />
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Integration Guide */}
+            <IntegrationGuide
+              apiKey={apiKey}
+              baseUrl={customBaseUrl}
+              platformId={platformId}
+              modelId={manualModel || (availableModels && availableModels.length > 0 ? availableModels[0] : (currentPlatform.body?.model || ''))}
+            />
           </div>
         )}
       </main>
