@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check, Database } from 'lucide-react';
+import { Settings2, Play, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Zap, Loader2, Info, Copy, Terminal, Box, Check, Database, ChevronDown, ChevronUp, Globe } from 'lucide-react';
 
 const PLATFORMS = [
   {
@@ -348,12 +348,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0B0F19] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0f1c] to-black text-slate-200 relative overflow-y-auto">
+    <div className="min-h-screen flex flex-col bg-[#0B0F19] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0f1c] to-black text-slate-200 relative overflow-y-auto font-sans">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-900/50 backdrop-blur-md border-b border-white/10">
+      <nav className="fixed top-0 w-full z-50 bg-slate-900/60 backdrop-blur-xl border-b border-white/10 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="inline-flex items-center justify-center p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg mr-3 shadow-lg shadow-blue-500/20">
+          <div className="flex items-center group cursor-pointer">
+            <div className="inline-flex items-center justify-center p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-3 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tight">
@@ -361,82 +361,123 @@ export default function App() {
             </span>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="px-2.5 py-1 text-xs font-bold text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20">v1.0</span>
+            <span className="hidden sm:inline-block px-2.5 py-1 text-xs font-bold text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20">v1.1</span>
             <a href="https://github.com/som1ng/API-QuickCheck" target="_blank" rel="noopener noreferrer" className="flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors">
-              GitHub
+              <span className="mr-1">GitHub</span>
             </a>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow pt-24 pb-12 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
+      <main className="flex-grow pt-28 pb-16 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
         
         {/* Header Text */}
-        <div className="text-center mb-2">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">快速验证密钥并一键生成 Agent 配置</h1>
-          <p className="text-slate-400 font-medium text-sm">无需后端，纯浏览器端运行，安全可靠不走漏 Key。</p>
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+            LLM API <span className="text-blue-400">快速验证工具</span>
+          </h1>
+          <p className="text-slate-400 font-medium text-base max-w-xl mx-auto">
+            一键探测模型可用性与额度状态，适配主流 Agent 接入配置。
+          </p>
         </div>
 
-        {/* Card 1: Platform & Key Setup */}
-        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] p-6 md:p-8 hover:border-white/20 transition-all">
-          {/* Platform Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-slate-300 mb-2">测试平台</label>
-            <div className="relative">
-              <select
-                className="w-full appearance-none bg-black/20 border border-white/10 text-white rounded-lg py-3 px-4 pr-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
-                value={platformId}
-                onChange={handlePlatformChange}
-              >
-                {PLATFORMS.map(p => (
-                  <option key={p.id} value={p.id} className="bg-slate-900 text-white">{p.name}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <Settings2 className="w-5 h-5 text-slate-500" />
+        {/* Card 1: Main Control Panel */}
+        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 md:p-10 hover:border-white/20 transition-all duration-300">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Platform Selector */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-slate-300 ml-1">测试平台</label>
+              <div className="relative">
+                <select
+                  className="w-full appearance-none bg-black/40 border border-white/10 text-white rounded-xl py-3.5 px-4 pr-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner cursor-pointer"
+                  value={platformId}
+                  onChange={handlePlatformChange}
+                >
+                  {PLATFORMS.map(p => (
+                    <option key={p.id} value={p.id} className="bg-[#1a1f2e] text-white py-2">{p.name}</option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <ChevronDown className="w-5 h-5 text-slate-500" />
+                </div>
+              </div>
+            </div>
+
+            {/* API Key Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-slate-300 ml-1">API Key</label>
+              <div className="relative">
+                <input
+                  type="password"
+                  className="w-full bg-black/40 border border-white/10 text-white rounded-xl py-3.5 px-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600 font-mono shadow-inner"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder={currentPlatform.placeholder}
+                  autoComplete="off"
+                />
               </div>
             </div>
           </div>
 
-          {/* Advanced Settings */}
-          <div className="mb-6">
+          {/* Advanced Settings Toggle */}
+          <div className="mb-8 group">
             <button 
+              type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center text-sm text-slate-400 hover:text-white transition-colors font-medium"
+              className={`flex items-center justify-between w-full px-5 py-3 text-sm font-bold transition-all rounded-xl border ${
+                showAdvanced 
+                  ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' 
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20'
+              }`}
             >
-              <Settings2 className="w-4 h-4 mr-1" />
-              {showAdvanced ? '收起高级设置' : '高级设置 (自定义 Base URL & 平台提示)'}
+              <div className="flex items-center">
+                <Settings2 className={`w-4 h-4 mr-2 transition-transform duration-300 ${showAdvanced ? 'rotate-90 text-blue-400' : 'text-slate-500'}`} />
+                <span>高级设置 (自定义 Base URL & CORS 代理)</span>
+              </div>
+              {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
             
             {showAdvanced && (
-              <div className="mt-3 p-4 bg-black/20 rounded-lg border border-white/5 animate-in fade-in slide-in-from-top-2 duration-200">
-                <label className="block text-xs font-semibold text-slate-400 mb-2">接口地址 (Base URL)</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/30 border border-white/10 text-white text-sm rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all mb-3 shadow-inner placeholder-slate-600"
-                  value={customBaseUrl}
-                  onChange={(e) => setCustomBaseUrl(e.target.value)}
-                  placeholder="https://api.openai.com"
-                />
-                
-                <div className="flex items-center mb-4 mt-2">
-                  <input
-                    type="checkbox"
-                    id="proxy-toggle"
-                    className="w-4 h-4 text-blue-500 bg-black/30 border-white/10 rounded focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer"
-                    checked={useProxy}
-                    onChange={(e) => setUseProxy(e.target.checked)}
-                  />
-                  <label htmlFor="proxy-toggle" className="ml-2 text-sm font-medium text-slate-300 cursor-pointer select-none">
-                    使用 CORS 代理转发请求 (支持绕过严格跨域限制)
-                  </label>
+              <div className="mt-4 p-5 bg-black/30 rounded-2xl border border-white/5 space-y-6 shadow-inner animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">接口地址 (Base URL)</label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                    <input
+                      type="text"
+                      className="w-full bg-black/20 border border-white/10 text-white text-sm rounded-lg py-2.5 pl-10 pr-3 focus:outline-none focus:border-blue-500 transition-all shadow-inner placeholder-slate-700"
+                      value={customBaseUrl}
+                      onChange={(e) => setCustomBaseUrl(e.target.value)}
+                      placeholder="https://api.openai.com"
+                    />
+                  </div>
                 </div>
+                
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-blue-500/10 rounded-lg mr-3">
+                      <ShieldCheck className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-200">CORS 代理转发</h4>
+                      <p className="text-[10px] text-slate-500">开启后可绕过浏览器对官方 API 的跨域限制</p>
+                    </div>
+                  </div>
+                  <div 
+                    onClick={() => setUseProxy(!useProxy)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${useProxy ? 'bg-blue-600' : 'bg-slate-700'}`}
+                  >
+                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${useProxy ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </div>
+                </div>
+
                 {/* @ts-ignore */}
                 {currentPlatform.helpText && (
-                  <div className="flex items-start bg-blue-500/10 border border-blue-500/20 rounded-md p-3">
-                    <Info className="w-4 h-4 text-blue-400 mr-2 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-300 leading-relaxed">
+                  <div className="flex items-start bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
+                    <Info className="w-4 h-4 text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-blue-200/70 leading-relaxed">
                       {/* @ts-ignore */}
                       {currentPlatform.helpText}
                     </p>
@@ -446,36 +487,22 @@ export default function App() {
             )}
           </div>
 
-          {/* API Key Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-slate-300 mb-2">API Key</label>
-            <input
-              type="password"
-              className="w-full bg-black/20 border border-white/10 text-white rounded-lg py-3 px-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-500 font-mono shadow-inner"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder={currentPlatform.placeholder}
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
-            />
-          </div>
-
           {/* Submit Button */}
           <button
             onClick={handleTest}
             disabled={status === 'loading'}
-            className="w-full relative overflow-hidden rounded-lg font-bold text-white shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 py-3.5 flex items-center justify-center border border-white/10"
+            className="w-full relative group overflow-hidden rounded-2xl font-black text-white shadow-2xl shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4 flex items-center justify-center border border-white/10"
           >
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             {status === 'loading' ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                测试中...
+                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                正在深度探测中...
               </>
             ) : (
               <>
-                <Play className="w-5 h-5 mr-2" fill="currentColor" />
-                开始测试
+                <Play className="w-5 h-5 mr-3 fill-current" />
+                立即验证 API 有效性
               </>
             )}
           </button>
@@ -483,40 +510,60 @@ export default function App() {
 
         {/* Results Area */}
         {status !== 'idle' && status !== 'loading' && (
-          <div className={`p-5 rounded-2xl border shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] backdrop-blur-lg animate-in zoom-in-95 duration-200 ${
-            status === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-            status === 'error_cors' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
-            'bg-red-500/10 border-red-500/20 text-red-400'
+          <div className={`p-6 rounded-3xl border shadow-2xl backdrop-blur-3xl animate-in zoom-in-95 duration-300 ${
+            status === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' :
+            status === 'error_cors' ? 'bg-amber-500/10 border-amber-500/20' :
+            'bg-red-500/10 border-red-500/20'
           }`}>
             <div className="flex items-start">
-              {status === 'success' && <CheckCircle2 className="w-6 h-6 mr-3 flex-shrink-0 text-emerald-400" />}
-              {(status === 'error_key' || status === 'error_quota' || status === 'error_other') && <XCircle className="w-6 h-6 mr-3 flex-shrink-0 text-red-400" />}
-              {status === 'error_cors' && <AlertTriangle className="w-6 h-6 mr-3 flex-shrink-0 text-yellow-400" />}
+              <div className={`p-3 rounded-2xl mr-4 flex-shrink-0 ${
+                status === 'success' ? 'bg-emerald-500/20 text-emerald-400' :
+                status === 'error_cors' ? 'bg-amber-500/20 text-amber-400' :
+                'bg-red-500/20 text-red-400'
+              }`}>
+                {status === 'success' && <CheckCircle2 className="w-7 h-7" />}
+                {(status === 'error_key' || status === 'error_quota' || status === 'error_other') && <XCircle className="w-7 h-7" />}
+                {status === 'error_cors' && <AlertTriangle className="w-7 h-7" />}
+              </div>
               
-              <div className="w-full">
-                <h3 className="font-bold mb-1 flex items-center justify-between text-base">
+              <div className="w-full pt-1">
+                <h3 className="font-black mb-1 flex items-center justify-between text-lg tracking-tight">
                   <span className="text-white">
-                    {status === 'success' ? '测试通过！' :
-                     status === 'error_cors' ? '跨域拦截 / 网络不通' : '测试失败'}
+                    {status === 'success' ? '验证通过' :
+                     status === 'error_cors' ? '跨域拦截 / 连接受阻' : '验证失败'}
                   </span>
                   {status === 'success' && delay !== null && (
-                    <span className="text-xs font-mono opacity-90 bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    <span className="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
                       {delay}ms
                     </span>
                   )}
                 </h3>
-                <p className="text-sm opacity-90 leading-relaxed mb-1">
-                  {status === 'success' ? `你的 Key 可以正常使用。` : errorMessage}
+                <p className={`text-sm font-medium leading-relaxed mb-4 ${
+                  status === 'success' ? 'text-emerald-200/70' :
+                  status === 'error_cors' ? 'text-amber-200/70' :
+                  'text-red-200/70'
+                }`}>
+                  {status === 'success' ? `该 API Key 目前状态健康，可立即投入使用。` : errorMessage}
                 </p>
                 {status === 'success' && (
-                  <div className="mt-4 flex flex-col sm:flex-row gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="flex-1 bg-black/20 p-3 rounded-xl border border-white/5 flex items-center shadow-inner">
-                      <Zap className="w-4 h-4 text-emerald-400 mr-2 flex-shrink-0" />
-                      <span className="text-xs text-slate-300 font-medium">API 状态：<span className="text-emerald-400 font-bold ml-1">健康可用</span></span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <div className="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center shadow-inner group hover:border-emerald-500/30 transition-colors">
+                      <div className="p-2 bg-emerald-500/10 rounded-lg mr-3">
+                        <Zap className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">API Status</span>
+                        <span className="text-emerald-400 font-black text-sm">可用 / 正常</span>
+                      </div>
                     </div>
-                    <div className="flex-1 bg-black/20 p-3 rounded-xl border border-white/5 flex items-center shadow-inner">
-                      <Database className="w-4 h-4 text-blue-400 mr-2 flex-shrink-0" />
-                      <span className="text-xs text-slate-300 font-medium">当前额度：<span className="text-blue-400 font-bold ml-1">充沛 (未耗尽)</span></span>
+                    <div className="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center shadow-inner group hover:border-blue-500/30 transition-colors">
+                      <div className="p-2 bg-blue-500/10 rounded-lg mr-3">
+                        <Database className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Quota Info</span>
+                        <span className="text-blue-400 font-black text-sm">额度充沛</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -527,50 +574,52 @@ export default function App() {
 
         {/* Model Probe & Agent Guide */}
         {status === 'success' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
             
             {/* Models Area */}
             {availableModels !== null && (
-              <div className="bg-white/5 backdrop-blur-lg p-6 rounded-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] hover:border-white/20 transition-all">
-                <h4 className="text-base font-semibold text-white mb-4 flex items-center">
-                  <Box className="w-5 h-5 mr-2 text-blue-400" />
-                  可用模型探测 {availableModels.length > 0 && <span className="ml-2 text-sm font-normal text-slate-400">({availableModels.length} 个)</span>}
+              <div className="bg-white/5 backdrop-blur-2xl p-8 rounded-3xl border border-white/10 shadow-2xl hover:border-white/20 transition-all">
+                <h4 className="text-lg font-bold text-white mb-5 flex items-center">
+                  <Box className="w-5 h-5 mr-3 text-blue-400" />
+                  可用模型列表 {availableModels.length > 0 && <span className="ml-3 text-sm font-bold text-slate-500 px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{availableModels.length}</span>}
                 </h4>
                 {availableModels.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                  <div className="flex flex-wrap gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
                     {availableModels.map(m => (
-                      <span key={m} className="px-2.5 py-1 text-xs bg-black/30 text-slate-300 rounded-md border border-white/10 hover:border-white/30 transition-colors">
+                      <span key={m} className="px-3 py-1.5 text-xs font-mono font-medium bg-black/40 text-slate-300 rounded-lg border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all cursor-default">
                         {m}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-yellow-400 flex items-center bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
-                    <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
-                    无法获取模型列表，请手动尝试在 Agent 中填写模型 ID
-                  </p>
+                  <div className="flex items-center bg-amber-500/10 p-5 rounded-2xl border border-amber-500/20">
+                    <AlertTriangle className="w-5 h-5 mr-3 flex-shrink-0 text-amber-500" />
+                    <p className="text-sm font-medium text-amber-200/80">
+                      无法自动获取模型列表，请手动在 Agent 中尝试填写具体的模型名称。
+                    </p>
+                  </div>
                 )}
               </div>
             )}
 
             {/* Agent Guide */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] overflow-hidden">
-              <div className="p-5 bg-black/20 border-b border-white/10 flex justify-between items-center">
-                <h3 className="font-bold text-white flex items-center text-base">
-                  <Terminal className="w-5 h-5 mr-2 text-blue-400" />
+            <div className="bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+              <div className="p-6 bg-black/20 border-b border-white/10 flex justify-between items-center">
+                <h3 className="font-black text-white flex items-center text-lg tracking-tight">
+                  <Terminal className="w-5 h-5 mr-3 text-blue-500" />
                   Agent 一键接入指南
                 </h3>
               </div>
               
               {/* Tabs */}
-              <div className="flex border-b border-white/10 bg-black/10 overflow-x-auto custom-scrollbar px-2">
+              <div className="flex border-b border-white/5 bg-black/10 overflow-x-auto custom-scrollbar px-3 pt-2">
                 {['Claude Code', 'OpenClaw', 'Cline / Roo Code'].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-3 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+                    className={`px-6 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
                       activeTab === tab 
-                        ? 'text-blue-400 border-blue-400 bg-white/5' 
+                        ? 'text-blue-400 border-blue-500 bg-white/5' 
                         : 'text-slate-500 border-transparent hover:text-slate-300 hover:bg-white/5'
                     }`}
                   >
@@ -579,45 +628,43 @@ export default function App() {
                 ))}
               </div>
 
-              <div className="p-6">
+              <div className="p-8">
                 {customBaseUrl !== currentPlatform.defaultBaseUrl && (
-                  <div className="mb-6 flex items-start bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 shadow-inner">
-                    <AlertTriangle className="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-yellow-200 leading-relaxed font-medium">
-                      <span className="font-bold">⚠️ 检测到您使用的是非官方 API</span>，请务必在 Agent 设置中开启「自定义 Endpoint」功能（或修改 Base URL），否则将无法使用。
+                  <div className="mb-8 flex items-start bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 shadow-inner">
+                    <AlertTriangle className="w-6 h-6 text-amber-500 mr-4 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-amber-100/80 leading-relaxed font-bold">
+                      ⚠️ 正在使用自定义 API 地址。请务必在 Agent 设置中开启「自定义 Endpoint」或修改 API Base，否则请求将指向默认官方接口导致鉴权失败。
                     </p>
                   </div>
                 )}
 
                 {activeTab === 'Claude Code' && (
-                  <div className="relative group animate-in fade-in duration-300">
-                    <div className="space-y-6">
-                      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 shadow-inner animate-in slide-in-from-top-2">
-                        <h4 className="text-sm font-bold text-blue-400 flex items-center mb-2">
-                          <Box className="w-5 h-5 mr-2 flex-shrink-0" />
-                          统一本地网关模式（基于 LiteLLM）
-                        </h4>
-                        <p className="text-xs text-blue-200 leading-relaxed">
-                          为了保证跨平台模型协议的绝对兼容性，避免复杂的手动 JSON 配置。我们采用 LiteLLM 作为本地网关，无论测试什么平台，只需按以下三步【无脑复制】即可完美驱动 Claude Code。
+                  <div className="relative animate-in fade-in duration-500">
+                    <div className="space-y-8">
+                      <div className="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-5 shadow-inner">
+                        <div className="flex items-center mb-3">
+                          <Box className="w-5 h-5 mr-3 text-blue-400" />
+                          <h4 className="text-sm font-black text-blue-300 uppercase tracking-wider">统一本地网关模式 (LiteLLM)</h4>
+                        </div>
+                        <p className="text-xs text-blue-100/60 leading-relaxed">
+                          采用 LiteLLM 作为本地中转网关是目前最稳定的方案。它能完美解决所有非 Anthropic 模型与 Claude Code 之间的协议兼容性问题，真正实现“无脑接入”。
                         </p>
                       </div>
 
                       {/* Step 1 */}
-                      <div className="bg-black/20 rounded-lg border border-white/5 p-5 shadow-inner">
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center"><span className="bg-white/10 text-slate-300 px-1.5 py-0.5 rounded mr-2 text-xs border border-white/5">第一步</span> 环境大扫除（防劫持排雷）</h5>
-                        <p className="text-xs text-slate-400 mb-3">说明：清理可能被第三方工具篡改的隐藏配置或环境变量。</p>
-                        
-                        <div className="flex gap-2 mb-2">
-                          <button onClick={() => setShellType('bash')} className={`px-3 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md transition-colors ${shellType === 'bash' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/5'}`}>Bash / Zsh</button>
-                          <button onClick={() => setShellType('ps')} className={`px-3 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md transition-colors ${shellType === 'ps' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/5'}`}>PowerShell</button>
+                      <div className="space-y-4">
+                        <h5 className="text-sm font-bold text-white flex items-center"><span className="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg mr-3 text-[10px] font-black">01</span> 环境清理与反劫持</h5>
+                        <div className="flex gap-2">
+                          <button onClick={() => setShellType('bash')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>Bash / Zsh</button>
+                          <button onClick={() => setShellType('ps')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>PowerShell</button>
                         </div>
-                        <div className="relative">
-                          <div className="absolute right-2 top-2 z-10">
+                        <div className="relative group">
+                          <div className="absolute right-3 top-3 z-10">
                             <CopyButton text={shellType === 'bash' 
                               ? `unset ANTHROPIC_AUTH_TOKEN\nexport NO_PROXY="127.0.0.1,localhost,0.0.0.0"` 
                               : `Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"`} />
                           </div>
-                          <pre className="bg-[#0B0F19] p-4 rounded-lg text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-inner">
+                          <pre className="bg-[#05070a] p-5 rounded-2xl text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-2xl">
                             {shellType === 'bash' ? (
                               <code>
                                 <span className="text-purple-400">unset</span> ANTHROPIC_AUTH_TOKEN{'\n'}
@@ -625,7 +672,7 @@ export default function App() {
                               </code>
                             ) : (
                               <code>
-                                <span className="text-slate-500"># Windows</span>{'\n'}
+                                <span className="text-slate-500"># Windows PowerShell</span>{'\n'}
                                 <span className="text-emerald-400">Remove-Item</span> Env:\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue{'\n'}
                                 <span className="text-purple-400">$env:</span>NO_PROXY=<span className="text-amber-300">"127.0.0.1,localhost,0.0.0.0"</span>
                               </code>
@@ -635,62 +682,54 @@ export default function App() {
                       </div>
 
                       {/* Step 2 */}
-                      <div className="bg-black/20 rounded-lg border border-white/5 p-5 shadow-inner">
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center"><span className="bg-white/10 text-slate-300 px-1.5 py-0.5 rounded mr-2 text-xs border border-white/5">第二步</span> 启动万能翻译官 (LiteLLM)</h5>
-                        <p className="text-xs text-slate-400 mb-3">说明：让代理工具在后台帮你将协议翻译成 Claude 能懂的语言。<span className="text-yellow-500 font-bold">请勿关闭此窗口！</span></p>
-                        
-                        <div className="flex gap-2 mb-2">
-                          <button onClick={() => setShellType('bash')} className={`px-3 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md transition-colors ${shellType === 'bash' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/5'}`}>Bash / Zsh</button>
-                          <button onClick={() => setShellType('ps')} className={`px-3 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md transition-colors ${shellType === 'ps' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/5'}`}>PowerShell</button>
+                      <div className="space-y-4">
+                        <h5 className="text-sm font-bold text-white flex items-center"><span className="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg mr-3 text-[10px] font-black">02</span> 启动 LiteLLM 翻译官</h5>
+                        <div className="flex gap-2">
+                          <button onClick={() => setShellType('bash')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>Bash / Zsh</button>
+                          <button onClick={() => setShellType('ps')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>PowerShell</button>
                         </div>
-                        <div className="relative">
-                          <div className="absolute right-2 top-2 z-10"><CopyButton text={shellType === 'bash' 
+                        <div className="relative group">
+                          <div className="absolute right-3 top-3 z-10"><CopyButton text={shellType === 'bash' 
                             ? `export ${litellmEnvKey}="${apiKey}"\npip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params` 
                             : `$env:${litellmEnvKey}="${apiKey}"\npip install --upgrade "litellm[proxy]"\nlitellm --model ${litellmDefaultModel} --api_base ${customBaseUrl.replace(/\/$/, '')} --drop_params`} /></div>
-                          <pre className="bg-[#0B0F19] p-4 rounded-lg text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-inner">
+                          <pre className="bg-[#05070a] p-5 rounded-2xl text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-2xl">
                             {shellType === 'bash' ? (
                               <code>
                                 <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
                                 <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-                                <span className="text-purple-400">litellm</span> --model <span className="text-emerald-400">{litellmDefaultModel}</span> --api_base <span className="text-emerald-400">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
+                                <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
                               </code>
                             ) : (
                               <code>
                                 <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{apiKey}"</span>{'\n'}
                                 <span className="text-purple-400">pip</span> install --upgrade <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-                                <span className="text-purple-400">litellm</span> --model <span className="text-emerald-400">{litellmDefaultModel}</span> --api_base <span className="text-emerald-400">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
+                                <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmDefaultModel}</span> --api_base <span className="text-emerald-300">{customBaseUrl.replace(/\/$/, '')}</span> --drop_params
                               </code>
                             )}
                           </pre>
                         </div>
-                        
-                        <div className="mt-4 bg-yellow-500/10 border border-yellow-500/20 rounded-md p-3">
-                          <p className="text-xs text-yellow-200 leading-relaxed space-y-1">
-                            <span className="font-bold flex items-center text-yellow-400"><Info className="w-3.5 h-3.5 mr-1" />常见排错：</span>
-                            <span className="block">1. <span className="font-semibold text-yellow-400">为什么加 --drop_params？</span> Claude 会发送特定的参数 (如 thinking)，DeepSeek 等模型不认识会报错 400，该标志能自动过滤多余参数。</span>
-                            <span className="block">2. <span className="font-semibold text-yellow-400">提示 No such option: --api_key？</span> 新版 LiteLLM 已弃用该启动参数，请务必先执行步骤一设置环境变量。</span>
-                            <span className="block">3. <span className="font-semibold text-yellow-400">报错 ModuleNotFoundError?</span> 请确保执行的是 <code>pip install --upgrade "litellm[proxy]"</code>，proxy 插件包含服务器所需的完整依赖。</span>
+                        <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4">
+                          <p className="text-[10px] text-amber-200/50 leading-relaxed italic">
+                            提示：保持此终端窗口运行。<code>--drop_params</code> 是关键，它能防止 Claude 特有参数（如 Thinking）导致 DeepSeek 报错。
                           </p>
                         </div>
                       </div>
 
                       {/* Step 3 */}
-                      <div className="bg-black/20 rounded-lg border border-white/5 p-5 shadow-inner">
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center"><span className="bg-white/10 text-slate-300 px-1.5 py-0.5 rounded mr-2 text-xs border border-white/5">第三步</span> 启动 Claude Code</h5>
-                        <p className="text-xs text-slate-400 mb-3">说明：保持 LiteLLM 运行，打开一个<span className="text-emerald-400 font-bold">【全新】</span>的终端窗口，粘贴以下命令。</p>
-                        
-                        <div className="flex gap-2 mb-2">
-                          <button onClick={() => setShellType('bash')} className={`px-3 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md transition-colors ${shellType === 'bash' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/5'}`}>Bash / Zsh</button>
-                          <button onClick={() => setShellType('ps')} className={`px-3 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md transition-colors ${shellType === 'ps' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/5'}`}>PowerShell</button>
+                      <div className="space-y-4">
+                        <h5 className="text-sm font-bold text-white flex items-center"><span className="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg mr-3 text-[10px] font-black">03</span> 唤醒 Claude Code</h5>
+                        <div className="flex gap-2">
+                          <button onClick={() => setShellType('bash')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'bash' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>Bash / Zsh</button>
+                          <button onClick={() => setShellType('ps')} className={`px-4 py-1.5 text-[10px] uppercase font-black tracking-widest rounded-lg transition-all ${shellType === 'ps' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:bg-white/10'}`}>PowerShell</button>
                         </div>
-                        <div className="relative">
-                          <div className="absolute right-2 top-2 z-10">
+                        <div className="relative group">
+                          <div className="absolute right-3 top-3 z-10">
                             <CopyButton text={shellType === 'bash' 
                               ? `export ANTHROPIC_BASE_URL="http://0.0.0.0:4000"\nexport ANTHROPIC_API_KEY="sk-litellm"\nclaude`
                               : `$env:ANTHROPIC_BASE_URL="http://0.0.0.0:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm"\nclaude`
                             } />
                           </div>
-                          <pre className="bg-[#0B0F19] p-4 rounded-lg text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-inner">
+                          <pre className="bg-[#05070a] p-5 rounded-2xl text-xs font-mono text-slate-300 border border-white/5 overflow-x-auto custom-scrollbar shadow-2xl">
                             {shellType === 'bash' ? (
                               <code>
                                 <span className="text-purple-400">export</span> ANTHROPIC_BASE_URL=<span className="text-amber-300">"http://0.0.0.0:4000"</span>{'\n'}
@@ -709,48 +748,47 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Official Docs Bridge */}
-                    <div className="mt-8 border-t border-white/10 pt-6 animate-in fade-in duration-500">
-                      <h4 className="text-sm font-bold text-white mb-3 flex items-center">
-                        <Box className="w-4 h-4 mr-2 text-blue-400" />
-                        实时参考 (Official Docs Bridge)
-                      </h4>
-                      <p className="text-xs text-slate-400 mb-3">代码可能会随版本更新，如遇报错，请第一时间查看官方最新手册：</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <a href="https://docs.litellm.ai/docs/proxy/quick_start" target="_blank" rel="noopener noreferrer" className="block p-3 bg-black/20 border border-white/5 rounded-lg hover:border-blue-500/50 hover:bg-blue-500/10 transition-colors group">
-                          <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 block mb-1">LiteLLM Proxy</span>
-                          <span className="text-xs text-slate-500">官方配置指南</span>
+                    {/* Official Docs */}
+                    <div className="mt-12 pt-8 border-t border-white/5">
+                      <div className="flex items-center mb-6">
+                        <Globe className="w-4 h-4 text-slate-600 mr-2" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">官方文档直连</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <a href="https://docs.litellm.ai/docs/proxy/quick_start" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-blue-500/5 hover:border-blue-500/30 transition-all group">
+                          <div className="text-xs font-black text-blue-400 mb-1">LiteLLM Proxy</div>
+                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400">快速入门手册 →</div>
                         </a>
-                        <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank" rel="noopener noreferrer" className="block p-3 bg-black/20 border border-white/5 rounded-lg hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors group">
-                          <span className="text-sm font-semibold text-purple-400 group-hover:text-purple-300 block mb-1">Claude Code</span>
-                          <span className="text-xs text-slate-500">官方环境手册</span>
+                        <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-purple-500/5 hover:border-purple-500/30 transition-all group">
+                          <div className="text-xs font-black text-purple-400 mb-1">Claude Code</div>
+                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400">官方环境指南 →</div>
                         </a>
-                        <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener noreferrer" className="block p-3 bg-black/20 border border-white/5 rounded-lg hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors group">
-                          <span className="text-sm font-semibold text-emerald-400 group-hover:text-emerald-300 block mb-1">DeepSeek API</span>
-                          <span className="text-xs text-slate-500">官方参数说明</span>
+                        <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-emerald-500/5 hover:border-emerald-500/30 transition-all group">
+                          <div className="text-xs font-black text-emerald-400 mb-1">DeepSeek API</div>
+                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400">官方参数说明 →</div>
                         </a>
                       </div>
                     </div>
 
-                    {/* Error Log Analyzer */}
-                    <div className="mt-8 border-t border-white/10 pt-6 animate-in fade-in duration-500">
-                      <h4 className="text-sm font-bold text-white mb-3 flex items-center">
-                        <Terminal className="w-4 h-4 mr-2 text-yellow-400" />
-                        报错自诊断 (Error Log Analyzer)
-                      </h4>
+                    {/* Analyzer */}
+                    <div className="mt-12 pt-8 border-t border-white/5">
+                      <div className="flex items-center mb-4">
+                        <Terminal className="w-4 h-4 text-amber-500 mr-2" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">报错自诊断分析</span>
+                      </div>
                       <textarea
                         value={errorLog}
                         onChange={(e) => setErrorLog(e.target.value)}
-                        placeholder="在此粘贴您的终端报错日志..."
-                        className="w-full h-24 bg-[#0B0F19] border border-white/10 rounded-lg p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 custom-scrollbar mb-3 placeholder-slate-600 transition-all shadow-inner"
+                        placeholder="粘贴终端报错日志，自动为您匹配解决方案..."
+                        className="w-full h-32 bg-[#05070a] border border-white/5 rounded-2xl p-5 text-xs font-mono text-slate-300 focus:outline-none focus:border-blue-500 transition-all shadow-2xl placeholder-slate-800"
                       />
                       {diagnosis && (
-                        <div className={`p-4 rounded-lg border shadow-inner ${
+                        <div className={`mt-4 p-5 rounded-2xl border shadow-2xl animate-in fade-in duration-300 ${
                           diagnosis.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                          diagnosis.type === 'warning' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                          diagnosis.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
                           'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                         }`}>
-                          <p className="text-xs font-medium leading-relaxed">{diagnosis.message}</p>
+                          <p className="text-xs font-bold leading-relaxed">{diagnosis.message}</p>
                         </div>
                       )}
                     </div>
@@ -759,12 +797,12 @@ export default function App() {
 
                 {activeTab === 'OpenClaw' && (
                   <div className="relative group animate-in fade-in duration-300">
-                    <div className="absolute right-3 top-3 z-10">
+                    <div className="absolute right-4 top-4 z-10">
                       <CopyButton text={`{\n  "api_key": "${apiKey}",\n  "base_url": "${customBaseUrl}"\n}`} />
                     </div>
-                    <div className="bg-[#0B0F19] p-5 rounded-xl border border-white/5 overflow-hidden relative shadow-inner">
-                      <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
-                      <pre className="text-sm font-mono text-slate-300 overflow-x-auto pb-2 custom-scrollbar">
+                    <div className="bg-[#05070a] p-6 rounded-2xl border border-white/5 relative shadow-2xl">
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 rounded-l-2xl" />
+                      <pre className="text-sm font-mono text-slate-300 overflow-x-auto pb-2 custom-scrollbar pl-4">
                         <code>
                           {'{'}{'\n'}
                           {'  '}<span className="text-blue-400">"api_key"</span>: <span className="text-amber-300">"{apiKey}"</span>,{'\n'}
@@ -773,67 +811,63 @@ export default function App() {
                         </code>
                       </pre>
                     </div>
-                    <p className="text-xs text-slate-500 mt-3 flex items-center">
-                      <Info className="w-3.5 h-3.5 mr-1.5" />
-                      将以上配置片段合并到您的 config.json 对应模型提供商配置中。
+                    <p className="text-xs text-slate-500 mt-5 flex items-center font-medium">
+                      <Info className="w-4 h-4 mr-2" />
+                      将生成的配置片段粘贴至 OpenClaw 的 config.json 文件中即可。
                     </p>
                   </div>
                 )}
 
                 {activeTab === 'Cline / Roo Code' && (
-                  <div className="animate-in fade-in duration-300">
-                    <div className="bg-black/20 rounded-xl border border-white/10 overflow-hidden shadow-inner relative">
-                      <div className="absolute top-0 left-0 w-1 h-full bg-purple-500" />
-                      <table className="w-full text-sm text-left">
+                  <div className="animate-in fade-in duration-300 space-y-4">
+                    <div className="bg-black/40 rounded-2xl border border-white/10 overflow-hidden shadow-2xl relative">
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-purple-600" />
+                      <table className="w-full text-sm text-left border-collapse">
                         <tbody className="divide-y divide-white/5">
                           <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-3.5 px-5 text-slate-400 font-medium w-32 border-r border-white/5">Provider</td>
-                            <td className="py-3.5 px-5 text-white font-semibold flex items-center justify-between">
+                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest w-40 border-r border-white/5">Provider</td>
+                            <td className="py-4 px-6 text-white font-black flex items-center justify-between">
                               <span>
                                 {currentPlatform.id === 'anthropic' || currentPlatform.id === 'claude' ? 'Anthropic' : 
                                  currentPlatform.id === 'gemini' ? 'Google Gemini' : 'OpenAI Compatible'}
                               </span>
-                              <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
                                 <CopyButton text={currentPlatform.id === 'anthropic' || currentPlatform.id === 'claude' ? 'Anthropic' : currentPlatform.id === 'gemini' ? 'Google Gemini' : 'OpenAI Compatible'} />
                               </div>
                             </td>
                           </tr>
                           <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-3.5 px-5 text-slate-400 font-medium border-r border-white/5">Base URL</td>
-                            <td className="py-3.5 px-5 text-yellow-400 font-mono text-xs flex justify-between items-center bg-black/10">
+                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest border-r border-white/5">Base URL</td>
+                            <td className="py-4 px-6 text-amber-300 font-mono text-xs flex justify-between items-center bg-black/20">
                               <span className="truncate max-w-[200px] sm:max-w-xs">{customBaseUrl}</span>
-                              <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
                                 <CopyButton text={customBaseUrl} />
                               </div>
                             </td>
                           </tr>
                           <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-3.5 px-5 text-slate-400 font-medium border-r border-white/5">API Key</td>
-                            <td className="py-3.5 px-5 text-emerald-400 font-mono text-xs flex justify-between items-center bg-black/10">
-                              <span>{apiKey.substring(0, 8)}...</span>
-                              <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest border-r border-white/5">API Key</td>
+                            <td className="py-4 px-6 text-emerald-400 font-mono text-xs flex justify-between items-center bg-black/20">
+                              <span>{apiKey.substring(0, 10)}...</span>
+                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
                                 <CopyButton text={apiKey} />
                               </div>
                             </td>
                           </tr>
                           <tr className="hover:bg-white/5 transition-colors group">
-                            <td className="py-3.5 px-5 text-slate-400 font-medium border-r border-white/5">建议模型</td>
-                            <td className="py-3.5 px-5 text-blue-400 font-mono text-xs flex justify-between items-center bg-black/10">
+                            <td className="py-4 px-6 text-slate-400 font-black text-[10px] uppercase tracking-widest border-r border-white/5">Target Model</td>
+                            <td className="py-4 px-6 text-blue-400 font-mono text-xs flex justify-between items-center bg-black/20">
                               <span className="truncate max-w-[200px] sm:max-w-xs">
-                                {availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / claude-3-5-sonnet'}
+                                {availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / deepseek-chat'}
                               </span>
-                              <div className="scale-90 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <CopyButton text={availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / claude-3-5-sonnet'} />
+                              <div className="scale-75 opacity-0 group-hover:opacity-100 transition-all">
+                                <CopyButton text={availableModels && availableModels.length > 0 ? availableModels[0] : 'gpt-4o / deepseek-chat'} />
                               </div>
                             </td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
-                    <p className="text-xs text-slate-500 mt-3 flex items-center">
-                      <Info className="w-3.5 h-3.5 mr-1.5" />
-                      在 VSCode 扩展设置中，依次填入上述表格内容。
-                    </p>
                   </div>
                 )}
               </div>
@@ -843,11 +877,13 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-8 text-center border-t border-white/10 mt-auto bg-black/20 backdrop-blur-md">
-        <p className="text-slate-500 text-sm flex items-center justify-center space-x-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-500/70" />
-          <span>本工具纯前端运行，绝不收集或上传任何 API Key。只为开源与热爱而生。</span>
-        </p>
+      <footer className="w-full py-10 text-center border-t border-white/5 mt-auto bg-black/40 backdrop-blur-3xl">
+        <div className="max-w-7xl mx-auto px-4">
+          <p className="text-slate-500 text-xs font-bold flex items-center justify-center space-x-3 tracking-wide">
+            <ShieldCheck className="w-5 h-5 text-emerald-500/40" />
+            <span>纯前端沙盒环境 · 隐私安全保障 · 拒绝 Key 泄露</span>
+          </p>
+        </div>
       </footer>
     </div>
   );
