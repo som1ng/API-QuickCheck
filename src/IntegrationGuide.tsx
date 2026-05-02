@@ -201,15 +201,6 @@ claude`;
             </>
           )}
         </CodeBlock>
-
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-red-200/80 leading-relaxed space-y-1">
-            <p className="font-bold text-red-300 text-[13px] mb-2">终端内模型显式重定向 (防 404 必做)</p>
-            <p>进入 Agent 交互界面后，<strong className="text-red-400">绝对不能直接开始对话</strong>（会触发默认模型的 404 错误）。</p>
-            <p>必须第一时间执行 Agent 的模型切换命令（例如 Claude Code 中的 <code className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded font-mono">/model</code>），并在弹出的列表中手动高亮选中通过 LiteLLM 映射进来的代理模型，回车确认后方可开始对话。</p>
-          </div>
-        </div>
         <div className="flex flex-wrap gap-3">
           <DocLink href="https://docs.litellm.ai/docs/proxy/quick_start" label="LiteLLM Proxy 文档" color="blue" />
           <DocLink href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" label="Claude Code 官方指南" color="purple" />
