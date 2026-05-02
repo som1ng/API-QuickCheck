@@ -185,7 +185,7 @@ function ModelSelector({
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="下拉选择预设模型，或手动输入 Model ID"
+          placeholder="手动输入模型 ID，或点击右侧 🔄 拉取全量列表"
           className="w-full bg-black/30 border border-white/10 rounded-lg py-3.5 pl-10 pr-12 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors font-mono text-sm shadow-inner placeholder-slate-600"
         />
         <button
@@ -202,7 +202,12 @@ function ModelSelector({
       {isOpen && (
         <div className="absolute left-0 right-0 top-[calc(100%+8px)] bg-slate-900/90 backdrop-blur border border-white/10 rounded-lg shadow-2xl z-50 overflow-hidden">
           <div className="max-h-60 overflow-y-auto custom-scrollbar py-1">
-            {filteredModels.length > 0 ? (
+            {models.length === 0 ? (
+              <div className="p-4 text-sm text-slate-400 text-center flex items-center justify-center gap-2">
+                <Info className="w-4 h-4" />
+                <span>请点击右侧按钮拉取全量模型，或直接键盘输入</span>
+              </div>
+            ) : filteredModels.length > 0 ? (
               filteredModels.map((model) => {
                 const isSelected = value.trim() === model.id;
                 return (
@@ -246,7 +251,7 @@ export default function App() {
   const [customBaseUrl, setCustomBaseUrl] = useState(PLATFORMS[DEFAULT_PLATFORM_ID].defaultBaseUrl);
   const [isCustomBaseUrlDirty, setIsCustomBaseUrlDirty] = useState(false);
   const [modelId, setModelId] = useState('');
-  const [availableModels, setAvailableModels] = useState<ModelOption[]>(PLATFORMS[DEFAULT_PLATFORM_ID].presetModels);
+  const [availableModels, setAvailableModels] = useState<ModelOption[]>([]);
   const [isSyncingModels, setIsSyncingModels] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [useProxy, setUseProxy] = useState(false);
@@ -260,8 +265,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'test' | 'docs'>('test');
 
   const currentPlatform = PLATFORMS[selectedPlatform];
-  const defaultModelId = currentPlatform.presetModels[0]?.id || '';
-  const currentModelId = modelId.trim() || defaultModelId;
+  const currentModelId = modelId.trim();
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -278,7 +282,7 @@ export default function App() {
       setCustomBaseUrl(PLATFORMS[nextPlatform].defaultBaseUrl);
     }
 
-    setAvailableModels(PLATFORMS[nextPlatform].presetModels);
+    setAvailableModels([]);
     setModelId('');
     setStatus('idle');
     setErrorMessage('');
@@ -365,6 +369,12 @@ export default function App() {
     if (!customBaseUrl.trim()) {
       setStatus('error_other');
       setErrorMessage('请输入 Base URL。');
+      return;
+    }
+
+    if (!currentModelId) {
+      setStatus('error_other');
+      setErrorMessage('请输入模型 ID，或点击右侧刷新按钮先拉取全量模型。');
       return;
     }
 
@@ -612,7 +622,7 @@ export default function App() {
                   />
 
                   <p className="text-xs text-slate-500 ml-1">
-                    默认展示当前平台的高频预设。点击右侧刷新按钮可严格按平台配置同步全量模型，手填始终有效。
+                    初始列表为空。点击右侧刷新按钮可严格按平台配置同步全量模型，手填始终有效。
                   </p>
                 </div>
               </div>

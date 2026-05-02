@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Info, Check, Copy, AlertTriangle, ExternalLink, BookOpen } from 'lucide-react';
+import { PLATFORMS } from './config/platforms'; // 🌟 引入我们的全知全能配置文件
 
 // ── Reusable copy button (self-contained) ────────────────────────────
 function GuideCopyButton({ text }: { text: string }) {
@@ -64,27 +65,33 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
     typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Win') !== -1 ? 'ps' : 'bash'
   );
 
+  // 获取当前平台的终极配置
+  const platformConfig = PLATFORMS[platformId];
+
   // Resolve display values
   const displayKey = apiKey || 'sk-your-api-key';
-  const displayUrl = baseUrl || 'https://api.openai.com';
+  const displayUrl = baseUrl || (platformConfig?.defaultBaseUrl || 'https://api.openai.com/v1');
   const displayModel = modelId || 'gpt-4o';
   const baseUrlNoTrailingSlash = displayUrl.replace(/\/$/, '');
-  // Some apps don't want /v1 suffix
   const baseUrlNoV1 = baseUrlNoTrailingSlash.replace(/\/v1$/, '');
 
-  // LiteLLM env key
-  const litellmEnvKey = platformId === 'custom' ? 'OPENAI_API_KEY' : `${platformId.toUpperCase()}_API_KEY`;
-  const litellmModel = platformId === 'deepseek'
-    ? 'deepseek/deepseek-chat'
-    : `openai/${displayModel}`;
+  // 🌟 动态计算 LiteLLM 专属配置
+  const litellmEnvKey = platformConfig ? platformConfig.litellmConfig.envVar : 'OPENAI_API_KEY';
+  const prefix = platformConfig ? platformConfig.litellmConfig.prefix : 'openai/';
+  
+  // 防御性拼接：如果用户手动填写的模型已经带了正确的前缀，就不要再重复拼接了
+  const litellmModel = displayModel.startsWith(prefix) ? displayModel : `${prefix}${displayModel}`;
+  
+  const requiresApiBase = platformConfig ? platformConfig.litellmConfig.requiresApiBase : true; // 自定义平台默认需要 api_base
+  const apiBaseFlagStr = requiresApiBase ? ` --api_base "${baseUrlNoTrailingSlash}"` : '';
 
   // ── Renderers ─────────────────────────────────────────────────────
 
   const renderClaudeCode = () => {
+    // Anthropic 官方原生直连逻辑不变
     const isNativeAnthropic = platformId === 'anthropic' || platformId === 'claude';
 
     if (isNativeAnthropic) {
-      // Direct Anthropic key → no LiteLLM needed
       const bashCode = `export ANTHROPIC_API_KEY="${displayKey}"\nclaude`;
       const psCode = `$env:ANTHROPIC_API_KEY="${displayKey}"\nclaude`;
       return (
@@ -113,11 +120,11 @@ export default function IntegrationGuide({ apiKey, baseUrl, platformId, modelId 
       );
     }
 
-    // Non-Anthropic → LiteLLM gateway
+    // 🌟 非原生平台 → LiteLLM 网关 (完美对接映射表)
     const bashCode1 = `# 终端 1: 启动服务端 (LiteLLM 本地网关)
 export ${litellmEnvKey}="${displayKey}"
 command -v litellm >/dev/null 2>&1 || pip install "litellm[proxy]"
-litellm --model ${litellmModel} --drop_params`;
+litellm --model ${litellmModel}${apiBaseFlagStr} --drop_params`;
 
     const bashCode2 = `# 终端 2: 启动客户端 (Agent 交互终端)
 unset ANTHROPIC_AUTH_TOKEN
@@ -129,7 +136,7 @@ claude`;
     const psCode1 = `# 终端 1: 启动服务端 (LiteLLM 本地网关)
 $env:${litellmEnvKey}="${displayKey}"
 if (!(Get-Command litellm -ErrorAction SilentlyContinue)) { pip install "litellm[proxy]" }
-litellm --model ${litellmModel} --drop_params`;
+litellm --model ${litellmModel}${apiBaseFlagStr} --drop_params`;
 
     const psCode2 = `# 终端 2: 启动客户端 (Agent 交互终端)
 Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue
@@ -148,6 +155,7 @@ claude`;
           </p>
         </div>
         <ShellSwitch shell={shellType} onChange={setShellType} />
+        
         <p className="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mt-6 flex items-center gap-2">
           <span className="w-2 h-2 bg-blue-500 rounded-full inline-block" />
           终端 1：启动服务端 (LiteLLM 本地网关)
@@ -157,13 +165,15 @@ claude`;
             <>
               <span className="text-purple-400">export</span> {litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
               <span className="text-purple-400">command</span> -v litellm {'>'}/dev/null 2{'>'}{'&'}1 || <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span>{'\n'}
-              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params
+              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span>
+              {requiresApiBase && <><span className="text-blue-300"> --api_base </span><span className="text-amber-300">"{baseUrlNoTrailingSlash}"</span></>} --drop_params
             </>
           ) : (
             <>
               <span className="text-purple-400">$env:</span>{litellmEnvKey}=<span className="text-amber-300">"{displayKey}"</span>{'\n'}
               <span className="text-purple-400">if</span> (!(<span className="text-emerald-400">Get-Command</span> litellm -ErrorAction SilentlyContinue)) {'{'} <span className="text-purple-400">pip</span> install <span className="text-amber-300">"litellm[proxy]"</span> {'}'}{'\n'}
-              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span> --drop_params
+              <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">{litellmModel}</span>
+              {requiresApiBase && <><span className="text-blue-300"> --api_base </span><span className="text-amber-300">"{baseUrlNoTrailingSlash}"</span></>} --drop_params
             </>
           )}
         </CodeBlock>
@@ -209,8 +219,6 @@ claude`;
   };
 
   const renderNextChat = () => {
-
-
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
