@@ -1,6 +1,5 @@
-import { ChevronRight, Info, Copy, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, Info, Copy, CheckCircle2, BookOpen } from 'lucide-react';
 import { useState } from 'react';
-import PlatformQuickReference from './PlatformQuickReference';
 
 const CURSOR_GATEWAY_COMMAND = '$env:DEEPSEEK_API_KEY="sk-xxxxxxxxx"\nlitellm --drop_params';
 
@@ -58,13 +57,20 @@ export default function CursorDoc() {
               <div className="bg-black/50 border border-white/10 rounded-lg p-5 font-mono text-sm overflow-x-auto shadow-inner">
                 <pre className="text-slate-300">
                   <code>
-                    <span className="text-slate-500"># 1. 注入你所选平台的环境变量 (详见下方速查表)</span>{'\n'}
-                    <span className="text-purple-400">$env:</span><span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【速查表中的环境变量名】</span>=<span className="text-amber-300">"你的真实密钥"</span>{'\n\n'}
+                    <span className="text-slate-500"># 1. 注入你所选平台的环境变量</span>{'\n'}
+                    <span className="text-purple-400">$env:</span><span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【对应环境变量】</span>=<span className="text-amber-300">"你的真实密钥"</span>{'\n\n'}
                     <span className="text-slate-500"># 2. 启动代理网关</span>{'\n'}
                     <span className="text-purple-400">litellm</span> --drop_params
                   </code>
                 </pre>
               </div>
+            </div>
+
+            <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded-r-xl flex items-center gap-3">
+              <BookOpen className="w-5 h-5 text-blue-400 flex-shrink-0" />
+              <span className="text-sm text-blue-200/80">
+                找不到你需要配置的平台？请前往左侧导航栏的 <strong>「LiteLLM 进阶配置」</strong> 模块，查阅我们整理的 23+ 主流大模型平台完整参数速查表。
+              </span>
             </div>
 
             <div>
@@ -89,13 +95,6 @@ export default function CursorDoc() {
               </div>
             </div>
 
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 mt-4">
-              <h4 className="text-white font-bold mb-4 flex items-center gap-2">
-                <Info className="w-5 h-5 text-blue-400" />
-                全平台参数速查表
-              </h4>
-              <PlatformQuickReference />
-            </div>
           </div>
         </div>
 

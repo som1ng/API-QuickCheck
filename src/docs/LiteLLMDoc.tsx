@@ -1,5 +1,8 @@
-import { ChevronRight, Copy, CheckCircle2, Download, Rocket, Info, LayoutTemplate } from 'lucide-react';
+import { ChevronRight, Copy, CheckCircle2, Download, Rocket, Info, LayoutTemplate, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
+import { PLATFORMS } from '../config/platforms';
+
+const CATEGORY_ORDER = ['海外巨头', '海外聚合与加速', '国内大厂', '国内新锐'] as const;
 
 export default function LiteLLMDoc() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -69,7 +72,7 @@ export default function LiteLLMDoc() {
             第二步 — 核心配置指南 (公式与对照表)
           </h3>
           <p className="text-slate-400 text-sm mb-6 leading-relaxed pl-8">
-            通过指定正确的平台前缀，LiteLLM 会自动处理所有底层的 Base URL 和鉴权握手，切勿手动添加 <code className="bg-white/10 px-1 rounded">--api_base</code> 参数。
+            通过指定正确的平台前缀，LiteLLM 可以统一管理跨平台模型调用。是否需要显式附加 <code className="bg-white/10 px-1 rounded">--api_base</code>，请严格以速查表中的标记为准。
           </p>
 
           <div className="pl-8 space-y-8">
@@ -90,33 +93,53 @@ export default function LiteLLMDoc() {
               </div>
             </div>
 
-            {/* 对照表 */}
             <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
               <h4 className="text-white font-bold mb-4 flex items-center gap-2 text-sm">
                 <Info className="w-4 h-4 text-blue-400" />
-                🗂️ 常见平台参数速查表
+                🗂️ 全平台参数速查表 (23+ 支持)
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1 text-xs">OpenRouter</div>
-                  <div className="text-[10px] text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">OPENROUTER_API_KEY</code></div>
-                  <div className="text-[10px] text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">openrouter/</code></div>
-                </div>
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1 text-xs">DeepSeek (官方)</div>
-                  <div className="text-[10px] text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">DEEPSEEK_API_KEY</code></div>
-                  <div className="text-[10px] text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">deepseek/</code></div>
-                </div>
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1 text-xs">硅基流动 (SiliconFlow)</div>
-                  <div className="text-[10px] text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">SILICONFLOW_API_KEY</code></div>
-                  <div className="text-[10px] text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">siliconflow/</code></div>
-                </div>
-                <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                  <div className="font-bold text-slate-200 mb-1 text-xs">OpenAI (官方)</div>
-                  <div className="text-[10px] text-slate-400 mb-1">变量: <code className="text-blue-300 bg-blue-500/10 px-1 rounded">OPENAI_API_KEY</code></div>
-                  <div className="text-[10px] text-slate-400">前缀: <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">openai/</code></div>
-                </div>
+              <div className="space-y-5">
+                {CATEGORY_ORDER.map((category) => {
+                  const groupedPlatforms = Object.values(PLATFORMS).filter((platform) => platform.category === category);
+                  if (groupedPlatforms.length === 0) return null;
+
+                  return (
+                    <section key={category} className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-slate-200">{category}</span>
+                        <span className="h-px flex-1 bg-white/10" />
+                      </div>
+
+                      <div className="space-y-2">
+                        {groupedPlatforms.map((platform) => (
+                          <div key={platform.id} className="bg-black/30 border border-white/5 rounded-lg p-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="font-bold text-slate-200 text-xs">{platform.name}</div>
+                              {platform.litellmConfig.requiresApiBase && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-orange-400/30 bg-orange-500/10 px-2 py-0.5 text-[10px] font-bold text-orange-300">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  需附加 --api_base（{platform.defaultBaseUrl}）
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-1">
+                              变量:
+                              <code className="ml-1 text-blue-300 bg-blue-500/10 px-1 rounded">
+                                {platform.litellmConfig.envVar}
+                              </code>
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-1">
+                              前缀:
+                              <code className="ml-1 text-emerald-300 bg-emerald-500/10 px-1 rounded">
+                                {platform.litellmConfig.prefix}
+                              </code>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
               </div>
             </div>
           </div>

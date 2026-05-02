@@ -1,6 +1,5 @@
-import { ChevronRight, BookOpen, Copy, CheckCircle2, Terminal, ExternalLink } from 'lucide-react';
+import { ChevronRight, BookOpen, Copy, CheckCircle2, Terminal } from 'lucide-react';
 import { useState } from 'react';
-import PlatformQuickReference from './PlatformQuickReference';
 
 const CLIENT_BOOTSTRAP = 'Remove-Item Env:\\ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue\n$env:NO_PROXY="127.0.0.1,localhost,0.0.0.0"\n$env:ANTHROPIC_BASE_URL="http://127.0.0.1:4000"\n$env:ANTHROPIC_API_KEY="sk-litellm-local"\nclaude';
 
@@ -58,34 +57,23 @@ export default function ClaudeCodeDoc() {
               <div className="bg-black/50 border border-white/10 rounded-lg p-5 font-mono text-sm overflow-x-auto shadow-inner">
                 <pre className="text-slate-300">
                   <code>
-                    <span className="text-slate-500"># 1. 注入你所选平台的环境变量 (详见下方速查表)</span>{'\n'}
-                    <span className="text-purple-400">$env:</span><span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【速查表中的环境变量名】</span>=<span className="text-amber-300">"你的真实密钥"</span>{'\n\n'}
+                    <span className="text-slate-500"># 1. 注入你所选平台的环境变量</span>{'\n'}
+                    <span className="text-purple-400">$env:</span><span className="text-yellow-200 bg-yellow-500/20 px-1 rounded">【对应环境变量】</span>=<span className="text-amber-300">"你的真实密钥"</span>{'\n\n'}
                     <span className="text-slate-500"># 2. 启动代理</span>{'\n'}
                     <span className="text-slate-500"># 情况 A：对于原生支持的平台 (requiresApiBase 为 false，如 openrouter, deepseek)</span>{'\n'}
-                    <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">【速查表前缀】/【具体模型ID】</span> --drop_params{'\n\n'}
+                    <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">【对应平台前缀】/【具体模型ID】</span> --drop_params{'\n\n'}
                     <span className="text-slate-500"># 情况 B：对于兼容协议平台 (requiresApiBase 为 true，如 siliconflow, aliyun)</span>{'\n'}
-                    <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">【速查表前缀】/【具体模型ID】</span> --api_base <span className="text-blue-300">【平台的默认 Base URL】</span> --drop_params
+                    <span className="text-purple-400">litellm</span> --model <span className="text-emerald-300">【对应平台前缀】/【具体模型ID】</span> --api_base <span className="text-blue-300">【平台的默认 Base URL】</span> --drop_params
                   </code>
                 </pre>
               </div>
             </div>
 
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-              <h4 className="text-white font-bold mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-400" />
-                全平台参数速查表
-              </h4>
-              <PlatformQuickReference />
-            </div>
-
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-5 flex items-start gap-4 shadow-lg">
-              <ExternalLink className="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-blue-300 font-bold mb-2">读取规则只认速查表</h4>
-                <p className="text-blue-200/80 text-sm leading-relaxed">
-                  环境变量名、模型前缀，以及是否必须附加 `--api_base`，都以速查表为准。橙色标记的平台请把鼠标悬停在徽章上查看默认 Base URL。
-                </p>
-              </div>
+            <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded-r-xl flex items-center gap-3">
+              <BookOpen className="w-5 h-5 text-blue-400 flex-shrink-0" />
+              <span className="text-sm text-blue-200/80">
+                找不到你需要配置的平台？请前往左侧导航栏的 <strong>「LiteLLM 进阶配置」</strong> 模块，查阅我们整理的 23+ 主流大模型平台完整参数速查表。
+              </span>
             </div>
           </div>
         </div>
