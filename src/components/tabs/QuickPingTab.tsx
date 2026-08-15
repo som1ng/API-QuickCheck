@@ -309,13 +309,17 @@ export const QuickPingTab: React.FC = () => {
 
             {/* 2. Big Textarea for API Keys with razor-sharp crisp font */}
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
                 <label className="text-sm font-semibold text-[#faf9f5]">
                   API Key 列表
                 </label>
-                <span className="text-xs font-mono text-[#d4cebe]">
-                  已解析: <strong className="text-[#faf9f5] font-bold">{parsedCount}</strong> 条 (独立 {uniqueKeys.length} / 重复 {duplicates.length})
-                </span>
+                <div className="flex items-center gap-2 bg-[#23211e] border border-[#3d3934] px-3 py-1 rounded-lg text-xs sm:text-sm font-mono text-[#d4cebe] shadow-sm">
+                  <span>已解析: <strong className="text-[#faf9f5] font-bold text-sm">{parsedCount}</strong> 条</span>
+                  <span className="text-[#9c9689]/60">|</span>
+                  <span>独立: <strong className="text-[#5db872] font-bold text-sm">{uniqueKeys.length}</strong></span>
+                  <span className="text-[#9c9689]/60">/</span>
+                  <span>重复: <strong className="text-[#e8a55a] font-bold text-sm">{duplicates.length}</strong></span>
+                </div>
               </div>
 
               <textarea
