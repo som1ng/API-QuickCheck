@@ -24,7 +24,7 @@ export const TabNav: React.FC = () => {
 
   return (
     <div className="flex items-center justify-start overflow-x-auto pb-1 no-scrollbar">
-      <div className="inline-flex p-1 rounded-xl bg-[#1b1a18] border border-[#2e2b27] gap-1">
+      <div className="inline-flex p-1.5 rounded-xl bg-[#1b1a18] border border-[#2e2b27] gap-1">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -33,13 +33,13 @@ export const TabNav: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab.id })}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2.5 px-4.5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                 isActive
                   ? 'bg-[#cc785c] text-[#faf9f5] shadow-sm font-semibold'
                   : 'text-[#9c9689] hover:text-[#faf9f5] hover:bg-[#23211e]'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon className="w-[18px] h-[18px]" />
               <span>{tab.label}</span>
             </button>
           );

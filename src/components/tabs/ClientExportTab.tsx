@@ -96,13 +96,13 @@ API Key : ${apiKey}`,
       <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-[#cc785c]/15 border border-[#cc785c]/30 flex items-center justify-center text-[#cc785c]">
-            <Terminal className="w-4 h-4" />
+            <Terminal className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-serif-display text-xl font-medium text-[#faf9f5] tracking-tight">
+            <h2 className="font-serif-display text-2xl font-medium text-[#faf9f5] tracking-tight">
               客户端与 Agent 配置导出
             </h2>
-            <p className="mt-1 text-xs text-[#9c9689]">
+            <p className="mt-1 text-sm text-[#9c9689]">
               自动根据当前配置的中转站 Base URL、Key 和模型生成各大 Coding Agent 及客户端的最佳连接配置。
             </p>
           </div>
@@ -122,7 +122,7 @@ API Key : ${apiKey}`,
           <button
             key={tab.id}
             onClick={() => setActiveClient(tab.id as any)}
-            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition whitespace-nowrap ${
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition whitespace-nowrap ${
               activeClient === tab.id
                 ? 'bg-[#cc785c] text-[#faf9f5] font-semibold'
                 : 'text-[#9c9689] hover:text-[#faf9f5] hover:bg-[#23211e]'
@@ -136,8 +136,8 @@ API Key : ${apiKey}`,
       {/* Code Display Card */}
       <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md space-y-4">
         <div>
-          <h3 className="font-serif-display text-base font-medium text-[#faf9f5]">{current.title}</h3>
-          <p className="text-xs text-[#9c9689] mt-0.5">{current.description}</p>
+          <h3 className="font-serif-display text-lg font-medium text-[#faf9f5]">{current.title}</h3>
+          <p className="text-sm text-[#9c9689] mt-0.5">{current.description}</p>
         </div>
 
         <CodeBlock

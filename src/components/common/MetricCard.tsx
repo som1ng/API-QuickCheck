@@ -28,24 +28,24 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   return (
     <div
-      className={`relative rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 shadow-md transition-all hover:border-[#cc785c]/40 ${
+      className={`relative rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md transition-all hover:border-[#cc785c]/40 ${
         highlight ? 'ring-1 ring-[#cc785c]/50' : ''
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs text-[#9c9689] font-medium">{label}</span>
-        {icon && <div>{icon}</div>}
+        <span className="text-sm text-[#9c9689] font-medium">{label}</span>
+        {icon && <div className="opacity-70">{icon}</div>}
       </div>
 
-      <div className="mt-3 flex items-baseline gap-1.5">
-        <span className={`text-2xl font-bold tracking-tight font-mono ${statusStyles[status]}`}>
+      <div className="mt-3 flex items-baseline gap-2">
+        <span className={`text-3xl font-bold tracking-tight font-mono ${statusStyles[status]}`}>
           {value}
         </span>
-        {unit && <span className="text-xs text-[#9c9689] font-mono">{unit}</span>}
+        {unit && <span className="text-sm text-[#9c9689] font-mono">{unit}</span>}
       </div>
 
       {subValue && (
-        <div className="mt-2 text-[11px] text-[#9c9689] truncate">{subValue}</div>
+        <div className="mt-2 text-xs text-[#9c9689]">{subValue}</div>
       )}
     </div>
   );

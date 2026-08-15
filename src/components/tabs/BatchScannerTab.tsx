@@ -84,13 +84,13 @@ export const BatchScannerTab: React.FC = () => {
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[#5db8a6]/15 border border-[#5db8a6]/30 flex items-center justify-center text-[#5db8a6]">
-                <ListFilter className="w-4 h-4" />
+                <ListFilter className="w-5 h-5" />
               </div>
-              <h2 className="font-serif-display text-xl font-medium text-[#faf9f5] tracking-tight">
+              <h2 className="font-serif-display text-2xl font-medium text-[#faf9f5] tracking-tight">
                 模型清单与并发巡检
               </h2>
             </div>
-            <p className="mt-1.5 text-xs text-[#9c9689] max-w-2xl leading-relaxed">
+            <p className="mt-1.5 text-sm text-[#9c9689] max-w-2xl leading-relaxed">
               自动探测中转站开放的模型总表，5 线程并发探测各模型真实可用性（200 可用 / 401 无效 / 402 欠费 / 429 限流 / 404 空壳）。
             </p>
           </div>
@@ -99,25 +99,25 @@ export const BatchScannerTab: React.FC = () => {
             <button
               onClick={handleFetchModels}
               disabled={isLoadingModels || isScanning}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#2e2b27] bg-[#23211e] px-3.5 py-2 text-xs font-medium text-[#d4cebe] hover:bg-[#2b2926] hover:text-[#faf9f5] transition"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#2e2b27] bg-[#23211e] px-4 py-2.5 text-sm font-medium text-[#d4cebe] hover:bg-[#2b2926] hover:text-[#faf9f5] transition"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoadingModels ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-[18px] h-[18px] ${isLoadingModels ? 'animate-spin' : ''}`} />
               <span>{availableModels.length > 0 ? `已拉取 (${availableModels.length})` : '拉取清单'}</span>
             </button>
 
             <button
               onClick={handleStartBatchScan}
               disabled={isScanning || availableModels.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-4 py-2 text-xs font-medium text-[#faf9f5] shadow-sm transition disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-5 py-2.5 text-sm font-medium text-[#faf9f5] shadow-sm transition disabled:opacity-50"
             >
               {isScanning ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-[18px] h-[18px] animate-spin" />
                   <span>巡检中 ({scanProgress.completed}/{scanProgress.total})</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-3.5 h-3.5 fill-[#faf9f5]" />
+                  <Play className="w-[18px] h-[18px] fill-[#faf9f5]" />
                   <span>并发巡检</span>
                 </>
               )}
@@ -128,7 +128,7 @@ export const BatchScannerTab: React.FC = () => {
         {/* Progress */}
         {isScanning && (
           <div className="mt-5 space-y-2 pt-4 border-t border-[#2e2b27]">
-            <div className="flex justify-between text-xs text-[#9c9689]">
+            <div className="flex justify-between text-sm text-[#9c9689]">
               <span>正在批量探测模型连通性...</span>
               <span className="font-mono text-[#faf9f5]">
                 {Math.round((scanProgress.completed / (scanProgress.total || 1)) * 100)}%
@@ -157,7 +157,7 @@ export const BatchScannerTab: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setFilterProvider(tab.id)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition whitespace-nowrap ${
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition whitespace-nowrap ${
                 filterProvider === tab.id
                   ? 'bg-[#cc785c] text-[#faf9f5] font-semibold'
                   : 'text-[#9c9689] hover:text-[#faf9f5] hover:bg-[#23211e]'
@@ -169,13 +169,13 @@ export const BatchScannerTab: React.FC = () => {
         </div>
 
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#9c9689]" />
+          <Search className="absolute left-3 top-2.5 h-[18px] w-[18px] text-[#9c9689]" />
           <input
             type="text"
             placeholder="搜索模型 ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-[#2e2b27] bg-[#1b1a18] pl-8 pr-3 py-1.5 text-xs text-[#faf9f5] placeholder-[#9c9689]/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]/40 transition"
+            className="w-full rounded-lg border border-[#2e2b27] bg-[#1b1a18] pl-9 pr-4 py-2 text-sm text-[#faf9f5] placeholder-[#9c9689]/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]/40 transition"
           />
         </div>
       </div>
@@ -183,7 +183,7 @@ export const BatchScannerTab: React.FC = () => {
       {/* Results Table */}
       <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] overflow-hidden shadow-md">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#d4cebe]">
+          <table className="w-full text-left text-sm text-[#d4cebe]">
             <thead className="border-b border-[#2e2b27] bg-[#23211e] text-[#9c9689] font-mono">
               <tr>
                 <th className="p-3 pl-4">序号</th>
@@ -213,7 +213,7 @@ export const BatchScannerTab: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <span>{model.id}</span>
                           {config.selectedModel === model.id && (
-                            <span className="px-1.5 py-0.2 rounded bg-[#cc785c]/15 text-[#cc785c] text-[10px] border border-[#cc785c]/30 font-semibold">
+                            <span className="px-1.5 py-0.2 rounded bg-[#cc785c]/15 text-[#cc785c] text-xs border border-[#cc785c]/30 font-semibold">
                               主测
                             </span>
                           )}
@@ -223,7 +223,7 @@ export const BatchScannerTab: React.FC = () => {
                         {check ? (
                           <StatusBadge status={check.status} />
                         ) : (
-                          <span className="text-[#9c9689] text-[11px]">未测试</span>
+                          <span className="text-[#9c9689] text-xs">未测试</span>
                         )}
                       </td>
                       <td className="p-3 text-[#9c9689]">
@@ -241,7 +241,7 @@ export const BatchScannerTab: React.FC = () => {
                       <td className="p-3 pr-4">
                         <button
                           onClick={() => dispatch({ type: 'SET_SELECTED_MODEL', payload: model.id })}
-                          className="text-[11px] text-[#cc785c] hover:text-[#d98266] transition underline"
+                          className="text-xs text-[#cc785c] hover:text-[#d98266] transition underline"
                         >
                           设为主测
                         </button>

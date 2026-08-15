@@ -68,14 +68,14 @@ const MainContent: React.FC = () => {
       </main>
 
       {/* Footer in Claude Editorial Warm Tone */}
-      <footer className="border-t border-[#2e2b27] bg-[#141413] py-6 text-xs text-[#9c9689]">
+      <footer className="border-t border-[#2e2b27] bg-[#141413] py-7 text-sm text-[#9c9689]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-[#d4cebe]">
-            <ShieldCheck className="w-4 h-4 text-[#5db872]" />
+          <div className="flex items-center gap-2.5 text-[#d4cebe]">
+            <ShieldCheck className="w-5 h-5 text-[#5db872]" />
             <span>API-QuickCheck 2.0 · 零数据落盘 · 密钥安全不离浏览器</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#cc785c]" />
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-[18px] h-[18px] text-[#cc785c]" />
             <span>Anthropic Claude Editorial Design System</span>
           </div>
         </div>

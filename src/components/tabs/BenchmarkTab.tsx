@@ -83,19 +83,19 @@ export const BenchmarkTab: React.FC = () => {
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[#e8a55a]/15 border border-[#e8a55a]/30 flex items-center justify-center text-[#e8a55a]">
-                <Gauge className="w-4 h-4" />
+                <Gauge className="w-5 h-5" />
               </div>
-              <h2 className="font-serif-display text-xl font-medium text-[#faf9f5] tracking-tight">
+              <h2 className="font-serif-display text-2xl font-medium text-[#faf9f5] tracking-tight">
                 流式测速与性能基准
               </h2>
             </div>
-            <p className="mt-1.5 text-xs text-[#9c9689] max-w-2xl leading-relaxed">
+            <p className="mt-1.5 text-sm text-[#9c9689] max-w-2xl leading-relaxed">
               高精度实测首字响应延迟 (TTFT)、流式生成吞吐速率 (TPS) 与网络 Chunk 抖动方差，评估中转站上游拥塞与稳定性。
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#23211e] px-3.5 py-2 rounded-lg border border-[#2e2b27] text-xs text-[#d4cebe]">
+            <div className="flex items-center gap-2 bg-[#23211e] px-4 py-2.5 rounded-lg border border-[#2e2b27] text-sm text-[#d4cebe]">
               <span>轮数:</span>
               <select
                 value={roundsCount}
@@ -112,17 +112,17 @@ export const BenchmarkTab: React.FC = () => {
             {isRunning ? (
               <button
                 onClick={handleStop}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#c64545] hover:bg-[#a93a3a] px-4 py-2 text-xs font-medium text-[#faf9f5] shadow-sm transition"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#c64545] hover:bg-[#a93a3a] px-5 py-2.5 text-sm font-medium text-[#faf9f5] shadow-sm transition"
               >
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-[18px] h-[18px] animate-spin" />
                 <span>停止测试 ({currentRound}/{roundsCount})</span>
               </button>
             ) : (
               <button
                 onClick={handleStartBenchmark}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-4 py-2 text-xs font-medium text-[#faf9f5] shadow-sm transition"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-5 py-2.5 text-sm font-medium text-[#faf9f5] shadow-sm transition"
               >
-                <Play className="w-3.5 h-3.5 fill-[#faf9f5]" />
+                <Play className="w-[18px] h-[18px] fill-[#faf9f5]" />
                 <span>开始测速</span>
               </button>
             )}
@@ -137,7 +137,7 @@ export const BenchmarkTab: React.FC = () => {
           value={isRunning ? liveTtft || '-' : summary ? summary.avgTtftMs : '-'}
           unit="ms"
           subValue={summary ? `最优: ${summary.minTtftMs}ms | 最慢: ${summary.maxTtftMs}ms` : '首个数据块到达耗时'}
-          icon={<Gauge className="w-4 h-4 text-[#e8a55a]" />}
+          icon={<Gauge className="w-5 h-5 text-[#e8a55a]" />}
           status={
             summary
               ? summary.avgTtftMs < 600
@@ -155,7 +155,7 @@ export const BenchmarkTab: React.FC = () => {
           value={isRunning ? liveTps || '-' : summary ? summary.avgTps : '-'}
           unit="tokens/s"
           subValue={summary ? `峰值: ${summary.maxTps} tokens/s (估算值)` : '实时流式词元吞吐'}
-          icon={<Activity className="w-4 h-4 text-[#5db872]" />}
+          icon={<Activity className="w-5 h-5 text-[#5db872]" />}
           status={
             summary
               ? summary.avgTps > 50
@@ -182,7 +182,7 @@ export const BenchmarkTab: React.FC = () => {
               : '-'
           }
           subValue={summary ? `Chunk 到达方差: ${summary.avgJitterVariance}` : '数据块到达平稳度'}
-          icon={<Radio className="w-4 h-4 text-[#cc785c]" />}
+          icon={<Radio className="w-5 h-5 text-[#cc785c]" />}
           status={
             summary
               ? summary.stabilityScore === 'excellent' || summary.stabilityScore === 'good'
@@ -197,19 +197,19 @@ export const BenchmarkTab: React.FC = () => {
       <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-5 shadow-lg">
         <div className="flex items-center justify-between border-b border-[#2e2b27] pb-3 mb-3">
           <div className="flex items-center gap-2">
-            <Terminal className="w-3.5 h-3.5 text-[#9c9689]" />
-            <span className="text-xs font-mono text-[#d4cebe] font-medium">
+            <Terminal className="w-[18px] h-[18px] text-[#9c9689]" />
+            <span className="text-sm font-mono text-[#d4cebe] font-medium">
               流式打字机监视器 (Streaming Terminal)
             </span>
           </div>
           {isRunning && (
-            <span className="text-xs font-mono text-[#e8a55a]">
+            <span className="text-sm font-mono text-[#e8a55a]">
               第 {currentRound}/{roundsCount} 轮输出中...
             </span>
           )}
         </div>
 
-        <div className="min-h-[120px] max-h-[220px] overflow-y-auto font-mono text-xs text-[#faf9f5] leading-relaxed whitespace-pre-wrap">
+        <div className="min-h-[120px] max-h-[220px] overflow-y-auto font-mono text-sm text-[#faf9f5] leading-relaxed whitespace-pre-wrap">
           {liveText || (
             <span className="text-[#9c9689]/60 italic">
               点击上方「开始测速」后，此处将实时展示逐字生成的文本流与打字机效果...
@@ -222,12 +222,12 @@ export const BenchmarkTab: React.FC = () => {
       {summary && summary.rounds.length > 0 && (
         <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] overflow-hidden shadow-md">
           <div className="p-4 border-b border-[#2e2b27] flex items-center justify-between">
-            <h4 className="font-serif-display text-base font-medium text-[#faf9f5]">多轮测速历史明细</h4>
+            <h4 className="font-serif-display text-lg font-medium text-[#faf9f5]">多轮测速历史明细</h4>
             <span className="text-xs text-[#9c9689] font-mono">模型: {summary.model}</span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#d4cebe]">
+            <table className="w-full text-left text-sm text-[#d4cebe]">
               <thead className="border-b border-[#2e2b27] bg-[#23211e] text-[#9c9689] font-mono">
                 <tr>
                   <th className="p-3 pl-4">轮次</th>
@@ -246,11 +246,11 @@ export const BenchmarkTab: React.FC = () => {
                     <td className="p-3">
                       {round.status === 'completed' ? (
                         <span className="text-[#5db872] inline-flex items-center gap-1 font-semibold">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> 成功
+                          <CheckCircle2 className="w-[18px] h-[18px]" /> 成功
                         </span>
                       ) : (
                         <span className="text-[#c64545] inline-flex items-center gap-1 font-semibold">
-                          <XCircle className="w-3.5 h-3.5" /> 失败
+                          <XCircle className="w-[18px] h-[18px]" /> 失败
                         </span>
                       )}
                     </td>

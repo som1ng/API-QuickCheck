@@ -20,6 +20,9 @@
     --claude-success: #5db872;
     --claude-warning: #e8a55a;
     --claude-error: #c64545;
+
+    /* Base font sizing — comfortable for 1080p/1440p */
+    font-size: 15px;
   }
 
   body {
@@ -28,6 +31,7 @@
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
 
   h1, h2, .font-serif-display {
@@ -38,12 +42,18 @@
   code, pre, .font-mono {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
+
+  /* Globally improve input readability */
+  input, select, textarea {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
 }
 
 /* Custom Scrollbar for Claude Aesthetic */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
