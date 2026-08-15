@@ -57,6 +57,8 @@ export interface ReasoningVerificationResult {
   hasReasoningStream: boolean;
   reasoningFieldUsed?: 'reasoning_content' | 'reasoning' | 'text_think_tag';
   thinkingTimeMs: number;
+  firstTokenLatencyMs?: number; // 首字延迟
+  generationTps?: number;       // 流式生成吞吐
   passed: boolean;
   details: string;
 }
@@ -72,6 +74,9 @@ export interface FidelityReport {
   reasoningResult?: ReasoningVerificationResult;
   probes: ProbeExecutionResult[];
   systemFingerprint?: string;
+  firstTokenLatencyMs?: number; // 真实首字响应速度 (First Token Latency)
+  generationTps?: number;       // 真实生成吞吐 (Tokens/s)
+  thinkingTimeMs?: number;      // 纯思考链耗时
   totalDurationMs: number;
   totalTokens: {
     prompt: number;
