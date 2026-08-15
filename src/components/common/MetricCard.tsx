@@ -28,12 +28,12 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   return (
     <div
-      className={`relative rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 shadow-sm transition-all hover:border-[#cc785c]/40 ${
+      className={`relative rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 shadow-sm smooth-card ${
         highlight ? 'ring-1 ring-[#cc785c]/50' : ''
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs text-neutral-400 font-semibold tracking-wide uppercase">{label}</span>
+        <span className="text-xs text-neutral-300 font-semibold tracking-wide uppercase">{label}</span>
         {icon && <div className="text-neutral-400">{icon}</div>}
       </div>
 
@@ -45,7 +45,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       </div>
 
       {subValue && (
-        <div className="mt-2 text-xs text-neutral-300 font-mono tracking-wide bg-white/5 border border-white/10 px-2 py-0.5 rounded-md inline-block">
+        <div className="mt-2 text-xs text-[#faf9f5] font-mono font-medium tracking-wide bg-white/5 border border-white/10 px-2 py-0.5 rounded-md inline-block shadow-sm">
           {subValue}
         </div>
       )}

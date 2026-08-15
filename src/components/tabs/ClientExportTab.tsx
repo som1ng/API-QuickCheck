@@ -1911,25 +1911,25 @@ location / {
                   const isTip = callout.type === 'tip';
 
                   const borderClass = isDanger
-                    ? 'border-[#c64545]/40 bg-[#c64545]/10 text-[#faf9f5]'
+                    ? 'border-[#e11d48]/40 bg-[#4c0519]/20 text-[#faf9f5]'
                     : isWarning
-                    ? 'border-[#e8a55a]/40 bg-[#e8a55a]/10 text-[#faf9f5]'
+                    ? 'border-[#d97706]/40 bg-[#451a03]/20 text-[#faf9f5]'
                     : isTip
-                    ? 'border-[#5db872]/40 bg-[#5db872]/10 text-[#faf9f5]'
+                    ? 'border-[#059669]/40 bg-[#064e3b]/20 text-[#faf9f5]'
                     : 'border-[#cc785c]/40 bg-[#cc785c]/10 text-[#faf9f5]';
 
                   const iconColor = isDanger
-                    ? 'text-[#c64545]'
+                    ? 'text-[#fda4af]'
                     : isWarning
-                    ? 'text-[#e8a55a]'
+                    ? 'text-[#fcd34d]'
                     : isTip
-                    ? 'text-[#5db872]'
+                    ? 'text-[#6ee7b7]'
                     : 'text-[#cc785c]';
 
                   return (
                     <div
                       key={idx}
-                      className={`rounded-xl border p-4 space-y-1.5 shadow-sm ${borderClass}`}
+                      className={`rounded-xl border p-4 space-y-1.5 shadow-sm smooth-card ${borderClass}`}
                     >
                       <div className="flex items-center gap-2">
                         {isDanger || isWarning ? (
@@ -1941,7 +1941,7 @@ location / {
                         )}
                         <h4 className="text-xs font-bold tracking-wide uppercase">{callout.title}</h4>
                       </div>
-                      <p className="text-xs text-[#d4cebe] leading-relaxed pl-6">
+                      <p className="text-xs text-neutral-300 leading-relaxed pl-6 font-normal">
                         {callout.content}
                       </p>
                     </div>
@@ -1961,12 +1961,12 @@ location / {
                 <h2 className="text-base font-semibold text-[#faf9f5]">5. 连通性快速验证 (Quick Verification)</h2>
               </div>
 
-              <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-3">
+              <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-3 smooth-card">
                 <div className="space-y-1">
                   <h3 className="text-xs font-semibold text-[#faf9f5]">
                     {currentDoc.verificationSnippet.title}
                   </h3>
-                  <p className="text-xs text-[#9c9689]">
+                  <p className="text-xs text-neutral-300">
                     {currentDoc.verificationSnippet.description}
                   </p>
                 </div>
@@ -1994,14 +1994,14 @@ location / {
                 {currentDoc.faqs.map((faq, idx) => (
                   <div
                     key={idx}
-                    className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-1.5"
+                    className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-1.5 smooth-card"
                   >
                     <div className="flex items-start gap-2">
                       <span className="text-xs font-mono font-bold text-[#cc785c] mt-0.5">Q:</span>
                       <h4 className="text-xs font-semibold text-[#faf9f5]">{faq.question}</h4>
                     </div>
-                    <div className="flex items-start gap-2 pl-4 text-xs text-[#9c9689] leading-relaxed">
-                      <span className="font-mono font-bold text-[#5db872] mt-0.5">A:</span>
+                    <div className="flex items-start gap-2 pl-4 text-xs text-neutral-300 leading-relaxed">
+                      <span className="font-mono font-bold text-[#6ee7b7] mt-0.5">A:</span>
                       <p>{faq.answer}</p>
                     </div>
                   </div>
@@ -2012,12 +2012,12 @@ location / {
 
           {/* Bottom Pagination / Next Topic */}
           <div className="pt-8 border-t border-[#2e2b27] flex items-center justify-between">
-            <div className="text-xs text-[#9c9689]">
-              当前正在浏览: <span className="text-[#faf9f5] font-medium">{currentDoc.title}</span>
+            <div className="text-xs text-neutral-400">
+              当前正在浏览: <span className="text-[#faf9f5] font-semibold">{currentDoc.title}</span>
             </div>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="text-xs text-[#cc785c] hover:underline flex items-center gap-1"
+              className="text-xs text-[#cc785c] hover:underline flex items-center gap-1 font-semibold smooth-btn"
             >
               <span>回到顶部 ↑</span>
             </button>
@@ -2028,7 +2028,7 @@ location / {
         {/* Right Column: TOC "本页内容" (2-3 cols)     */}
         {/* ========================================== */}
         <aside className="hidden xl:block xl:col-span-2 space-y-4 sticky top-20">
-          <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-3 shadow-md">
+          <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-3 shadow-md smooth-card">
             <div className="flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-[#faf9f5] pb-2 border-b border-[#2e2b27]">
               <Hash className="h-3.5 w-3.5 text-[#cc785c]" />
               <span>本页内容</span>
@@ -2037,26 +2037,26 @@ location / {
             <nav className="space-y-1 text-xs">
               <button
                 onClick={() => scrollToSection('overview')}
-                className="w-full text-left py-1 text-[#9c9689] hover:text-[#faf9f5] transition block truncate"
+                className="w-full text-left py-1 text-neutral-400 hover:text-white transition block truncate font-medium"
               >
                 1. 连接参数总览
               </button>
               <button
                 onClick={() => scrollToSection('quick-config')}
-                className="w-full text-left py-1 text-[#9c9689] hover:text-[#faf9f5] transition block truncate"
+                className="w-full text-left py-1 text-neutral-400 hover:text-white transition block truncate font-medium"
               >
                 2. 快速配置代码
               </button>
               <button
                 onClick={() => scrollToSection('step-by-step')}
-                className="w-full text-left py-1 text-[#9c9689] hover:text-[#faf9f5] transition block truncate"
+                className="w-full text-left py-1 text-neutral-400 hover:text-white transition block truncate font-medium"
               >
                 3. 分步操作指南
               </button>
               {currentDoc.callouts.length > 0 && (
                 <button
                   onClick={() => scrollToSection('tips-warnings')}
-                  className="w-full text-left py-1 text-[#9c9689] hover:text-[#faf9f5] transition block truncate"
+                  className="w-full text-left py-1 text-neutral-400 hover:text-white transition block truncate font-medium"
                 >
                   4. 注意事项与避坑
                 </button>
@@ -2064,7 +2064,7 @@ location / {
               {currentDoc.verificationSnippet && (
                 <button
                   onClick={() => scrollToSection('verification')}
-                  className="w-full text-left py-1 text-[#9c9689] hover:text-[#faf9f5] transition block truncate"
+                  className="w-full text-left py-1 text-neutral-400 hover:text-white transition block truncate font-medium"
                 >
                   5. 连通性快速验证
                 </button>
@@ -2072,7 +2072,7 @@ location / {
               {currentDoc.faqs.length > 0 && (
                 <button
                   onClick={() => scrollToSection('faq')}
-                  className="w-full text-left py-1 text-[#9c9689] hover:text-[#faf9f5] transition block truncate"
+                  className="w-full text-left py-1 text-neutral-400 hover:text-white transition block truncate font-medium"
                 >
                   6. 常见问题排查
                 </button>
@@ -2083,7 +2083,7 @@ location / {
             <div className="pt-3 border-t border-[#2e2b27] space-y-2">
               <button
                 onClick={handleCopyGlobalConfig}
-                className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-[#2e2b27] bg-[#23211e] py-1.5 text-xs text-[#d4cebe] hover:text-[#faf9f5] hover:border-[#cc785c]/40 transition"
+                className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-[#2e2b27] bg-[#23211e] py-1.5 text-xs text-neutral-300 hover:text-white hover:border-[#cc785c]/60 transition smooth-btn shadow-sm font-semibold tracking-wide"
               >
                 <Copy className="h-3 w-3" />
                 <span>复制完整配置</span>
@@ -2092,16 +2092,16 @@ location / {
           </div>
 
           {/* Live Config Summary Widget */}
-          <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-3 space-y-2 text-[11px]">
+          <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-3 space-y-2 text-[11px] smooth-card">
             <div className="font-semibold text-[#faf9f5] flex items-center gap-1">
               <Server className="h-3 w-3 text-[#cc785c]" />
-              <span>当前连接中转站</span>
+              <span>当前连接端点</span>
             </div>
-            <div className="text-[#9c9689] truncate" title={cleanBaseUrl}>
+            <div className="text-neutral-300 font-mono truncate" title={cleanBaseUrl}>
               {cleanBaseUrl}
             </div>
-            <div className="text-[10px] text-[#5db872] flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5db872] animate-pulse" />
+            <div className="text-[10px] text-[#6ee7b7] flex items-center gap-1 font-semibold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6ee7b7] animate-pulse" />
               <span>配置参数自动同步已就绪</span>
             </div>
           </div>
