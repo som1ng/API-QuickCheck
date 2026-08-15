@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <rect width="120" height="120" rx="28" fill="#1b1a18" />
+  <rect x="1" y="1" width="118" height="118" rx="27" stroke="#2e2b27" stroke-width="2" />
+  
+  <!-- Outer Radial Petals (Anthropic Starburst Theme) -->
+  <g transform="translate(60, 60)">
+    <!-- Central Glow Ring -->
+    <circle r="36" fill="#cc785c" fill-opacity="0.12" />
+    <circle r="26" stroke="#cc785c" stroke-width="2" stroke-dasharray="3 3" opacity="0.4" />
+    
+    <!-- 8 Symmetrical Spikes -->
+    <path d="M0 -42 L4 -26 L0 -22 L-4 -26 Z" fill="#cc785c" />
+    <path d="M0 42 L4 26 L0 22 L-4 26 Z" fill="#cc785c" />
+    <path d="M-42 0 L-26 4 L-22 0 L-26 -4 Z" fill="#cc785c" />
+    <path d="M42 0 L26 4 L22 0 L26 -4 Z" fill="#cc785c" />
+    
+    <path d="M-30 -30 L-18 -22 L-16 -16 L-22 -18 Z" fill="#d98266" opacity="0.85" />
+    <path d="M30 -30 L18 -22 L16 -16 L22 -18 Z" fill="#d98266" opacity="0.85" />
+    <path d="M-30 30 L-18 22 L-16 16 L-22 18 Z" fill="#d98266" opacity="0.85" />
+    <path d="M30 30 L18 22 L16 16 L22 18 Z" fill="#d98266" opacity="0.85" />
+    
+    <!-- Central Shield & Verification Checkmark -->
+    <circle r="18" fill="#141413" stroke="#cc785c" stroke-width="2.5" />
+    <path d="M-7 0 L-2 5 L7 -4" stroke="#5db872" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

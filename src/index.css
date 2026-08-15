@@ -1,9 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-slate-900 text-slate-100 antialiased selection:bg-cyan-500/30;
+  :root {
+    --claude-bg: #141413;
+    --claude-surface: #1b1a18;
+    --claude-surface-elevated: #23211e;
+    --claude-border: #2e2b27;
+    --claude-border-subtle: rgba(230, 223, 216, 0.08);
+    --claude-primary: #cc785c;
+    --claude-primary-hover: #d98266;
+    --claude-primary-active: #a9583e;
+    --claude-text-primary: #faf9f5;
+    --claude-text-body: #d4cebe;
+    --claude-text-muted: #9c9689;
+    --claude-success: #5db872;
+    --claude-warning: #e8a55a;
+    --claude-error: #c64545;
   }
+
+  body {
+    background-color: var(--claude-bg);
+    color: var(--claude-text-body);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, .font-serif-display {
+    font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+    letter-spacing: -0.02em;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+}
+
+/* Custom Scrollbar for Claude Aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141413;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2e2b27;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3934;
 }
