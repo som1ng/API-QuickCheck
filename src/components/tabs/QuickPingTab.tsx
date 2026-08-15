@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { parseRawKeysInput, runBatchKeyTestPool } from '../../engine/batchKeys/keyPoolTester';
 import { BatchKeySummary, KeyCheckResult } from '../../types/batchKeys';
 import { StatusBadge } from '../common/StatusBadge';
+import { ProviderIcon } from '../common/ProviderLogos';
 import {
   Play,
   Copy,
@@ -21,20 +22,19 @@ interface ProviderPreset {
   name: string;
   baseUrl: string;
   defaultModel: string;
-  iconText: string;
   category: string;
 }
 
 const PROVIDER_PRESETS: ProviderPreset[] = [
-  { id: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', defaultModel: 'gpt-4o', iconText: '🤖', category: '官方' },
-  { id: 'anthropic', name: 'Anthropic (Claude)', baseUrl: 'https://api.anthropic.com/v1', defaultModel: 'claude-3-7-sonnet-20250219', iconText: '🧠', category: '官方' },
-  { id: 'gemini', name: 'Google Gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', defaultModel: 'gemini-2.5-flash', iconText: '✨', category: '官方' },
-  { id: 'deepseek', name: 'DeepSeek (官方)', baseUrl: 'https://api.deepseek.com', defaultModel: 'deepseek-chat', iconText: '🐳', category: '官方' },
-  { id: 'groq', name: 'Groq (超高速)', baseUrl: 'https://api.groq.com/openai/v1', defaultModel: 'llama-3.3-70b-versatile', iconText: '⚡', category: '聚合加速' },
-  { id: 'cerebras', name: 'Cerebras', baseUrl: 'https://api.cerebras.ai/v1', defaultModel: 'llama3.1-70b', iconText: '🚀', category: '聚合加速' },
-  { id: 'siliconflow', name: '硅基流动 (SiliconFlow)', baseUrl: 'https://api.siliconflow.cn/v1', defaultModel: 'deepseek-ai/DeepSeek-V3', iconText: '🌊', category: '国内' },
-  { id: 'openrouter', name: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1', defaultModel: 'openai/gpt-4o', iconText: '🔀', category: '聚合' },
-  { id: 'custom', name: '自定义中转站 / 代理 URL', baseUrl: '', defaultModel: 'gpt-4o', iconText: '🌐', category: '自定义' },
+  { id: 'openai', name: 'OpenAI (官方)', baseUrl: 'https://api.openai.com/v1', defaultModel: 'gpt-4o', category: '官方' },
+  { id: 'anthropic', name: 'Anthropic (Claude)', baseUrl: 'https://api.anthropic.com/v1', defaultModel: 'claude-3-7-sonnet-20250219', category: '官方' },
+  { id: 'gemini', name: 'Google Gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', defaultModel: 'gemini-2.5-flash', category: '官方' },
+  { id: 'deepseek', name: 'DeepSeek (官方)', baseUrl: 'https://api.deepseek.com', defaultModel: 'deepseek-chat', category: '官方' },
+  { id: 'groq', name: 'Groq (超高速)', baseUrl: 'https://api.groq.com/openai/v1', defaultModel: 'llama-3.3-70b-versatile', category: '聚合加速' },
+  { id: 'cerebras', name: 'Cerebras', baseUrl: 'https://api.cerebras.ai/v1', defaultModel: 'llama3.1-70b', category: '聚合加速' },
+  { id: 'siliconflow', name: '硅基流动 (SiliconFlow)', baseUrl: 'https://api.siliconflow.cn/v1', defaultModel: 'deepseek-ai/DeepSeek-V3', category: '国内' },
+  { id: 'openrouter', name: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1', defaultModel: 'openai/gpt-4o', category: '聚合' },
+  { id: 'custom', name: '自定义中转站 / 代理 URL', baseUrl: '', defaultModel: 'gpt-4o', category: '自定义' },
 ];
 
 export const QuickPingTab: React.FC = () => {
@@ -183,7 +183,7 @@ export const QuickPingTab: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* ── Main Two-Column Big Workspace (Matching user reference layout) ── */}
+      {/* ── Main Two-Column Big Workspace ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
         {/* ── Left Column: Config, Provider & Big Key Textarea (5 cols) ── */}
@@ -242,7 +242,7 @@ export const QuickPingTab: React.FC = () => {
                 </div>
               </div>
 
-              {/* Provider Combobox Dropdown */}
+              {/* Provider Combobox Dropdown with Official SVG Logos */}
               <div className="relative">
                 <button
                   type="button"
@@ -250,7 +250,7 @@ export const QuickPingTab: React.FC = () => {
                   className="w-full flex items-center justify-between rounded-xl border border-[#2e2b27] bg-[#23211e] px-4 py-3.5 text-sm text-[#faf9f5] hover:border-[#cc785c]/40 transition shadow-inner"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">{selectedProvider.iconText}</span>
+                    <ProviderIcon providerId={selectedProvider.id} className="w-5 h-5" />
                     <span className="font-semibold text-[#faf9f5]">{selectedProvider.name}</span>
                   </div>
                   <ChevronDown className="w-4 h-4 text-[#d4cebe]" />
@@ -275,14 +275,14 @@ export const QuickPingTab: React.FC = () => {
                           key={p.id}
                           type="button"
                           onClick={() => handleSelectProvider(p)}
-                          className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center justify-between ${
+                          className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm transition flex items-center justify-between ${
                             selectedProvider.id === p.id
                               ? 'bg-[#cc785c]/15 text-[#faf9f5] font-semibold'
                               : 'text-[#d4cebe] hover:bg-[#2b2926] hover:text-[#faf9f5]'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <span className="text-base">{p.iconText}</span>
+                          <div className="flex items-center gap-3">
+                            <ProviderIcon providerId={p.id} className="w-5 h-5 shrink-0" />
                             <span className="text-[#faf9f5] font-medium">{p.name}</span>
                           </div>
                           <span className="text-xs text-[#9c9689] font-mono">{p.category}</span>
