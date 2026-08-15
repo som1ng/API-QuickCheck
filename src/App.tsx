@@ -20,8 +20,8 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[#141413] text-[#d4cebe] font-sans selection:bg-[#cc785c]/20">
       <Header />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 space-y-16">
-        <div className="min-h-[480px]">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+        <div className="min-h-[520px]">
           {isHome && (
             <ErrorBoundary fallbackTitle="中转站综合检测模块异常">
               <HomeRelayTab />
