@@ -206,6 +206,7 @@ export async function fetchRemoteModels(
   if (cleanKey.length > 5) {
     const discovered: { id: string; name: string }[] = [];
     const chatUrl = buildChatCompletionsUrl(cleanBase);
+    let unauthorizedProbeCount = 0;
 
     const probePromises = COMMON_CANDIDATE_MODELS.map(async (modelId) => {
       try {
@@ -226,8 +227,23 @@ export async function fetchRemoteModels(
           signal,
         });
 
-        // If status 200, 400 (bad params), 402 (quota), or 429 (rate limit), the model DEFINITELY exists on relay!
-        if (res.ok || res.status === 200 || res.status === 400 || res.status === 402 || res.status === 429) {
+        if (res.status === 401 || res.status === 403) {
+          unauthorizedProbeCount += 1;
+        }
+
+        const errorText = res.rawText.toLowerCase();
+        const explicitlyMissingModel = [
+          'model_not_found',
+          'model not found',
+          'model does not exist',
+          'unknown model',
+          'invalid model',
+          'no available channel',
+          '模型不存在',
+          '无可用渠道',
+        ].some((message) => errorText.includes(message));
+
+        if (res.ok || res.status === 200 || res.status === 402 || res.status === 429 || (res.status === 400 && !explicitlyMissingModel)) {
           discovered.push({ id: modelId, name: modelId });
         }
       } catch {
@@ -239,6 +255,10 @@ export async function fetchRemoteModels(
 
     if (discovered.length > 0) {
       return discovered;
+    }
+
+    if (unauthorizedProbeCount === COMMON_CANDIDATE_MODELS.length) {
+      sawUnauthorized = true;
     }
   }
 
