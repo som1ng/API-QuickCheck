@@ -12,18 +12,18 @@
   </p>
 
   <p>
-    <a href="https://api-quick-check.vercel.app/"><strong>🌐 Live Demo</strong></a> ·
-    <a href="#-why-api-quickcheck-20"><strong>💡 Why QuickCheck</strong></a> ·
-    <a href="#-core-feature-matrix"><strong>✨ Features</strong></a> ·
-    <a href="#-quick-start"><strong>🚀 Quick Start</strong></a> ·
-    <a href="#-1-click-deploy-to-vercel"><strong>⚡ Deploy</strong></a> ·
+    <a href="https://api-quick-check.vercel.app/"><strong>Live Demo</strong></a> ·
+    <a href="#-why-api-quickcheck-20"><strong>Why QuickCheck</strong></a> ·
+    <a href="#-core-modules"><strong>Features</strong></a> ·
+    <a href="#-quick-start"><strong>Quick Start</strong></a> ·
+    <a href="#-deploy-to-vercel"><strong>Deploy</strong></a> ·
     <a href="./README_zh.md"><strong>中文说明</strong></a>
   </p>
 </div>
 
 ---
 
-## 💡 Why API-QuickCheck 2.0?
+## ⭐ Why API-QuickCheck 2.0?
 
 In today's crowded AI API proxy/middleman ecosystem, **model substitution fraud** (e.g. routing Claude 3.7 / o1 to cheap alternatives, faking `<think>` tags in text, silent context truncation, and severe gateway queueing) has become a common trap for developers and agent builders.
 
@@ -35,18 +35,18 @@ In today's crowded AI API proxy/middleman ecosystem, **model substitution fraud*
 
 ---
 
-## 🏆 Core Feature Matrix
+## ⭐ Core Modules
 
 ```
-                                 ┌── [ 🛡️ 1. Fidelity ] ➔ Claude Thinking Signature / R1 Reasoning Stream
-                                 ├── [ ⚡ 2. Benchmark ] ➔ Microsecond TTFT / Real-time TPS / Jitter Variance
-                                 ├── [ 🔍 3. Scanner ] ➔ Dual-Engine Discovery / 5-Thread Pool Classifier
-API-QuickCheck 2.0 ──────────────┼── [ 🧩 4. Capability ] ➔ SSE Stream / Tool Calling / Vision / JSON Mode
-                                 ├── [ 💰 5. Balance ] ➔ OneAPI / NewAPI / DoneAPI / OpenRouter Quota Sniffing
-                                 └── [ 🚀 6. Adapter ] ➔ Claude Code / Cline / Cursor / Dify 1-Click Configs
+                                 ┌── [ 1. Fidelity ] ➔ Claude Thinking Signature / R1 Reasoning Stream
+                                 ├── [ 2. Benchmark ] ➔ Microsecond TTFT / Real-time TPS / Jitter Variance
+                                 ├── [ 3. Scanner ] ➔ Dual-Engine Discovery / 5-Thread Pool Classifier
+API-QuickCheck 2.0 ──────────────┼── [ 4. Capability ] ➔ SSE Stream / Tool Calling / Vision / JSON Mode
+                                 ├── [ 5. Balance ] ➔ OneAPI / NewAPI / DoneAPI / OpenRouter Quota Sniffing
+                                 └── [ 6. Adapter ] ➔ Claude Code / Cline / Cursor / Dify 1-Click Configs
 ```
 
-### 1. 🛡️ Deep Fidelity & Downgrade Forensics
+### 1. Deep Fidelity & Downgrade Forensics
 - **Anthropic Official Thinking Signature Cryptographic Validation**:
   Extracts Anthropic's private-key signature from `thinking` blocks and submits it back to Anthropic in turn 2 for official cryptographic verification. **Spoofing or relaying with cheap models is mathematically impossible!**
 - **DeepSeek-R1 / OpenAI o1 Native Reasoning Stream Check**:
@@ -54,26 +54,26 @@ API-QuickCheck 2.0 ──────────────┼── [ 🧩 4.
 - **Metacognitive Conflict & SVG Topology Probes**:
   Detects injected `"You are Claude"` system prompts; verifies SVG 3D spatial geometry and knowledge cutoffs.
 
-### 2. ⚡ Streaming Latency & Performance Benchmark
+### 2. Streaming Latency & Performance Benchmark
 - **Microsecond TTFT (Time to First Token)**: Precisely measures network handshake and queueing delay until the first data chunk arrives.
 - **Real-Time TPS Throughput**: Tracks live token velocity with an integrated streaming terminal typewriter.
 - **Jitter Variance**: Calculates inter-chunk arrival variance to diagnose rate limits and proxy buffer congestion.
 
-### 3. 🔍 Dual-Engine 100% Model Discovery
+### 3. Dual-Engine 100% Model Discovery
 - **Engine 1 (Standard Cascade)**: Concurrently polls `/v1/models`, `/models`, `/api/models` with universal payload extractors.
 - **Engine 2 (Fast Chat Prober Fallback)**: **Even if the relay admin hides `/v1/models`**, fast concurrent probing across top 16 models in 500ms will 100% discover all active models.
 
-### 4. 🧩 Capability & Agent Readiness Matrix
+### 4. Capability & Agent Readiness Matrix
 - **SSE Stream**: Tests if persistent connections are broken by reverse proxies.
 - **Tool / Function Calling**: Validates if middleman gateways strip or corrupt `tools` schemas (essential for **Cline, Cursor, Claude Code**).
 - **Vision Multimodal**: Sends 1x1 base64 image probes to verify multimodal pipeline viability.
 - **JSON Mode**: Validates `response_format` strict compliance.
 
-### 5. 💰 Universal Relay Balance & Quota Sniffer
+### 5. Universal Relay Balance & Quota Sniffer
 - Compatible with **OneAPI, NewAPI, DoneAPI, VoAPI, V3, OpenRouter, SiliconFlow, DeepSeek**.
 - Normalizes 500,000-point ratios to USD / CNY amounts.
 
-### 6. 🚀 Coding Agent 1-Click Auto-Adapter
+### 6. Coding Agent 1-Click Auto-Adapter
 - Instantly generates validated configuration code for:
   - **Claude Code** (Anthropic CLI)
   - **Cline / Roo Code** (VS Code Agent)
@@ -83,20 +83,20 @@ API-QuickCheck 2.0 ──────────────┼── [ 🧩 4.
 
 ---
 
-## 📊 Technical Comparison Matrix
+## ⭐ Technical Comparison Matrix
 
 | Evaluation Dimension | Traditional Shell Scripts | Common Online Ping Sites | **API-QuickCheck 2.0** |
 | :--- | :---: | :---: | :---: |
-| **Claude Private-Key Auth** | ❌ Text check only | ⚠️ Incomplete text heuristic | ** 100% Official Cryptographic Turn-2 Check** |
-| **Reasoning Stream Check** | ❌ Fooled by fake `<think>` | ❌ Not supported | ** Native `reasoning_content` validation** |
-| **Browser CORS Resolution** | ❌ Network Error | ⚠️ Centralized private server | ** Local Middleware + Vercel Serverless Edge** |
-| **Hidden Model Discovery** | ❌ Exits on 404 | ❌ Scans public list only | ** Candidate Routes + 16-Model Fast Prober** |
-| **Design Aesthetics** | ❌ Basic / Cluttered | ❌ Chaotic dashboard / neon glow | ** Anthropic Claude Editorial System** |
-| **API Key Privacy** | ❌ Uploaded to server | ❌ Saved to cloud DB | ** 100% In-Memory · Never Leaves Browser** |
+| **Claude Private-Key Auth** | Not Supported | ⚠️ Incomplete text heuristic | ✅ **100% Official Cryptographic Turn-2 Check** |
+| **Reasoning Stream Check** | Not Supported | Not Supported | ✅ **Native `reasoning_content` validation** |
+| **Browser CORS Resolution** | ⚠️ Network Error | ⚠️ Centralized private server | ✅ **Local Middleware + Vercel Serverless Edge** |
+| **Hidden Model Discovery** | Exits on 404 | Not Supported | ✅ **Candidate Routes + 16-Model Fast Prober** |
+| **Design Aesthetics** | Basic / Cluttered | Chaotic dashboard | ✅ **Anthropic Claude Editorial System** |
+| **API Key Privacy** | Uploaded to server | Saved to cloud DB | ✅ **100% In-Memory · Never Leaves Browser** |
 
 ---
 
-## 🚀 Quick Start
+## ⭐ Quick Start
 
 ### Local Development
 
@@ -117,7 +117,7 @@ open http://localhost:5173/
 
 ---
 
-## ⚡ 1-Click Deploy to Vercel (Serverless Ready)
+## ⭐ Deploy to Vercel
 
 Optimized for **Vercel Serverless Edge Runtime** (`api/proxy.ts` and `vercel.json`):
 
@@ -129,14 +129,14 @@ Optimized for **Vercel Serverless Edge Runtime** (`api/proxy.ts` and `vercel.jso
 
 ---
 
-## 🛡️ Privacy & Security Commitment
+## ⚠️ Privacy & Security Commitment
 
 - **Zero Data Persistence**: All keys are processed in client memory and never saved to any database.
 - **100% Open Source**: Every network call and scoring algorithm is fully auditable.
 
 ---
 
-## 📜 License
+## License
 
 Released under the **[MIT License](./LICENSE)**.
 
