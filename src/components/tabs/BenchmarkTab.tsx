@@ -3,10 +3,21 @@ import { useApp } from '../../context/AppContext';
 import { runBenchmarkRound, aggregateBenchmarkSummary } from '../../engine/benchmark/speedTester';
 import { BenchmarkRoundResult, BenchmarkSummary } from '../../types/benchmark';
 import { MetricCard } from '../common/MetricCard';
-import { Play, Loader2, Gauge, Activity, Radio, CheckCircle2, XCircle, Terminal } from 'lucide-react';
+import { Play, Loader2, Gauge, Activity, Radio, CheckCircle2, XCircle, Terminal, Layers, ChevronDown, Search } from 'lucide-react';
+
+const POPULAR_MODEL_PRESETS = [
+  'claude-3-7-sonnet-20250219',
+  'claude-3-5-sonnet-20241022',
+  'deepseek-reasoner',
+  'deepseek-chat',
+  'gpt-4o',
+  'o1',
+  'gemini-2.5-flash',
+];
 
 export const BenchmarkTab: React.FC = () => {
-  const { config } = useApp().state;
+  const { state, dispatch } = useApp();
+  const { config, availableModels } = state;
 
   const [roundsCount, setRoundsCount] = useState<number>(3);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -15,6 +26,8 @@ export const BenchmarkTab: React.FC = () => {
   const [liveTps, setLiveTps] = useState<number>(0);
   const [liveTtft, setLiveTtft] = useState<number>(0);
   const [summary, setSummary] = useState<BenchmarkSummary | null>(null);
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [modelSearchQuery, setModelSearchQuery] = useState('');
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -75,10 +88,14 @@ export const BenchmarkTab: React.FC = () => {
     }
   };
 
+  const filteredRemoteModels = availableModels.filter((m) =>
+    m.id.toLowerCase().includes(modelSearchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       {/* Top Controller */}
-      <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md">
+      <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div>
             <div className="flex items-center gap-2.5">
@@ -128,137 +145,212 @@ export const BenchmarkTab: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Model Selector Bar */}
+        <div className="pt-4 border-t border-[#2e2b27] relative">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-[#faf9f5] flex items-center gap-2">
+              <Layers className="w-[18px] h-[18px] text-[#cc785c]" />
+              <span>测速目标模型</span>
+            </label>
+            {availableModels.length > 0 && (
+              <span className="text-xs text-[#5db872] font-mono">
+                已探测到 {availableModels.length} 个可用模型
+              </span>
+            )}
+          </div>
+
+          <div className="relative">
+            <div className="flex rounded-lg border border-[#2e2b27] bg-[#23211e] focus-within:border-[#cc785c] transition">
+              <input
+                type="text"
+                value={config.selectedModel}
+                onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
+                placeholder="例如: gpt-4o / deepseek-chat"
+                className="w-full bg-transparent px-4 py-2.5 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/60 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowModelDropdown(!showModelDropdown)}
+                className="px-3.5 text-[#9c9689] hover:text-[#faf9f5] transition border-l border-[#2e2b27]"
+              >
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Dropdown */}
+            {showModelDropdown && (
+              <div className="absolute left-0 right-0 mt-1.5 rounded-xl border border-[#2e2b27] bg-[#23211e] p-2.5 shadow-2xl z-50 max-h-80 overflow-y-auto space-y-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="快速搜索模型..."
+                    value={modelSearchQuery}
+                    onChange={(e) => setModelSearchQuery(e.target.value)}
+                    className="w-full rounded-lg border border-[#2e2b27] bg-[#1b1a18] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-[#9c9689] focus:outline-none focus:border-[#cc785c]"
+                  />
+                  <Search className="w-4 h-4 text-[#9c9689] absolute left-3 top-2.5" />
+                </div>
+
+                <div>
+                  <div className="text-xs uppercase font-semibold text-[#9c9689] px-2.5 py-1.5">
+                    常用热门模型
+                  </div>
+                  {POPULAR_MODEL_PRESETS.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => {
+                        dispatch({ type: 'SET_SELECTED_MODEL', payload: m });
+                        setShowModelDropdown(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#faf9f5] transition font-mono truncate"
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+
+                {availableModels.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase font-semibold text-[#5db872] px-2.5 py-1.5 border-t border-[#2e2b27] mt-1 pt-2">
+                      中转站可用模型 ({availableModels.length})
+                    </div>
+                    {filteredRemoteModels.slice(0, 40).map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id });
+                          setShowModelDropdown(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#d4cebe] transition font-mono truncate"
+                      >
+                        {m.id}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Metrics Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricCard
-          label="TTFT (首字响应延迟)"
-          value={isRunning ? liveTtft || '-' : summary ? summary.avgTtftMs : '-'}
+          label="首字生成延迟 (TTFT)"
+          value={isRunning ? liveTtft : (summary?.avgTtftMs || '-')}
           unit="ms"
-          subValue={summary ? `最优: ${summary.minTtftMs}ms | 最慢: ${summary.maxTtftMs}ms` : '首个数据块到达耗时'}
-          icon={<Gauge className="w-5 h-5 text-[#e8a55a]" />}
           status={
-            summary
-              ? summary.avgTtftMs < 600
-                ? 'success'
-                : summary.avgTtftMs < 1500
-                ? 'warning'
-                : 'error'
+            summary && summary.avgTtftMs < 600
+              ? 'success'
+              : summary && summary.avgTtftMs < 1500
+              ? 'warning'
+              : summary
+              ? 'error'
               : 'neutral'
           }
-          highlight={isRunning}
+          icon={<Radio className="w-4 h-4 text-[#9c9689]" />}
         />
-
         <MetricCard
-          label="TPS (生成速率)"
-          value={isRunning ? liveTps || '-' : summary ? summary.avgTps : '-'}
+          label="流式生成速度 (TPS)"
+          value={isRunning ? liveTps : (summary?.avgTps || '-')}
           unit="tokens/s"
-          subValue={summary ? `峰值: ${summary.maxTps} tokens/s (估算值)` : '实时流式词元吞吐'}
-          icon={<Activity className="w-5 h-5 text-[#5db872]" />}
           status={
-            summary
-              ? summary.avgTps > 50
-                ? 'success'
-                : summary.avgTps > 20
-                ? 'warning'
-                : 'error'
+            summary && summary.avgTps > 40
+              ? 'success'
+              : summary && summary.avgTps > 15
+              ? 'warning'
+              : summary
+              ? 'error'
               : 'neutral'
           }
-          highlight={isRunning}
+          icon={<Activity className="w-4 h-4 text-[#cc785c]" />}
         />
-
         <MetricCard
-          label="流式稳定性 (Jitter)"
-          value={
-            summary
-              ? summary.stabilityScore === 'excellent'
-                ? '极稳 (平滑)'
-                : summary.stabilityScore === 'good'
-                ? '良好'
-                : '波动较大'
-              : isRunning
-              ? '测算中...'
-              : '-'
-          }
-          subValue={summary ? `Chunk 到达方差: ${summary.avgJitterVariance}` : '数据块到达平稳度'}
-          icon={<Radio className="w-5 h-5 text-[#cc785c]" />}
+          label="网络 Chunk 抖动"
+          value={summary?.avgJitterVariance || '-'}
+          unit="ms (方差)"
           status={
-            summary
-              ? summary.stabilityScore === 'excellent' || summary.stabilityScore === 'good'
-                ? 'success'
-                : 'warning'
+            summary && summary.avgJitterVariance < 100
+              ? 'success'
+              : summary && summary.avgJitterVariance < 300
+              ? 'warning'
+              : summary
+              ? 'error'
               : 'neutral'
           }
+          icon={<Gauge className="w-4 h-4 text-[#5db872]" />}
         />
       </div>
 
-      {/* Live Typewriter Output */}
-      <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-5 shadow-lg">
-        <div className="flex items-center justify-between border-b border-[#2e2b27] pb-3 mb-3">
+      {/* Live Stream Terminal */}
+      <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-5 shadow-inner">
+        <div className="flex items-center justify-between pb-3 border-b border-[#2e2b27] text-sm text-[#9c9689]">
           <div className="flex items-center gap-2">
-            <Terminal className="w-[18px] h-[18px] text-[#9c9689]" />
-            <span className="text-sm font-mono text-[#d4cebe] font-medium">
-              流式打字机监视器 (Streaming Terminal)
-            </span>
+            <Terminal className="w-4 h-4 text-[#cc785c]" />
+            <span className="font-mono text-[#d4cebe]">实时流式控制台 (Streaming Terminal)</span>
           </div>
           {isRunning && (
-            <span className="text-sm font-mono text-[#e8a55a]">
-              第 {currentRound}/{roundsCount} 轮输出中...
-            </span>
+            <div className="flex items-center gap-2 text-xs font-mono text-[#5db872]">
+              <span className="h-2 w-2 rounded-full bg-[#5db872] animate-ping" />
+              <span>接收 Chunk 中...</span>
+            </div>
           )}
         </div>
 
-        <div className="min-h-[120px] max-h-[220px] overflow-y-auto font-mono text-sm text-[#faf9f5] leading-relaxed whitespace-pre-wrap">
+        <div className="mt-3.5 max-h-56 overflow-y-auto font-mono text-sm leading-relaxed text-[#faf9f5] whitespace-pre-wrap select-text">
           {liveText || (
-            <span className="text-[#9c9689]/60 italic">
-              点击上方「开始测速」后，此处将实时展示逐字生成的文本流与打字机效果...
-            </span>
+            <span className="text-[#9c9689]/60 italic">点击“开始测速”按钮启动流式性能探针...</span>
           )}
         </div>
       </div>
 
-      {/* Multi-round Table */}
-      {summary && summary.rounds.length > 0 && (
+      {/* Benchmark Summary Table */}
+      {summary && (
         <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] overflow-hidden shadow-md">
           <div className="p-4 border-b border-[#2e2b27] flex items-center justify-between">
-            <h4 className="font-serif-display text-lg font-medium text-[#faf9f5]">多轮测速历史明细</h4>
-            <span className="text-xs text-[#9c9689] font-mono">模型: {summary.model}</span>
+            <h3 className="font-serif-display text-lg font-medium text-[#faf9f5]">
+              多轮测试详单统计
+            </h3>
+            <span className="text-xs text-[#9c9689] font-mono">
+              测试模型: {summary.model}
+            </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-[#d4cebe]">
-              <thead className="border-b border-[#2e2b27] bg-[#23211e] text-[#9c9689] font-mono">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#23211e] text-xs text-[#9c9689] uppercase tracking-wider">
                 <tr>
-                  <th className="p-3 pl-4">轮次</th>
-                  <th className="p-3">状态</th>
-                  <th className="p-3">TTFT (首字)</th>
-                  <th className="p-3">TPS (吞吐)</th>
-                  <th className="p-3">总耗时</th>
-                  <th className="p-3">生成 Token</th>
-                  <th className="p-3 pr-4">稳定性方差</th>
+                  <th className="px-4 py-3">轮次</th>
+                  <th className="px-4 py-3">状态</th>
+                  <th className="px-4 py-3">首字延迟 (TTFT)</th>
+                  <th className="px-4 py-3">生成速度 (TPS)</th>
+                  <th className="px-4 py-3">总耗时</th>
+                  <th className="px-4 py-3">生成 Tokens</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#2e2b27] font-mono">
+              <tbody className="divide-y divide-[#2e2b27] font-mono text-xs">
                 {summary.rounds.map((round) => (
                   <tr key={round.round} className="hover:bg-[#23211e]/50 transition">
-                    <td className="p-3 pl-4 text-[#faf9f5] font-medium">第 {round.round} 轮</td>
-                    <td className="p-3">
+                    <td className="px-4 py-3 font-semibold text-[#faf9f5]">#{round.round}</td>
+                    <td className="px-4 py-3">
                       {round.status === 'completed' ? (
-                        <span className="text-[#5db872] inline-flex items-center gap-1 font-semibold">
-                          <CheckCircle2 className="w-[18px] h-[18px]" /> 成功
+                        <span className="text-[#5db872] flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> 成功
                         </span>
                       ) : (
-                        <span className="text-[#c64545] inline-flex items-center gap-1 font-semibold">
-                          <XCircle className="w-[18px] h-[18px]" /> 失败
+                        <span className="text-[#c64545] flex items-center gap-1">
+                          <XCircle className="w-3.5 h-3.5" /> 失败
                         </span>
                       )}
                     </td>
-                    <td className="p-3 font-semibold text-[#e8a55a]">{round.ttftMs} ms</td>
-                    <td className="p-3 font-semibold text-[#5db872]">{round.tps} t/s</td>
-                    <td className="p-3 text-[#9c9689]">{round.totalDurationMs} ms</td>
-                    <td className="p-3 text-[#9c9689]">{round.outputTokens}</td>
-                    <td className="p-3 pr-4 text-[#9c9689]">{round.jitterVariance}</td>
+                    <td className="px-4 py-3 text-[#faf9f5]">{round.ttftMs} ms</td>
+                    <td className="px-4 py-3 text-[#cc785c] font-semibold">{round.tps} t/s</td>
+                    <td className="px-4 py-3 text-[#d4cebe]">{round.totalDurationMs} ms</td>
+                    <td className="px-4 py-3 text-[#d4cebe]">{round.outputTokens}</td>
                   </tr>
                 ))}
               </tbody>

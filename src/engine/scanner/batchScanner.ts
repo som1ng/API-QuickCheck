@@ -98,7 +98,7 @@ export async function fetchRemoteModels(
 
   let lastErrorMessage = '';
   let sawUnauthorized = false;
-  const attemptedStatuses: number[] = [];
+  const attemptedLogs: string[] = [];
 
   // 1. Try standard /v1/models endpoints first (highest priority first)
   for (const url of candidateUrls) {
@@ -111,11 +111,11 @@ export async function fetchRemoteModels(
           'x-api-key': cleanKey,
           'x-goog-api-key': cleanKey,
         },
-        timeoutMs: 5000,
+        timeoutMs: 8000,
         signal,
       });
 
-      attemptedStatuses.push(res.status);
+      attemptedLogs.push(`GET ${url} -> ${res.status || 'Error'}`);
       if (res.status === 401 || res.status === 403) {
         sawUnauthorized = true;
         lastErrorMessage = res.errorMessage || 'API Key 无效或未授权 (HTTP 401/403)';
@@ -132,14 +132,48 @@ export async function fetchRemoteModels(
           });
         }
       }
-    } catch {
-      // try next
+    } catch (err: any) {
+      attemptedLogs.push(`GET ${url} -> ${err.message || 'Error'}`);
     }
   }
 
-  // 2. If endpoint requires key and key is invalid, report immediately
-  if (sawUnauthorized) {
-    throw new Error('API Key 无效或未授权 (HTTP 401)，请确认当前中转站 API Key 是否正确！');
+  // 2. Dedicated proxy retry phase for top 2 candidates
+  const proxyTargets = candidateUrls.slice(0, 2);
+  for (const targetUrl of proxyTargets) {
+    try {
+      const proxyUrl = `/api/proxy?target=${encodeURIComponent(targetUrl)}`;
+      const res = await silentFetch<unknown>({
+        url: proxyUrl,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${cleanKey}`,
+          'x-api-key': cleanKey,
+          'x-goog-api-key': cleanKey,
+        },
+        timeoutMs: 10000,
+        signal,
+      });
+
+      attemptedLogs.push(`PROXY GET ${targetUrl} -> ${res.status || 'Error'}`);
+      if (res.status === 401 || res.status === 403) {
+        sawUnauthorized = true;
+        lastErrorMessage = res.errorMessage || 'API Key 无效或未授权 (HTTP 401/403)';
+      }
+
+      if (res.ok && res.data) {
+        const models = extractUniversalModels(res.data);
+        if (models.length > 0) {
+          const seen = new Set<string>();
+          return models.filter((m) => {
+            if (seen.has(m.id)) return false;
+            seen.add(m.id);
+            return true;
+          });
+        }
+      }
+    } catch (err: any) {
+      attemptedLogs.push(`PROXY GET ${targetUrl} -> ${err.message || 'Error'}`);
+    }
   }
 
   // 3. Fallback: Fast Probe across high-frequency models via POST /v1/chat/completions
@@ -162,7 +196,7 @@ export async function fetchRemoteModels(
             messages: [{ role: 'user', content: 'hi' }],
             max_tokens: 1,
           },
-          timeoutMs: 4500,
+          timeoutMs: 6000,
           signal,
         });
 
@@ -182,7 +216,11 @@ export async function fetchRemoteModels(
     }
   }
 
-  throw new Error(lastErrorMessage || `未探测到可用模型列表。该中转站可能在后台关闭了 /v1/models 接口，你可以直接在输入框手动填写模型名进行检测`);
+  if (sawUnauthorized) {
+    throw new Error(`API Key 无效或未授权 (HTTP 401/403)，请确认当前中转站 API Key 是否正确！\n\n已尝试路由:\n${attemptedLogs.join('\n')}`);
+  }
+
+  throw new Error(`${lastErrorMessage || '未探测到可用模型列表。该中转站可能在后台关闭了 /v1/models 接口，你可以直接在下方输入框手动填写模型名进行检测'}\n\n已尝试路由:\n${attemptedLogs.join('\n')}`);
 }
 
 export function classifyModelProvider(modelId: string): ModelCheckItem['provider'] {
