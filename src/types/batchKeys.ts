@@ -3,6 +3,7 @@ export type KeyHealthStatus =
   | 'quota_exhausted' 
   | 'invalid' 
   | 'rate_limited' 
+  | 'duplicate'
   | 'network_error' 
   | 'pending' 
   | 'testing';
@@ -23,7 +24,10 @@ export interface BatchKeySummary {
   completed: number;
   activeCount: number;
   exhaustedCount: number;
+  rateLimitedCount: number;
   invalidCount: number;
+  duplicateCount: number;
   errorCount: number;
   results: KeyCheckResult[];
+  duplicates: string[];
 }

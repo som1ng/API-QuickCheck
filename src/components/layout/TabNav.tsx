@@ -1,20 +1,20 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { ActiveTabId } from '../../types/config';
-import { ShieldCheck, Gauge, Search, Cpu, Zap, Code2 } from 'lucide-react';
+import { ShieldCheck, KeyRound, Gauge, Search, Code2 } from 'lucide-react';
 
 interface TabItem {
   id: ActiveTabId;
   label: string;
+  badge?: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
 const TABS: TabItem[] = [
-  { id: 'fidelity', label: '真伪鉴别', icon: ShieldCheck },
+  { id: 'fidelity', label: 'API 掺水验真', badge: '核心', icon: ShieldCheck },
+  { id: 'quickping', label: 'API KEY 批量检测', badge: '核心', icon: KeyRound },
   { id: 'benchmark', label: '性能测速', icon: Gauge },
-  { id: 'scanner', label: '批量巡检', icon: Search },
-  { id: 'capability', label: '能力矩阵', icon: Cpu },
-  { id: 'quickping', label: '极速单测', icon: Zap },
+  { id: 'scanner', label: '模型巡检', icon: Search },
   { id: 'export', label: '客户端配置', icon: Code2 },
 ];
 
@@ -24,7 +24,7 @@ export const TabNav: React.FC = () => {
 
   return (
     <div className="w-full flex items-center justify-start overflow-x-auto pb-1 no-scrollbar">
-      <div className="inline-flex p-1.5 rounded-xl bg-[#1b1a18] border border-[#2e2b27] gap-2">
+      <div className="inline-flex p-1.5 rounded-xl bg-[#1b1a18] border border-[#2e2b27] gap-2.5">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -41,6 +41,17 @@ export const TabNav: React.FC = () => {
             >
               <Icon className="w-[18px] h-[18px] shrink-0" />
               <span>{tab.label}</span>
+              {tab.badge && (
+                <span
+                  className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold ${
+                    isActive
+                      ? 'bg-white/20 text-[#faf9f5]'
+                      : 'bg-[#cc785c]/15 text-[#cc785c] border border-[#cc785c]/30'
+                  }`}
+                >
+                  {tab.badge}
+                </span>
+              )}
             </button>
           );
         })}
