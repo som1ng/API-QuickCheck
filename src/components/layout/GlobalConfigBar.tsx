@@ -3,7 +3,17 @@ import { useApp } from '../../context/AppContext';
 import { PLATFORMS } from '../../config/platforms';
 import { fetchRemoteModels } from '../../engine/scanner/batchScanner';
 import { sniffRelayProfile } from '../../engine/billing/quotaSniffer';
-import { Eye, EyeOff, RefreshCw, KeyRound, Globe, Layers, Wallet, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, KeyRound, Globe, Layers, Wallet, ChevronDown, CheckCircle2, Search } from 'lucide-react';
+
+const POPULAR_MODEL_PRESETS = [
+  'claude-3-7-sonnet-20250219',
+  'claude-3-5-sonnet-20241022',
+  'deepseek-reasoner',
+  'deepseek-chat',
+  'gpt-4o',
+  'o1',
+  'gemini-2.5-flash',
+];
 
 export const GlobalConfigBar: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -12,6 +22,8 @@ export const GlobalConfigBar: React.FC = () => {
   const [showKey, setShowKey] = useState(false);
   const [isSniffingBalance, setIsSniffingBalance] = useState(false);
   const [showPresetsDropdown, setShowPresetsDropdown] = useState(false);
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [modelSearchQuery, setModelSearchQuery] = useState('');
   const [sniffFeedback, setSniffFeedback] = useState<string | null>(null);
 
   // Auto-fetch models when user stops typing URL and Key
@@ -83,6 +95,10 @@ export const GlobalConfigBar: React.FC = () => {
     dispatch({ type: 'SET_BASE_URL', payload: platform.defaultBaseUrl });
     setShowPresetsDropdown(false);
   };
+
+  const filteredRemoteModels = availableModels.filter((m) =>
+    m.id.toLowerCase().includes(modelSearchQuery.toLowerCase())
+  );
 
   return (
     <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 shadow-lg space-y-4">
@@ -160,8 +176,8 @@ export const GlobalConfigBar: React.FC = () => {
           />
         </div>
 
-        {/* 3. Target Model Selector (3 cols) */}
-        <div className="md:col-span-3">
+        {/* 3. Target Model Selector with Interactive Dropdown (3 cols) */}
+        <div className="md:col-span-3 relative">
           <div className="flex items-center justify-between mb-1.5">
             <label className="text-xs font-medium text-[#faf9f5] flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-[#cc785c]" />
@@ -173,29 +189,90 @@ export const GlobalConfigBar: React.FC = () => {
               className="text-[11px] text-[#cc785c] hover:text-[#d98266] transition flex items-center gap-1 disabled:opacity-40 font-medium"
             >
               <RefreshCw className={`w-2.5 h-2.5 ${isLoadingModels ? 'animate-spin' : ''}`} />
-              <span>{availableModels.length > 0 ? `(${availableModels.length})` : '拉取'}</span>
+              <span>{availableModels.length > 0 ? `(${availableModels.length})` : '拉取清单'}</span>
             </button>
           </div>
 
           <div className="relative">
-            <input
-              type="text"
-              list="models-datalist"
-              placeholder="gpt-4o / claude-3-7-sonnet"
-              value={config.selectedModel}
-              onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-              className="w-full rounded-lg border border-[#2e2b27] bg-[#23211e] px-3 py-2 font-mono text-xs text-[#faf9f5] placeholder-[#9c9689]/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]/40 transition"
-            />
-            <datalist id="models-datalist">
-              {availableModels.map((m) => (
-                <option key={m.id} value={m.id} />
-              ))}
-            </datalist>
+            <div className="flex rounded-lg border border-[#2e2b27] bg-[#23211e] focus-within:border-[#cc785c] transition">
+              <input
+                type="text"
+                placeholder="gpt-4o / claude-3-7-sonnet"
+                value={config.selectedModel}
+                onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
+                className="w-full bg-transparent px-3 py-2 font-mono text-xs text-[#faf9f5] placeholder-[#9c9689]/60 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowModelDropdown(!showModelDropdown)}
+                className="px-2 text-[#9c9689] hover:text-[#faf9f5] transition border-l border-[#2e2b27]"
+              >
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Smart Combobox Dropdown */}
+            {showModelDropdown && (
+              <div className="absolute right-0 mt-1 w-72 rounded-xl border border-[#2e2b27] bg-[#23211e] p-2 shadow-2xl z-50 max-h-72 overflow-y-auto space-y-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="快速搜索模型..."
+                    value={modelSearchQuery}
+                    onChange={(e) => setModelSearchQuery(e.target.value)}
+                    className="w-full rounded-md border border-[#2e2b27] bg-[#1b1a18] pl-7 pr-2 py-1.5 text-xs text-[#faf9f5] placeholder-[#9c9689] focus:outline-none focus:border-[#cc785c]"
+                  />
+                  <Search className="w-3 h-3 text-[#9c9689] absolute left-2 top-2.5" />
+                </div>
+
+                {/* Popular Presets */}
+                <div>
+                  <div className="text-[10px] uppercase font-semibold text-[#9c9689] px-2 py-1">
+                    常用热门模型
+                  </div>
+                  {POPULAR_MODEL_PRESETS.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => {
+                        dispatch({ type: 'SET_SELECTED_MODEL', payload: m });
+                        setShowModelDropdown(false);
+                      }}
+                      className="w-full text-left px-2 py-1 rounded-md text-xs hover:bg-[#2b2926] text-[#faf9f5] transition font-mono truncate"
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Discovered Models */}
+                {availableModels.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase font-semibold text-[#5db872] px-2 py-1 border-t border-[#2e2b27] mt-1 pt-1.5">
+                      中转站可用模型 ({availableModels.length})
+                    </div>
+                    {filteredRemoteModels.slice(0, 40).map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id });
+                          setShowModelDropdown(false);
+                        }}
+                        className="w-full text-left px-2 py-1 rounded-md text-xs hover:bg-[#2b2926] text-[#d4cebe] transition font-mono truncate"
+                      >
+                        {m.id}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Auto-discovered Models Banner (Claude Sage Green Aesthetic) */}
+      {/* Auto-discovered Models Banner */}
       {availableModels.length > 0 && (
         <div className="rounded-lg border border-[#5db872]/30 bg-[#5db872]/[0.08] p-3 text-xs text-[#d4cebe] space-y-1">
           <div className="flex items-center gap-1.5 font-medium text-[#5db872]">

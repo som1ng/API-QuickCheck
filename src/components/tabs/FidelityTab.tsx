@@ -1,13 +1,51 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { runFidelityAudit } from '../../engine/fidelity/fidelityScorer';
-import { FidelityReport } from '../../types/fidelity';
+import {
+  FidelityReport,
+  FidelityDepth,
+  ModelVerificationProfile,
+} from '../../types/fidelity';
 import { StatusBadge } from '../common/StatusBadge';
-import { ShieldCheck, Play, Loader2, CheckCircle2, XCircle, Clock, Check, Sparkles } from 'lucide-react';
+import { MetricCard } from '../common/MetricCard';
+import {
+  ShieldCheck,
+  Play,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Check,
+  Sparkles,
+  Coins,
+  ChevronDown,
+  Layers,
+  Gauge,
+  Sliders,
+  DollarSign,
+} from 'lucide-react';
+
+const COMMON_PRESET_MODELS = [
+  { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet (Thinking)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
+  { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet (New)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
+  { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (原生思维链)', tag: 'DeepSeek', family: 'deepseek' as ModelVerificationProfile },
+  { id: 'deepseek-chat', label: 'DeepSeek-V3', tag: 'DeepSeek', family: 'deepseek' as ModelVerificationProfile },
+  { id: 'gpt-4o', label: 'GPT-4o (Omni)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
+  { id: 'o1', label: 'OpenAI o1 (Full Reasoning)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
+  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', tag: 'Google', family: 'gemini' as ModelVerificationProfile },
+];
 
 export const FidelityTab: React.FC = () => {
-  const { config } = useApp().state;
+  const { state, dispatch } = useApp();
+  const { config, availableModels } = state;
 
+  // Custom Controls
+  const [selectedProfile, setSelectedProfile] = useState<ModelVerificationProfile>('auto');
+  const [selectedDepth, setSelectedDepth] = useState<FidelityDepth>('standard');
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [modelSearchQuery, setModelSearchQuery] = useState('');
+
+  // Execution State
   const [isRunning, setIsRunning] = useState(false);
   const [progressText, setProgressText] = useState('');
   const [progressPercent, setProgressPercent] = useState(0);
@@ -20,7 +58,7 @@ export const FidelityTab: React.FC = () => {
     }
 
     setIsRunning(true);
-    setProgressText('正在初始化 Claude / OpenAI 深度鉴别引擎...');
+    setProgressText('正在初始化深度鉴别引擎...');
     setProgressPercent(5);
 
     try {
@@ -28,9 +66,13 @@ export const FidelityTab: React.FC = () => {
         config.baseUrl,
         config.apiKey,
         config.selectedModel,
-        (step, pct) => {
-          setProgressText(step);
-          setProgressPercent(pct);
+        {
+          depth: selectedDepth,
+          profile: selectedProfile,
+          onProgress: (step, pct) => {
+            setProgressText(step);
+            setProgressPercent(pct);
+          },
         }
       );
       setReport(result);
@@ -43,11 +85,24 @@ export const FidelityTab: React.FC = () => {
     }
   };
 
+  const handleSelectModel = (modelId: string, family?: ModelVerificationProfile) => {
+    dispatch({ type: 'SET_SELECTED_MODEL', payload: modelId });
+    if (family && selectedProfile === 'auto') {
+      // Keep auto or sync
+    }
+    setShowModelDropdown(false);
+  };
+
+  // Filtered dropdown list
+  const filteredRemoteModels = availableModels.filter((m) =>
+    m.id.toLowerCase().includes(modelSearchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
-      {/* Top Action Card in Claude Warm Aesthetic */}
-      <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+      {/* 1. Top Controls & Diagnostic Setup Card */}
+      <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[#cc785c]/15 border border-[#cc785c]/30 flex items-center justify-center text-[#cc785c]">
@@ -57,39 +112,174 @@ export const FidelityTab: React.FC = () => {
                 真伪模型与降级掺假深度鉴别
               </h2>
             </div>
-            <p className="mt-1.5 text-xs text-[#9c9689] max-w-2xl leading-relaxed">
-              基于 Anthropic 官方服务端私钥签名 (Thinking Signature)、DeepSeek/o1 原生思维链协议与元认知冲突探针，深度穿透中转站真实身份。
+            <p className="mt-1 text-xs text-[#9c9689] max-w-2xl leading-relaxed">
+              自主选择目标模型、厂商专属判伪标准与检测深度，精准击穿中转站套壳伪装与思维链造假。
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-xs font-mono text-[#9c9689] bg-[#23211e] px-3.5 py-2 rounded-lg border border-[#2e2b27]">
-              目标: <span className="text-[#faf9f5] font-semibold">{config.selectedModel}</span>
-            </div>
+          <button
+            onClick={handleStartAudit}
+            disabled={isRunning || !config.baseUrl || !config.apiKey}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-6 py-2.5 text-xs font-medium text-[#faf9f5] shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isRunning ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>鉴别中 ({progressPercent}%)</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 fill-[#faf9f5]" />
+                <span>开始全维度验真</span>
+              </>
+            )}
+          </button>
+        </div>
 
-            <button
-              onClick={handleStartAudit}
-              disabled={isRunning}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-4 py-2 text-xs font-medium text-[#faf9f5] shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isRunning ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>鉴别中 ({progressPercent}%)</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5 fill-[#faf9f5]" />
-                  <span>开始真伪鉴别</span>
-                </>
+        {/* 2. Interactive Selection Controls (Model Dropdown, Family Profile, Scan Depth) */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-3 border-t border-[#2e2b27]">
+          {/* A. Searchable Target Model Dropdown (5 cols) */}
+          <div className="md:col-span-5 relative">
+            <label className="block text-xs font-medium text-[#faf9f5] mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#cc785c]" />
+                <span>测试目标模型 (可下拉或手动输入)</span>
+              </span>
+              {availableModels.length > 0 && (
+                <span className="text-[10px] text-[#5db872] font-mono">
+                  已探测 {availableModels.length} 个
+                </span>
               )}
-            </button>
+            </label>
+
+            <div className="relative">
+              <div className="flex rounded-lg border border-[#2e2b27] bg-[#23211e] focus-within:border-[#cc785c] transition">
+                <input
+                  type="text"
+                  value={config.selectedModel}
+                  onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
+                  placeholder="例如: claude-3-7-sonnet-20250219"
+                  className="w-full bg-transparent px-3 py-2 font-mono text-xs text-[#faf9f5] placeholder-[#9c9689]/60 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowModelDropdown(!showModelDropdown)}
+                  className="px-2.5 text-[#9c9689] hover:text-[#faf9f5] transition border-l border-[#2e2b27]"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Dropdown Menu */}
+              {showModelDropdown && (
+                <div className="absolute left-0 right-0 mt-1 rounded-xl border border-[#2e2b27] bg-[#23211e] p-2 shadow-2xl z-50 max-h-72 overflow-y-auto space-y-2">
+                  <input
+                    type="text"
+                    placeholder="搜索模型..."
+                    value={modelSearchQuery}
+                    onChange={(e) => setModelSearchQuery(e.target.value)}
+                    className="w-full rounded-md border border-[#2e2b27] bg-[#1b1a18] px-2.5 py-1.5 text-xs text-[#faf9f5] placeholder-[#9c9689] focus:outline-none focus:border-[#cc785c]"
+                  />
+
+                  {/* Hot Presets */}
+                  <div>
+                    <div className="text-[10px] uppercase font-semibold text-[#9c9689] px-2 py-1">
+                      热门官方模型预设
+                    </div>
+                    {COMMON_PRESET_MODELS.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSelectModel(item.id, item.family)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-[#2b2926] text-[#faf9f5] transition flex items-center justify-between font-mono"
+                      >
+                        <span>{item.id}</span>
+                        <span className="text-[10px] text-[#cc785c] px-1.5 py-0.5 rounded bg-[#cc785c]/10">
+                          {item.tag}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Remote Discovered Models */}
+                  {availableModels.length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase font-semibold text-[#5db872] px-2 py-1 border-t border-[#2e2b27] mt-1 pt-1.5">
+                        中转站已扫描可用模型 ({availableModels.length})
+                      </div>
+                      {filteredRemoteModels.slice(0, 30).map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleSelectModel(m.id)}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-[#2b2926] text-[#d4cebe] transition flex items-center justify-between font-mono"
+                        >
+                          <span className="truncate">{m.id}</span>
+                          <span className="text-[10px] text-[#9c9689]">Remote</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* B. Model Verification Profile / Family (4 cols) */}
+          <div className="md:col-span-4">
+            <label className="block text-xs font-medium text-[#faf9f5] mb-1.5 flex items-center gap-1.5">
+              <Sliders className="w-3.5 h-3.5 text-[#cc785c]" />
+              <span>评判准则 / 厂商体系</span>
+            </label>
+
+            <select
+              value={selectedProfile}
+              onChange={(e) => setSelectedProfile(e.target.value as ModelVerificationProfile)}
+              className="w-full rounded-lg border border-[#2e2b27] bg-[#23211e] px-3 py-2 text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none transition"
+            >
+              <option value="auto">⭐ 智能自动匹配 (推荐)</option>
+              <option value="claude">Anthropic Claude (Thinking Signature 验签 + 空间几何)</option>
+              <option value="deepseek">DeepSeek R1/V3 (原生 reasoning_content + 671B指纹)</option>
+              <option value="openai">OpenAI o1/o3/GPT-4o (系统指纹 + 知识库截止期)</option>
+              <option value="gemini">Google Gemini (原生思考流 + 搜索接地)</option>
+              <option value="universal">通用大模型 (元认知冲突 + 拓扑几何)</option>
+            </select>
+          </div>
+
+          {/* C. Diagnostic Rigor Depth (3 cols) */}
+          <div className="md:col-span-3">
+            <label className="block text-xs font-medium text-[#faf9f5] mb-1.5 flex items-center gap-1.5">
+              <Gauge className="w-3.5 h-3.5 text-[#cc785c]" />
+              <span>检测深度与精度</span>
+            </label>
+
+            <div className="grid grid-cols-3 gap-1 bg-[#23211e] p-1 rounded-lg border border-[#2e2b27]">
+              {[
+                { id: 'quick', label: '轻检', tip: '2项探针 · ~1s' },
+                { id: 'standard', label: '标准', tip: '5项探针 · ~4s' },
+                { id: 'deep', label: '死磕', tip: '8项探针 · ~8s' },
+              ].map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setSelectedDepth(d.id as FidelityDepth)}
+                  title={d.tip}
+                  className={`py-1.5 rounded text-xs font-medium transition text-center ${
+                    selectedDepth === d.id
+                      ? 'bg-[#cc785c] text-[#faf9f5] font-semibold'
+                      : 'text-[#9c9689] hover:text-[#faf9f5]'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Feedback Bar */}
         {isRunning && (
-          <div className="mt-5 space-y-2 pt-4 border-t border-[#2e2b27]">
+          <div className="mt-4 space-y-2 pt-3 border-t border-[#2e2b27] animate-in fade-in">
             <div className="flex justify-between text-xs text-[#9c9689]">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3 text-[#cc785c]" />
@@ -107,16 +297,49 @@ export const FidelityTab: React.FC = () => {
         )}
       </div>
 
-      {/* Report Dashboard */}
+      {/* 3. Comprehensive Diagnostics Report */}
       {report && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Main Verdict Card with Veridrop/Claude Split Layout */}
+          {/* Top Metrics Cards Row: Duration, Tokens, Cost, Pass Rate */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <MetricCard
+              label="检测总耗时"
+              value={(report.totalDurationMs / 1000).toFixed(2)}
+              unit="s"
+              status="neutral"
+              icon={<Clock className="w-4 h-4 text-[#9c9689]" />}
+            />
+            <MetricCard
+              label="消耗 Token 总计"
+              value={report.totalTokens.total}
+              unit="Tokens"
+              subValue={`Prompt: ${report.totalTokens.prompt} | Output: ${report.totalTokens.completion}`}
+              status="neutral"
+              icon={<Coins className="w-4 h-4 text-[#cc785c]" />}
+            />
+            <MetricCard
+              label="预估花费金额"
+              value={`$${report.estimatedCostUsd}`}
+              subValue={`约 ¥${(report.estimatedCostUsd * 7.25).toFixed(4)}`}
+              status="neutral"
+              icon={<DollarSign className="w-4 h-4 text-[#5db872]" />}
+            />
+            <MetricCard
+              label="探针通过率"
+              value={`${report.probes.filter((p) => p.passed).length}/${report.probes.length}`}
+              unit={`(${Math.round((report.probes.filter((p) => p.passed).length / (report.probes.length || 1)) * 100)}%)`}
+              status={report.overallScore >= 80 ? 'success' : report.overallScore >= 50 ? 'warning' : 'error'}
+              icon={<CheckCircle2 className="w-4 h-4 text-[#5db872]" />}
+            />
+          </div>
+
+          {/* Main Verdict Card (Circular Gauge + Structured Evidence Checklist) */}
           <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md">
             {/* Header Title & Tags */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-[#2e2b27]">
               <div>
                 <div className="text-[11px] uppercase tracking-wider text-[#9c9689] font-semibold mb-1">
-                  体检核验报告
+                  体检核验综合报告 · 准则 [{report.verificationProfile.toUpperCase()}] · 深度 [{report.depth.toUpperCase()}]
                 </div>
                 <div className="flex items-center gap-3">
                   <h3 className="font-serif-display text-2xl font-medium text-[#faf9f5]">
@@ -127,8 +350,7 @@ export const FidelityTab: React.FC = () => {
               </div>
 
               <div className="text-xs text-[#9c9689] font-mono flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5" />
-                <span>耗时 {report.probes.reduce((a, b) => a + b.latencyMs, 0)}ms</span>
+                <span>检测时间: {new Date(report.testedAt).toLocaleTimeString()}</span>
               </div>
             </div>
 
@@ -169,7 +391,7 @@ export const FidelityTab: React.FC = () => {
                   <div className="text-xs font-semibold text-[#faf9f5]">
                     {report.overallScore >= 90 ? '高保真官方真品' : report.overallScore >= 70 ? '协议表现良好' : '疑似降级或掺假'}
                   </div>
-                  <p className="text-[11px] text-[#9c9689] mt-1 line-clamp-2 px-2">
+                  <p className="text-[11px] text-[#9c9689] mt-1 line-clamp-2 px-2 leading-relaxed">
                     {report.summary}
                   </p>
                 </div>
@@ -191,7 +413,7 @@ export const FidelityTab: React.FC = () => {
                       </span>
                     )
                   ) : (
-                    <span className="text-[#9c9689]">非原生 messages 协议 (标准通过)</span>
+                    <span className="text-[#9c9689]">非原生 messages 协议 (跳过验签)</span>
                   )}
                 </div>
 
@@ -228,11 +450,11 @@ export const FidelityTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Probes Detailed Log Table */}
+          {/* Detailed Evidence Log Table */}
           <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] overflow-hidden shadow-md">
             <div className="p-4 border-b border-[#2e2b27] flex items-center justify-between">
               <h4 className="font-serif-display text-base font-medium text-[#faf9f5]">
-                探针实测明细与决策证据
+                探针实测明细与决策证据链
               </h4>
               <span className="text-xs text-[#9c9689] font-mono">共执行 {report.probes.length} 项探针</span>
             </div>
@@ -258,6 +480,9 @@ export const FidelityTab: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-4 text-xs font-mono text-[#9c9689] shrink-0">
+                    <div>
+                      Token: <span className="text-[#faf9f5] font-semibold">{probe.tokensUsed?.total || '-'}</span>
+                    </div>
                     <div>
                       得分: <span className="text-[#faf9f5] font-semibold">{probe.score}</span>/100
                     </div>

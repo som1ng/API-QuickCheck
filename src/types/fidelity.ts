@@ -1,5 +1,9 @@
 export type FidelityLevel = 'genuine' | 'suspect_downgraded' | 'fake_imposter' | 'inconclusive' | 'error';
 
+export type FidelityDepth = 'quick' | 'standard' | 'deep';
+
+export type ModelVerificationProfile = 'auto' | 'claude' | 'deepseek' | 'openai' | 'gemini' | 'universal';
+
 export interface ProbeResponseMeta {
   reasoningContent?: string;
   systemFingerprint?: string;
@@ -21,7 +25,8 @@ export interface ProbeVerdict {
 export interface FingerprintProbeDefinition {
   probeId: string;
   title: string;
-  targetFamily: 'claude' | 'reasoning_r1_o1' | 'gpt4o' | 'general';
+  targetFamily: 'claude' | 'deepseek' | 'openai' | 'gemini' | 'general';
+  minDepth: FidelityDepth;
   prompt: string;
   description: string;
   judge: (output: string, meta: ProbeResponseMeta) => ProbeVerdict;
@@ -36,6 +41,7 @@ export interface ProbeExecutionResult {
   reasoningContent?: string;
   details: string;
   latencyMs: number;
+  tokensUsed?: { prompt: number; completion: number; total: number };
   isApplicable?: boolean;
 }
 
@@ -57,6 +63,8 @@ export interface ReasoningVerificationResult {
 
 export interface FidelityReport {
   targetModel: string;
+  verificationProfile: ModelVerificationProfile;
+  depth: FidelityDepth;
   overallScore: number; // 0 ~ 100
   level: FidelityLevel;
   summary: string;
@@ -64,5 +72,12 @@ export interface FidelityReport {
   reasoningResult?: ReasoningVerificationResult;
   probes: ProbeExecutionResult[];
   systemFingerprint?: string;
+  totalDurationMs: number;
+  totalTokens: {
+    prompt: number;
+    completion: number;
+    total: number;
+  };
+  estimatedCostUsd: number;
   testedAt: number;
 }
