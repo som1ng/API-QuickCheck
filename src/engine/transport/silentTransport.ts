@@ -144,7 +144,7 @@ export async function silentFetch<T = unknown>(
     const isCors = errorObj.name === 'TypeError' && (errorObj.message.includes('fetch') || errorObj.message.includes('NetworkError') || errorObj.message.includes('Failed'));
 
     // If blocked by CORS or NetworkError in browser, silently fallback to proxy
-    if ((isCors || !isTimeout) && !disableFallback && !url.startsWith('/api/proxy')) {
+    if (!userSignal?.aborted && !disableFallback && !url.startsWith('/api/proxy')) {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
       return silentFetch<T>({
         ...options,

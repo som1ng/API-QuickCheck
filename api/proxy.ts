@@ -32,7 +32,8 @@ export default async function handler(req: Request) {
     );
   }
 
-  const targetUrl = decodeURIComponent(targetParam);
+  // URLSearchParams has already decoded the query value once.
+  const targetUrl = targetParam;
 
   try {
     const forwardHeaders = new Headers();

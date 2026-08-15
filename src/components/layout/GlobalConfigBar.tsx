@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { fetchRemoteModels } from '../../engine/scanner/batchScanner';
 import { sniffRelayProfile } from '../../engine/billing/quotaSniffer';
-import { Eye, EyeOff, RefreshCw, KeyRound, Globe, Wallet, CheckCircle2, Zap } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, KeyRound, Globe, Wallet, CheckCircle2, Zap, Layers } from 'lucide-react';
 
 const COMMON_URL_PRESETS = [
   { label: 'OpenAI 官方', url: 'https://api.openai.com/v1', defaultModel: 'gpt-4o' },
@@ -176,6 +176,38 @@ export const GlobalConfigBar: React.FC = () => {
               <span className="text-[#5db872] font-mono font-medium">已就绪 ({config.apiKey.length} 位)</span>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Always-available Model Input ── */}
+      <div className="space-y-2.5 border-t border-[#2e2b27] pt-5">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
+            <Layers className="w-[18px] h-[18px] text-[#cc785c]" />
+            <span>测试目标模型</span>
+          </label>
+          <span className="text-xs text-[#9c9689]">支持手动输入自定义模型 ID</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input
+            type="text"
+            value={config.selectedModel}
+            onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
+            placeholder="例如: gpt-4o / claude-3-7-sonnet"
+            className="w-full rounded-lg border border-[#2e2b27] bg-[#23211e] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]/40 transition"
+          />
+          <select
+            value={availableModels.some((model) => model.id === config.selectedModel) ? config.selectedModel : ''}
+            onChange={(e) => e.target.value && dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
+            className="w-full rounded-lg border border-[#2e2b27] bg-[#23211e] px-4 py-3 font-mono text-sm text-[#faf9f5] focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]/40 transition disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={availableModels.length === 0}
+          >
+            <option value="">{availableModels.length > 0 ? '从已探测模型中选择' : '暂无已探测模型'}</option>
+            {availableModels.map((model) => (
+              <option key={model.id} value={model.id}>{model.name || model.id}</option>
+            ))}
+          </select>
         </div>
       </div>
 

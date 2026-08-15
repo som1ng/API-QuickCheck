@@ -1,15 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import url from 'node:url'
 
 // Transparent local proxy with SSL bypass for local development
 const localCorsProxyPlugin = () => ({
   name: 'local-cors-proxy',
   configureServer(server: any) {
     server.middlewares.use('/api/proxy', async (req: any, res: any) => {
+      if (req.method === 'OPTIONS') {
+        res.statusCode = 204;
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', '*');
+        res.end();
+        return;
+      }
+
       try {
-        const rawUrl: string = req.url || '';
-        const queryIndex = rawUrl.indexOf('?target=');
-        const targetUrl = queryIndex !== -1 ? decodeURIComponent(rawUrl.slice(queryIndex + 8)) : '';
+        const requestUrl = new url.URL(req.url || '/', 'http://localhost');
+        const targetUrl = requestUrl.searchParams.get('target') || '';
 
         if (!targetUrl) {
           res.statusCode = 400;
@@ -39,7 +48,7 @@ const localCorsProxyPlugin = () => ({
         const forwardHeaders: Record<string, string | string[]> = {};
         for (const [k, v] of Object.entries(req.headers)) {
           const lk = k.toLowerCase();
-          if (!['host', 'origin', 'referer', 'content-length', 'connection'].includes(lk) && v !== undefined) {
+          if (!['host', 'origin', 'referer', 'content-length', 'connection', 'keep-alive', 'transfer-encoding', 'upgrade', 'accept-encoding'].includes(lk) && v !== undefined) {
             forwardHeaders[k] = v as any;
           }
         }
@@ -51,6 +60,7 @@ const localCorsProxyPlugin = () => ({
           forwardHeaders['content-length'] = String(bodyBuffer.length);
         }
 
+        let settled = false;
         const proxyReq = httpModule.request(
           targetUrl,
           {
@@ -60,6 +70,7 @@ const localCorsProxyPlugin = () => ({
             timeout: 10000,
           },
           (proxyRes: any) => {
+            settled = true;
             res.statusCode = proxyRes.statusCode || 200;
             res.statusMessage = proxyRes.statusMessage || '';
 
@@ -77,6 +88,8 @@ const localCorsProxyPlugin = () => ({
         );
 
         proxyReq.on('error', (err: any) => {
+          if (settled || res.headersSent) return;
+          settled = true;
           res.statusCode = 502;
           res.setHeader('Content-Type', 'application/json');
           res.setHeader('Access-Control-Allow-Origin', '*');
@@ -84,6 +97,8 @@ const localCorsProxyPlugin = () => ({
         });
 
         proxyReq.on('timeout', () => {
+          if (settled || res.headersSent) return;
+          settled = true;
           proxyReq.destroy();
           res.statusCode = 504;
           res.setHeader('Content-Type', 'application/json');
