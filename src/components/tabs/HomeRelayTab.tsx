@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { runFidelityAudit } from '../../engine/fidelity/fidelityScorer';
 import { fetchRemoteModels, runBatchScanPool } from '../../engine/scanner/batchScanner';
@@ -18,7 +18,6 @@ import {
   XCircle,
   Clock,
   Check,
-  Sparkles,
   Coins,
   Layers,
   Gauge,
@@ -37,18 +36,29 @@ import {
   EyeOff,
   RefreshCw,
   ListFilter,
+  ChevronDown,
 } from 'lucide-react';
 
 const POPULAR_MODELS = [
-  { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet', family: 'claude' },
-  { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', family: 'claude' },
-  { id: 'o3-mini', label: 'OpenAI o3-mini', family: 'openai' },
-  { id: 'o1', label: 'OpenAI o1', family: 'openai' },
-  { id: 'gpt-4o', label: 'GPT-4o', family: 'openai' },
-  { id: 'grok-3', label: 'Grok 3', family: 'xai' },
-  { id: 'grok-2-latest', label: 'Grok 2', family: 'xai' },
-  { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', family: 'gemini' },
-  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', family: 'gemini' },
+  // Anthropic Claude
+  { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet', family: 'claude' as const },
+  { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', family: 'claude' as const },
+  { id: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku', family: 'claude' as const },
+
+  // OpenAI
+  { id: 'gpt-4.5-preview', label: 'GPT-4.5', family: 'openai' as const },
+  { id: 'o3-mini', label: 'o3-mini', family: 'openai' as const },
+  { id: 'o1', label: 'OpenAI o1', family: 'openai' as const },
+  { id: 'gpt-4o', label: 'GPT-4o', family: 'openai' as const },
+
+  // xAI
+  { id: 'grok-3', label: 'Grok 3', family: 'xai' as const },
+  { id: 'grok-2-latest', label: 'Grok 2', family: 'xai' as const },
+
+  // Google Gemini
+  { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', family: 'gemini' as const },
+  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', family: 'gemini' as const },
+  { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', family: 'gemini' as const },
 ];
 
 export const HomeRelayTab: React.FC = () => {
@@ -60,8 +70,12 @@ export const HomeRelayTab: React.FC = () => {
 
   // Input states
   const [showKey, setShowKey] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<ModelVerificationProfile>('auto');
+  const [selectedProfile, setSelectedProfile] = useState<ModelVerificationProfile>('claude');
   const [selectedDepth, setSelectedDepth] = useState<FidelityDepth>('standard');
+
+  // Model combobox dropdown open/close
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
 
   // Fidelity Audit States
   const [isRunningAudit, setIsRunningAudit] = useState(false);
@@ -78,6 +92,17 @@ export const HomeRelayTab: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanProgress, setScanProgress] = useState<{ total: number; completed: number }>({ total: 0, completed: 0 });
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Auto-sniff models when user inputs baseUrl and apiKey
   useEffect(() => {
     if (!config.baseUrl || !config.apiKey || config.apiKey.length < 8) return;
@@ -86,7 +111,7 @@ export const HomeRelayTab: React.FC = () => {
         const models = await fetchRemoteModels(config.baseUrl, config.apiKey);
         if (models.length > 0) {
           dispatch({ type: 'SET_AVAILABLE_MODELS', payload: models });
-          if (!models.some((m) => m.id === config.selectedModel)) {
+          if (!config.selectedModel) {
             dispatch({ type: 'SET_SELECTED_MODEL', payload: models[0].id });
           }
         }
@@ -95,7 +120,23 @@ export const HomeRelayTab: React.FC = () => {
       }
     }, 1200);
     return () => clearTimeout(timer);
-  }, [config.baseUrl, config.apiKey, dispatch]);
+  }, [config.baseUrl, config.apiKey, config.selectedModel, dispatch]);
+
+  const handleSelectModel = (modelId: string, family?: 'claude' | 'openai' | 'xai' | 'gemini') => {
+    dispatch({ type: 'SET_SELECTED_MODEL', payload: modelId });
+    setIsModelDropdownOpen(false);
+
+    // Auto align profile based on model family
+    if (family) {
+      setSelectedProfile(family);
+    } else {
+      const lower = modelId.toLowerCase();
+      if (lower.includes('claude')) setSelectedProfile('claude');
+      else if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3')) setSelectedProfile('openai');
+      else if (lower.includes('grok') || lower.includes('xai')) setSelectedProfile('xai');
+      else if (lower.includes('gemini')) setSelectedProfile('gemini');
+    }
+  };
 
   const handleStartFidelityAudit = async () => {
     if (!config.apiKey || !config.baseUrl) {
@@ -239,7 +280,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             中转站检测
           </h1>
           <p className="mt-1 text-sm sm:text-base text-neutral-300 max-w-2xl leading-relaxed">
-            聚焦 4 家顶尖大厂大模型真实性、首字延迟 (TTFT)、思考流签名与可用性检测。
+            聚焦 4 家顶尖大厂（Anthropic Claude、OpenAI、xAI Grok、Google Gemini）真伪验真与首字速度 (TTFT)。
           </p>
         </div>
 
@@ -338,7 +379,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         {/* Row B: Model & Parameters (In Fidelity mode) */}
         {activeMode === 'fidelity' && (
           <div className="space-y-4 pt-4 border-t border-[#2e2b27]">
-            {/* Target Model Input + Pills */}
+            {/* Target Model Integrated Combobox Input + Pills */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
@@ -347,45 +388,96 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 </label>
                 {availableModels.length > 0 && (
                   <span className="text-xs text-[#6ee7b7] font-semibold bg-[#064e3b] border border-[#059669] px-2.5 py-1 rounded-md tracking-normal font-sans shadow-sm">
-                    已检测模型: {availableModels.length} 个
+                    已检测到模型: {availableModels.length} 个
                   </span>
                 )}
               </div>
 
-              {/* Model input + Quick selector */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  value={config.selectedModel}
-                  onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-                  placeholder="例如: claude-3-7-sonnet-20250219 / o3-mini / grok-3 / gemini-2.5-pro"
-                  className="flex-1 rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
-                />
-
-                {availableModels.length > 0 && (
-                  <select
-                    value={availableModels.some((m) => m.id === config.selectedModel) ? config.selectedModel : ''}
-                    onChange={(e) => e.target.value && dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-                    className="sm:w-64 rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 font-mono text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none cursor-pointer font-semibold"
+              {/* Integrated Combobox Component with Instant Built-in Dropdown Menu */}
+              <div className="relative" ref={modelDropdownRef}>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    value={config.selectedModel}
+                    onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
+                    onFocus={() => setIsModelDropdownOpen(true)}
+                    placeholder="输入或下拉挑选模型，例如: claude-3-7-sonnet-20250219 / gpt-4.5-preview / grok-3"
+                    className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-4 pr-10 py-3 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                    className="absolute right-3 p-1.5 rounded-lg text-neutral-400 hover:text-white transition"
+                    title="展开模型列表"
                   >
-                    <option value="">从已发现列表中挑选...</option>
-                    {availableModels.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name || m.id}
-                      </option>
-                    ))}
-                  </select>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isModelDropdownOpen ? 'rotate-180 text-[#cc785c]' : ''}`} />
+                  </button>
+                </div>
+
+                {/* Instant Floating Dropdown Menu */}
+                {isModelDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in duration-150 divide-y divide-[#2e2b27]/60">
+                    {/* Section 1: Curated Top Frontier Models */}
+                    <div className="p-2">
+                      <div className="px-3 py-1.5 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+                        🔥 4 家大厂顶尖旗舰模型
+                      </div>
+                      <div className="space-y-1">
+                        {POPULAR_MODELS.map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => handleSelectModel(m.id, m.family)}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono text-left transition ${
+                              config.selectedModel === m.id
+                                ? 'bg-[#cc785c] text-white font-semibold'
+                                : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
+                            }`}
+                          >
+                            <span>{m.id}</span>
+                            <span className="text-[11px] opacity-75 font-sans font-medium">{m.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 2: Remote Discovered Models (if fetched) */}
+                    {availableModels.length > 0 && (
+                      <div className="p-2">
+                        <div className="px-3 py-1.5 text-[11px] font-semibold text-[#6ee7b7] uppercase tracking-wider flex items-center justify-between">
+                          <span>🔍 接口端点发现模型 ({availableModels.length})</span>
+                        </div>
+                        <div className="space-y-1">
+                          {availableModels.map((m) => (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => handleSelectModel(m.id)}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono text-left transition ${
+                                config.selectedModel === m.id
+                                  ? 'bg-[#cc785c] text-white font-semibold'
+                                  : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
+                              }`}
+                            >
+                              <span>{m.id}</span>
+                              {m.name && <span className="text-[11px] opacity-70 truncate max-w-xs">{m.name}</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
 
               {/* Top Arena/Agent Leaderboard Model Pills */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-xs text-neutral-300 font-medium mr-1">顶尖大模型:</span>
+                <span className="text-xs text-neutral-300 font-medium mr-1">快捷选择:</span>
                 {POPULAR_MODELS.map((m) => (
                   <button
                     key={m.id}
                     type="button"
-                    onClick={() => dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id })}
+                    onClick={() => handleSelectModel(m.id, m.family)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-mono transition border model-pill tracking-wide ${
                       config.selectedModel === m.id
                         ? 'bg-[#cc785c] border-[#cc785c] text-white font-semibold shadow-sm'
@@ -400,22 +492,21 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
             {/* Sub-parameters: Profile & Depth */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Profile Selector */}
+              {/* Profile Selector (Explicit Choices Only) */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-200 mb-1.5 flex items-center gap-1.5 tracking-wide">
                   <Sliders className="w-3.5 h-3.5 text-[#cc785c]" />
-                  <span>检测体系</span>
+                  <span>检测体系 (选择对应的测试规则)</span>
                 </label>
                 <select
                   value={selectedProfile}
                   onChange={(e) => setSelectedProfile(e.target.value as ModelVerificationProfile)}
                   className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-[#faf9f5] font-semibold focus:border-[#cc785c] focus:outline-none cursor-pointer"
                 >
-                  <option value="auto">⭐ 智能自动匹配 (推荐)</option>
-                  <option value="claude">Anthropic Claude (官方签名 + Thinking)</option>
-                  <option value="openai">OpenAI (o1/o3/GPT-4o 指纹)</option>
-                  <option value="xai">xAI Grok (Grok-3/Grok-2 验真)</option>
-                  <option value="gemini">Google Gemini (Gemini 2.5 原生思考流)</option>
+                  <option value="claude">Anthropic Claude 体系 (官方加密签名 + Thinking 思考流)</option>
+                  <option value="openai">OpenAI 体系 (o1/o3/GPT-4.5 系统指纹 + 知识边界)</option>
+                  <option value="xai">xAI Grok 体系 (Grok-3/Grok-2 思考流与知识库)</option>
+                  <option value="gemini">Google Gemini 体系 (Gemini 2.5/2.0 原生思考流 + 搜索接地)</option>
                 </select>
               </div>
 
@@ -451,22 +542,13 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         )}
 
         {/* Row C: Action & Execution CTA */}
-        <div className="pt-4 border-t border-[#2e2b27] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="text-xs text-neutral-300 flex items-center gap-2 tracking-wide font-medium">
-            <Sparkles className="w-4 h-4 text-[#cc785c]" />
-            <span>
-              {activeMode === 'fidelity'
-                ? '自动测算首字速度 (TTFT)、生成速率 (TPS)、思维链与签名'
-                : '并发探测模型可用性与 HTTP 状态码'}
-            </span>
-          </div>
-
+        <div className="pt-4 border-t border-[#2e2b27] flex items-center justify-end">
           {activeMode === 'fidelity' ? (
             <button
               type="button"
               onClick={handleStartFidelityAudit}
               disabled={isRunningAudit || !config.baseUrl || !config.apiKey}
-              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-8 py-3.5 text-sm sm:text-base font-semibold text-white shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0 smooth-btn tracking-wide"
+              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-9 py-3.5 text-base font-semibold text-white shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0 smooth-btn tracking-wide"
             >
               {isRunningAudit ? (
                 <>
@@ -519,7 +601,6 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           <div className="space-y-2 pt-2 animate-in fade-in">
             <div className="flex justify-between text-xs text-neutral-200 font-medium">
               <span className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#cc785c]" />
                 {progressText}
               </span>
               <span className="font-mono text-[#faf9f5] font-semibold">{progressPercent}%</span>

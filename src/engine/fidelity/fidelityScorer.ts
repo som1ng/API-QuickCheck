@@ -78,10 +78,13 @@ export async function runFidelityAudit(
     if (depth === 'standard' && probe.minDepth === 'deep') return false;
 
     // Check profile applicability
-    if (resolvedProfile !== 'universal' && probe.targetFamily !== 'general' && probe.targetFamily !== resolvedProfile) {
-      // Allow claude probes if profile is claude, etc.
-      return false;
-    }
+    const profileMatch =
+      resolvedProfile === 'universal' ||
+      probe.targetFamily === 'general' ||
+      probe.targetFamily === resolvedProfile ||
+      ((resolvedProfile === 'xai' || resolvedProfile === 'grok') && (probe.targetFamily === 'xai' || probe.targetFamily === 'grok'));
+
+    if (!profileMatch) return false;
     return true;
   });
 
