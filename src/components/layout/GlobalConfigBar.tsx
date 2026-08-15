@@ -8,6 +8,7 @@ const COMMON_URL_PRESETS = [
   { label: 'OpenAI 官方', url: 'https://api.openai.com/v1', defaultModel: 'gpt-4o' },
   { label: 'Claude 官方', url: 'https://api.anthropic.com/v1', defaultModel: 'claude-3-7-sonnet-20250219' },
   { label: 'DeepSeek 官方', url: 'https://api.deepseek.com', defaultModel: 'deepseek-chat' },
+  { label: 'xAI (Grok)', url: 'https://api.x.ai/v1', defaultModel: 'grok-2-latest' },
   { label: 'Gemini 官方', url: 'https://generativelanguage.googleapis.com/v1beta', defaultModel: 'gemini-2.5-flash' },
   { label: 'OpenRouter', url: 'https://openrouter.ai/api/v1', defaultModel: 'openai/gpt-4o' },
   { label: '硅基流动', url: 'https://api.siliconflow.cn/v1', defaultModel: 'deepseek-ai/DeepSeek-V3' },
