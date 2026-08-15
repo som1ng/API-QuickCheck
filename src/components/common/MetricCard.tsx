@@ -20,32 +20,34 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   highlight = false,
 }) => {
   const statusStyles = {
-    success: 'text-[#5db872]',
-    warning: 'text-[#e8a55a]',
-    error: 'text-[#c64545]',
-    neutral: 'text-[#faf9f5]',
+    success: 'text-emerald-400',
+    warning: 'text-amber-400',
+    error: 'text-rose-400',
+    neutral: 'text-neutral-100',
   };
 
   return (
     <div
-      className={`relative rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-md transition-all hover:border-[#cc785c]/40 ${
+      className={`relative rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 shadow-sm transition-all hover:border-[#cc785c]/40 ${
         highlight ? 'ring-1 ring-[#cc785c]/50' : ''
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-sm text-[#9c9689] font-medium">{label}</span>
-        {icon && <div className="opacity-70">{icon}</div>}
+        <span className="text-xs text-neutral-400 font-semibold tracking-wide uppercase">{label}</span>
+        {icon && <div className="text-neutral-400">{icon}</div>}
       </div>
 
       <div className="mt-3 flex items-baseline gap-2">
-        <span className={`text-3xl font-bold tracking-tight font-mono ${statusStyles[status]}`}>
+        <span className={`text-2xl font-bold tracking-normal font-mono ${statusStyles[status]}`}>
           {value}
         </span>
-        {unit && <span className="text-sm text-[#9c9689] font-mono">{unit}</span>}
+        {unit && <span className="text-xs text-neutral-400 font-mono font-medium">{unit}</span>}
       </div>
 
       {subValue && (
-        <div className="mt-2 text-xs text-[#9c9689]">{subValue}</div>
+        <div className="mt-2 text-xs text-neutral-300 font-mono tracking-wide bg-white/5 border border-white/10 px-2 py-0.5 rounded-md inline-block">
+          {subValue}
+        </div>
       )}
     </div>
   );

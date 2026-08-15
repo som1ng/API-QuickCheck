@@ -250,10 +250,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
       {/* ── 1. Header & Mode Switcher ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif-display text-3xl sm:text-4xl font-semibold text-[#faf9f5] tracking-tight">
+          <h1 className="font-serif-display text-3xl sm:text-4xl font-semibold text-neutral-100 tracking-tight">
             中转站检测
           </h1>
-          <p className="mt-1 text-sm sm:text-base text-[#9c9689] max-w-2xl leading-relaxed">
+          <p className="mt-1 text-sm sm:text-base text-neutral-300 max-w-2xl leading-relaxed">
             检测 API 真实性、首字响应延迟 (TTFT) 与模型可用性。
           </p>
         </div>
@@ -263,10 +263,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           <button
             type="button"
             onClick={() => setActiveMode('fidelity')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all tracking-wide ${
               activeMode === 'fidelity'
-                ? 'bg-[#cc785c] text-[#faf9f5] shadow-sm'
-                : 'text-[#9c9689] hover:text-[#faf9f5]'
+                ? 'bg-[#cc785c] text-white shadow-sm'
+                : 'text-neutral-300 hover:text-white'
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -276,10 +276,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           <button
             type="button"
             onClick={() => setActiveMode('scanner')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all tracking-wide ${
               activeMode === 'scanner'
-                ? 'bg-[#cc785c] text-[#faf9f5] shadow-sm'
-                : 'text-[#9c9689] hover:text-[#faf9f5]'
+                ? 'bg-[#cc785c] text-white shadow-sm'
+                : 'text-neutral-300 hover:text-white'
             }`}
           >
             <ListFilter className="w-4 h-4" />
@@ -295,17 +295,17 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           {/* Base URL (7 cols) */}
           <div className="lg:col-span-7 space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
+              <label className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
                 <Globe className="w-4 h-4 text-[#cc785c]" />
                 <span>接口地址 (Base URL)</span>
               </label>
               <span
-                className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-medium ${
+                className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-medium tracking-wide ${
                   isOfficial
-                    ? 'bg-[#5db872]/15 text-[#5db872] border border-[#5db872]/30'
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25'
                     : config.baseUrl
                     ? 'bg-[#cc785c]/15 text-[#cc785c] border border-[#cc785c]/30'
-                    : 'text-[#9c9689]'
+                    : 'text-neutral-400 bg-white/5 border border-white/10'
                 }`}
               >
                 {isOfficial ? '官方直连' : config.baseUrl ? '中转节点' : '待配置'}
@@ -317,21 +317,21 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               placeholder="https://api.openai.com/v1"
               value={config.baseUrl}
               onChange={(e) => dispatch({ type: 'SET_BASE_URL', payload: e.target.value })}
-              className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/40 focus:border-[#cc785c] focus:outline-none smooth-input"
+              className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
             />
 
             {/* Presets */}
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-              <span className="text-xs text-[#9c9689] mr-1">快捷填入:</span>
+              <span className="text-xs text-neutral-400 font-medium mr-1">快捷填入:</span>
               {COMMON_PRESETS.map((p) => (
                 <button
                   key={p.label}
                   type="button"
                   onClick={() => handleApplyPreset(p)}
-                  className={`px-2.5 py-1 rounded-md text-xs transition border model-pill ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition border model-pill tracking-wide ${
                     config.baseUrl === p.url
-                      ? 'bg-[#cc785c]/20 border-[#cc785c] text-[#faf9f5] font-semibold'
-                      : 'bg-[#23211e] border-[#2e2b27] text-[#9c9689] hover:text-[#faf9f5]'
+                      ? 'bg-[#cc785c]/25 border-[#cc785c] text-white font-semibold'
+                      : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:border-[#cc785c]/40'
                   }`}
                 >
                   {p.label}
@@ -343,14 +343,14 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           {/* API Key (5 cols) */}
           <div className="lg:col-span-5 space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
+              <label className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-[#cc785c]" />
                 <span>API 密钥 (Key)</span>
               </label>
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="text-xs text-[#9c9689] hover:text-[#faf9f5] transition flex items-center gap-1"
+                className="text-xs text-neutral-400 hover:text-white transition flex items-center gap-1 font-medium"
               >
                 {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 <span>{showKey ? '隐藏' : '显示'}</span>
@@ -363,14 +363,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
                 value={config.apiKey}
                 onChange={(e) => dispatch({ type: 'SET_API_KEY', payload: e.target.value })}
-                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/40 focus:border-[#cc785c] focus:outline-none smooth-input"
+                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
               />
             </div>
 
-            <div className="flex items-center justify-between pt-0.5 text-xs text-[#9c9689]">
-              <span>零数据上云 · 内存直连</span>
+            <div className="flex items-center justify-between pt-0.5 text-xs text-neutral-400">
+              <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-neutral-300 font-mono">内存直连</span>
               {config.apiKey.length > 5 && (
-                <span className="text-[#5db872] font-mono font-medium">已就绪 ({config.apiKey.length} 位)</span>
+                <span className="text-emerald-400 font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">
+                  已就绪 ({config.apiKey.length} 位)
+                </span>
               )}
             </div>
           </div>
@@ -382,12 +384,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             {/* Target Model Input + Pills */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
+                <label className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#cc785c]" />
                   <span>测试目标模型</span>
                 </label>
                 {availableModels.length > 0 && (
-                  <span className="text-xs text-[#5db872] font-mono">
+                  <span className="text-xs text-emerald-400 font-mono font-medium bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 rounded-md tracking-wide">
                     已检测模型: {availableModels.length} 个
                   </span>
                 )}
@@ -400,14 +402,14 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   value={config.selectedModel}
                   onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
                   placeholder="例如: claude-3-7-sonnet-20250219 / gpt-4o / deepseek-reasoner"
-                  className="flex-1 rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/40 focus:border-[#cc785c] focus:outline-none smooth-input"
+                  className="flex-1 rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 font-mono text-sm text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
                 />
 
                 {availableModels.length > 0 && (
                   <select
                     value={availableModels.some((m) => m.id === config.selectedModel) ? config.selectedModel : ''}
                     onChange={(e) => e.target.value && dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-                    className="sm:w-64 rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 font-mono text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none cursor-pointer"
+                    className="sm:w-64 rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 font-mono text-xs text-neutral-200 focus:border-[#cc785c] focus:outline-none cursor-pointer"
                   >
                     <option value="">从已发现列表中挑选...</option>
                     {availableModels.map((m) => (
@@ -421,16 +423,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
               {/* Popular Model Pills */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-xs text-[#9c9689] mr-1">常用模型:</span>
+                <span className="text-xs text-neutral-400 font-medium mr-1">常用模型:</span>
                 {POPULAR_MODELS.map((m) => (
                   <button
                     key={m.id}
                     type="button"
                     onClick={() => dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id })}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-mono transition border model-pill ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition border model-pill tracking-wide ${
                       config.selectedModel === m.id
-                        ? 'bg-[#cc785c]/25 border-[#cc785c] text-[#faf9f5] font-semibold'
-                        : 'bg-[#23211e] border-[#2e2b27] text-[#9c9689] hover:text-[#faf9f5]'
+                        ? 'bg-[#cc785c]/25 border-[#cc785c] text-white font-semibold'
+                        : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white'
                     }`}
                   >
                     {m.label}
@@ -443,14 +445,14 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               {/* Profile Selector */}
               <div>
-                <label className="block text-xs font-semibold text-[#9c9689] mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5 flex items-center gap-1.5 tracking-wide">
                   <Sliders className="w-3.5 h-3.5 text-[#cc785c]" />
                   <span>检测体系</span>
                 </label>
                 <select
                   value={selectedProfile}
                   onChange={(e) => setSelectedProfile(e.target.value as ModelVerificationProfile)}
-                  className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none cursor-pointer"
+                  className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-neutral-200 focus:border-[#cc785c] focus:outline-none cursor-pointer"
                 >
                   <option value="auto">⭐ 智能自动匹配 (推荐)</option>
                   <option value="claude">Anthropic Claude (官方签名 + Thinking)</option>
@@ -463,7 +465,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
               {/* Depth Selector */}
               <div>
-                <label className="block text-xs font-semibold text-[#9c9689] mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5 flex items-center gap-1.5 tracking-wide">
                   <Gauge className="w-3.5 h-3.5 text-[#cc785c]" />
                   <span>检测深度</span>
                 </label>
@@ -477,10 +479,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       key={d.id}
                       type="button"
                       onClick={() => setSelectedDepth(d.id as FidelityDepth)}
-                      className={`py-1.5 rounded-lg text-xs font-medium transition ${
+                      className={`py-1.5 rounded-lg text-xs font-medium transition tracking-wide ${
                         selectedDepth === d.id
-                          ? 'bg-[#cc785c] text-[#faf9f5] font-semibold shadow-sm'
-                          : 'text-[#9c9689] hover:text-[#faf9f5]'
+                          ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
+                          : 'text-neutral-400 hover:text-white'
                       }`}
                     >
                       {d.label}
@@ -494,7 +496,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
         {/* Row C: Action & Execution CTA */}
         <div className="pt-4 border-t border-[#2e2b27] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="text-xs text-[#9c9689] flex items-center gap-2">
+          <div className="text-xs text-neutral-300 flex items-center gap-2 tracking-wide">
             <Sparkles className="w-4 h-4 text-[#cc785c]" />
             <span>
               {activeMode === 'fidelity'
@@ -508,7 +510,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               type="button"
               onClick={handleStartFidelityAudit}
               disabled={isRunningAudit || !config.baseUrl || !config.apiKey}
-              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-8 py-3.5 text-sm sm:text-base font-semibold text-[#faf9f5] shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0 smooth-btn"
+              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-8 py-3.5 text-sm sm:text-base font-semibold text-white shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0 smooth-btn tracking-wide"
             >
               {isRunningAudit ? (
                 <>
@@ -517,7 +519,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 </>
               ) : (
                 <>
-                  <Play className="w-5 h-5 fill-[#faf9f5]" />
+                  <Play className="w-5 h-5 fill-white" />
                   <span>开始检测</span>
                 </>
               )}
@@ -528,7 +530,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 type="button"
                 onClick={handleFetchModels}
                 disabled={isLoadingModels || isScanning}
-                className="inline-flex items-center gap-2 rounded-xl border border-[#2e2b27] bg-[#23211e] px-4 py-3 text-xs font-semibold text-[#d4cebe] hover:bg-[#2b2926] hover:text-[#faf9f5] transition disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#2e2b27] bg-[#23211e] px-4 py-3 text-xs font-semibold text-neutral-200 hover:bg-[#2b2926] hover:text-white transition disabled:opacity-40 tracking-wide"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoadingModels ? 'animate-spin' : ''}`} />
                 <span>{availableModels.length > 0 ? `已拉取 (${availableModels.length})` : '拉取清单'}</span>
@@ -538,7 +540,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 type="button"
                 onClick={handleStartBatchScan}
                 disabled={isScanning || (!config.baseUrl || !config.apiKey)}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-6 py-3 text-xs sm:text-sm font-semibold text-[#faf9f5] shadow-md transition disabled:opacity-50 smooth-btn"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] px-6 py-3 text-xs sm:text-sm font-semibold text-white shadow-md transition disabled:opacity-50 smooth-btn tracking-wide"
               >
                 {isScanning ? (
                   <>
@@ -547,7 +549,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 fill-[#faf9f5]" />
+                    <Play className="w-4 h-4 fill-white" />
                     <span>开始并发检测</span>
                   </>
                 )}
@@ -559,12 +561,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         {/* Progress Bar */}
         {isRunningAudit && (
           <div className="space-y-2 pt-2 animate-in fade-in">
-            <div className="flex justify-between text-xs text-[#9c9689]">
+            <div className="flex justify-between text-xs text-neutral-300">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#cc785c]" />
                 {progressText}
               </span>
-              <span className="font-mono text-[#faf9f5] font-semibold">{progressPercent}%</span>
+              <span className="font-mono text-white font-semibold">{progressPercent}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-[#23211e]">
               <div
@@ -586,11 +588,11 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               <div className="lg:col-span-7 rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-6 sm:p-7 shadow-lg space-y-5 flex flex-col justify-between smooth-card">
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-serif-display text-lg font-semibold text-[#faf9f5] flex items-center gap-2.5">
+                    <h3 className="font-serif-display text-lg font-semibold text-neutral-100 flex items-center gap-2.5">
                       <Fingerprint className="w-5 h-5 text-[#cc785c]" />
                       <span>就绪检测项 (Active Probes)</span>
                     </h3>
-                    <span className="text-xs px-2.5 py-0.5 rounded-md bg-[#23211e] border border-[#2e2b27] text-[#5db872] font-mono">
+                    <span className="text-xs px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-mono font-medium tracking-wide">
                       {selectedDepth === 'quick' ? '2 项核心' : selectedDepth === 'standard' ? '5 项标准' : '8 项深度'}
                     </span>
                   </div>
@@ -628,15 +630,15 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                         className="p-3.5 rounded-xl border border-[#2e2b27] bg-[#23211e]/60 hover:bg-[#23211e] transition"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-[#5db872]" />
+                          <span className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                             <span>{probe.title}</span>
                           </span>
-                          <span className="text-xs px-2 py-0.5 rounded font-mono bg-[#141413] border border-[#2e2b27] text-[#cc785c]">
+                          <span className="text-xs px-2.5 py-0.5 rounded-md font-mono bg-white/5 border border-white/10 text-neutral-300 font-medium tracking-wide">
                             {probe.tag}
                           </span>
                         </div>
-                        <p className="text-xs text-[#9c9689] pl-6 leading-relaxed">
+                        <p className="text-xs text-neutral-300 pl-6 leading-relaxed tracking-normal">
                           {probe.desc}
                         </p>
                       </div>
@@ -644,59 +646,59 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   </div>
                 </div>
 
-                <div className="pt-3 flex items-center justify-between text-xs text-[#9c9689] font-mono border-t border-[#2e2b27]/60">
+                <div className="pt-3 flex items-center justify-between text-xs text-neutral-400 font-mono border-t border-[#2e2b27]/60 tracking-wide">
                   <span>点击上方按钮开始检测</span>
-                  <span className="text-[#faf9f5]">预估耗时: {selectedDepth === 'quick' ? '1~2s' : selectedDepth === 'standard' ? '3~5s' : '6~9s'}</span>
+                  <span className="text-neutral-200 font-medium">预估耗时: {selectedDepth === 'quick' ? '1~2s' : selectedDepth === 'standard' ? '3~5s' : '6~9s'}</span>
                 </div>
               </div>
 
               {/* Scoring Standards (5 cols) */}
               <div className="lg:col-span-5 rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-6 sm:p-7 shadow-lg space-y-5 flex flex-col justify-between smooth-card">
                 <div className="space-y-3.5">
-                  <h3 className="font-serif-display text-lg font-semibold text-[#faf9f5] flex items-center gap-2.5">
+                  <h3 className="font-serif-display text-lg font-semibold text-neutral-100 flex items-center gap-2.5">
                     <Activity className="w-5 h-5 text-[#cc785c]" />
                     <span>评分判定标准</span>
                   </h3>
 
                   <div className="space-y-3">
-                    <div className="p-3.5 rounded-xl border border-[#5db872]/30 bg-[#5db872]/[0.08] space-y-1">
-                      <div className="flex items-center justify-between font-semibold text-sm text-[#5db872]">
+                    <div className="p-3.5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
+                      <div className="flex items-center justify-between font-semibold text-sm text-emerald-400 tracking-wide">
                         <span>85 ~ 100 分 · 官方正品</span>
                         <Check className="w-4 h-4" />
                       </div>
-                      <p className="text-xs text-[#d4cebe] leading-relaxed">
+                      <p className="text-xs text-neutral-300 leading-relaxed tracking-normal">
                         官方直连或透传，签名完整，原生思维链无修改，响应速度正常。
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl border border-[#e8a55a]/30 bg-[#e8a55a]/[0.08] space-y-1">
-                      <div className="flex items-center justify-between font-semibold text-sm text-[#e8a55a]">
+                    <div className="p-3.5 rounded-xl border border-amber-500/25 bg-amber-500/10 space-y-1">
+                      <div className="flex items-center justify-between font-semibold text-sm text-amber-400 tracking-wide">
                         <span>50 ~ 84 分 · 疑似降级 / 包装异常</span>
                         <span className="text-xs font-mono font-bold">⚠️ 提示</span>
                       </div>
-                      <p className="text-xs text-[#d4cebe] leading-relaxed">
+                      <p className="text-xs text-neutral-300 leading-relaxed tracking-normal">
                         存在伪造思考流、缺少官方签名或存在网关预设指令注入。
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl border border-[#c64545]/30 bg-[#c64545]/[0.08] space-y-1">
-                      <div className="flex items-center justify-between font-semibold text-sm text-[#c64545]">
+                    <div className="p-3.5 rounded-xl border border-rose-500/25 bg-rose-500/10 space-y-1">
+                      <div className="flex items-center justify-between font-semibold text-sm text-rose-400 tracking-wide">
                         <span>0 ~ 49 分 · 虚假冒充</span>
                         <XCircle className="w-4 h-4" />
                       </div>
-                      <p className="text-xs text-[#d4cebe] leading-relaxed">
+                      <p className="text-xs text-neutral-300 leading-relaxed tracking-normal">
                         模型替换或伪造响应，探针测试未达标。
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs text-[#9c9689] space-y-1">
-                  <span className="text-[#faf9f5] font-semibold flex items-center gap-1.5">
+                <div className="p-3.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs text-neutral-300 space-y-1">
+                  <span className="text-neutral-100 font-semibold flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-[#cc785c]" />
                     隐私说明
                   </span>
-                  <p>请求由浏览器直接发出，不存储任何密钥与测试数据。</p>
+                  <p className="text-neutral-400">请求由浏览器直接发出，不存储任何密钥与测试数据。</p>
                 </div>
               </div>
             </div>
@@ -709,119 +711,135 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 {/* Metric 1: 首字响应速度 (TTFT) */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
-                  <div className="flex items-center justify-between text-xs text-[#9c9689]">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                     <span>首字速度 (TTFT)</span>
                     <Zap className="w-4 h-4 text-[#cc785c]" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-2xl font-bold text-[#faf9f5]">
+                    <span className="font-mono text-2xl font-bold text-neutral-100">
                       {report.firstTokenLatencyMs ? report.firstTokenLatencyMs : '--'}
                     </span>
-                    <span className="text-xs text-[#9c9689] font-mono">ms</span>
+                    <span className="text-xs text-neutral-400 font-mono">ms</span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#5db872]">
-                    {report.firstTokenLatencyMs && report.firstTokenLatencyMs < 800
-                      ? '⚡ 极速'
-                      : report.firstTokenLatencyMs && report.firstTokenLatencyMs < 2000
-                      ? '🟢 正常'
-                      : '🟡 较慢'}
+                  <div className="text-xs font-mono font-medium tracking-wide">
+                    {report.firstTokenLatencyMs && report.firstTokenLatencyMs < 800 ? (
+                      <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">⚡ 极速</span>
+                    ) : report.firstTokenLatencyMs && report.firstTokenLatencyMs < 2000 ? (
+                      <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">🟢 正常</span>
+                    ) : (
+                      <span className="text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded">🟡 较慢</span>
+                    )}
                   </div>
                 </div>
 
                 {/* Metric 2: 生成速率 (TPS) */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
-                  <div className="flex items-center justify-between text-xs text-[#9c9689]">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                     <span>生成速率 (TPS)</span>
-                    <Activity className="w-4 h-4 text-[#5db872]" />
+                    <Activity className="w-4 h-4 text-emerald-400" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-2xl font-bold text-[#faf9f5]">
+                    <span className="font-mono text-2xl font-bold text-neutral-100">
                       {report.generationTps ? report.generationTps : '--'}
                     </span>
-                    <span className="text-xs text-[#9c9689] font-mono">tok/s</span>
+                    <span className="text-xs text-neutral-400 font-mono">tok/s</span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#9c9689]">
-                    {report.generationTps && report.generationTps > 30 ? '🚀 正常输出' : '流式生成'}
+                  <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
+                    <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+                      {report.generationTps && report.generationTps > 30 ? '🚀 正常输出' : '流式生成'}
+                    </span>
                   </div>
                 </div>
 
                 {/* Metric 3: 思考耗时 */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
-                  <div className="flex items-center justify-between text-xs text-[#9c9689]">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                     <span>思考耗时</span>
-                    <Cpu className="w-4 h-4 text-[#e8a55a]" />
+                    <Cpu className="w-4 h-4 text-amber-400" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-2xl font-bold text-[#faf9f5]">
+                    <span className="font-mono text-2xl font-bold text-neutral-100">
                       {report.thinkingTimeMs ? report.thinkingTimeMs : 0}
                     </span>
-                    <span className="text-xs text-[#9c9689] font-mono">ms</span>
+                    <span className="text-xs text-neutral-400 font-mono">ms</span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#9c9689]">
-                    {report.reasoningResult?.hasReasoningStream ? '🧠 原生思考流' : '无思考链'}
+                  <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
+                    <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+                      {report.reasoningResult?.hasReasoningStream ? '🧠 原生思考流' : '无思考链'}
+                    </span>
                   </div>
                 </div>
 
                 {/* Metric 4: 消耗 Token */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
-                  <div className="flex items-center justify-between text-xs text-[#9c9689]">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                     <span>消耗 Token</span>
                     <Coins className="w-4 h-4 text-[#cc785c]" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-2xl font-bold text-[#faf9f5]">
+                    <span className="font-mono text-2xl font-bold text-neutral-100">
                       {report.totalTokens.total}
                     </span>
-                    <span className="text-xs text-[#9c9689] font-mono">tok</span>
+                    <span className="text-xs text-neutral-400 font-mono">tok</span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#9c9689]">
-                    约 ${(report.estimatedCostUsd).toFixed(4)}
+                  <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
+                    <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+                      约 ${(report.estimatedCostUsd).toFixed(4)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Metric 5: 总耗时 */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
-                  <div className="flex items-center justify-between text-xs text-[#9c9689]">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                     <span>检测总耗时</span>
-                    <Clock className="w-4 h-4 text-[#9c9689]" />
+                    <Clock className="w-4 h-4 text-neutral-400" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-2xl font-bold text-[#faf9f5]">
+                    <span className="font-mono text-2xl font-bold text-neutral-100">
                       {(report.totalDurationMs / 1000).toFixed(2)}
                     </span>
-                    <span className="text-xs text-[#9c9689] font-mono">s</span>
+                    <span className="text-xs text-neutral-400 font-mono">s</span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#9c9689]">
-                    {report.probes.length} 项测试项
+                  <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
+                    <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+                      {report.probes.length} 项测试项
+                    </span>
                   </div>
                 </div>
 
                 {/* Metric 6: 评分 */}
                 <div className={`rounded-xl border p-5 space-y-2 shadow-sm smooth-card ${
                   report.overallScore >= 85
-                    ? 'border-[#5db872]/40 bg-[#5db872]/10'
+                    ? 'border-emerald-500/30 bg-emerald-500/10'
                     : report.overallScore >= 50
-                    ? 'border-[#e8a55a]/40 bg-[#e8a55a]/10'
-                    : 'border-[#c64545]/40 bg-[#c64545]/10'
+                    ? 'border-amber-500/30 bg-amber-500/10'
+                    : 'border-rose-500/30 bg-rose-500/10'
                 }`}>
-                  <div className="flex items-center justify-between text-xs text-[#faf9f5] font-semibold">
+                  <div className="flex items-center justify-between text-xs text-neutral-100 font-semibold tracking-wide uppercase">
                     <span>真实性评分</span>
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className={`font-mono text-2xl font-bold ${
                       report.overallScore >= 85
-                        ? 'text-[#5db872]'
+                        ? 'text-emerald-400'
                         : report.overallScore >= 50
-                        ? 'text-[#e8a55a]'
-                        : 'text-[#c64545]'
+                        ? 'text-amber-400'
+                        : 'text-rose-400'
                     }`}>
                       {report.overallScore}
                     </span>
-                    <span className="text-xs font-mono opacity-80">/100</span>
+                    <span className="text-xs font-mono text-neutral-300">/100</span>
                   </div>
-                  <div className="text-[11px] font-mono font-semibold">
-                    {report.level === 'genuine' ? '✅ 官方正品' : report.level === 'suspect_downgraded' ? '⚠️ 疑似降级' : '❌ 虚假冒充'}
+                  <div className="text-xs font-mono font-semibold tracking-wide">
+                    {report.level === 'genuine' ? (
+                      <span className="text-emerald-400">✅ 官方正品</span>
+                    ) : report.level === 'suspect_downgraded' ? (
+                      <span className="text-amber-400">⚠️ 疑似降级</span>
+                    ) : (
+                      <span className="text-rose-400">❌ 虚假冒充</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -830,22 +848,22 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               <div
                 className={`rounded-2xl border p-7 sm:p-8 shadow-2xl relative overflow-hidden smooth-card ${
                   report.overallScore >= 85
-                    ? 'border-[#5db872]/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-[#5db872]/[0.06]'
+                    ? 'border-emerald-500/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-emerald-500/[0.08]'
                     : report.overallScore >= 50
-                    ? 'border-[#e8a55a]/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-[#e8a55a]/[0.06]'
-                    : 'border-[#c64545]/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-[#c64545]/[0.06]'
+                    ? 'border-amber-500/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-amber-500/[0.08]'
+                    : 'border-rose-500/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-rose-500/[0.08]'
                 }`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wide ${
                           report.overallScore >= 85
-                            ? 'bg-[#5db872]/20 text-[#5db872] border border-[#5db872]/40'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                             : report.overallScore >= 50
-                            ? 'bg-[#e8a55a]/20 text-[#e8a55a] border border-[#e8a55a]/40'
-                            : 'bg-[#c64545]/20 text-[#c64545] border border-[#c64545]/40'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                         }`}
                       >
                         {report.overallScore >= 85 ? (
@@ -864,24 +882,24 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                         </span>
                       </span>
 
-                      <span className="text-xs text-[#9c9689] font-mono">
-                        测试模型: <strong className="text-[#faf9f5]">{report.targetModel}</strong>
+                      <span className="text-xs text-neutral-300 font-mono tracking-wide">
+                        测试模型: <strong className="text-white font-semibold">{report.targetModel}</strong>
                       </span>
-                      <span className="text-xs text-[#9c9689] font-mono">
+                      <span className="text-xs text-neutral-400 font-mono tracking-wide">
                         检测时间: {new Date(report.testedAt).toLocaleTimeString()}
                       </span>
                     </div>
 
-                    <h3 className="font-serif-display text-2xl sm:text-3xl font-semibold text-[#faf9f5] tracking-tight">
+                    <h3 className="font-serif-display text-2xl sm:text-3xl font-semibold text-neutral-100 tracking-tight">
                       {report.summary}
                     </h3>
 
                     <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                       {report.signatureResult?.isApplicable && (
-                        <span className={`px-2.5 py-1 rounded-md font-mono border flex items-center gap-1.5 ${
+                        <span className={`px-2.5 py-1 rounded-lg font-mono tracking-wide border flex items-center gap-1.5 ${
                           report.signatureResult.passed
-                            ? 'bg-[#5db872]/15 text-[#5db872] border-[#5db872]/30'
-                            : 'bg-[#c64545]/15 text-[#c64545] border-[#c64545]/30'
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
                         }`}>
                           <Shield className="w-3.5 h-3.5" />
                           <span>{report.signatureResult.passed ? 'Anthropic 官方签名校验通过' : '签名校验失败'}</span>
@@ -889,13 +907,13 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       )}
 
                       {report.reasoningResult?.hasReasoningStream && (
-                        <span className="px-2.5 py-1 rounded-md font-mono bg-[#23211e] border border-[#2e2b27] text-[#d4cebe] flex items-center gap-1.5">
+                        <span className="px-2.5 py-1 rounded-lg font-mono tracking-wide bg-white/5 border border-white/10 text-neutral-200 flex items-center gap-1.5">
                           <Cpu className="w-3.5 h-3.5 text-[#cc785c]" />
                           <span>原生 `{report.reasoningResult.reasoningFieldUsed}` 协议</span>
                         </span>
                       )}
 
-                      <span className="px-2.5 py-1 rounded-md font-mono bg-[#23211e] border border-[#2e2b27] text-[#9c9689]">
+                      <span className="px-2.5 py-1 rounded-lg font-mono tracking-wide bg-white/5 border border-white/10 text-neutral-300">
                         地址: {config.baseUrl}
                       </span>
                     </div>
@@ -906,12 +924,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     <button
                       type="button"
                       onClick={handleCopyMarkdownReport}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs font-semibold text-[#faf9f5] hover:bg-[#2b2926] hover:border-[#cc785c]/40 transition shadow-sm smooth-btn"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs font-semibold text-white hover:bg-[#2b2926] hover:border-[#cc785c]/40 transition shadow-sm smooth-btn tracking-wide"
                     >
                       {copiedReport ? (
                         <>
-                          <Check className="w-4 h-4 text-[#5db872]" />
-                          <span className="text-[#5db872]">已复制报告</span>
+                          <Check className="w-4 h-4 text-emerald-400" />
+                          <span className="text-emerald-400">已复制报告</span>
                         </>
                       ) : (
                         <>
@@ -925,7 +943,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       type="button"
                       onClick={handleStartFidelityAudit}
                       disabled={isRunningAudit}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#141413] border border-[#2e2b27] text-xs font-semibold text-[#9c9689] hover:text-[#faf9f5] hover:border-[#cc785c]/40 transition smooth-btn"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#141413] border border-[#2e2b27] text-xs font-semibold text-neutral-300 hover:text-white hover:border-[#cc785c]/40 transition smooth-btn tracking-wide"
                     >
                       <RotateCcw className="w-4 h-4" />
                       <span>重新检测</span>
@@ -939,23 +957,23 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 {/* Header with Filter Pills */}
                 <div className="p-5 sm:p-6 border-b border-[#2e2b27] flex flex-wrap items-center justify-between gap-4 bg-[#141413]/60">
                   <div>
-                    <h4 className="font-serif-display text-xl font-semibold text-[#faf9f5]">
+                    <h4 className="font-serif-display text-xl font-semibold text-neutral-100">
                       探针结果明细 ({report.probes.length} 项)
                     </h4>
-                    <p className="text-xs text-[#9c9689] mt-0.5">
+                    <p className="text-xs text-neutral-300 mt-0.5 tracking-normal">
                       各维度测试项执行结果与原始回包数据。
                     </p>
                   </div>
 
                   {/* Filter Tabs */}
-                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs font-semibold">
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs font-semibold tracking-wide">
                     <button
                       type="button"
                       onClick={() => setProbeFilter('all')}
                       className={`px-3 py-1.5 rounded-lg transition ${
                         probeFilter === 'all'
-                          ? 'bg-[#cc785c] text-[#faf9f5]'
-                          : 'text-[#9c9689] hover:text-[#faf9f5]'
+                          ? 'bg-[#cc785c] text-white'
+                          : 'text-neutral-400 hover:text-white'
                       }`}
                     >
                       全部 ({report.probes.length})
@@ -965,8 +983,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       onClick={() => setProbeFilter('passed')}
                       className={`px-3 py-1.5 rounded-lg transition ${
                         probeFilter === 'passed'
-                          ? 'bg-[#5db872] text-[#faf9f5]'
-                          : 'text-[#9c9689] hover:text-[#faf9f5]'
+                          ? 'bg-emerald-500 text-white'
+                          : 'text-neutral-400 hover:text-white'
                       }`}
                     >
                       通过 ({report.probes.filter((p) => p.passed).length})
@@ -976,8 +994,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       onClick={() => setProbeFilter('failed')}
                       className={`px-3 py-1.5 rounded-lg transition ${
                         probeFilter === 'failed'
-                          ? 'bg-[#c64545] text-[#faf9f5]'
-                          : 'text-[#9c9689] hover:text-[#faf9f5]'
+                          ? 'bg-rose-500 text-white'
+                          : 'text-neutral-400 hover:text-white'
                       }`}
                     >
                       未通过 ({report.probes.filter((p) => !p.passed).length})
@@ -992,19 +1010,19 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           {item.passed ? (
-                            <div className="w-7 h-7 rounded-lg bg-[#5db872]/15 border border-[#5db872]/30 flex items-center justify-center text-[#5db872] shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                               <Check className="w-4 h-4" />
                             </div>
                           ) : (
-                            <div className="w-7 h-7 rounded-lg bg-[#c64545]/15 border border-[#c64545]/30 flex items-center justify-center text-[#c64545] shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
                               <XCircle className="w-4 h-4" />
                             </div>
                           )}
                           <div>
-                            <h5 className="text-sm font-semibold text-[#faf9f5]">
+                            <h5 className="text-sm font-semibold text-neutral-100">
                               {item.title}
                             </h5>
-                            <div className="flex items-center gap-2 text-xs text-[#9c9689] font-mono mt-0.5">
+                            <div className="flex items-center gap-2 text-xs text-neutral-400 font-mono mt-0.5 tracking-wide">
                               <span>耗时: {item.latencyMs}ms</span>
                               <span>·</span>
                               <span>Token: {item.tokensUsed?.total || '--'}</span>
@@ -1013,31 +1031,31 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                         </div>
 
                         <span
-                          className={`text-xs px-3 py-1 rounded-full font-mono font-semibold ${
+                          className={`text-xs px-3 py-1 rounded-full font-mono font-semibold tracking-wide ${
                             item.passed
-                              ? 'bg-[#5db872]/15 text-[#5db872] border border-[#5db872]/30'
-                              : 'bg-[#c64545]/15 text-[#c64545] border border-[#c64545]/30'
+                              ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                              : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                           }`}
                         >
                           {item.passed ? `通过 (${item.score}分)` : `未通过 (${item.score}分)`}
                         </span>
                       </div>
 
-                      <p className="text-xs text-[#d4cebe] leading-relaxed pl-10">
+                      <p className="text-xs text-neutral-300 leading-relaxed pl-10 tracking-normal">
                         {item.details}
                       </p>
 
                       {item.actualOutput && (
                         <div className="pl-10 pt-1">
-                          <div className="rounded-xl bg-[#141413] border border-[#2e2b27] overflow-hidden">
-                            <div className="flex items-center justify-between px-3.5 py-1.5 bg-[#1b1a18] border-b border-[#2e2b27] text-[11px] font-mono text-[#9c9689]">
+                          <div className="rounded-xl bg-[#10100f] border border-white/10 overflow-hidden">
+                            <div className="flex items-center justify-between px-3.5 py-1.5 bg-[#1b1a18] border-b border-[#2e2b27] text-xs font-mono text-neutral-400 tracking-wide">
                               <span className="flex items-center gap-1.5">
                                 <Terminal className="w-3.5 h-3.5 text-[#cc785c]" />
                                 <span>模型响应片段</span>
                               </span>
                               <span>RAW OUTPUT</span>
                             </div>
-                            <pre className="p-3.5 font-mono text-xs text-[#d4cebe] overflow-x-auto whitespace-pre-wrap max-h-40 leading-relaxed">
+                            <pre className="p-3.5 font-mono text-xs text-neutral-200 overflow-x-auto whitespace-pre-wrap max-h-40 leading-relaxed tracking-wide">
                               {item.actualOutput.trim()}
                             </pre>
                           </div>
@@ -1069,10 +1087,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   key={p.id}
                   type="button"
                   onClick={() => setFilterProvider(p.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition tracking-wide ${
                     filterProvider === p.id
-                      ? 'bg-[#cc785c] text-[#faf9f5]'
-                      : 'bg-[#23211e] text-[#9c9689] hover:text-[#faf9f5]'
+                      ? 'bg-[#cc785c] text-white'
+                      : 'bg-[#23211e] text-neutral-300 hover:text-white'
                   }`}
                 >
                   {p.label}
@@ -1081,27 +1099,27 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             </div>
 
             <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9c9689]" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
                 placeholder="搜索模型 ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-xs font-mono text-[#faf9f5] focus:border-[#cc785c] focus:outline-none smooth-input"
+                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-xs font-mono text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
               />
             </div>
           </div>
 
           {/* Model List Table */}
           {availableModels.length === 0 ? (
-            <div className="p-12 text-center text-[#9c9689] text-sm space-y-2">
+            <div className="p-12 text-center text-neutral-400 text-sm space-y-2">
               <Layers className="w-8 h-8 text-[#cc785c]/40 mx-auto" />
               <p>暂无模型数据，请在上方输入接口地址与 Key 后点击「拉取清单」或「开始并发检测」</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#141413] border-b border-[#2e2b27] text-[#9c9689] uppercase font-semibold">
+                <thead className="bg-[#141413] border-b border-[#2e2b27] text-neutral-400 uppercase font-semibold tracking-wide">
                   <tr>
                     <th className="px-6 py-3.5">序号</th>
                     <th className="px-6 py-3.5">模型 ID</th>
@@ -1116,22 +1134,22 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     const result = scanResults[m.id];
                     return (
                       <tr key={m.id} className="hover:bg-[#23211e]/40 transition">
-                        <td className="px-6 py-4 text-[#9c9689]">{idx + 1}</td>
-                        <td className="px-6 py-4 text-[#faf9f5] font-semibold">{m.id}</td>
+                        <td className="px-6 py-4 text-neutral-400 font-semibold tracking-wide">{idx + 1}</td>
+                        <td className="px-6 py-4 text-neutral-100 font-semibold tracking-wide">{m.id}</td>
                         <td className="px-6 py-4">
                           {result ? (
                             <StatusBadge status={result.status} />
                           ) : (
-                            <span className="text-[#9c9689]">待检测</span>
+                            <span className="text-neutral-400 font-mono">待检测</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-[#9c9689]">
+                        <td className="px-6 py-4 text-neutral-300">
                           {result?.httpStatus ? (
                             <span
-                              className={`px-2 py-0.5 rounded font-mono font-bold ${
+                              className={`px-2.5 py-1 rounded-md font-mono font-bold tracking-wide ${
                                 result.httpStatus === 200
-                                  ? 'bg-[#5db872]/15 text-[#5db872]'
-                                  : 'bg-[#c64545]/15 text-[#c64545]'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25'
+                                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/25'
                               }`}
                             >
                               {result.httpStatus}
@@ -1140,7 +1158,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                             '--'
                           )}
                         </td>
-                        <td className="px-6 py-4 text-[#9c9689]">
+                        <td className="px-6 py-4 text-neutral-300 font-mono tracking-wide">
                           {result?.latencyMs ? `${result.latencyMs}ms` : '--'}
                         </td>
                         <td className="px-6 py-4">
@@ -1150,7 +1168,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                               dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id });
                               setActiveMode('fidelity');
                             }}
-                            className="px-3 py-1 rounded-md bg-[#23211e] hover:bg-[#cc785c] hover:text-[#faf9f5] text-[#9c9689] transition font-sans text-xs font-semibold"
+                            className="px-3 py-1.5 rounded-lg bg-[#23211e] hover:bg-[#cc785c] hover:text-white text-neutral-300 transition font-sans text-xs font-semibold tracking-wide"
                           >
                             检测此模型
                           </button>

@@ -183,12 +183,12 @@ export const FaqSection: React.FC = () => {
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-1 text-sm text-[#9c9689] leading-relaxed border-t border-[#2e2b27]/60 space-y-3 animate-in fade-in duration-200">
+                <div className="px-5 pb-5 pt-3 text-sm text-neutral-300 leading-relaxed border-t border-[#2e2b27]/60 space-y-3 animate-in fade-in duration-200">
                   {item.answer}
 
                   {item.summaryNote && (
-                    <div className="mt-3 pt-3 border-t border-[#2e2b27]/40 text-xs text-[#d4cebe] italic">
-                      {item.summaryNote}
+                    <div className="mt-3 pt-3 border-t border-[#2e2b27]/40 text-xs text-neutral-200 font-medium bg-white/5 border border-white/10 p-3 rounded-lg tracking-wide">
+                      💡 {item.summaryNote}
                     </div>
                   )}
                 </div>

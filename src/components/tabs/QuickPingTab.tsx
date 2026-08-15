@@ -313,12 +313,16 @@ export const QuickPingTab: React.FC = () => {
                 <label className="text-sm font-semibold text-[#faf9f5]">
                   API Key 列表
                 </label>
-                <div className="flex items-center gap-2 bg-[#23211e] border border-[#3d3934] px-3 py-1 rounded-lg text-xs sm:text-sm font-mono text-[#d4cebe] shadow-sm">
-                  <span>已解析: <strong className="text-[#faf9f5] font-bold text-sm">{parsedCount}</strong> 条</span>
-                  <span className="text-[#9c9689]/60">|</span>
-                  <span>独立: <strong className="text-[#5db872] font-bold text-sm">{uniqueKeys.length}</strong></span>
-                  <span className="text-[#9c9689]/60">/</span>
-                  <span>重复: <strong className="text-[#e8a55a] font-bold text-sm">{duplicates.length}</strong></span>
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className="bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg text-xs font-mono text-neutral-300 tracking-wide">
+                    已解析: <strong className="text-white font-bold text-xs font-mono">{parsedCount}</strong> 条
+                  </span>
+                  <span className="bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-lg text-xs font-mono text-emerald-400 font-medium tracking-wide">
+                    独立: <strong className="text-emerald-300 font-bold text-xs font-mono">{uniqueKeys.length}</strong>
+                  </span>
+                  <span className="bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 rounded-lg text-xs font-mono text-amber-400 font-medium tracking-wide">
+                    重复: <strong className="text-amber-300 font-bold text-xs font-mono">{duplicates.length}</strong>
+                  </span>
                 </div>
               </div>
 
@@ -365,11 +369,11 @@ export const QuickPingTab: React.FC = () => {
             {/* Status Tabs with Count Pills */}
             <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
               {[
-                { id: 'active', label: '有效', count: summary?.activeCount || 0, color: 'text-[#5db872]', bg: 'bg-[#5db872]/20', border: 'border-[#5db872]/40' },
-                { id: 'quota_exhausted', label: '无额', count: summary?.exhaustedCount || 0, color: 'text-[#e8a55a]', bg: 'bg-[#e8a55a]/20', border: 'border-[#e8a55a]/40' },
-                { id: 'rate_limited', label: '限流', count: summary?.rateLimitedCount || 0, color: 'text-[#e8a55a]', bg: 'bg-[#e8a55a]/20', border: 'border-[#e8a55a]/40' },
-                { id: 'invalid', label: '无效', count: summary?.invalidCount || 0, color: 'text-[#c64545]', bg: 'bg-[#c64545]/20', border: 'border-[#c64545]/40' },
-                { id: 'duplicate', label: '重复', count: summary?.duplicateCount || duplicates.length || 0, color: 'text-[#d4cebe]', bg: 'bg-[#2e2b27]', border: 'border-[#3d3934]' },
+                { id: 'active', label: '有效', count: summary?.activeCount || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30' },
+                { id: 'quota_exhausted', label: '无额', count: summary?.exhaustedCount || 0, color: 'text-amber-400', bg: 'bg-amber-500/15', border: 'border-amber-500/30' },
+                { id: 'rate_limited', label: '限流', count: summary?.rateLimitedCount || 0, color: 'text-amber-400', bg: 'bg-amber-500/15', border: 'border-amber-500/30' },
+                { id: 'invalid', label: '无效', count: summary?.invalidCount || 0, color: 'text-rose-400', bg: 'bg-rose-500/15', border: 'border-rose-500/30' },
+                { id: 'duplicate', label: '重复', count: summary?.duplicateCount || duplicates.length || 0, color: 'text-neutral-300', bg: 'bg-white/5', border: 'border-white/10' },
               ].map((tab) => {
                 const isSelected = activeFilterTab === tab.id;
                 return (
@@ -377,14 +381,14 @@ export const QuickPingTab: React.FC = () => {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveFilterTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition tracking-wide ${
                       isSelected
                         ? 'bg-[#23211e] border border-[#cc785c]/80 text-[#faf9f5] shadow-sm font-semibold'
                         : 'text-[#d4cebe] hover:text-[#faf9f5] hover:bg-[#23211e]/50'
                     }`}
                   >
                     <span>{tab.label}</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${tab.bg} ${tab.color} border ${tab.border}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${tab.bg} ${tab.color} border ${tab.border} tracking-wide`}>
                       {tab.count}
                     </span>
                   </button>
@@ -399,12 +403,12 @@ export const QuickPingTab: React.FC = () => {
                   type="button"
                   onClick={handleCopyCurrentTabKeys}
                   disabled={getFilteredItems().length === 0}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#23211e] hover:bg-[#2b2926] border border-[#2e2b27] text-xs font-semibold text-[#faf9f5] transition disabled:opacity-40"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#23211e] hover:bg-[#2b2926] border border-[#2e2b27] text-xs font-semibold text-[#faf9f5] transition disabled:opacity-40 tracking-wide"
                 >
                   {copiedBatch ? (
                     <>
-                      <Check className="w-4 h-4 text-[#5db872]" />
-                      <span className="text-[#5db872]">已复制!</span>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span className="text-emerald-400">已复制!</span>
                     </>
                   ) : (
                     <>
@@ -444,7 +448,7 @@ export const QuickPingTab: React.FC = () => {
                   <p className="text-base font-semibold text-[#faf9f5]">
                     并发验货检测中... ({progress.completed}/{progress.total})
                   </p>
-                  <p className="text-xs text-[#d4cebe] font-mono">
+                  <p className="text-xs text-[#d4cebe] font-mono tracking-wide">
                     已检测 {Math.round((progress.completed / (progress.total || 1)) * 100)}% · 线程并发清洗中
                   </p>
                 </div>
@@ -471,8 +475,8 @@ export const QuickPingTab: React.FC = () => {
                       className="flex items-center justify-between p-4 rounded-xl bg-[#23211e] border border-[#2e2b27] hover:border-[#cc785c]/40 transition group"
                     >
                       <div className="flex items-center gap-3.5 overflow-hidden">
-                        <span className="text-xs font-mono text-[#9c9689] w-6 font-semibold">#{idx + 1}</span>
-                        <span className="font-mono text-sm text-[#faf9f5] font-semibold truncate max-w-sm select-all">
+                        <span className="text-xs font-mono text-neutral-400 w-6 font-semibold tracking-wide">#{idx + 1}</span>
+                        <span className="font-mono text-sm text-neutral-100 font-semibold truncate max-w-sm select-all tracking-wide">
                           {item.key}
                         </span>
                         <StatusBadge status={item.status} size="sm" />
@@ -480,7 +484,7 @@ export const QuickPingTab: React.FC = () => {
 
                       <div className="flex items-center gap-3.5 shrink-0">
                         {'latencyMs' in item && item.latencyMs !== undefined && (
-                          <span className="text-xs font-mono text-[#faf9f5] font-semibold bg-[#1b1a18] px-2.5 py-1 rounded-md border border-[#2e2b27]">
+                          <span className="text-xs font-mono text-neutral-200 font-medium bg-white/5 px-2.5 py-1 rounded-md border border-white/10 tracking-wide">
                             {item.latencyMs} ms
                           </span>
                         )}
@@ -492,7 +496,7 @@ export const QuickPingTab: React.FC = () => {
                           title="复制完整 Key"
                         >
                           {copiedKeyIndex === idx ? (
-                            <Check className="w-4 h-4 text-[#5db872]" />
+                            <Check className="w-4 h-4 text-emerald-400" />
                           ) : (
                             <Copy className="w-4 h-4" />
                           )}
@@ -507,10 +511,10 @@ export const QuickPingTab: React.FC = () => {
 
           {/* Footer Summary Stats */}
           {summary && (
-            <div className="px-7 py-4 border-t border-[#2e2b27] bg-[#141413]/60 flex items-center justify-between text-xs text-[#d4cebe] font-mono font-medium">
-              <span>总提交: <strong className="text-[#faf9f5] font-bold">{summary.total}</strong></span>
-              <span>有效可用率: <strong className="text-[#5db872] font-bold">{Math.round((summary.activeCount / (summary.total || 1)) * 100)}%</strong></span>
-              <span>平均延迟: <strong className="text-[#faf9f5] font-bold">{Math.round(summary.results.reduce((a, b) => a + (b.latencyMs || 0), 0) / (summary.results.length || 1))} ms</strong></span>
+            <div className="px-7 py-4 border-t border-[#2e2b27] bg-[#141413]/60 flex items-center justify-between text-xs text-neutral-300 font-mono font-medium tracking-wide">
+              <span>总提交: <strong className="text-white font-bold">{summary.total}</strong></span>
+              <span>有效可用率: <strong className="text-emerald-400 font-bold">{Math.round((summary.activeCount / (summary.total || 1)) * 100)}%</strong></span>
+              <span>平均延迟: <strong className="text-white font-bold">{Math.round(summary.results.reduce((a, b) => a + (b.latencyMs || 0), 0) / (summary.results.length || 1))} ms</strong></span>
             </div>
           )}
         </div>
