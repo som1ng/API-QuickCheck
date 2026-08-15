@@ -9,40 +9,47 @@ import { buildChatCompletionsUrl, getCandidateModelsUrls, normalizeBaseUrl } fro
 export function extractUniversalModels(data: unknown): { id: string; name: string }[] {
   if (!data) return [];
 
+  // If string, attempt JSON parse
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      return extractUniversalModels(parsed);
+    } catch {
+      return [];
+    }
+  }
+
   // Case 1: Direct Array
   if (Array.isArray(data)) {
     return data.flatMap(parseModelItem).filter(Boolean);
   }
 
-  if (typeof data !== 'object') return [];
+  if (typeof data !== 'object' || data === null) return [];
   const obj = data as Record<string, any>;
 
-  // Case 2: obj.data
-  if (Array.isArray(obj.data)) {
-    return obj.data.flatMap(parseModelItem).filter(Boolean);
+  // Case 2: Standard and known array container keys
+  const candidateKeys = ['data', 'models', 'result', 'list', 'items', 'model_list', 'available_models', 'channels'];
+  for (const key of candidateKeys) {
+    const val = obj[key];
+    if (Array.isArray(val)) {
+      const parsed = val.flatMap(parseModelItem).filter(Boolean);
+      if (parsed.length > 0) return parsed;
+    } else if (val && typeof val === 'object') {
+      const parsed = extractUniversalModels(val);
+      if (parsed.length > 0) return parsed;
+    }
   }
 
-  // Case 3: obj.models
-  if (Array.isArray(obj.models)) {
-    return obj.models.flatMap(parseModelItem).filter(Boolean);
-  }
-
-  // Case 4: obj.result
-  if (Array.isArray(obj.result)) {
-    return obj.result.flatMap(parseModelItem).filter(Boolean);
-  }
-
-  // Case 5: obj.data.models or obj.data.list or obj.data.data
-  if (obj.data && typeof obj.data === 'object') {
-    if (Array.isArray(obj.data.models)) {
-      return obj.data.models.flatMap(parseModelItem).filter(Boolean);
+  // Case 3: Object where keys themselves are model identifiers
+  const entries = Object.entries(obj);
+  if (entries.length > 0 && entries.every(([k, v]) => typeof k === 'string' && !k.startsWith('_') && k.length > 2 && (typeof v === 'object' || typeof v === 'boolean' || typeof v === 'number'))) {
+    const found: { id: string; name: string }[] = [];
+    for (const [k, v] of entries) {
+      if (['object', 'success', 'code', 'msg', 'message', 'status', 'created', 'usage'].includes(k.toLowerCase())) continue;
+      const displayName = (v as any)?.name || (v as any)?.display_name || k;
+      found.push({ id: k, name: displayName });
     }
-    if (Array.isArray(obj.data.list)) {
-      return obj.data.list.flatMap(parseModelItem).filter(Boolean);
-    }
-    if (Array.isArray(obj.data.data)) {
-      return obj.data.data.flatMap(parseModelItem).filter(Boolean);
-    }
+    if (found.length > 0) return found;
   }
 
   return [];
@@ -56,10 +63,29 @@ function parseModelItem(item: unknown): { id: string; name: string }[] {
 
   if (typeof item === 'object' && item !== null) {
     const record = item as Record<string, unknown>;
-    const id = typeof record.id === 'string' ? record.id : typeof record.name === 'string' ? record.name : undefined;
-    if (id) {
-      const cleanId = id.replace(/^models\//, '');
-      const displayName = typeof record.display_name === 'string' ? record.display_name : cleanId;
+    const id =
+      typeof record.id === 'string'
+        ? record.id
+        : typeof record.name === 'string'
+        ? record.name
+        : typeof record.model === 'string'
+        ? record.model
+        : typeof record.model_name === 'string'
+        ? record.model_name
+        : typeof record.model_id === 'string'
+        ? record.model_id
+        : typeof record.slug === 'string'
+        ? record.slug
+        : undefined;
+
+    if (id && typeof id === 'string' && id.trim().length > 0) {
+      const cleanId = id.trim().replace(/^models\//, '');
+      const displayName =
+        typeof record.display_name === 'string'
+          ? record.display_name
+          : typeof record.displayName === 'string'
+          ? record.displayName
+          : cleanId;
       return [{ id: cleanId, name: displayName }];
     }
   }

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Local CORS-free transparent proxy middleware with Cloudflare / Overseas failover
+// Transparent local proxy with SSL bypass for local development
 const localCorsProxyPlugin = () => ({
   name: 'local-cors-proxy',
   configureServer(server: any) {
@@ -20,7 +20,7 @@ const localCorsProxyPlugin = () => ({
 
         const chunks: Uint8Array[] = [];
         for await (const chunk of req) {
-          chunks.push(chunk);
+          chunks.push(typeof chunk === 'string' ? new TextEncoder().encode(chunk) : chunk);
         }
         
         let totalLen = 0;
@@ -32,52 +32,74 @@ const localCorsProxyPlugin = () => ({
           offset += c.length;
         }
 
-        const forwardHeaders: Record<string, string> = {};
+        const httpModule = await import(targetUrl.startsWith('https:') ? 'https' : 'http');
+        const { URL } = await import('url');
+        const targetObj = new URL(targetUrl);
+
+        const forwardHeaders: Record<string, string | string[]> = {};
         for (const [k, v] of Object.entries(req.headers)) {
-          if (!['host', 'origin', 'referer', 'content-length'].includes(k.toLowerCase()) && typeof v === 'string') {
-            forwardHeaders[k] = v;
+          const lk = k.toLowerCase();
+          if (!['host', 'origin', 'referer', 'content-length', 'connection'].includes(lk) && v !== undefined) {
+            forwardHeaders[k] = v as any;
           }
         }
-
-        const fetchFn = (globalThis as any).fetch;
-        let response: any;
-
-        try {
-          // Attempt 1: Direct local fetch with 5s timeout
-          const controller = new (globalThis as any).AbortController();
-          const timeoutId = (globalThis as any).setTimeout(() => controller.abort(), 5000);
-
-          response = await fetchFn(targetUrl, {
-            method: req.method || 'GET',
-            headers: forwardHeaders,
-            body: req.method && ['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) && totalLen > 0 ? bodyBuffer : undefined,
-            signal: controller.signal,
-          });
-          (globalThis as any).clearTimeout(timeoutId);
-        } catch (_localErr) {
-          // Attempt 2: If local machine has network/GFW/CORS blockage, tunnel through Vercel Edge Serverless
-          const vercelProxyUrl = `https://api-quick-check.vercel.app/api/proxy?target=${encodeURIComponent(targetUrl)}`;
-          response = await fetchFn(vercelProxyUrl, {
-            method: req.method || 'GET',
-            headers: forwardHeaders,
-            body: req.method && ['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) && totalLen > 0 ? bodyBuffer : undefined,
-          });
+        forwardHeaders['host'] = targetObj.host;
+        if (!forwardHeaders['user-agent']) {
+          forwardHeaders['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+        }
+        if (bodyBuffer.length > 0) {
+          forwardHeaders['content-length'] = String(bodyBuffer.length);
         }
 
-        res.statusCode = response.status;
-        response.headers.forEach((value: string, key: string) => {
-          if (!['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())) {
-            res.setHeader(key, value);
+        const proxyReq = httpModule.request(
+          targetUrl,
+          {
+            method: req.method || 'GET',
+            headers: forwardHeaders,
+            rejectUnauthorized: false,
+            timeout: 10000,
+          },
+          (proxyRes: any) => {
+            res.statusCode = proxyRes.statusCode || 200;
+            res.statusMessage = proxyRes.statusMessage || '';
+
+            for (const [k, v] of Object.entries(proxyRes.headers)) {
+              if (v && !['content-encoding', 'transfer-encoding', 'connection'].includes(k.toLowerCase())) {
+                res.setHeader(k, v);
+              }
+            }
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', '*');
+
+            proxyRes.pipe(res);
           }
+        );
+
+        proxyReq.on('error', (err: any) => {
+          res.statusCode = 502;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.end(JSON.stringify({ error: 'Proxy Gateway Error', details: err?.message || 'Error' }));
         });
-        res.setHeader('Access-Control-Allow-Origin', '*');
 
-        const resBuffer = await response.arrayBuffer();
-        res.end(new Uint8Array(resBuffer));
+        proxyReq.on('timeout', () => {
+          proxyReq.destroy();
+          res.statusCode = 504;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.end(JSON.stringify({ error: 'Proxy Gateway Timeout (10000ms)' }));
+        });
+
+        if (bodyBuffer.length > 0) {
+          proxyReq.write(bodyBuffer);
+        }
+        proxyReq.end();
       } catch (err: unknown) {
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Proxy Error' }));
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Internal Proxy Error' }));
       }
     });
   },
