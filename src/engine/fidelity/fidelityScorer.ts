@@ -225,8 +225,9 @@ export async function runFidelityAudit(
 function detectModelFamily(model: string): ModelVerificationProfile {
   const m = model.toLowerCase();
   if (m.includes('claude')) return 'claude';
-  if (m.includes('deepseek') || m.includes('r1')) return 'deepseek';
   if (m.includes('gpt') || m.includes('o1') || m.includes('o3') || m.includes('chatgpt')) return 'openai';
+  if (m.includes('grok') || m.includes('xai')) return 'xai';
   if (m.includes('gemini')) return 'gemini';
+  if (m.includes('deepseek') || m.includes('r1')) return 'deepseek';
   return 'universal';
 }

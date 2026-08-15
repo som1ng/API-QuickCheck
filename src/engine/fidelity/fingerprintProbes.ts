@@ -198,4 +198,87 @@ export const FINGERPRINT_PROBES: FingerprintProbeDefinition[] = [
       };
     },
   },
+
+  // 8. OpenAI Family: Strict Negative Constraint & Instruction Following (Quick / Standard / Deep)
+  {
+    probeId: 'openai_reasoning_constraint',
+    title: 'OpenAI (o1/o3/GPT-4o) 负向约束与指令依从探针',
+    targetFamily: 'openai',
+    minDepth: 'quick',
+    description: '测试 OpenAI 系列模型的高阶逻辑推理与严格负向约束依从能力。',
+    prompt: 'Answer the following question without using the letter "e" anywhere in your response: What color is the clear daytime sky?',
+    judge: (output: string, _meta: ProbeResponseMeta): ProbeVerdict => {
+      const clean = output.trim().toLowerCase();
+      const hasE = clean.includes('e');
+      if (!hasE && (clean.includes('azure') || clean.includes('cyan') || clean.includes('sky is') || clean.length > 0)) {
+        return {
+          passed: true,
+          score: 100,
+          details: '成功遵守零字母 "e" 负向约束（具备 OpenAI o1/o3/GPT-4o 高阶指令遵循特征）。',
+          extractedValue: output.trim().slice(0, 30),
+        };
+      }
+      return {
+        passed: false,
+        score: 40,
+        details: `未能完全遵守负向排除约束 (输出包含字母 e: ${output.slice(0, 40)})。`,
+        extractedValue: output.slice(0, 30),
+      };
+    },
+  },
+
+  // 9. xAI Grok Family: Truth & Knowledge Horizon Probe (Quick / Standard / Deep)
+  {
+    probeId: 'xai_grok_verification',
+    title: 'xAI Grok (Grok-3/Grok-2) 知识与事实验真探针',
+    targetFamily: 'xai',
+    minDepth: 'quick',
+    description: '校验 Grok 3 / Grok 2 核心辨识特征与知识时效。',
+    prompt: 'Who founded xAI and in what year was it launched? Answer with only the founder name and year.',
+    judge: (output: string, _meta: ProbeResponseMeta): ProbeVerdict => {
+      const lower = output.toLowerCase();
+      if ((lower.includes('elon') || lower.includes('musk')) && lower.includes('2023')) {
+        return {
+          passed: true,
+          score: 100,
+          details: '准确识别 xAI 创办背景与核心事实（具备 Grok 真实知识库特征）。',
+          extractedValue: 'Elon Musk / 2023',
+        };
+      }
+      return {
+        passed: false,
+        score: 30,
+        details: `未正确回答 xAI 创办事实 (输出: ${output.slice(0, 40)})。`,
+        extractedValue: output.slice(0, 30),
+      };
+    },
+  },
+
+  // 10. Gemini Family: Context & Logic Trap Probe (Quick / Standard / Deep)
+  {
+    probeId: 'gemini_logic_probe',
+    title: 'Google Gemini (Gemini 2.5) 原生逻辑语义探针',
+    targetFamily: 'gemini',
+    minDepth: 'quick',
+    description: '测试 Gemini 2.5 原生深度语义与语言陷阱识别。',
+    prompt: 'If you have 3 apples and you take away 2, how many do YOU have? Answer with only the exact single number digit.',
+    judge: (output: string, _meta: ProbeResponseMeta): ProbeVerdict => {
+      const trimmed = output.trim();
+      if (trimmed.includes('2') && !trimmed.startsWith('1')) {
+        return {
+          passed: true,
+          score: 100,
+          details: '准确识破“你拿走了2个苹果，所以你拥有2个”语义陷阱（具备 Gemini 2.5 强逻辑特征）。',
+          extractedValue: '2',
+        };
+      }
+      return {
+        passed: false,
+        score: 40,
+        details: `落入基础减法直觉陷阱 (输出: ${output.slice(0, 30)})。`,
+        extractedValue: output.slice(0, 30),
+      };
+    },
+  },
 ];
+

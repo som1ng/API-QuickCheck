@@ -2,7 +2,7 @@ export type FidelityLevel = 'genuine' | 'suspect_downgraded' | 'fake_imposter' |
 
 export type FidelityDepth = 'quick' | 'standard' | 'deep';
 
-export type ModelVerificationProfile = 'auto' | 'claude' | 'deepseek' | 'openai' | 'gemini' | 'universal';
+export type ModelVerificationProfile = 'auto' | 'claude' | 'openai' | 'grok' | 'xai' | 'gemini' | 'deepseek' | 'universal';
 
 export interface ProbeResponseMeta {
   reasoningContent?: string;
@@ -25,7 +25,7 @@ export interface ProbeVerdict {
 export interface FingerprintProbeDefinition {
   probeId: string;
   title: string;
-  targetFamily: 'claude' | 'deepseek' | 'openai' | 'gemini' | 'general';
+  targetFamily: 'claude' | 'openai' | 'grok' | 'xai' | 'gemini' | 'deepseek' | 'general';
   minDepth: FidelityDepth;
   prompt: string;
   description: string;
