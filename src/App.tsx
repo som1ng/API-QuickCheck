@@ -29,7 +29,7 @@ const MainContent: React.FC = () => {
         <TabNav />
 
         {/* Tab Content with Error Boundary */}
-        <div className="pt-1">
+        <div className="pt-2 min-h-[600px]">
           {activeTab === 'fidelity' && (
             <ErrorBoundary fallbackTitle="真伪鉴别模块异常">
               <FidelityTab />
@@ -67,8 +67,10 @@ const MainContent: React.FC = () => {
           )}
         </div>
 
-        {/* Common Questions & FAQs */}
-        <FaqSection />
+        {/* Common Questions & FAQs (Positioned comfortably below main workspace) */}
+        <div className="pt-16 mt-16 border-t border-[#2e2b27]/80">
+          <FaqSection />
+        </div>
       </main>
 
       {/* Rich Multi-column Footer */}
