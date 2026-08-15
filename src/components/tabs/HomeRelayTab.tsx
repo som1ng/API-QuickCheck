@@ -39,28 +39,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-const POPULAR_MODELS = [
-  // Anthropic Claude
-  { id: 'claude-fable-5', label: 'Claude Fable 5', family: 'claude' as const },
-  { id: 'claude-sonnet-5', label: 'Claude Sonnet 5', family: 'claude' as const },
-  { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet', family: 'claude' as const },
-
-  // OpenAI
-  { id: 'gpt-5.6-sol', label: 'GPT-5.6 Sol', family: 'openai' as const },
-  { id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', family: 'openai' as const },
-  { id: 'o3-mini', label: 'OpenAI o3-mini', family: 'openai' as const },
-  { id: 'gpt-4.5-preview', label: 'GPT-4.5 Preview', family: 'openai' as const },
-
-  // xAI
-  { id: 'grok-4', label: 'Grok 4', family: 'xai' as const },
-  { id: 'grok-3', label: 'Grok 3', family: 'xai' as const },
-
-  // Google Gemini
-  { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash', family: 'gemini' as const },
-  { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro', family: 'gemini' as const },
-  { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', family: 'gemini' as const },
-];
-
 export const HomeRelayTab: React.FC = () => {
   const { state, dispatch } = useApp();
   const { config, availableModels, isLoadingModels } = state;
@@ -103,7 +81,7 @@ export const HomeRelayTab: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Auto-sniff models when user inputs baseUrl and apiKey
+  // Auto-sniff models from user's relay station when baseUrl and apiKey are entered
   useEffect(() => {
     if (!config.baseUrl || !config.apiKey || config.apiKey.length < 8) return;
     const timer = setTimeout(async () => {
@@ -118,34 +96,35 @@ export const HomeRelayTab: React.FC = () => {
       } catch {
         /* silent */
       }
-    }, 1200);
+    }, 1000);
     return () => clearTimeout(timer);
   }, [config.baseUrl, config.apiKey, config.selectedModel, dispatch]);
 
-  const handleSelectModel = (modelId: string, family?: 'claude' | 'openai' | 'xai' | 'gemini') => {
+  const handleSelectModel = (modelId: string) => {
     dispatch({ type: 'SET_SELECTED_MODEL', payload: modelId });
     setIsModelDropdownOpen(false);
 
-    // Auto align profile based on model family
-    if (family) {
-      setSelectedProfile(family);
-    } else {
-      const lower = modelId.toLowerCase();
-      if (lower.includes('claude') || lower.includes('fable') || lower.includes('mythos') || lower.includes('sonnet') || lower.includes('opus')) {
-        setSelectedProfile('claude');
-      } else if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3') || lower.includes('sol') || lower.includes('terra')) {
-        setSelectedProfile('openai');
-      } else if (lower.includes('grok') || lower.includes('xai')) {
-        setSelectedProfile('xai');
-      } else if (lower.includes('gemini')) {
-        setSelectedProfile('gemini');
-      }
+    // Automatically align verification profile with selected model
+    const lower = modelId.toLowerCase();
+    if (lower.includes('claude') || lower.includes('fable') || lower.includes('mythos') || lower.includes('sonnet') || lower.includes('opus')) {
+      setSelectedProfile('claude');
+    } else if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3') || lower.includes('sol') || lower.includes('terra') || lower.includes('chatgpt')) {
+      setSelectedProfile('openai');
+    } else if (lower.includes('grok') || lower.includes('xai')) {
+      setSelectedProfile('xai');
+    } else if (lower.includes('gemini')) {
+      setSelectedProfile('gemini');
     }
   };
 
   const handleStartFidelityAudit = async () => {
     if (!config.apiKey || !config.baseUrl) {
       alert('请先输入中转站接口地址 (Base URL) 和 API Key');
+      return;
+    }
+
+    if (!config.selectedModel) {
+      alert('请先输入或选择需要测试的目标模型');
       return;
     }
 
@@ -157,7 +136,7 @@ export const HomeRelayTab: React.FC = () => {
       const result = await runFidelityAudit(
         config.baseUrl,
         config.apiKey,
-        config.selectedModel || 'claude-fable-5',
+        config.selectedModel,
         {
           depth: selectedDepth,
           profile: selectedProfile,
@@ -285,7 +264,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             中转站检测
           </h1>
           <p className="mt-1 text-sm sm:text-base text-neutral-300 max-w-2xl leading-relaxed">
-            聚焦 Anthropic、OpenAI、xAI、Google 顶尖大模型真实性、首字延迟 (TTFT) 与防掺水鉴别。
+            检测 API 真实性、首字响应延迟 (TTFT) 与模型可用性。
           </p>
         </div>
 
@@ -384,118 +363,79 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         {/* Row B: Model & Parameters (In Fidelity mode) */}
         {activeMode === 'fidelity' && (
           <div className="space-y-4 pt-4 border-t border-[#2e2b27]">
-            {/* Target Model Integrated Combobox Input + Pills */}
-            <div className="space-y-2.5">
+            {/* Target Model Combobox (Extracted from user's relay) */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#cc785c]" />
                   <span>测试目标模型</span>
                 </label>
-                {availableModels.length > 0 && (
+                {availableModels.length > 0 ? (
                   <span className="text-xs text-[#6ee7b7] font-semibold bg-[#064e3b] border border-[#059669] px-2.5 py-1 rounded-md tracking-normal font-sans shadow-sm">
-                    已检测到模型: {availableModels.length} 个
+                    已从中转站提取: {availableModels.length} 个模型
+                  </span>
+                ) : (
+                  <span className="text-xs text-neutral-400 font-mono tracking-normal">
+                    填入地址与 Key 后自动提取模型列表
                   </span>
                 )}
               </div>
 
-              {/* Integrated Combobox Component with Instant Built-in Dropdown Menu */}
+              {/* Integrated Combobox Component */}
               <div className="relative" ref={modelDropdownRef}>
                 <div className="flex items-center">
                   <input
                     type="text"
                     value={config.selectedModel}
                     onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-                    onFocus={() => setIsModelDropdownOpen(true)}
-                    placeholder="输入或下拉挑选模型，例如: claude-fable-5 / gpt-5.6-sol / grok-4 / gemini-3.5-flash"
+                    onFocus={() => {
+                      if (availableModels.length > 0) setIsModelDropdownOpen(true);
+                    }}
+                    placeholder={availableModels.length > 0 ? "从下方列表中挑选或直接输入模型 ID..." : "输入需要测试的目标模型 ID (例如: claude-3-7-sonnet-20250219 / gpt-4o)..."}
                     className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-4 pr-10 py-3 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-                    className="absolute right-3 p-1.5 rounded-lg text-neutral-400 hover:text-white transition"
-                    title="展开模型列表"
-                  >
-                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isModelDropdownOpen ? 'rotate-180 text-[#cc785c]' : ''}`} />
-                  </button>
+                  {availableModels.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                      className="absolute right-3 p-1.5 rounded-lg text-neutral-400 hover:text-white transition"
+                      title="展开从中转站提取的模型列表"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isModelDropdownOpen ? 'rotate-180 text-[#cc785c]' : ''}`} />
+                    </button>
+                  )}
                 </div>
 
-                {/* Instant Floating Dropdown Menu */}
-                {isModelDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in duration-150 divide-y divide-[#2e2b27]/60">
-                    {/* Section 1: Curated Top Frontier Models */}
-                    <div className="p-2">
-                      <div className="px-3 py-1.5 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
-                        🔥 4 家大厂顶尖旗舰模型
-                      </div>
-                      <div className="space-y-1">
-                        {POPULAR_MODELS.map((m) => (
-                          <button
-                            key={m.id}
-                            type="button"
-                            onClick={() => handleSelectModel(m.id, m.family)}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono text-left transition ${
-                              config.selectedModel === m.id
-                                ? 'bg-[#cc785c] text-white font-semibold'
-                                : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
-                            }`}
-                          >
-                            <span>{m.id}</span>
-                            <span className="text-[11px] opacity-75 font-sans font-medium">{m.label}</span>
-                          </button>
-                        ))}
-                      </div>
+                {/* Instant Floating Dropdown Menu for Discovered Models */}
+                {isModelDropdownOpen && availableModels.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in duration-150 p-2 space-y-1">
+                    <div className="px-3 py-1.5 text-[11px] font-semibold text-[#6ee7b7] uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1.5 mb-1">
+                      <span>🔍 从中转站提取的模型列表 ({availableModels.length})</span>
+                      <span className="text-neutral-400 font-normal">点击快速填入</span>
                     </div>
-
-                    {/* Section 2: Remote Discovered Models (if fetched) */}
-                    {availableModels.length > 0 && (
-                      <div className="p-2">
-                        <div className="px-3 py-1.5 text-[11px] font-semibold text-[#6ee7b7] uppercase tracking-wider flex items-center justify-between">
-                          <span>🔍 接口端点发现模型 ({availableModels.length})</span>
-                        </div>
-                        <div className="space-y-1">
-                          {availableModels.map((m) => (
-                            <button
-                              key={m.id}
-                              type="button"
-                              onClick={() => handleSelectModel(m.id)}
-                              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono text-left transition ${
-                                config.selectedModel === m.id
-                                  ? 'bg-[#cc785c] text-white font-semibold'
-                                  : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
-                              }`}
-                            >
-                              <span>{m.id}</span>
-                              {m.name && <span className="text-[11px] opacity-70 truncate max-w-xs">{m.name}</span>}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    {availableModels.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleSelectModel(m.id)}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-mono text-left transition ${
+                          config.selectedModel === m.id
+                            ? 'bg-[#cc785c] text-white font-semibold'
+                            : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
+                        }`}
+                      >
+                        <span className="font-semibold">{m.id}</span>
+                        {m.name && m.name !== m.id && (
+                          <span className="text-[11px] opacity-70 truncate max-w-xs">{m.name}</span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
-
-              {/* Top Arena/Agent Leaderboard Model Pills */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-xs text-neutral-300 font-medium mr-1">快捷选择:</span>
-                {POPULAR_MODELS.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => handleSelectModel(m.id, m.family)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-mono transition border model-pill tracking-wide ${
-                      config.selectedModel === m.id
-                        ? 'bg-[#cc785c] border-[#cc785c] text-white font-semibold shadow-sm'
-                        : 'bg-[#23211e] border-[#38342f] text-[#faf9f5] font-medium hover:text-white hover:border-[#cc785c]/60'
-                    }`}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
-            {/* Sub-parameters: Profile & Depth (Titles match top row size) */}
+            {/* Sub-parameters: Profile & Depth (Equal Title Typography) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
               {/* Profile Selector (Pure AI Company Names) */}
               <div className="space-y-2">
