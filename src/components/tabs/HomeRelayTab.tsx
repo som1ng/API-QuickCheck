@@ -41,24 +41,24 @@ import {
 
 const POPULAR_MODELS = [
   // Anthropic Claude
+  { id: 'claude-fable-5', label: 'Claude Fable 5', family: 'claude' as const },
+  { id: 'claude-sonnet-5', label: 'Claude Sonnet 5', family: 'claude' as const },
   { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet', family: 'claude' as const },
-  { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', family: 'claude' as const },
-  { id: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku', family: 'claude' as const },
 
   // OpenAI
-  { id: 'gpt-4.5-preview', label: 'GPT-4.5', family: 'openai' as const },
-  { id: 'o3-mini', label: 'o3-mini', family: 'openai' as const },
-  { id: 'o1', label: 'OpenAI o1', family: 'openai' as const },
-  { id: 'gpt-4o', label: 'GPT-4o', family: 'openai' as const },
+  { id: 'gpt-5.6-sol', label: 'GPT-5.6 Sol', family: 'openai' as const },
+  { id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', family: 'openai' as const },
+  { id: 'o3-mini', label: 'OpenAI o3-mini', family: 'openai' as const },
+  { id: 'gpt-4.5-preview', label: 'GPT-4.5 Preview', family: 'openai' as const },
 
   // xAI
+  { id: 'grok-4', label: 'Grok 4', family: 'xai' as const },
   { id: 'grok-3', label: 'Grok 3', family: 'xai' as const },
-  { id: 'grok-2-latest', label: 'Grok 2', family: 'xai' as const },
 
   // Google Gemini
+  { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash', family: 'gemini' as const },
+  { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro', family: 'gemini' as const },
   { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', family: 'gemini' as const },
-  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', family: 'gemini' as const },
-  { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', family: 'gemini' as const },
 ];
 
 export const HomeRelayTab: React.FC = () => {
@@ -131,10 +131,15 @@ export const HomeRelayTab: React.FC = () => {
       setSelectedProfile(family);
     } else {
       const lower = modelId.toLowerCase();
-      if (lower.includes('claude')) setSelectedProfile('claude');
-      else if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3')) setSelectedProfile('openai');
-      else if (lower.includes('grok') || lower.includes('xai')) setSelectedProfile('xai');
-      else if (lower.includes('gemini')) setSelectedProfile('gemini');
+      if (lower.includes('claude') || lower.includes('fable') || lower.includes('mythos') || lower.includes('sonnet') || lower.includes('opus')) {
+        setSelectedProfile('claude');
+      } else if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3') || lower.includes('sol') || lower.includes('terra')) {
+        setSelectedProfile('openai');
+      } else if (lower.includes('grok') || lower.includes('xai')) {
+        setSelectedProfile('xai');
+      } else if (lower.includes('gemini')) {
+        setSelectedProfile('gemini');
+      }
     }
   };
 
@@ -152,7 +157,7 @@ export const HomeRelayTab: React.FC = () => {
       const result = await runFidelityAudit(
         config.baseUrl,
         config.apiKey,
-        config.selectedModel || 'claude-3-7-sonnet-20250219',
+        config.selectedModel || 'claude-fable-5',
         {
           depth: selectedDepth,
           profile: selectedProfile,
@@ -264,8 +269,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
     const matchesSearch = m.id.toLowerCase().includes(searchQuery.toLowerCase()) || (m.name && m.name.toLowerCase().includes(searchQuery.toLowerCase()));
     if (!matchesSearch) return false;
     if (filterProvider === 'all') return true;
-    if (filterProvider === 'claude') return m.id.toLowerCase().includes('claude');
-    if (filterProvider === 'openai') return m.id.toLowerCase().includes('gpt') || m.id.toLowerCase().includes('o1') || m.id.toLowerCase().includes('o3') || m.id.toLowerCase().includes('chatgpt');
+    if (filterProvider === 'claude') return m.id.toLowerCase().includes('claude') || m.id.toLowerCase().includes('fable') || m.id.toLowerCase().includes('sonnet');
+    if (filterProvider === 'openai') return m.id.toLowerCase().includes('gpt') || m.id.toLowerCase().includes('o1') || m.id.toLowerCase().includes('o3') || m.id.toLowerCase().includes('sol') || m.id.toLowerCase().includes('terra');
     if (filterProvider === 'xai') return m.id.toLowerCase().includes('grok') || m.id.toLowerCase().includes('xai');
     if (filterProvider === 'google') return m.id.toLowerCase().includes('gemini') || m.id.toLowerCase().includes('gemma');
     return true;
@@ -280,7 +285,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             中转站检测
           </h1>
           <p className="mt-1 text-sm sm:text-base text-neutral-300 max-w-2xl leading-relaxed">
-            聚焦 4 家顶尖大厂（Anthropic Claude、OpenAI、xAI Grok、Google Gemini）真伪验真与首字速度 (TTFT)。
+            聚焦 Anthropic、OpenAI、xAI、Google 顶尖大模型真实性、首字延迟 (TTFT) 与防掺水鉴别。
           </p>
         </div>
 
@@ -401,7 +406,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     value={config.selectedModel}
                     onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
                     onFocus={() => setIsModelDropdownOpen(true)}
-                    placeholder="输入或下拉挑选模型，例如: claude-3-7-sonnet-20250219 / gpt-4.5-preview / grok-3"
+                    placeholder="输入或下拉挑选模型，例如: claude-fable-5 / gpt-5.6-sol / grok-4 / gemini-3.5-flash"
                     className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-4 pr-10 py-3 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
                   />
                   <button
@@ -490,33 +495,33 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               </div>
             </div>
 
-            {/* Sub-parameters: Profile & Depth */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Profile Selector (Explicit Choices Only) */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-200 mb-1.5 flex items-center gap-1.5 tracking-wide">
-                  <Sliders className="w-3.5 h-3.5 text-[#cc785c]" />
-                  <span>检测体系 (选择对应的测试规则)</span>
+            {/* Sub-parameters: Profile & Depth (Titles match top row size) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+              {/* Profile Selector (Pure AI Company Names) */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-[#cc785c]" />
+                  <span>检测体系</span>
                 </label>
                 <select
                   value={selectedProfile}
                   onChange={(e) => setSelectedProfile(e.target.value as ModelVerificationProfile)}
-                  className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-[#faf9f5] font-semibold focus:border-[#cc785c] focus:outline-none cursor-pointer"
+                  className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] font-semibold focus:border-[#cc785c] focus:outline-none cursor-pointer smooth-input tracking-wide"
                 >
-                  <option value="claude">Anthropic Claude 体系 (官方加密签名 + Thinking 思考流)</option>
-                  <option value="openai">OpenAI 体系 (o1/o3/GPT-4.5 系统指纹 + 知识边界)</option>
-                  <option value="xai">xAI Grok 体系 (Grok-3/Grok-2 思考流与知识库)</option>
-                  <option value="gemini">Google Gemini 体系 (Gemini 2.5/2.0 原生思考流 + 搜索接地)</option>
+                  <option value="claude">Anthropic (Claude)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="xai">xAI (Grok)</option>
+                  <option value="gemini">Google (Gemini)</option>
                 </select>
               </div>
 
               {/* Depth Selector */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-200 mb-1.5 flex items-center gap-1.5 tracking-wide">
-                  <Gauge className="w-3.5 h-3.5 text-[#cc785c]" />
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
+                  <Gauge className="w-4 h-4 text-[#cc785c]" />
                   <span>检测深度</span>
                 </label>
-                <div className="grid grid-cols-3 gap-1 bg-[#23211e] p-1 rounded-xl border border-[#2e2b27]">
+                <div className="grid grid-cols-3 gap-1.5 bg-[#141413] p-1.5 rounded-xl border border-[#2e2b27]">
                   {[
                     { id: 'quick', label: '快速 · 1s' },
                     { id: 'standard', label: '标准 · 4s' },
@@ -526,7 +531,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       key={d.id}
                       type="button"
                       onClick={() => setSelectedDepth(d.id as FidelityDepth)}
-                      className={`py-1.5 rounded-lg text-xs font-semibold transition tracking-wide ${
+                      className={`py-2 rounded-lg text-xs font-semibold transition tracking-wide ${
                         selectedDepth === d.id
                           ? 'bg-[#cc785c] text-white shadow-sm'
                           : 'text-neutral-300 hover:text-white'
