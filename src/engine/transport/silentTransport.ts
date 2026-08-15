@@ -1,6 +1,6 @@
 /**
  * Silent Network Transport Layer
- * Direct fetch with automatic silent fallback to local proxy upon CORS / Network interception.
+ * Direct fetch with automatic silent fallback to local/edge proxy upon CORS, WAF, or 404/403 Origin blocks.
  */
 
 export interface TransportRequestOptions {
@@ -79,6 +79,22 @@ export async function silentFetch<T = unknown>(
       rawText = '';
     }
 
+    // If direct browser request got 404, 403, 405, or 502 (often caused by Cloudflare WAF blocking Origin: localhost),
+    // and fallback is not disabled, silently retry once through serverless proxy
+    if (
+      !response.ok &&
+      !disableFallback &&
+      !url.startsWith('/api/proxy') &&
+      [404, 403, 405, 502, 503].includes(response.status)
+    ) {
+      const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
+      return silentFetch<T>({
+        ...options,
+        url: proxyUrl,
+        disableFallback: true,
+      });
+    }
+
     const lowerText = (rawText + JSON.stringify(parsedData || '')).toLowerCase();
     let errorCategory: TransportResponse<T>['errorCategory'] = undefined;
     let errorMessage: string | undefined = undefined;
@@ -127,8 +143,8 @@ export async function silentFetch<T = unknown>(
     const isTimeout = errorObj.name === 'AbortError' || errorObj.message.includes('Timeout');
     const isCors = errorObj.name === 'TypeError' && (errorObj.message.includes('fetch') || errorObj.message.includes('NetworkError') || errorObj.message.includes('Failed'));
 
-    // If blocked by CORS in browser, silently fallback to local/Vercel serverless proxy
-    if (isCors && !disableFallback && !url.startsWith('/api/proxy')) {
+    // If blocked by CORS or NetworkError in browser, silently fallback to proxy
+    if ((isCors || !isTimeout) && !disableFallback && !url.startsWith('/api/proxy')) {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
       return silentFetch<T>({
         ...options,
@@ -160,11 +176,15 @@ export async function silentStreamingFetch(
   options: RequestInit
 ): Promise<Response> {
   try {
-    return await fetch(url, options);
+    const res = await fetch(url, options);
+    // If direct response was blocked with 404/403/502 by WAF, retry via proxy
+    if (!res.ok && [404, 403, 405, 502].includes(res.status) && !url.startsWith('/api/proxy')) {
+      const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
+      return await fetch(proxyUrl, options);
+    }
+    return res;
   } catch (err: unknown) {
-    const errorObj = err instanceof Error ? err : new Error(String(err));
-    const isCors = errorObj.name === 'TypeError' && (errorObj.message.includes('fetch') || errorObj.message.includes('NetworkError') || errorObj.message.includes('Failed'));
-    if (isCors && !url.startsWith('/api/proxy')) {
+    if (!url.startsWith('/api/proxy')) {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
       return await fetch(proxyUrl, options);
     }
