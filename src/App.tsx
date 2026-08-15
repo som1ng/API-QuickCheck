@@ -1,14 +1,9 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
-import { GlobalConfigBar } from './components/layout/GlobalConfigBar';
-import { TabNav } from './components/layout/TabNav';
 import { FaqSection } from './components/layout/FaqSection';
 import { Footer } from './components/layout/Footer';
-import { FidelityTab } from './components/tabs/FidelityTab';
-import { BenchmarkTab } from './components/tabs/BenchmarkTab';
-import { BatchScannerTab } from './components/tabs/BatchScannerTab';
-import { CapabilityTab } from './components/tabs/CapabilityTab';
+import { HomeRelayTab } from './components/tabs/HomeRelayTab';
 import { QuickPingTab } from './components/tabs/QuickPingTab';
 import { ClientExportTab } from './components/tabs/ClientExportTab';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -17,51 +12,33 @@ const MainContent: React.FC = () => {
   const { state } = useApp();
   const { activeTab } = state;
 
+  const isHome = activeTab === 'home' || activeTab === 'fidelity' || activeTab === 'benchmark' || activeTab === 'scanner';
+  const isBatchKeys = activeTab === 'quickping';
+  const isDocs = activeTab === 'docs' || activeTab === 'export';
+
   return (
     <div className="min-h-screen flex flex-col bg-[#141413] text-[#d4cebe] font-sans selection:bg-[#cc785c]/30 selection:text-[#faf9f5]">
+      {/* ── 1. Global Navigation Header ── */}
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        {/* Global Configuration Card */}
-        <GlobalConfigBar />
-
-        {/* Navigation Tabs */}
-        <TabNav />
-
-        {/* Tab Content with Error Boundary */}
-        <div className="pt-2 min-h-[600px]">
-          {activeTab === 'fidelity' && (
-            <ErrorBoundary fallbackTitle="真伪鉴别模块异常">
-              <FidelityTab />
+      {/* ── 2. Primary Workbench Body ── */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+        {/* Main Workspaces according to Global Header Nav */}
+        <div className="min-h-[640px]">
+          {isHome && (
+            <ErrorBoundary fallbackTitle="中转站综合检测模块异常">
+              <HomeRelayTab />
             </ErrorBoundary>
           )}
 
-          {activeTab === 'benchmark' && (
-            <ErrorBoundary fallbackTitle="性能测速模块异常">
-              <BenchmarkTab />
-            </ErrorBoundary>
-          )}
-
-          {activeTab === 'scanner' && (
-            <ErrorBoundary fallbackTitle="模型批量巡检模块异常">
-              <BatchScannerTab />
-            </ErrorBoundary>
-          )}
-
-          {activeTab === 'capability' && (
-            <ErrorBoundary fallbackTitle="高级能力探针模块异常">
-              <CapabilityTab />
-            </ErrorBoundary>
-          )}
-
-          {activeTab === 'quickping' && (
+          {isBatchKeys && (
             <ErrorBoundary fallbackTitle="API Key 批量检测模块异常">
               <QuickPingTab />
             </ErrorBoundary>
           )}
 
-          {activeTab === 'export' && (
-            <ErrorBoundary fallbackTitle="客户端配置导出模块异常">
+          {isDocs && (
+            <ErrorBoundary fallbackTitle="客户端与 Agent 配置模块异常">
               <ClientExportTab />
             </ErrorBoundary>
           )}
@@ -73,7 +50,7 @@ const MainContent: React.FC = () => {
         </div>
       </main>
 
-      {/* Rich Multi-column Footer */}
+      {/* ── 3. Footer ── */}
       <Footer />
     </div>
   );

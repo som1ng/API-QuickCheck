@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ActiveTabId } from '../../types/config';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 
 interface FaqItem {
@@ -9,9 +8,9 @@ interface FaqItem {
   summaryNote?: string;
 }
 
-const FAQ_BY_TAB: Record<ActiveTabId, FaqItem[]> = {
-  // 1. API 掺水验真
-  fidelity: [
+const FAQ_BY_TAB: Record<string, FaqItem[]> = {
+  // 1. Home: 中转站综合检测
+  home: [
     {
       question: '我花钱买的是 GPT/Claude，怎么知道中转站没偷偷换成更便宜的模型？',
       answer: (
@@ -40,14 +39,27 @@ const FAQ_BY_TAB: Record<ActiveTabId, FaqItem[]> = {
       ),
     },
     {
-      question: '为什么 OpenAI 的检测不像 Claude 那样能「100% 保证真伪」？',
+      question: '测完显示「0 个模型可用」，是中转站挂了吗？',
+      answer: (
+        <div className="space-y-2">
+          <p>常见原因分析：</p>
+          <ol className="list-decimal list-inside space-y-1.5 pl-1 text-[#d4cebe]">
+            <li><strong>中转站关闭了公开模型列表</strong>：很多中转站管理员在后台隐藏了 <code className="text-[#cc785c] font-mono">/v1/models</code> 路由。这种情况下，你依然可以在输入框直接手动填写模型名发起测试；</li>
+            <li><strong>API Key 额度用尽或未授权</strong>：Key 本身失效或账户欠费；</li>
+            <li><strong>本地网络与 CORS</strong>：系统已内置透明代理与 SNI 握手兜底重试。</li>
+          </ol>
+        </div>
+      ),
+    },
+    {
+      question: 'TTFT 和 TPS 究竟代表什么？多少算优秀？',
       answer: (
         <div className="space-y-2">
           <p>
-            因为 Anthropic 在 Claude 3.7 / 3.5 的 Thinking 输出中，加入了由官方私钥加密签名的 <code className="text-[#cc785c] font-mono">signature</code> 字段，任何第三方套壳或逆向均无法伪造其数学签名；
+            <strong>TTFT (Time To First Token)</strong> 是从发送请求到接收到模型吐出第一个字的时间。TTFT &lt; 600ms 为优秀，600~1500ms 为正常，&gt; 2000ms 说明中转站网关排队或上游拥塞。
           </p>
           <p>
-            而 OpenAI 等厂商目前尚未提供端到端非对称加密签名，因此对其检测主要通过 <strong>系统指纹 (system_fingerprint)</strong>、<strong>知识库截断期探针</strong>、<strong>高维空间拓扑</strong> 与 <strong>流式 Token 生成延迟特征</strong> 进行多重交叉高置信度鉴别。
+            <strong>TPS (Tokens Per Second)</strong> 代表流式输出的吞吐速率。旗舰大模型（如 Claude 3.7 / GPT-4o）通常在 40~80 tokens/s；轻量模型（如 Groq / Gemini Flash）可达 100~300+ tokens/s。
           </p>
         </div>
       ),
@@ -64,7 +76,7 @@ const FAQ_BY_TAB: Record<ActiveTabId, FaqItem[]> = {
             支持任意多行文本直接粘贴，系统会自动识别<strong>换行、逗号、分号</strong>等分隔符，并自动去除空格、注释行以及过滤重复 Key。
           </p>
           <p>
-            原生预置支持 OpenAI、Anthropic (Claude)、Google Gemini、DeepSeek、Groq、Cerebras、硅基流动、OpenRouter 以及任何自定义中转站 Base URL。
+            原生预置支持 OpenAI、Anthropic (Claude)、DeepSeek、xAI (Grok)、Google Gemini、Cerebras、硅基流动、OpenRouter 以及任何自定义中转站 Base URL。
           </p>
         </div>
       ),
@@ -93,63 +105,13 @@ const FAQ_BY_TAB: Record<ActiveTabId, FaqItem[]> = {
     },
   ],
 
-  // 3. 性能测速
-  benchmark: [
+  // 3. 客户端与 Agent 配置 (Docs)
+  docs: [
     {
-      question: 'TTFT 和 TPS 究竟代表什么？多少算优秀？',
-      answer: (
-        <div className="space-y-2">
-          <p>
-            <strong>TTFT (Time To First Token)</strong> 是从发送请求到接收到模型吐出第一个字的时间。TTFT &lt; 600ms 为优秀，600~1500ms 为正常，&gt; 2000ms 说明中转站网关排队或上游拥塞。
-          </p>
-          <p>
-            <strong>TPS (Tokens Per Second)</strong> 代表流式输出的吞吐速率。旗舰大模型（如 Claude 3.7 / GPT-4o）通常在 40~80 tokens/s；轻量模型（如 Groq / Gemini Flash）可达 100~300+ tokens/s。
-          </p>
-        </div>
-      ),
-    },
-    {
-      question: '为什么不同轮次的测速结果会有波动？',
+      question: '导出的配置支持哪些主流 AI 客户端与 Agent？',
       answer: (
         <p>
-          中转站上游往往挂载了多个渠道账号做负载均衡，不同轮次可能被路由到了不同的底层节点；此外海外跨境网络链路的抖动也会影响首字延迟。建议开启「3 轮均值」或「5 轮压力测试」以获取稳定的性能基准。
-        </p>
-      ),
-    },
-  ],
-
-  // 4. 模型巡检
-  scanner: [
-    {
-      question: '测完显示「0 个模型可用」，是中转站挂了吗？',
-      answer: (
-        <div className="space-y-2">
-          <p>常见原因分析：</p>
-          <ol className="list-decimal list-inside space-y-1.5 pl-1 text-[#d4cebe]">
-            <li><strong>中转站关闭了公开模型列表</strong>：很多中转站管理员在后台隐藏了 <code className="text-[#cc785c] font-mono">/v1/models</code> 路由。这种情况下，你依然可以在输入框直接手动填写模型名发起测试；</li>
-            <li><strong>API Key 额度用尽或未授权</strong>：Key 本身失效或账户欠费；</li>
-            <li><strong>本地网络与 CORS</strong>：系统已内置透明代理兜底，若依然拉取不到，请确认 Base URL 是否包含路径前缀（如标准 <code className="text-[#cc785c] font-mono">https://api.your-relay.com</code>）。</li>
-          </ol>
-        </div>
-      ),
-    },
-    {
-      question: '什么是「空壳模型 (404 / Fake Model)」？',
-      answer: (
-        <p>
-          部分中转站在模型列表里声明了支持某模型（如 <code className="text-[#faf9f5] font-mono">claude-3-7-sonnet</code>），但实际请求时上游并无可用渠道，直接返回 404 或 502。批量巡检会真实对每一个模型发送探测包，甄别出哪些是真实可用的、哪些只是写在列表里的空壳。
-        </p>
-      ),
-    },
-  ],
-
-  // 5. 客户端配置
-  export: [
-    {
-      question: '导出的配置支持哪些主流 AI 客户端？',
-      answer: (
-        <p>
-          支持一键导出适配 <strong>NextChat (ChatGPT-Next-Web)</strong>、<strong>Cherry Studio</strong>、<strong>Chatbox</strong>、<strong>Cline (VSCode 插件)</strong>、<strong>LiteLLM</strong>、<strong>cURL</strong> 以及环境变量命令。
+          支持一键导出适配 <strong>Claude Code CLI</strong>、<strong>Cline (VSCode 插件)</strong>、<strong>Cursor</strong>、<strong>Cherry Studio</strong>、<strong>NextChat (ChatGPT-Next-Web)</strong>、<strong>Dify</strong>、<strong>Chatbox</strong>、<strong>LiteLLM</strong>、<strong>cURL</strong> 以及各类 Agent 环境变量。
         </p>
       ),
     },
@@ -157,19 +119,7 @@ const FAQ_BY_TAB: Record<ActiveTabId, FaqItem[]> = {
       question: '为什么导出的地址有的是 /v1 有的没有？',
       answer: (
         <p>
-          不同客户端的规范不同。例如 NextChat 默认要求传入基础域名，而 LiteLLM / OpenAI SDK 需要标准的 <code className="text-[#cc785c] font-mono">/v1</code> 结尾。导出模块已自动根据目标软件的标准进行了自适应格式化。
-        </p>
-      ),
-    },
-  ],
-
-  // Fallback for capability
-  capability: [
-    {
-      question: '高级能力矩阵包含哪些维度的探针？',
-      answer: (
-        <p>
-          包含 Function Calling / Tool Use 工具调用探针、多模态 Vision 视觉解析、JSON Mode 严格结构化输出、系统提示词注入防御与长上下文检索能力。
+          不同客户端的规范不同。例如 NextChat 默认要求传入基础域名，而 LiteLLM / OpenAI SDK / Claude Code 需要标准的 <code className="text-[#cc785c] font-mono">/v1</code> 结尾。导出模块已自动根据目标软件的标准进行了自适应格式化。
         </p>
       ),
     },
@@ -182,7 +132,11 @@ export const FaqSection: React.FC = () => {
 
   const [openIndex, setOpenIndex] = useState<number | null>(0); // Default open first
 
-  const currentFaqList = FAQ_BY_TAB[activeTab] || FAQ_BY_TAB.fidelity;
+  let currentKey = 'home';
+  if (activeTab === 'quickping') currentKey = 'quickping';
+  else if (activeTab === 'docs' || activeTab === 'export') currentKey = 'docs';
+
+  const currentFaqList = FAQ_BY_TAB[currentKey] || FAQ_BY_TAB.home;
 
   const toggleAccordion = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);

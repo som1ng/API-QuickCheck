@@ -33,7 +33,7 @@ const initialState: AppState = {
     selectedModel: 'gpt-4o',
     timeoutMs: 8000,
   },
-  activeTab: 'fidelity',
+  activeTab: 'home',
   availableModels: [],
   isLoadingModels: false,
   modelError: null,

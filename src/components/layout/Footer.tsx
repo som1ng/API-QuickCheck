@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="text-sm text-[#9c9689] leading-relaxed max-w-md">
-              全能 AI API 中转站真伪鉴别与 Key 批量清洗引擎。支持官方私钥签名验真、思维链 Delta 提取、知识库截止期与流式测速。代码完全开源，API Key 永不落盘。
+              全能 AI API 中转站真伪鉴别与 Key 批量清洗引擎。聚合官方私钥签名验真、思维链 Delta 提取、知识库截止期与流式测速。代码完全开源，API Key 永不落盘。
             </p>
 
             <div className="flex items-center gap-2.5 text-xs text-[#5db872] pt-1 font-medium">
@@ -40,17 +40,17 @@ export const Footer: React.FC = () => {
           {/* Column 2: 功能直达 (4 cols) */}
           <div className="md:col-span-4 space-y-3.5">
             <h4 className="text-xs uppercase font-semibold text-[#faf9f5] tracking-wider">
-              核心功能直达
+              核心功能导航
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <button
                   type="button"
-                  onClick={() => handleNavigateTab('fidelity')}
+                  onClick={() => handleNavigateTab('home')}
                   className="flex items-center gap-2 text-[#d4cebe] hover:text-[#cc785c] transition text-left"
                 >
                   <span className="w-2 h-2 rounded-full bg-[#cc785c]" />
-                  <span>API 掺水与真伪深度鉴别 (核心)</span>
+                  <span>中转站综合检测 (掺水验真 / 测速 / 巡检)</span>
                 </button>
               </li>
               <li>
@@ -60,43 +60,23 @@ export const Footer: React.FC = () => {
                   className="flex items-center gap-2 text-[#d4cebe] hover:text-[#5db872] transition text-left"
                 >
                   <span className="w-2 h-2 rounded-full bg-[#5db872]" />
-                  <span>API Key 批量并发清洗验货 (核心)</span>
+                  <span>API Key 批量检测与清洗 🔥 (核心)</span>
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => handleNavigateTab('benchmark')}
-                  className="flex items-center gap-2 text-[#d4cebe] hover:text-[#e8a55a] transition text-left"
-                >
-                  <span className="w-2 h-2 rounded-full bg-[#e8a55a]" />
-                  <span>TTFT 与流式 TPS 性能测速</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleNavigateTab('scanner')}
+                  onClick={() => handleNavigateTab('docs')}
                   className="flex items-center gap-2 text-[#d4cebe] hover:text-[#faf9f5] transition text-left"
                 >
                   <span className="w-2 h-2 rounded-full bg-[#9c9689]" />
-                  <span>中转站多模型全量巡检</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleNavigateTab('export')}
-                  className="flex items-center gap-2 text-[#d4cebe] hover:text-[#faf9f5] transition text-left"
-                >
-                  <span className="w-2 h-2 rounded-full bg-[#9c9689]" />
-                  <span>NextChat / Cline 客户端配置导出</span>
+                  <span>客户端与 Agent 接入配置 (Docs)</span>
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: 开源项目与代码 (3 cols) */}
+          {/* Column 3: 开源生态 (3 cols) */}
           <div className="md:col-span-3 space-y-3.5">
             <h4 className="text-xs uppercase font-semibold text-[#faf9f5] tracking-wider">
               开源生态
@@ -130,16 +110,6 @@ export const Footer: React.FC = () => {
                   className="hover:text-[#faf9f5] text-[#d4cebe] transition"
                 >
                   提交 Issue / 漏洞反馈
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/som1ng/API-QuickCheck"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-[#faf9f5] text-[#d4cebe] transition"
-                >
-                  贡献指南与 PR
                 </a>
               </li>
             </ul>

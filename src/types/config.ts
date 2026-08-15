@@ -48,4 +48,4 @@ export interface RelayProfile {
   supportsOpenAICompat: boolean;
 }
 
-export type ActiveTabId = 'fidelity' | 'benchmark' | 'scanner' | 'capability' | 'quickping' | 'export';
+export type ActiveTabId = 'home' | 'quickping' | 'docs' | 'fidelity' | 'benchmark' | 'scanner' | 'capability' | 'export';
