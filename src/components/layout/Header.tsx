@@ -16,9 +16,9 @@ export const Header: React.FC = () => {
   const isDocs = activeTab === 'docs' || activeTab === 'export';
 
   const navItems: { id: ActiveTabId; label: string; active: boolean; badge?: string }[] = [
-    { id: 'home', label: '中转站综合体检', active: isHome },
+    { id: 'home', label: '中转站检测', active: isHome },
     { id: 'quickping', label: 'API Key 批量检测', active: isKeys, badge: '🔥' },
-    { id: 'docs', label: '文档与接入配置 (Docs)', active: isDocs },
+    { id: 'docs', label: '文档与接入指南', active: isDocs },
   ];
 
   return (

@@ -23,7 +23,7 @@ const MainContent: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
         <div className="min-h-[520px]">
           {isHome && (
-            <ErrorBoundary fallbackTitle="中转站综合检测模块异常">
+            <ErrorBoundary fallbackTitle="中转站检测模块异常">
               <HomeRelayTab />
             </ErrorBoundary>
           )}

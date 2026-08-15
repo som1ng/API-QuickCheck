@@ -52,9 +52,9 @@ const COMMON_PRESETS = [
 const POPULAR_MODELS = [
   { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet', family: 'claude' },
   { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', family: 'claude' },
-  { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (思维链)', family: 'deepseek' },
+  { id: 'deepseek-reasoner', label: 'DeepSeek-R1', family: 'deepseek' },
   { id: 'deepseek-chat', label: 'DeepSeek-V3', family: 'deepseek' },
-  { id: 'gpt-4o', label: 'GPT-4o (Omni)', family: 'openai' },
+  { id: 'gpt-4o', label: 'GPT-4o', family: 'openai' },
   { id: 'o1', label: 'OpenAI o1', family: 'openai' },
   { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', family: 'gemini' },
 ];
@@ -63,7 +63,7 @@ export const HomeRelayTab: React.FC = () => {
   const { state, dispatch } = useApp();
   const { config, availableModels, isLoadingModels } = state;
 
-  // Active Mode: fidelity (真伪与降级体检) vs scanner (全模型并发巡检)
+  // Active Mode: fidelity (模型真伪检测) vs scanner (全模型可用性检测)
   const [activeMode, setActiveMode] = useState<'fidelity' | 'scanner'>('fidelity');
 
   // Input states
@@ -119,7 +119,7 @@ export const HomeRelayTab: React.FC = () => {
     }
 
     setIsRunningAudit(true);
-    setProgressText('正在初始化深度鉴别与流式测速引擎...');
+    setProgressText('正在初始化检测引擎...');
     setProgressPercent(5);
 
     try {
@@ -139,7 +139,7 @@ export const HomeRelayTab: React.FC = () => {
       setReport(result);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`鉴别过程发生错误: ${msg}`);
+      alert(`检测过程发生错误: ${msg}`);
     } finally {
       setIsRunningAudit(false);
       setProgressPercent(100);
@@ -185,7 +185,7 @@ export const HomeRelayTab: React.FC = () => {
         }
       );
     } catch (err: unknown) {
-      alert(`批量巡检异常: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`批量检测异常: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsScanning(false);
     }
@@ -194,18 +194,18 @@ export const HomeRelayTab: React.FC = () => {
   const handleCopyMarkdownReport = async () => {
     if (!report) return;
 
-    const md = `# API-QuickCheck 综合体检与真伪鉴别报告
+    const md = `# API-QuickCheck 中转站检测报告
 - **目标模型**: \`${report.targetModel}\`
-- **中转地址**: \`${config.baseUrl}\`
-- **鉴别体系**: \`${report.verificationProfile}\` (深度: \`${report.depth}\`)
-- **保真度评分**: **${report.overallScore} / 100** (${report.level === 'genuine' ? '✅ 官方正品' : report.level === 'suspect_downgraded' ? '⚠️ 疑似降级/换皮' : '❌ 假冒冒充'})
+- **接口地址**: \`${config.baseUrl}\`
+- **检测体系**: \`${report.verificationProfile}\` (深度: \`${report.depth}\`)
+- **真实性评分**: **${report.overallScore} / 100** (${report.level === 'genuine' ? '✅ 官方正品' : report.level === 'suspect_downgraded' ? '⚠️ 疑似降级' : '❌ 虚假冒充'})
 - **首字响应速度 (TTFT)**: \`${report.firstTokenLatencyMs || 0} ms\`
-- **流式生成吞吐**: \`${report.generationTps || 0} tok/s\`
-- **思考链纯耗时**: \`${report.thinkingTimeMs || 0} ms\`
+- **流式生成速率**: \`${report.generationTps || 0} tok/s\`
+- **思考耗时**: \`${report.thinkingTimeMs || 0} ms\`
 - **总耗时 / Token**: \`${(report.totalDurationMs / 1000).toFixed(2)}s\` / \`${report.totalTokens.total} Tokens\`
-- **综合判定结论**: ${report.summary}
+- **判定结论**: ${report.summary}
 
-## 探针决策详单 (${report.probes.length} 项)
+## 探针结果明细 (${report.probes.length} 项)
 ${report.probes.map((p, i) => `### ${i + 1}. ${p.title} [${p.passed ? 'PASS' : 'FAIL'}]
 - **得分**: ${p.score} / 100 | **耗时**: ${p.latencyMs}ms
 - **详情**: ${p.details}
@@ -247,18 +247,18 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* ── 1. Clean Top Header & Mode Pill Switcher ── */}
+      {/* ── 1. Header & Mode Switcher ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif-display text-3xl sm:text-4xl font-semibold text-[#faf9f5] tracking-tight">
-            中转站体检工作台
+            中转站检测
           </h1>
-          <p className="mt-1.5 text-sm sm:text-base text-[#9c9689] max-w-2xl leading-relaxed">
-            一键深度鉴别 AI 接口真伪、流式首字速度 (TTFT) 与降级掺水，击穿套壳伪装。
+          <p className="mt-1 text-sm sm:text-base text-[#9c9689] max-w-2xl leading-relaxed">
+            检测 API 真实性、首字响应延迟 (TTFT) 与模型可用性。
           </p>
         </div>
 
-        {/* Mode Switcher Pill */}
+        {/* Mode Switcher */}
         <div className="inline-flex items-center p-1 rounded-xl bg-[#1b1a18] border border-[#2e2b27] self-start sm:self-auto shrink-0">
           <button
             type="button"
@@ -270,7 +270,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>真伪与降级体检</span>
+            <span>模型真伪检测</span>
           </button>
 
           <button
@@ -283,12 +283,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             }`}
           >
             <ListFilter className="w-4 h-4" />
-            <span>全模型并发巡检</span>
+            <span>全模型可用性检测</span>
           </button>
         </div>
       </div>
 
-      {/* ── 2. Unified All-In-One API & Model Configuration Card ── */}
+      {/* ── 2. Unified Configuration Card ── */}
       <div className="rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-6 sm:p-8 shadow-xl space-y-6 smooth-card">
         {/* Row A: Endpoint & Key */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -320,7 +320,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/40 focus:border-[#cc785c] focus:outline-none smooth-input"
             />
 
-            {/* Quick Presets */}
+            {/* Presets */}
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
               <span className="text-xs text-[#9c9689] mr-1">快捷填入:</span>
               {COMMON_PRESETS.map((p) => (
@@ -376,7 +376,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           </div>
         </div>
 
-        {/* Row B: Model & Parameters (Only in Fidelity mode) */}
+        {/* Row B: Model & Parameters (In Fidelity mode) */}
         {activeMode === 'fidelity' && (
           <div className="space-y-4 pt-4 border-t border-[#2e2b27]">
             {/* Target Model Input + Pills */}
@@ -388,7 +388,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 </label>
                 {availableModels.length > 0 && (
                   <span className="text-xs text-[#5db872] font-mono">
-                    已探测可用模型: {availableModels.length} 个
+                    已检测模型: {availableModels.length} 个
                   </span>
                 )}
               </div>
@@ -409,7 +409,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     onChange={(e) => e.target.value && dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
                     className="sm:w-64 rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 font-mono text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none cursor-pointer"
                   >
-                    <option value="">从已探测列表中挑选...</option>
+                    <option value="">从已发现列表中挑选...</option>
                     {availableModels.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.name || m.id}
@@ -421,7 +421,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
               {/* Popular Model Pills */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-xs text-[#9c9689] mr-1">热门模型:</span>
+                <span className="text-xs text-[#9c9689] mr-1">常用模型:</span>
                 {POPULAR_MODELS.map((m) => (
                   <button
                     key={m.id}
@@ -439,13 +439,13 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               </div>
             </div>
 
-            {/* Sub-parameters: Profile & Depth Grid */}
+            {/* Sub-parameters */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               {/* Profile Selector */}
               <div>
                 <label className="block text-xs font-semibold text-[#9c9689] mb-1.5 flex items-center gap-1.5">
                   <Sliders className="w-3.5 h-3.5 text-[#cc785c]" />
-                  <span>评判体系</span>
+                  <span>检测体系</span>
                 </label>
                 <select
                   value={selectedProfile}
@@ -453,9 +453,9 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none cursor-pointer"
                 >
                   <option value="auto">⭐ 智能自动匹配 (推荐)</option>
-                  <option value="claude">Anthropic Claude (官方私钥签名 + Thinking)</option>
+                  <option value="claude">Anthropic Claude (官方签名 + Thinking)</option>
                   <option value="deepseek">DeepSeek R1/V3 (原生思维链 + 知识库)</option>
-                  <option value="openai">OpenAI o1/o3/GPT-4o (系统指纹 + 截止期)</option>
+                  <option value="openai">OpenAI o1/o3/GPT-4o (系统指纹 + 知识边界)</option>
                   <option value="gemini">Google Gemini (原生思考流 + 搜索接地)</option>
                   <option value="universal">通用大模型 (元认知冲突 + 拓扑几何)</option>
                 </select>
@@ -469,9 +469,9 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 </label>
                 <div className="grid grid-cols-3 gap-1 bg-[#23211e] p-1 rounded-xl border border-[#2e2b27]">
                   {[
-                    { id: 'quick', label: '轻检 · 1s' },
+                    { id: 'quick', label: '快速 · 1s' },
                     { id: 'standard', label: '标准 · 4s' },
-                    { id: 'deep', label: '死磕 · 8s' },
+                    { id: 'deep', label: '深度 · 8s' },
                   ].map((d) => (
                     <button
                       key={d.id}
@@ -498,8 +498,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             <Sparkles className="w-4 h-4 text-[#cc785c]" />
             <span>
               {activeMode === 'fidelity'
-                ? '自动测算首字速度 (TTFT)、生成 TPS、思考链纯净度与私钥防伪'
-                : '5 线程高并发探活，快速识别 200 可用 / 401 鉴权失败 / 404 空壳'}
+                ? '自动测算首字速度 (TTFT)、生成速率 (TPS)、思维链与签名'
+                : '并发探测模型可用性与 HTTP 状态码'}
             </span>
           </div>
 
@@ -513,12 +513,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               {isRunningAudit ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>全维体检中...</span>
+                  <span>正在检测...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-5 h-5 fill-[#faf9f5]" />
-                  <span>开始全维度体检</span>
+                  <span>开始检测</span>
                 </>
               )}
             </button>
@@ -543,12 +543,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 {isScanning ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>巡检中 ({scanProgress.completed}/{scanProgress.total})</span>
+                    <span>检测中 ({scanProgress.completed}/{scanProgress.total})</span>
                   </>
                 ) : (
                   <>
                     <Play className="w-4 h-4 fill-[#faf9f5]" />
-                    <span>开始并发巡检</span>
+                    <span>开始并发检测</span>
                   </>
                 )}
               </button>
@@ -556,7 +556,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           )}
         </div>
 
-        {/* Progress Bar (When running) */}
+        {/* Progress Bar */}
         {isRunningAudit && (
           <div className="space-y-2 pt-2 animate-in fade-in">
             <div className="flex justify-between text-xs text-[#9c9689]">
@@ -588,39 +588,39 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   <div className="flex items-center justify-between">
                     <h3 className="font-serif-display text-lg font-semibold text-[#faf9f5] flex items-center gap-2.5">
                       <Fingerprint className="w-5 h-5 text-[#cc785c]" />
-                      <span>就绪探针矩阵 (Active Probes Ready)</span>
+                      <span>就绪检测项 (Active Probes)</span>
                     </h3>
                     <span className="text-xs px-2.5 py-0.5 rounded-md bg-[#23211e] border border-[#2e2b27] text-[#5db872] font-mono">
-                      {selectedDepth === 'quick' ? '2 项核心探针' : selectedDepth === 'standard' ? '5 项标准探针' : '8 项全维死磕探针'}
+                      {selectedDepth === 'quick' ? '2 项核心' : selectedDepth === 'standard' ? '5 项标准' : '8 项深度'}
                     </span>
                   </div>
 
                   <div className="space-y-2.5">
                     {[
                       {
-                        title: '首字响应速度 (TTFT) 与流式生成吞吐 (TPS)',
-                        desc: '毫秒级捕获第一块 Token 到达时间，同步测量真实 token 流速与中间缓冲拦截。',
-                        tag: '真实流速',
+                        title: '首字响应延迟 (TTFT) 与流式生成速率 (TPS)',
+                        desc: '测量首个 Token 到达耗时与持续流式生成吞吐。',
+                        tag: '性能指标',
                       },
                       {
-                        title: 'Claude 官方私钥加密签名验真 (Thinking Signature)',
-                        desc: '校验回包 signature 字段的数学密码学签名，100% 鉴别是否为 Anthropic 官方正品。',
-                        tag: '数学防伪',
+                        title: 'Claude 官方私钥签名校验 (Thinking Signature)',
+                        desc: '校验 signature 字段密码学签名，验证 Anthropic 官方直连。',
+                        tag: '密码学签名',
                       },
                       {
-                        title: '原生流式思维链 Delta 提取 (Native Reasoning Delta)',
-                        desc: '提取 thinking/reasoning_content 的 token 流式输出速率与思维链分块特征。',
-                        tag: '流式特征',
+                        title: '原生思维链协议校验 (Reasoning Delta)',
+                        desc: '校验 reasoning_content 字段与流式输出结构。',
+                        tag: '协议校验',
                       },
                       {
-                        title: '空间几何与反套壳拓扑探针 (Spatial Topology Probe)',
-                        desc: '利用高维空间几何推理与元认知冲突，击穿中转站套壳与 System Prompt 欺骗。',
-                        tag: '逻辑击穿',
+                        title: '空间几何与系统提示词冲突探针',
+                        desc: '测试模型空间坐标规划与预设指令隔离能力。',
+                        tag: '认知能力',
                       },
                       {
-                        title: '2024/2025 知识库时效与截断期探针 (Knowledge Horizon)',
-                        desc: '用特定时间截断事件与版本迭代题，鉴别是否用旧模型或小模型冒充新旗舰。',
-                        tag: '时效探针',
+                        title: '知识库截止时间探针 (Knowledge Horizon)',
+                        desc: '测试特定时间节点事件，验证模型版本真实性。',
+                        tag: '版本验证',
                       },
                     ].map((probe, idx) => (
                       <div
@@ -645,47 +645,47 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 </div>
 
                 <div className="pt-3 flex items-center justify-between text-xs text-[#9c9689] font-mono border-t border-[#2e2b27]/60">
-                  <span>点击上方按钮即刻执行探针</span>
+                  <span>点击上方按钮开始检测</span>
                   <span className="text-[#faf9f5]">预估耗时: {selectedDepth === 'quick' ? '1~2s' : selectedDepth === 'standard' ? '3~5s' : '6~9s'}</span>
                 </div>
               </div>
 
-              {/* Scoring Rubric (5 cols) */}
+              {/* Scoring Standards (5 cols) */}
               <div className="lg:col-span-5 rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-6 sm:p-7 shadow-lg space-y-5 flex flex-col justify-between smooth-card">
                 <div className="space-y-3.5">
                   <h3 className="font-serif-display text-lg font-semibold text-[#faf9f5] flex items-center gap-2.5">
                     <Activity className="w-5 h-5 text-[#cc785c]" />
-                    <span>保真度评分标准 (Scoring Rubric)</span>
+                    <span>评分判定标准</span>
                   </h3>
 
                   <div className="space-y-3">
                     <div className="p-3.5 rounded-xl border border-[#5db872]/30 bg-[#5db872]/[0.08] space-y-1">
                       <div className="flex items-center justify-between font-semibold text-sm text-[#5db872]">
-                        <span>85 ~ 100 分 · 高保真正品</span>
+                        <span>85 ~ 100 分 · 官方正品</span>
                         <Check className="w-4 h-4" />
                       </div>
                       <p className="text-xs text-[#d4cebe] leading-relaxed">
-                        官方直连或 100% 满血透传，加密签名完整无缺，原生思维链无篡改，首字响应迅速。
+                        官方直连或透传，签名完整，原生思维链无修改，响应速度正常。
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-xl border border-[#e8a55a]/30 bg-[#e8a55a]/[0.08] space-y-1">
                       <div className="flex items-center justify-between font-semibold text-sm text-[#e8a55a]">
                         <span>50 ~ 84 分 · 疑似降级 / 包装异常</span>
-                        <span className="text-xs font-mono font-bold">⚠️ 警示</span>
+                        <span className="text-xs font-mono font-bold">⚠️ 提示</span>
                       </div>
                       <p className="text-xs text-[#d4cebe] leading-relaxed">
-                        存在伪造思考流、缺少官方数学签名或网关后台注入了假冒 System Prompt。
+                        存在伪造思考流、缺少官方签名或存在网关预设指令注入。
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-xl border border-[#c64545]/30 bg-[#c64545]/[0.08] space-y-1">
                       <div className="flex items-center justify-between font-semibold text-sm text-[#c64545]">
-                        <span>0 ~ 49 分 · 严重掺水冒充</span>
+                        <span>0 ~ 49 分 · 虚假冒充</span>
                         <XCircle className="w-4 h-4" />
                       </div>
                       <p className="text-xs text-[#d4cebe] leading-relaxed">
-                        证据确凿的模型掉包（如使用廉价开源小模型套壳冒充顶尖模型），探针测试全军覆没。
+                        模型替换或伪造响应，探针测试未达标。
                       </p>
                     </div>
                   </div>
@@ -694,9 +694,9 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 <div className="p-3.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs text-[#9c9689] space-y-1">
                   <span className="text-[#faf9f5] font-semibold flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-[#cc785c]" />
-                    零数据泄露原则
+                    隐私说明
                   </span>
-                  <p>所有探针请求直接从浏览器内存发起，不留存任何日志，测试完成后立即销毁数据。</p>
+                  <p>请求由浏览器直接发出，不存储任何密钥与测试数据。</p>
                 </div>
               </div>
             </div>
@@ -721,10 +721,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   </div>
                   <div className="text-[11px] font-mono text-[#5db872]">
                     {report.firstTokenLatencyMs && report.firstTokenLatencyMs < 800
-                      ? '⚡ 响应极速'
+                      ? '⚡ 极速'
                       : report.firstTokenLatencyMs && report.firstTokenLatencyMs < 2000
-                      ? '🟢 延迟正常'
-                      : '🟡 排队较长'}
+                      ? '🟢 正常'
+                      : '🟡 较慢'}
                   </div>
                 </div>
 
@@ -741,14 +741,14 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     <span className="text-xs text-[#9c9689] font-mono">tok/s</span>
                   </div>
                   <div className="text-[11px] font-mono text-[#9c9689]">
-                    {report.generationTps && report.generationTps > 30 ? '🚀 满血输出' : '流式生成'}
+                    {report.generationTps && report.generationTps > 30 ? '🚀 正常输出' : '流式生成'}
                   </div>
                 </div>
 
-                {/* Metric 3: 思考链耗时 */}
+                {/* Metric 3: 思考耗时 */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
                   <div className="flex items-center justify-between text-xs text-[#9c9689]">
-                    <span>思考链耗时</span>
+                    <span>思考耗时</span>
                     <Cpu className="w-4 h-4 text-[#e8a55a]" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
@@ -779,10 +779,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   </div>
                 </div>
 
-                {/* Metric 5: 总检测耗时 */}
+                {/* Metric 5: 总耗时 */}
                 <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
                   <div className="flex items-center justify-between text-xs text-[#9c9689]">
-                    <span>总耗时</span>
+                    <span>检测总耗时</span>
                     <Clock className="w-4 h-4 text-[#9c9689]" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
@@ -792,11 +792,11 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     <span className="text-xs text-[#9c9689] font-mono">s</span>
                   </div>
                   <div className="text-[11px] font-mono text-[#9c9689]">
-                    {report.probes.length} 项探针并发
+                    {report.probes.length} 项测试项
                   </div>
                 </div>
 
-                {/* Metric 6: 综合保真得分 */}
+                {/* Metric 6: 评分 */}
                 <div className={`rounded-xl border p-5 space-y-2 shadow-sm smooth-card ${
                   report.overallScore >= 85
                     ? 'border-[#5db872]/40 bg-[#5db872]/10'
@@ -805,7 +805,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     : 'border-[#c64545]/40 bg-[#c64545]/10'
                 }`}>
                   <div className="flex items-center justify-between text-xs text-[#faf9f5] font-semibold">
-                    <span>保真指数</span>
+                    <span>真实性评分</span>
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div className="flex items-baseline gap-1">
@@ -826,7 +826,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 </div>
               </div>
 
-              {/* Official Audit Certificate Banner */}
+              {/* Status Certificate Banner */}
               <div
                 className={`rounded-2xl border p-7 sm:p-8 shadow-2xl relative overflow-hidden smooth-card ${
                   report.overallScore >= 85
@@ -857,10 +857,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                         )}
                         <span>
                           {report.level === 'genuine'
-                            ? 'VERIFIED GENUINE · 官方满血认证'
+                            ? 'VERIFIED GENUINE · 官方正品'
                             : report.level === 'suspect_downgraded'
-                            ? 'SUSPECT DOWNGRADED · 疑似降级套壳'
-                            : 'FAKE IMPOSTER · 虚假冒充伪造'}
+                            ? 'SUSPECT DOWNGRADED · 疑似降级'
+                            : 'FAKE IMPOSTER · 虚假冒充'}
                         </span>
                       </span>
 
@@ -884,7 +884,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                             : 'bg-[#c64545]/15 text-[#c64545] border-[#c64545]/30'
                         }`}>
                           <Shield className="w-3.5 h-3.5" />
-                          <span>{report.signatureResult.passed ? 'Anthropic 官方私钥验签通过' : '私钥验签失败'}</span>
+                          <span>{report.signatureResult.passed ? 'Anthropic 官方签名校验通过' : '签名校验失败'}</span>
                         </span>
                       )}
 
@@ -896,7 +896,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       )}
 
                       <span className="px-2.5 py-1 rounded-md font-mono bg-[#23211e] border border-[#2e2b27] text-[#9c9689]">
-                        端点: {config.baseUrl}
+                        地址: {config.baseUrl}
                       </span>
                     </div>
                   </div>
@@ -911,12 +911,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       {copiedReport ? (
                         <>
                           <Check className="w-4 h-4 text-[#5db872]" />
-                          <span className="text-[#5db872]">已复制 Markdown 报告</span>
+                          <span className="text-[#5db872]">已复制报告</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-4 h-4 text-[#cc785c]" />
-                          <span>复制体检报告 (用于维权)</span>
+                          <span>复制检测报告</span>
                         </>
                       )}
                     </button>
@@ -928,22 +928,22 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#141413] border border-[#2e2b27] text-xs font-semibold text-[#9c9689] hover:text-[#faf9f5] hover:border-[#cc785c]/40 transition smooth-btn"
                     >
                       <RotateCcw className="w-4 h-4" />
-                      <span>重新跑一次体检</span>
+                      <span>重新检测</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Interactive Filterable Probe Evidence Breakdown */}
+              {/* Probe Details */}
               <div className="rounded-2xl border border-[#2e2b27] bg-[#1b1a18] overflow-hidden shadow-xl space-y-0 smooth-card">
                 {/* Header with Filter Pills */}
                 <div className="p-5 sm:p-6 border-b border-[#2e2b27] flex flex-wrap items-center justify-between gap-4 bg-[#141413]/60">
                   <div>
                     <h4 className="font-serif-display text-xl font-semibold text-[#faf9f5]">
-                      鉴别探针决策详单 ({report.probes.length} 项)
+                      探针结果明细 ({report.probes.length} 项)
                     </h4>
                     <p className="text-xs text-[#9c9689] mt-0.5">
-                      逐项拆解模型在元认知注入、高维拓扑、数学思维链与厂商安全对齐的实际表现。
+                      各维度测试项执行结果与原始回包数据。
                     </p>
                   </div>
 
@@ -1019,7 +1019,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                               : 'bg-[#c64545]/15 text-[#c64545] border border-[#c64545]/30'
                           }`}
                         >
-                          {item.passed ? `通过 (${item.score}分)` : `拦截/未达标 (${item.score}分)`}
+                          {item.passed ? `通过 (${item.score}分)` : `未通过 (${item.score}分)`}
                         </span>
                       </div>
 
@@ -1033,7 +1033,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                             <div className="flex items-center justify-between px-3.5 py-1.5 bg-[#1b1a18] border-b border-[#2e2b27] text-[11px] font-mono text-[#9c9689]">
                               <span className="flex items-center gap-1.5">
                                 <Terminal className="w-3.5 h-3.5 text-[#cc785c]" />
-                                <span>模型实际回包片段</span>
+                                <span>模型响应片段</span>
                               </span>
                               <span>RAW OUTPUT</span>
                             </div>
@@ -1052,7 +1052,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         </div>
       )}
 
-      {/* ── 4. Batch Scanner View (When activeMode === 'scanner') ── */}
+      {/* ── 4. Batch Scanner View (In scanner mode) ── */}
       {activeMode === 'scanner' && (
         <div className="rounded-2xl border border-[#2e2b27] bg-[#1b1a18] overflow-hidden shadow-xl space-y-0 smooth-card">
           {/* Filter and Search toolbar */}
@@ -1096,7 +1096,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           {availableModels.length === 0 ? (
             <div className="p-12 text-center text-[#9c9689] text-sm space-y-2">
               <Layers className="w-8 h-8 text-[#cc785c]/40 mx-auto" />
-              <p>暂无已发现模型数据，请在上方输入中转地址与 Key 后点击「拉取清单」或「开始并发巡检」</p>
+              <p>暂无模型数据，请在上方输入接口地址与 Key 后点击「拉取清单」或「开始并发检测」</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -1105,9 +1105,9 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   <tr>
                     <th className="px-6 py-3.5">序号</th>
                     <th className="px-6 py-3.5">模型 ID</th>
-                    <th className="px-6 py-3.5">可用性状态</th>
+                    <th className="px-6 py-3.5">状态</th>
                     <th className="px-6 py-3.5">HTTP 响应</th>
-                    <th className="px-6 py-3.5">响应延迟</th>
+                    <th className="px-6 py-3.5">延迟</th>
                     <th className="px-6 py-3.5">操作</th>
                   </tr>
                 </thead>
@@ -1152,7 +1152,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                             }}
                             className="px-3 py-1 rounded-md bg-[#23211e] hover:bg-[#cc785c] hover:text-[#faf9f5] text-[#9c9689] transition font-sans text-xs font-semibold"
                           >
-                            体检此模型
+                            检测此模型
                           </button>
                         </td>
                       </tr>
