@@ -21,7 +21,6 @@
     --claude-warning: #e8a55a;
     --claude-error: #c64545;
 
-    /* Base font sizing — comfortable for 1080p/1440p */
     font-size: 15px;
   }
 
@@ -32,6 +31,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, .font-serif-display {
@@ -43,7 +43,6 @@
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
-  /* Globally improve input readability */
   input, select, textarea {
     font-size: 0.875rem;
     line-height: 1.5;
@@ -52,8 +51,8 @@
 
 /* Custom Scrollbar for Claude Aesthetic */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -67,4 +66,56 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #3d3934;
+}
+
+/* Smooth micro-interactions and GPU-accelerated motion */
+.smooth-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.2s ease, 
+              box-shadow 0.2s ease, 
+              background-color 0.2s ease;
+  will-change: transform;
+}
+
+.smooth-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(204, 120, 92, 0.35);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(204, 120, 92, 0.1);
+}
+
+.smooth-btn {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.smooth-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -4px rgba(204, 120, 92, 0.4);
+}
+
+.smooth-btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.smooth-input {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.smooth-input:focus {
+  border-color: #cc785c;
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.model-pill {
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.model-pill:hover {
+  transform: translateY(-1px);
+  border-color: rgba(204, 120, 92, 0.5);
+  color: #faf9f5;
+}
+
+.model-pill:active {
+  transform: scale(0.97);
 }
