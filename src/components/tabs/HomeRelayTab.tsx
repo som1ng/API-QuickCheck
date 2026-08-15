@@ -45,8 +45,8 @@ const POPULAR_MODELS = [
   { id: 'o3-mini', label: 'OpenAI o3-mini', family: 'openai' },
   { id: 'o1', label: 'OpenAI o1', family: 'openai' },
   { id: 'gpt-4o', label: 'GPT-4o', family: 'openai' },
-  { id: 'grok-3', label: 'Grok 3', family: 'grok' },
-  { id: 'grok-2-latest', label: 'Grok 2', family: 'grok' },
+  { id: 'grok-3', label: 'Grok 3', family: 'xai' },
+  { id: 'grok-2-latest', label: 'Grok 2', family: 'xai' },
   { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', family: 'gemini' },
   { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', family: 'gemini' },
 ];
@@ -111,7 +111,7 @@ export const HomeRelayTab: React.FC = () => {
       const result = await runFidelityAudit(
         config.baseUrl,
         config.apiKey,
-        config.selectedModel || 'gpt-4o',
+        config.selectedModel || 'claude-3-7-sonnet-20250219',
         {
           depth: selectedDepth,
           profile: selectedProfile,
@@ -179,7 +179,7 @@ export const HomeRelayTab: React.FC = () => {
   const handleCopyMarkdownReport = async () => {
     if (!report) return;
 
-    const md = `# API-QuickCheck 中转站检测报告
+    const md = `# API-QuickCheck 顶尖模型鉴别检测报告
 - **目标模型**: \`${report.targetModel}\`
 - **接口地址**: \`${config.baseUrl}\`
 - **检测体系**: \`${report.verificationProfile}\` (深度: \`${report.depth}\`)
@@ -209,7 +209,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
     }
   };
 
-  const isOfficial = /openai\.com|anthropic\.com|x\.ai|googleapis\.com/i.test(config.baseUrl);
+  const isOfficial = /openai\.com|anthropic\.com|x\.ai|googleapis\.com|google\.com/i.test(config.baseUrl);
 
   const displayedProbes = report
     ? report.probes.filter((p) => {
@@ -223,9 +223,9 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
     const matchesSearch = m.id.toLowerCase().includes(searchQuery.toLowerCase()) || (m.name && m.name.toLowerCase().includes(searchQuery.toLowerCase()));
     if (!matchesSearch) return false;
     if (filterProvider === 'all') return true;
-    if (filterProvider === 'openai') return m.id.toLowerCase().includes('gpt') || m.id.toLowerCase().includes('o1') || m.id.toLowerCase().includes('o3');
     if (filterProvider === 'claude') return m.id.toLowerCase().includes('claude');
-    if (filterProvider === 'grok') return m.id.toLowerCase().includes('grok') || m.id.toLowerCase().includes('xai');
+    if (filterProvider === 'openai') return m.id.toLowerCase().includes('gpt') || m.id.toLowerCase().includes('o1') || m.id.toLowerCase().includes('o3') || m.id.toLowerCase().includes('chatgpt');
+    if (filterProvider === 'xai') return m.id.toLowerCase().includes('grok') || m.id.toLowerCase().includes('xai');
     if (filterProvider === 'google') return m.id.toLowerCase().includes('gemini') || m.id.toLowerCase().includes('gemma');
     return true;
   });
@@ -235,11 +235,11 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
       {/* ── 1. Header & Mode Switcher ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif-display text-3xl sm:text-4xl font-semibold text-neutral-100 tracking-tight">
+          <h1 className="font-serif-display text-3xl sm:text-4xl font-semibold text-[#faf9f5] tracking-tight">
             中转站检测
           </h1>
           <p className="mt-1 text-sm sm:text-base text-neutral-300 max-w-2xl leading-relaxed">
-            聚焦 Claude、OpenAI、Grok、Gemini 顶尖大模型真实性、首字延迟 (TTFT) 与防掺水鉴别。
+            聚焦 4 家顶尖大厂大模型真实性、首字延迟 (TTFT)、思考流签名与可用性检测。
           </p>
         </div>
 
@@ -280,17 +280,17 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           {/* Base URL (7 cols) */}
           <div className="lg:col-span-7 space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
+              <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
                 <Globe className="w-4 h-4 text-[#cc785c]" />
                 <span>接口地址 (Base URL)</span>
               </label>
               <span
                 className={`text-xs px-2.5 py-1 rounded-md font-semibold tracking-normal font-sans shadow-sm ${
                   isOfficial
-                    ? 'bg-[#153424] border border-[#34d399]/60 text-[#6ee7b7]'
+                    ? 'bg-[#064e3b] border border-[#059669] text-[#6ee7b7]'
                     : config.baseUrl
-                    ? 'bg-[#3b2318] border border-[#cc785c]/60 text-[#f5a890]'
-                    : 'bg-[#23211e] border border-[#3d3934] text-neutral-300'
+                    ? 'bg-[#2a1d17] border border-[#ea580c] text-[#fdba74]'
+                    : 'bg-[#23211e] border border-[#44403c] text-[#faf9f5]'
                 }`}
               >
                 {isOfficial ? '官方直连' : config.baseUrl ? '中转节点' : '待配置'}
@@ -302,21 +302,21 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
               placeholder="https://api.openai.com/v1"
               value={config.baseUrl}
               onChange={(e) => dispatch({ type: 'SET_BASE_URL', payload: e.target.value })}
-              className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
+              className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
             />
           </div>
 
           {/* API Key (5 cols) */}
           <div className="lg:col-span-5 space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
+              <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-[#cc785c]" />
                 <span>API 密钥 (Key)</span>
               </label>
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="text-xs text-neutral-400 hover:text-white transition flex items-center gap-1 font-medium"
+                className="text-xs text-neutral-300 hover:text-white transition flex items-center gap-1 font-medium"
               >
                 {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 <span>{showKey ? '隐藏' : '显示'}</span>
@@ -329,7 +329,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
                 value={config.apiKey}
                 onChange={(e) => dispatch({ type: 'SET_API_KEY', payload: e.target.value })}
-                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
+                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
               />
             </div>
           </div>
@@ -338,15 +338,15 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         {/* Row B: Model & Parameters (In Fidelity mode) */}
         {activeMode === 'fidelity' && (
           <div className="space-y-4 pt-4 border-t border-[#2e2b27]">
-            {/* Target Model Input + Leaderboard Pills */}
+            {/* Target Model Input + Pills */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-neutral-100 flex items-center gap-2">
+                <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#cc785c]" />
                   <span>测试目标模型</span>
                 </label>
                 {availableModels.length > 0 && (
-                  <span className="text-xs text-[#6ee7b7] font-semibold bg-[#153424] border border-[#34d399]/60 px-2.5 py-1 rounded-md tracking-normal font-sans shadow-sm">
+                  <span className="text-xs text-[#6ee7b7] font-semibold bg-[#064e3b] border border-[#059669] px-2.5 py-1 rounded-md tracking-normal font-sans shadow-sm">
                     已检测模型: {availableModels.length} 个
                   </span>
                 )}
@@ -359,14 +359,14 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   value={config.selectedModel}
                   onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
                   placeholder="例如: claude-3-7-sonnet-20250219 / o3-mini / grok-3 / gemini-2.5-pro"
-                  className="flex-1 rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 font-mono text-sm text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
+                  className="flex-1 rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
                 />
 
                 {availableModels.length > 0 && (
                   <select
                     value={availableModels.some((m) => m.id === config.selectedModel) ? config.selectedModel : ''}
                     onChange={(e) => e.target.value && dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-                    className="sm:w-64 rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 font-mono text-xs text-neutral-200 focus:border-[#cc785c] focus:outline-none cursor-pointer"
+                    className="sm:w-64 rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 font-mono text-xs text-[#faf9f5] focus:border-[#cc785c] focus:outline-none cursor-pointer font-semibold"
                   >
                     <option value="">从已发现列表中挑选...</option>
                     {availableModels.map((m) => (
@@ -380,16 +380,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
               {/* Top Arena/Agent Leaderboard Model Pills */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-xs text-neutral-400 font-medium mr-1">顶尖大模型:</span>
+                <span className="text-xs text-neutral-300 font-medium mr-1">顶尖大模型:</span>
                 {POPULAR_MODELS.map((m) => (
                   <button
                     key={m.id}
                     type="button"
                     onClick={() => dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id })}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition border model-pill tracking-wide ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-mono transition border model-pill tracking-wide ${
                       config.selectedModel === m.id
-                        ? 'bg-[#cc785c]/25 border-[#cc785c] text-white font-semibold'
-                        : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:border-[#cc785c]/40'
+                        ? 'bg-[#cc785c] border-[#cc785c] text-white font-semibold shadow-sm'
+                        : 'bg-[#23211e] border-[#38342f] text-[#faf9f5] font-medium hover:text-white hover:border-[#cc785c]/60'
                     }`}
                   >
                     {m.label}
@@ -402,26 +402,26 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               {/* Profile Selector */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 mb-1.5 flex items-center gap-1.5 tracking-wide">
+                <label className="block text-xs font-semibold text-neutral-200 mb-1.5 flex items-center gap-1.5 tracking-wide">
                   <Sliders className="w-3.5 h-3.5 text-[#cc785c]" />
                   <span>检测体系</span>
                 </label>
                 <select
                   value={selectedProfile}
                   onChange={(e) => setSelectedProfile(e.target.value as ModelVerificationProfile)}
-                  className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-neutral-200 focus:border-[#cc785c] focus:outline-none cursor-pointer"
+                  className="w-full rounded-xl border border-[#2e2b27] bg-[#23211e] px-3.5 py-2.5 text-xs text-[#faf9f5] font-semibold focus:border-[#cc785c] focus:outline-none cursor-pointer"
                 >
                   <option value="auto">⭐ 智能自动匹配 (推荐)</option>
                   <option value="claude">Anthropic Claude (官方签名 + Thinking)</option>
-                  <option value="openai">OpenAI (o1/o3/GPT-4o 系统指纹)</option>
-                  <option value="grok">xAI Grok (Grok-3/Grok-2 思考流与知识库)</option>
+                  <option value="openai">OpenAI (o1/o3/GPT-4o 指纹)</option>
+                  <option value="xai">xAI Grok (Grok-3/Grok-2 验真)</option>
                   <option value="gemini">Google Gemini (Gemini 2.5 原生思考流)</option>
                 </select>
               </div>
 
               {/* Depth Selector */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 mb-1.5 flex items-center gap-1.5 tracking-wide">
+                <label className="block text-xs font-semibold text-neutral-200 mb-1.5 flex items-center gap-1.5 tracking-wide">
                   <Gauge className="w-3.5 h-3.5 text-[#cc785c]" />
                   <span>检测深度</span>
                 </label>
@@ -435,10 +435,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                       key={d.id}
                       type="button"
                       onClick={() => setSelectedDepth(d.id as FidelityDepth)}
-                      className={`py-1.5 rounded-lg text-xs font-medium transition tracking-wide ${
+                      className={`py-1.5 rounded-lg text-xs font-semibold transition tracking-wide ${
                         selectedDepth === d.id
-                          ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
-                          : 'text-neutral-400 hover:text-white'
+                          ? 'bg-[#cc785c] text-white shadow-sm'
+                          : 'text-neutral-300 hover:text-white'
                       }`}
                     >
                       {d.label}
@@ -452,7 +452,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
 
         {/* Row C: Action & Execution CTA */}
         <div className="pt-4 border-t border-[#2e2b27] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="text-xs text-neutral-300 flex items-center gap-2 tracking-wide">
+          <div className="text-xs text-neutral-300 flex items-center gap-2 tracking-wide font-medium">
             <Sparkles className="w-4 h-4 text-[#cc785c]" />
             <span>
               {activeMode === 'fidelity'
@@ -486,7 +486,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 type="button"
                 onClick={handleFetchModels}
                 disabled={isLoadingModels || isScanning}
-                className="inline-flex items-center gap-2 rounded-xl border border-[#2e2b27] bg-[#23211e] px-4 py-3 text-xs font-semibold text-neutral-200 hover:bg-[#2b2926] hover:text-white transition disabled:opacity-40 tracking-wide"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#2e2b27] bg-[#23211e] px-4 py-3 text-xs font-semibold text-[#faf9f5] hover:bg-[#2b2926] hover:text-white transition disabled:opacity-40 tracking-wide shadow-sm"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoadingModels ? 'animate-spin' : ''}`} />
                 <span>{availableModels.length > 0 ? `已拉取 (${availableModels.length})` : '拉取清单'}</span>
@@ -517,12 +517,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
         {/* Progress Bar */}
         {isRunningAudit && (
           <div className="space-y-2 pt-2 animate-in fade-in">
-            <div className="flex justify-between text-xs text-neutral-300">
+            <div className="flex justify-between text-xs text-neutral-200 font-medium">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#cc785c]" />
                 {progressText}
               </span>
-              <span className="font-mono text-white font-semibold">{progressPercent}%</span>
+              <span className="font-mono text-[#faf9f5] font-semibold">{progressPercent}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-[#23211e]">
               <div
@@ -546,18 +546,18 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 <Zap className="w-4 h-4 text-[#cc785c]" />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-2xl font-bold text-neutral-100">
+                <span className="font-mono text-2xl font-bold text-[#faf9f5]">
                   {report.firstTokenLatencyMs ? report.firstTokenLatencyMs : '--'}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">ms</span>
               </div>
-              <div className="text-xs font-mono font-medium tracking-wide">
+              <div className="text-xs font-mono font-semibold tracking-wide">
                 {report.firstTokenLatencyMs && report.firstTokenLatencyMs < 800 ? (
-                  <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">⚡ 极速</span>
+                  <span className="text-[#6ee7b7] bg-[#064e3b] border border-[#059669] px-2 py-0.5 rounded shadow-sm">⚡ 极速</span>
                 ) : report.firstTokenLatencyMs && report.firstTokenLatencyMs < 2000 ? (
-                  <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">🟢 正常</span>
+                  <span className="text-[#6ee7b7] bg-[#064e3b] border border-[#059669] px-2 py-0.5 rounded shadow-sm">🟢 正常</span>
                 ) : (
-                  <span className="text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded">🟡 较慢</span>
+                  <span className="text-[#fcd34d] bg-[#451a03] border border-[#d97706] px-2 py-0.5 rounded shadow-sm">🟡 较慢</span>
                 )}
               </div>
             </div>
@@ -566,16 +566,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
               <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                 <span>生成速率 (TPS)</span>
-                <Activity className="w-4 h-4 text-emerald-400" />
+                <Activity className="w-4 h-4 text-[#6ee7b7]" />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-2xl font-bold text-neutral-100">
+                <span className="font-mono text-2xl font-bold text-[#faf9f5]">
                   {report.generationTps ? report.generationTps : '--'}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">tok/s</span>
               </div>
-              <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
-                <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+              <div className="text-xs font-mono text-[#faf9f5] font-semibold tracking-wide">
+                <span className="bg-[#23211e] border border-[#44403c] px-2 py-0.5 rounded shadow-sm">
                   {report.generationTps && report.generationTps > 30 ? '🚀 正常输出' : '流式生成'}
                 </span>
               </div>
@@ -585,16 +585,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
               <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                 <span>思考耗时</span>
-                <Cpu className="w-4 h-4 text-amber-400" />
+                <Cpu className="w-4 h-4 text-[#fcd34d]" />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-2xl font-bold text-neutral-100">
+                <span className="font-mono text-2xl font-bold text-[#faf9f5]">
                   {report.thinkingTimeMs ? report.thinkingTimeMs : 0}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">ms</span>
               </div>
-              <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
-                <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+              <div className="text-xs font-mono text-[#faf9f5] font-semibold tracking-wide">
+                <span className="bg-[#23211e] border border-[#44403c] px-2 py-0.5 rounded shadow-sm">
                   {report.reasoningResult?.hasReasoningStream ? '🧠 原生思考流' : '无思考链'}
                 </span>
               </div>
@@ -607,13 +607,13 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 <Coins className="w-4 h-4 text-[#cc785c]" />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-2xl font-bold text-neutral-100">
+                <span className="font-mono text-2xl font-bold text-[#faf9f5]">
                   {report.totalTokens.total}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">tok</span>
               </div>
-              <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
-                <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+              <div className="text-xs font-mono text-[#faf9f5] font-semibold tracking-wide">
+                <span className="bg-[#23211e] border border-[#44403c] px-2 py-0.5 rounded shadow-sm">
                   约 ${(report.estimatedCostUsd).toFixed(4)}
                 </span>
               </div>
@@ -623,16 +623,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 space-y-2 shadow-sm smooth-card">
               <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold tracking-wide uppercase">
                 <span>检测总耗时</span>
-                <Clock className="w-4 h-4 text-neutral-400" />
+                <Clock className="w-4 h-4 text-neutral-300" />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-2xl font-bold text-neutral-100">
+                <span className="font-mono text-2xl font-bold text-[#faf9f5]">
                   {(report.totalDurationMs / 1000).toFixed(2)}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">s</span>
               </div>
-              <div className="text-xs font-mono text-neutral-300 font-medium tracking-wide">
-                <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+              <div className="text-xs font-mono text-[#faf9f5] font-semibold tracking-wide">
+                <span className="bg-[#23211e] border border-[#44403c] px-2 py-0.5 rounded shadow-sm">
                   {report.probes.length} 项测试项
                 </span>
               </div>
@@ -641,34 +641,34 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             {/* Metric 6: 评分 */}
             <div className={`rounded-xl border p-5 space-y-2 shadow-sm smooth-card ${
               report.overallScore >= 85
-                ? 'border-emerald-500/30 bg-emerald-500/10'
+                ? 'border-[#059669] bg-[#064e3b]/80'
                 : report.overallScore >= 50
-                ? 'border-amber-500/30 bg-amber-500/10'
-                : 'border-rose-500/30 bg-rose-500/10'
+                ? 'border-[#d97706] bg-[#451a03]/80'
+                : 'border-[#e11d48] bg-[#4c0519]/80'
             }`}>
-              <div className="flex items-center justify-between text-xs text-neutral-100 font-semibold tracking-wide uppercase">
+              <div className="flex items-center justify-between text-xs text-[#faf9f5] font-semibold tracking-wide uppercase">
                 <span>真实性评分</span>
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <div className="flex items-baseline gap-1">
                 <span className={`font-mono text-2xl font-bold ${
                   report.overallScore >= 85
-                    ? 'text-emerald-400'
+                    ? 'text-[#6ee7b7]'
                     : report.overallScore >= 50
-                    ? 'text-amber-400'
-                    : 'text-rose-400'
+                    ? 'text-[#fcd34d]'
+                    : 'text-[#fda4af]'
                 }`}>
                   {report.overallScore}
                 </span>
-                <span className="text-xs font-mono text-neutral-300">/100</span>
+                <span className="text-xs font-mono text-neutral-200">/100</span>
               </div>
               <div className="text-xs font-mono font-semibold tracking-wide">
                 {report.level === 'genuine' ? (
-                  <span className="text-emerald-400">✅ 官方正品</span>
+                  <span className="text-[#6ee7b7]">✅ 官方正品</span>
                 ) : report.level === 'suspect_downgraded' ? (
-                  <span className="text-amber-400">⚠️ 疑似降级</span>
+                  <span className="text-[#fcd34d]">⚠️ 疑似降级</span>
                 ) : (
-                  <span className="text-rose-400">❌ 虚假冒充</span>
+                  <span className="text-[#fda4af]">❌ 虚假冒充</span>
                 )}
               </div>
             </div>
@@ -678,22 +678,22 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
           <div
             className={`rounded-2xl border p-7 sm:p-8 shadow-2xl relative overflow-hidden smooth-card ${
               report.overallScore >= 85
-                ? 'border-emerald-500/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-emerald-500/[0.08]'
+                ? 'border-[#059669] bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-[#064e3b]/40'
                 : report.overallScore >= 50
-                ? 'border-amber-500/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-amber-500/[0.08]'
-                : 'border-rose-500/30 bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-rose-500/[0.08]'
+                ? 'border-[#d97706] bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-[#451a03]/40'
+                : 'border-[#e11d48] bg-gradient-to-br from-[#1b1a18] via-[#1b1a18] to-[#4c0519]/40'
             }`}
           >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-3">
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wide ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wide shadow-sm ${
                       report.overallScore >= 85
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        ? 'bg-[#064e3b] text-[#6ee7b7] border border-[#059669]'
                         : report.overallScore >= 50
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                        ? 'bg-[#451a03] text-[#fcd34d] border border-[#d97706]'
+                        : 'bg-[#4c0519] text-[#fda4af] border border-[#e11d48]'
                     }`}
                   >
                     {report.overallScore >= 85 ? (
@@ -712,24 +712,24 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     </span>
                   </span>
 
-                  <span className="text-xs text-neutral-300 font-mono tracking-wide">
-                    测试模型: <strong className="text-white font-semibold">{report.targetModel}</strong>
+                  <span className="text-xs text-neutral-200 font-mono tracking-wide">
+                    测试模型: <strong className="text-[#faf9f5] font-semibold">{report.targetModel}</strong>
                   </span>
                   <span className="text-xs text-neutral-400 font-mono tracking-wide">
                     检测时间: {new Date(report.testedAt).toLocaleTimeString()}
                   </span>
                 </div>
 
-                <h3 className="font-serif-display text-2xl sm:text-3xl font-semibold text-neutral-100 tracking-tight">
+                <h3 className="font-serif-display text-2xl sm:text-3xl font-semibold text-[#faf9f5] tracking-tight">
                   {report.summary}
                 </h3>
 
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                   {report.signatureResult?.isApplicable && (
-                    <span className={`px-2.5 py-1 rounded-lg font-mono tracking-wide border flex items-center gap-1.5 ${
+                    <span className={`px-2.5 py-1 rounded-lg font-mono tracking-wide border flex items-center gap-1.5 shadow-sm font-semibold ${
                       report.signatureResult.passed
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                        ? 'bg-[#064e3b] text-[#6ee7b7] border-[#059669]'
+                        : 'bg-[#4c0519] text-[#fda4af] border-[#e11d48]'
                     }`}>
                       <Shield className="w-3.5 h-3.5" />
                       <span>{report.signatureResult.passed ? 'Anthropic 官方签名校验通过' : '签名校验失败'}</span>
@@ -737,13 +737,13 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   )}
 
                   {report.reasoningResult?.hasReasoningStream && (
-                    <span className="px-2.5 py-1 rounded-lg font-mono tracking-wide bg-white/5 border border-white/10 text-neutral-200 flex items-center gap-1.5">
+                    <span className="px-2.5 py-1 rounded-lg font-mono tracking-wide bg-[#23211e] border border-[#44403c] text-[#faf9f5] font-semibold flex items-center gap-1.5 shadow-sm">
                       <Cpu className="w-3.5 h-3.5 text-[#cc785c]" />
                       <span>原生 `{report.reasoningResult.reasoningFieldUsed}` 协议</span>
                     </span>
                   )}
 
-                  <span className="px-2.5 py-1 rounded-lg font-mono tracking-wide bg-white/5 border border-white/10 text-neutral-300">
+                  <span className="px-2.5 py-1 rounded-lg font-mono tracking-wide bg-[#23211e] border border-[#44403c] text-neutral-300 font-medium">
                     地址: {config.baseUrl}
                   </span>
                 </div>
@@ -754,12 +754,12 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 <button
                   type="button"
                   onClick={handleCopyMarkdownReport}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs font-semibold text-white hover:bg-[#2b2926] hover:border-[#cc785c]/40 transition shadow-sm smooth-btn tracking-wide"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#23211e] border border-[#2e2b27] text-xs font-semibold text-white hover:bg-[#2b2926] hover:border-[#cc785c]/60 transition shadow-sm smooth-btn tracking-wide"
                 >
                   {copiedReport ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-400" />
-                      <span className="text-emerald-400">已复制报告</span>
+                      <Check className="w-4 h-4 text-[#6ee7b7]" />
+                      <span className="text-[#6ee7b7]">已复制报告</span>
                     </>
                   ) : (
                     <>
@@ -773,7 +773,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   type="button"
                   onClick={handleStartFidelityAudit}
                   disabled={isRunningAudit}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#141413] border border-[#2e2b27] text-xs font-semibold text-neutral-300 hover:text-white hover:border-[#cc785c]/40 transition smooth-btn tracking-wide"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#141413] border border-[#2e2b27] text-xs font-semibold text-neutral-300 hover:text-white hover:border-[#cc785c]/60 transition smooth-btn tracking-wide"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>重新检测</span>
@@ -787,7 +787,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
             {/* Header with Filter Pills */}
             <div className="p-5 sm:p-6 border-b border-[#2e2b27] flex flex-wrap items-center justify-between gap-4 bg-[#141413]/60">
               <div>
-                <h4 className="font-serif-display text-xl font-semibold text-neutral-100">
+                <h4 className="font-serif-display text-xl font-semibold text-[#faf9f5]">
                   探针结果明细 ({report.probes.length} 项)
                 </h4>
                 <p className="text-xs text-neutral-300 mt-0.5 tracking-normal">
@@ -802,8 +802,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   onClick={() => setProbeFilter('all')}
                   className={`px-3 py-1.5 rounded-lg transition ${
                     probeFilter === 'all'
-                      ? 'bg-[#cc785c] text-white'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#cc785c] text-white shadow-sm'
+                      : 'text-neutral-300 hover:text-white'
                   }`}
                 >
                   全部 ({report.probes.length})
@@ -813,8 +813,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   onClick={() => setProbeFilter('passed')}
                   className={`px-3 py-1.5 rounded-lg transition ${
                     probeFilter === 'passed'
-                      ? 'bg-emerald-500 text-white'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#059669] text-[#faf9f5] shadow-sm'
+                      : 'text-neutral-300 hover:text-white'
                   }`}
                 >
                   通过 ({report.probes.filter((p) => p.passed).length})
@@ -824,8 +824,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   onClick={() => setProbeFilter('failed')}
                   className={`px-3 py-1.5 rounded-lg transition ${
                     probeFilter === 'failed'
-                      ? 'bg-rose-500 text-white'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#e11d48] text-[#faf9f5] shadow-sm'
+                      : 'text-neutral-300 hover:text-white'
                   }`}
                 >
                   未通过 ({report.probes.filter((p) => !p.passed).length})
@@ -840,16 +840,16 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {item.passed ? (
-                        <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#064e3b] border border-[#059669] flex items-center justify-center text-[#6ee7b7] shrink-0 shadow-sm">
                           <Check className="w-4 h-4" />
                         </div>
                       ) : (
-                        <div className="w-7 h-7 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#4c0519] border border-[#e11d48] flex items-center justify-center text-[#fda4af] shrink-0 shadow-sm">
                           <XCircle className="w-4 h-4" />
                         </div>
                       )}
                       <div>
-                        <h5 className="text-sm font-semibold text-neutral-100">
+                        <h5 className="text-sm font-semibold text-[#faf9f5]">
                           {item.title}
                         </h5>
                         <div className="flex items-center gap-2 text-xs text-neutral-400 font-mono mt-0.5 tracking-wide">
@@ -861,10 +861,10 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     </div>
 
                     <span
-                      className={`text-xs px-3 py-1 rounded-full font-mono font-semibold tracking-wide ${
+                      className={`text-xs px-3 py-1 rounded-full font-mono font-semibold tracking-wide shadow-sm ${
                         item.passed
-                          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                          : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                          ? 'bg-[#064e3b] text-[#6ee7b7] border border-[#059669]'
+                          : 'bg-[#4c0519] text-[#fda4af] border border-[#e11d48]'
                       }`}
                     >
                       {item.passed ? `通过 (${item.score}分)` : `未通过 (${item.score}分)`}
@@ -908,8 +908,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 { id: 'all', label: `全部 (${availableModels.length})` },
                 { id: 'claude', label: 'Claude' },
                 { id: 'openai', label: 'OpenAI' },
-                { id: 'grok', label: 'Grok' },
-                { id: 'google', label: 'Gemini' },
+                { id: 'xai', label: 'xAI (Grok)' },
+                { id: 'google', label: 'Google (Gemini)' },
               ].map((p) => (
                 <button
                   key={p.id}
@@ -917,8 +917,8 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                   onClick={() => setFilterProvider(p.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition tracking-wide ${
                     filterProvider === p.id
-                      ? 'bg-[#cc785c] text-white'
-                      : 'bg-[#23211e] text-neutral-300 hover:text-white'
+                      ? 'bg-[#cc785c] text-white shadow-sm'
+                      : 'bg-[#23211e] text-[#faf9f5] hover:text-white'
                   }`}
                 >
                   {p.label}
@@ -933,7 +933,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 placeholder="搜索模型 ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-xs font-mono text-neutral-100 placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
+                className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-xs font-mono text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input tracking-wide"
               />
             </div>
           </div>
@@ -963,7 +963,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                     return (
                       <tr key={m.id} className="hover:bg-[#23211e]/40 transition">
                         <td className="px-6 py-4 text-neutral-400 font-semibold tracking-wide">{idx + 1}</td>
-                        <td className="px-6 py-4 text-neutral-100 font-semibold tracking-wide">{m.id}</td>
+                        <td className="px-6 py-4 text-[#faf9f5] font-semibold tracking-wide">{m.id}</td>
                         <td className="px-6 py-4">
                           {result ? (
                             <StatusBadge status={result.status} />
@@ -971,13 +971,13 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                             <span className="text-neutral-400 font-mono">待检测</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-neutral-300">
+                        <td className="px-6 py-4 text-[#faf9f5]">
                           {result?.httpStatus ? (
                             <span
-                              className={`px-2.5 py-1 rounded-md font-mono font-bold tracking-wide ${
+                              className={`px-2.5 py-1 rounded-md font-mono font-bold tracking-wide shadow-sm ${
                                 result.httpStatus === 200
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25'
-                                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/25'
+                                  ? 'bg-[#064e3b] text-[#6ee7b7] border border-[#059669]'
+                                  : 'bg-[#4c0519] text-[#fda4af] border border-[#e11d48]'
                               }`}
                             >
                               {result.httpStatus}
@@ -986,7 +986,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                             '--'
                           )}
                         </td>
-                        <td className="px-6 py-4 text-neutral-300 font-mono tracking-wide">
+                        <td className="px-6 py-4 text-[#faf9f5] font-mono tracking-wide">
                           {result?.latencyMs ? `${result.latencyMs}ms` : '--'}
                         </td>
                         <td className="px-6 py-4">
@@ -996,7 +996,7 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                               dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id });
                               setActiveMode('fidelity');
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-[#23211e] hover:bg-[#cc785c] hover:text-white text-neutral-300 transition font-sans text-xs font-semibold tracking-wide"
+                            className="px-3 py-1.5 rounded-lg bg-[#23211e] hover:bg-[#cc785c] hover:text-white text-[#faf9f5] transition font-sans text-xs font-semibold tracking-wide border border-[#38342f]"
                           >
                             检测此模型
                           </button>
