@@ -3,6 +3,8 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { GlobalConfigBar } from './components/layout/GlobalConfigBar';
 import { TabNav } from './components/layout/TabNav';
+import { FaqSection } from './components/layout/FaqSection';
+import { Footer } from './components/layout/Footer';
 import { FidelityTab } from './components/tabs/FidelityTab';
 import { BenchmarkTab } from './components/tabs/BenchmarkTab';
 import { BatchScannerTab } from './components/tabs/BatchScannerTab';
@@ -10,7 +12,6 @@ import { CapabilityTab } from './components/tabs/CapabilityTab';
 import { QuickPingTab } from './components/tabs/QuickPingTab';
 import { ClientExportTab } from './components/tabs/ClientExportTab';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { Sparkles, ShieldCheck } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const { state } = useApp();
@@ -20,7 +21,7 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[#141413] text-[#d4cebe] font-sans selection:bg-[#cc785c]/30 selection:text-[#faf9f5]">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         {/* Global Configuration Card */}
         <GlobalConfigBar />
 
@@ -54,7 +55,7 @@ const MainContent: React.FC = () => {
           )}
 
           {activeTab === 'quickping' && (
-            <ErrorBoundary fallbackTitle="极速单测模块异常">
+            <ErrorBoundary fallbackTitle="API Key 批量检测模块异常">
               <QuickPingTab />
             </ErrorBoundary>
           )}
@@ -65,21 +66,13 @@ const MainContent: React.FC = () => {
             </ErrorBoundary>
           )}
         </div>
+
+        {/* Common Questions & FAQs */}
+        <FaqSection />
       </main>
 
-      {/* Footer in Claude Editorial Warm Tone */}
-      <footer className="border-t border-[#2e2b27] bg-[#141413] py-7 text-sm text-[#9c9689]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 text-[#d4cebe]">
-            <ShieldCheck className="w-5 h-5 text-[#5db872]" />
-            <span>API-QuickCheck 2.0 · 零数据落盘 · 密钥安全不离浏览器</span>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Sparkles className="w-[18px] h-[18px] text-[#cc785c]" />
-            <span>Anthropic Claude Editorial Design System</span>
-          </div>
-        </div>
-      </footer>
+      {/* Rich Multi-column Footer */}
+      <Footer />
     </div>
   );
 };
