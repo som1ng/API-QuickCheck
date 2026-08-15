@@ -1,7 +1,16 @@
 import React from 'react';
+import { useApp } from '../../context/AppContext';
+import { ActiveTabId } from '../../types/config';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const { dispatch } = useApp();
+
+  const handleNavigateTab = (tabId: ActiveTabId) => {
+    dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer className="border-t border-[#2e2b27] bg-[#141413] pt-12 pb-8 text-sm text-[#9c9689]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -31,7 +40,7 @@ export const Footer: React.FC = () => {
           {/* Column 1: 项目 (2 cols) */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs uppercase font-semibold text-[#faf9f5] tracking-wider">
-              项目
+              开源项目
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -64,66 +73,78 @@ export const Footer: React.FC = () => {
                   提交 Issue / 需求
                 </a>
               </li>
-              <li>
-                <a
-                  href="https://github.com/som1ng/API-QuickCheck"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-[#faf9f5] transition"
-                >
-                  贡献指南
-                </a>
-              </li>
             </ul>
           </div>
 
-          {/* Column 2: 工具矩阵 (3 cols) */}
+          {/* Column 2: 核心功能快捷跳转 (3 cols) */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs uppercase font-semibold text-[#faf9f5] tracking-wider">
-              核心工具
+              功能直达
             </h4>
             <ul className="space-y-2 text-xs">
-              <li className="flex items-center gap-1.5 text-[#d4cebe]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#cc785c]" />
-                <span>Claude 官方签名深度验真</span>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => handleNavigateTab('fidelity')}
+                  className="flex items-center gap-1.5 text-[#d4cebe] hover:text-[#cc785c] transition text-left"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#cc785c]" />
+                  <span>API 掺水与真伪深度鉴别</span>
+                </button>
               </li>
-              <li className="flex items-center gap-1.5 text-[#d4cebe]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#5db872]" />
-                <span>API Key 批量并发清洗验货</span>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => handleNavigateTab('quickping')}
+                  className="flex items-center gap-1.5 text-[#d4cebe] hover:text-[#5db872] transition text-left"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5db872]" />
+                  <span>API Key 批量并发清洗验货</span>
+                </button>
               </li>
-              <li className="flex items-center gap-1.5 text-[#d4cebe]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#e8a55a]" />
-                <span>TTFT 与流式 TPS 性能压测</span>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => handleNavigateTab('benchmark')}
+                  className="flex items-center gap-1.5 text-[#d4cebe] hover:text-[#e8a55a] transition text-left"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e8a55a]" />
+                  <span>TTFT 与流式 TPS 性能测速</span>
+                </button>
               </li>
-              <li className="flex items-center gap-1.5 text-[#d4cebe]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#9c9689]" />
-                <span>中转站多模型并发批量巡检</span>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => handleNavigateTab('scanner')}
+                  className="flex items-center gap-1.5 text-[#d4cebe] hover:text-[#faf9f5] transition text-left"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9c9689]" />
+                  <span>中转站模型全量巡检</span>
+                </button>
               </li>
-              <li className="flex items-center gap-1.5 text-[#d4cebe]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#9c9689]" />
-                <span>NextChat / Cline 客户端配置导出</span>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => handleNavigateTab('export')}
+                  className="flex items-center gap-1.5 text-[#d4cebe] hover:text-[#faf9f5] transition text-left"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9c9689]" />
+                  <span>NextChat / Cline 客户端配置导出</span>
+                </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: 资源与安全 (2 cols) */}
+          {/* Column 3: 安全与隐私保障 (2 cols) */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs uppercase font-semibold text-[#faf9f5] tracking-wider">
               安全与隐私
             </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <span className="text-[#d4cebe]">纯前端内存直连</span>
-              </li>
-              <li>
-                <span className="text-[#d4cebe]">无后端数据库落盘</span>
-              </li>
-              <li>
-                <span className="text-[#d4cebe]">支持本地完全离线部署</span>
-              </li>
-              <li>
-                <span className="text-[#d4cebe]">透明开源代码可审计</span>
-              </li>
+            <ul className="space-y-2 text-xs text-[#d4cebe]">
+              <li>纯前端内存直连</li>
+              <li>无后端数据库落盘</li>
+              <li>支持完全离线本地部署</li>
+              <li>透明开源代码可逐行审计</li>
             </ul>
           </div>
         </div>
@@ -131,7 +152,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright & GitHub Star Bar */}
         <div className="pt-8 border-t border-[#2e2b27] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9c9689]">
           <div className="flex items-center gap-2">
-            <span>© 2026 API-QuickCheck · 独立测评 · 字段级穿透 · MIT 开源 · 代码可逐行审计</span>
+            <span>© 2026 API-QuickCheck · 独立测评 · 字段级穿透 · MIT 开源</span>
           </div>
 
           <div className="flex items-center gap-4">
