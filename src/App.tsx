@@ -17,40 +17,31 @@ const MainContent: React.FC = () => {
   const isDocs = activeTab === 'docs' || activeTab === 'export';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#141413] text-[#d4cebe] font-sans selection:bg-[#cc785c]/30 selection:text-[#faf9f5]">
-      {/* ── 1. Global Navigation Header ── */}
+    <div className="min-h-screen flex flex-col bg-[#141413] text-[#d4cebe] font-sans selection:bg-[#cc785c]/20">
       <Header />
 
-      {/* ── 2. Primary Workbench Body ── */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-        {/* Main Workspaces according to Global Header Nav */}
-        <div className="min-h-[640px]">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 space-y-16">
+        <div className="min-h-[480px]">
           {isHome && (
             <ErrorBoundary fallbackTitle="中转站综合检测模块异常">
               <HomeRelayTab />
             </ErrorBoundary>
           )}
-
           {isBatchKeys && (
             <ErrorBoundary fallbackTitle="API Key 批量检测模块异常">
               <QuickPingTab />
             </ErrorBoundary>
           )}
-
           {isDocs && (
-            <ErrorBoundary fallbackTitle="客户端与 Agent 配置模块异常">
+            <ErrorBoundary fallbackTitle="Docs 模块异常">
               <ClientExportTab />
             </ErrorBoundary>
           )}
         </div>
 
-        {/* Common Questions & FAQs (Positioned comfortably below main workspace) */}
-        <div className="pt-16 mt-16 border-t border-[#2e2b27]/80">
-          <FaqSection />
-        </div>
+        <FaqSection />
       </main>
 
-      {/* ── 3. Footer ── */}
       <Footer />
     </div>
   );
