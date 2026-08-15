@@ -66,8 +66,9 @@ const localCorsProxyPlugin = () => ({
           {
             method: req.method || 'GET',
             headers: forwardHeaders,
+            servername: targetObj.hostname,
             rejectUnauthorized: false,
-            timeout: 10000,
+            timeout: 12000,
           },
           (proxyRes: any) => {
             settled = true;
