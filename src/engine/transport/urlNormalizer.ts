@@ -28,9 +28,8 @@ export function buildChatCompletionsUrl(baseUrl: string, platformId?: string): s
     return `${clean}/chat/completions`;
   }
 
-  // If URL has no path or ends at domain, default to /v1/chat/completions
-  const urlObj = tryParseUrl(clean);
-  if (urlObj && (urlObj.pathname === '/' || urlObj.pathname === '')) {
+  // If clean does not end with /v1, standard OpenAI / OneAPI format is /v1/chat/completions
+  if (!clean.includes('/v1/')) {
     return `${clean}/v1/chat/completions`;
   }
 
@@ -44,30 +43,21 @@ export function getCandidateModelsUrls(baseUrl: string): string[] {
   const root = getBaseRootUrl(baseUrl);
   const candidates: string[] = [];
 
-  // 1. Direct endpoint appended
-  if (clean.endsWith('/models')) {
-    candidates.push(clean);
-  } else {
+  // Priority 1: Universal /v1/models standard
+  if (clean.endsWith('/v1')) {
     candidates.push(`${clean}/models`);
-  }
-
-  // 2. /v1/models if clean didn't have /v1
-  if (!clean.endsWith('/v1') && !clean.includes('/v1/')) {
+  } else if (!clean.endsWith('/models')) {
     candidates.push(`${clean}/v1/models`);
     candidates.push(`${root}/v1/models`);
+    candidates.push(`${clean}/models`);
+  } else {
+    candidates.push(clean);
   }
 
-  // 3. Root models and OpenRouter
+  // Priority 2: Alternative relay endpoints
   candidates.push(`${root}/api/v1/models`);
   candidates.push(`${root}/api/models`);
+  candidates.push(`${clean}/models`);
 
   return Array.from(new Set(candidates));
-}
-
-function tryParseUrl(urlStr: string): URL | null {
-  try {
-    return new URL(urlStr);
-  } catch {
-    return null;
-  }
 }

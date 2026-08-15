@@ -100,7 +100,7 @@ export async function fetchRemoteModels(
   let sawUnauthorized = false;
   const attemptedStatuses: number[] = [];
 
-  // 1. Try standard /v1/models endpoints first
+  // 1. Try standard /v1/models endpoints first (highest priority first)
   for (const url of candidateUrls) {
     try {
       const res = await silentFetch<unknown>({
@@ -111,13 +111,15 @@ export async function fetchRemoteModels(
           'x-api-key': cleanKey,
           'x-goog-api-key': cleanKey,
         },
-        timeoutMs: 4500,
+        timeoutMs: 5000,
         signal,
       });
 
-      lastErrorMessage = res.errorMessage || '';
       attemptedStatuses.push(res.status);
-      if (res.status === 401 || res.status === 403) sawUnauthorized = true;
+      if (res.status === 401 || res.status === 403) {
+        sawUnauthorized = true;
+        lastErrorMessage = res.errorMessage || 'API Key 无效或未授权 (HTTP 401/403)';
+      }
 
       if (res.ok && res.data) {
         const models = extractUniversalModels(res.data);
@@ -137,7 +139,7 @@ export async function fetchRemoteModels(
 
   // 2. If endpoint requires key and key is invalid, report immediately
   if (sawUnauthorized) {
-    throw new Error('API Key 无效或未授权 (HTTP 401)，请确认中转站令牌是否正确！');
+    throw new Error('API Key 无效或未授权 (HTTP 401)，请确认当前中转站 API Key 是否正确！');
   }
 
   // 3. Fallback: Fast Probe across high-frequency models via POST /v1/chat/completions
@@ -160,7 +162,7 @@ export async function fetchRemoteModels(
             messages: [{ role: 'user', content: 'hi' }],
             max_tokens: 1,
           },
-          timeoutMs: 4000,
+          timeoutMs: 4500,
           signal,
         });
 
@@ -180,10 +182,7 @@ export async function fetchRemoteModels(
     }
   }
 
-  const statusSummary = attemptedStatuses.length > 0
-    ? `已尝试 ${attemptedStatuses.length} 个模型路由：${attemptedStatuses.join(', ')}`
-    : '';
-  throw new Error(lastErrorMessage || `${statusSummary}。中转站可能隐藏了 /v1/models 路由，你可以直接输入模型 ID 进行检测`);
+  throw new Error(lastErrorMessage || `未探测到可用模型列表。该中转站可能在后台关闭了 /v1/models 接口，你可以直接在输入框手动填写模型名进行检测`);
 }
 
 export function classifyModelProvider(modelId: string): ModelCheckItem['provider'] {
