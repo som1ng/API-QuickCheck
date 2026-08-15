@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Local CORS-free transparent proxy middleware for development
+// Local CORS-free transparent proxy middleware with Cloudflare / Overseas failover
 const localCorsProxyPlugin = () => ({
   name: 'local-cors-proxy',
   configureServer(server: any) {
@@ -40,11 +40,29 @@ const localCorsProxyPlugin = () => ({
         }
 
         const fetchFn = (globalThis as any).fetch;
-        const response = await fetchFn(targetUrl, {
-          method: req.method || 'GET',
-          headers: forwardHeaders,
-          body: req.method && ['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) && totalLen > 0 ? bodyBuffer : undefined,
-        });
+        let response: any;
+
+        try {
+          // Attempt 1: Direct local fetch with 5s timeout
+          const controller = new (globalThis as any).AbortController();
+          const timeoutId = (globalThis as any).setTimeout(() => controller.abort(), 5000);
+
+          response = await fetchFn(targetUrl, {
+            method: req.method || 'GET',
+            headers: forwardHeaders,
+            body: req.method && ['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) && totalLen > 0 ? bodyBuffer : undefined,
+            signal: controller.signal,
+          });
+          (globalThis as any).clearTimeout(timeoutId);
+        } catch (_localErr) {
+          // Attempt 2: If local machine has network/GFW/CORS blockage, tunnel through Vercel Edge Serverless
+          const vercelProxyUrl = `https://api-quick-check.vercel.app/api/proxy?target=${encodeURIComponent(targetUrl)}`;
+          response = await fetchFn(vercelProxyUrl, {
+            method: req.method || 'GET',
+            headers: forwardHeaders,
+            body: req.method && ['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) && totalLen > 0 ? bodyBuffer : undefined,
+          });
+        }
 
         res.statusCode = response.status;
         response.headers.forEach((value: string, key: string) => {
