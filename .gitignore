@@ -43,10 +43,11 @@ lerna-debug.log*
 Thumbs.db
 Desktop.ini
 
-# Agent & CLI internal session artifacts
-.antigravitycli/*.json
-.antigravity/cache/
-.system_generated/
+# AI Assistant rules & Local prompts (Keep local only, never commit to git)
+.antigravity/
+.antigravitycli/
+CLAUDE.md
+docs/
 scratch/
 temp/
 patch_*.cjs
