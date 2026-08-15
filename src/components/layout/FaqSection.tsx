@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
+import { ActiveTabId } from '../../types/config';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 
 interface FaqItem {
@@ -7,81 +9,180 @@ interface FaqItem {
   summaryNote?: string;
 }
 
-const FAQ_LIST: FaqItem[] = [
-  {
-    question: '我花钱买的是 GPT/Claude，怎么知道中转站没偷偷换成更便宜的模型？',
-    answer: (
-      <div className="space-y-2">
-        <p>
-          看响应里有没有「穿帮」的指纹和协议结构。例如 OpenAI 官方回包只会出现标准的 token 计数字段；如果中转站偷偷把你的请求转给其他开源模型（如 Qwen 或 Llama）再包装成 OpenAI 格式发回来，很多专有元数据和格式特征经常会露出来。
-        </p>
-        <p>
-          API-QuickCheck 内置多维探针：包括 <strong>Anthropic 官方私钥加密签名验真 (Thinking Signature)</strong>、<strong>原生思维链 Delta 提取</strong>、<strong>知识库截止期探针</strong> 与 <strong>空间几何逻辑反作弊</strong>，一旦抓到异常特征，就会自动标记降级并计算保真指数。
-        </p>
-      </div>
-    ),
-    summaryNote: '简单说：正版模型会按官方体系回答，冒牌与套壳包装层经常露出对面厂家的痕迹。',
-  },
-  {
-    question: '我得了 75 分，为什么保真指数圆圈还是黄色而不是绿色？',
-    answer: (
-      <div className="space-y-2">
-        <p>
-          保真指数评分体系定义如下：
-        </p>
-        <ul className="list-disc list-inside space-y-1 pl-1 text-[#d4cebe]">
-          <li><span className="text-[#5db872] font-semibold">80 ~ 100 分（绿色）</span>：高保真官方真品，所有签名与关键探针全部通过；</li>
-          <li><span className="text-[#e8a55a] font-semibold">50 ~ 79 分（黄色）</span>：存在可疑项（例如伪造流式思维链、响应延迟异常、缺少官方签名，但模型推理能力接近）；</li>
-          <li><span className="text-[#c64545] font-semibold">0 ~ 49 分（红色）</span>：证据确凿的严重降级或冒充（例如用廉价开源模型冒充顶尖旗舰）。</li>
-        </ul>
-      </div>
-    ),
-  },
-  {
-    question: '测完显示「0 个模型可用」，是中转站挂了吗？',
-    answer: (
-      <div className="space-y-2">
-        <p>
-          不一定。常见原因有三：
-        </p>
-        <ol className="list-decimal list-inside space-y-1 pl-1 text-[#d4cebe]">
-          <li><strong>中转站关闭了公开模型列表</strong>：很多中转站管理员在后台隐藏了 <code className="text-[#cc785c] font-mono">/v1/models</code> 路由。这种情况下，你依然可以在输入框直接手动填写模型名（如 <code className="text-[#faf9f5] font-mono">gpt-4o</code>）直接发起检测；</li>
-          <li><strong>API Key 额度用尽或未授权</strong>：Key 本身失效或账户欠费；</li>
-          <li><strong>本地网络被中转站防火墙拦截</strong>：由于开发环境 CORS 限制，系统已自动为你启用了透明本地代理进行重试。</li>
-        </ol>
-      </div>
-    ),
-  },
-  {
-    question: '为什么 OpenAI 的检测不像 Claude 那样能「100% 保证真伪」？',
-    answer: (
-      <div className="space-y-2">
-        <p>
-          因为 Anthropic 在 Claude 3.7 / 3.5 的 Thinking 输出中，加入了由官方私钥加密签名的 <code className="text-[#cc785c] font-mono">signature</code> 字段，任何第三方套壳或逆向均无法伪造其数学签名；
-        </p>
-        <p>
-          而 OpenAI 等厂商目前尚未提供端到端非对称加密签名，因此对其检测主要通过 <strong>系统指纹 (system_fingerprint)</strong>、<strong>知识库截断期探针</strong>、<strong>高维空间拓扑</strong> 与 <strong>流式 Token 生成延迟特征</strong> 进行多重交叉高置信度鉴别。
-        </p>
-      </div>
-    ),
-  },
-  {
-    question: 'API Key 批量检测时，我的密钥会被你们保存或泄露吗？',
-    answer: (
-      <div className="space-y-2">
+const FAQ_BY_TAB: Record<ActiveTabId, FaqItem[]> = {
+  // 1. API 掺水验真
+  fidelity: [
+    {
+      question: '我花钱买的是 GPT/Claude，怎么知道中转站没偷偷换成更便宜的模型？',
+      answer: (
+        <div className="space-y-2">
+          <p>
+            看响应里有没有「穿帮」的指纹和协议结构。例如 OpenAI 官方回包只会出现标准的 token 计数字段；如果中转站偷偷把你的请求转给其他开源模型（如 Qwen 或 Llama）再包装成 OpenAI 格式发回来，很多专有元数据和格式特征经常会露出来。
+          </p>
+          <p>
+            API-QuickCheck 内置多维探针：包括 <strong>Anthropic 官方私钥加密签名验真 (Thinking Signature)</strong>、<strong>原生思维链 Delta 提取</strong>、<strong>知识库截止期探针</strong> 与 <strong>空间几何逻辑反作弊</strong>，一旦抓到异常特征，就会自动标记降级并计算保真指数。
+          </p>
+        </div>
+      ),
+      summaryNote: '简单说：正版模型会按官方体系回答，冒牌与套壳包装层经常露出对面厂家的痕迹。',
+    },
+    {
+      question: '我得了 75 分，为什么保真指数圆圈还是黄色而不是绿色？',
+      answer: (
+        <div className="space-y-2">
+          <p>保真指数评分体系定义如下：</p>
+          <ul className="list-disc list-inside space-y-1 pl-1 text-[#d4cebe]">
+            <li><span className="text-[#5db872] font-semibold">80 ~ 100 分（绿色）</span>：高保真官方真品，所有签名与关键探针全部通过；</li>
+            <li><span className="text-[#e8a55a] font-semibold">50 ~ 79 分（黄色）</span>：存在可疑项（例如伪造流式思维链、响应延迟异常、缺少官方签名，但模型推理能力接近）；</li>
+            <li><span className="text-[#c64545] font-semibold">0 ~ 49 分（红色）</span>：证据确凿的严重降级或冒充（例如用廉价开源模型冒充顶尖旗舰）。</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      question: '为什么 OpenAI 的检测不像 Claude 那样能「100% 保证真伪」？',
+      answer: (
+        <div className="space-y-2">
+          <p>
+            因为 Anthropic 在 Claude 3.7 / 3.5 的 Thinking 输出中，加入了由官方私钥加密签名的 <code className="text-[#cc785c] font-mono">signature</code> 字段，任何第三方套壳或逆向均无法伪造其数学签名；
+          </p>
+          <p>
+            而 OpenAI 等厂商目前尚未提供端到端非对称加密签名，因此对其检测主要通过 <strong>系统指纹 (system_fingerprint)</strong>、<strong>知识库截断期探针</strong>、<strong>高维空间拓扑</strong> 与 <strong>流式 Token 生成延迟特征</strong> 进行多重交叉高置信度鉴别。
+          </p>
+        </div>
+      ),
+    },
+  ],
+
+  // 2. API KEY 批量检测
+  quickping: [
+    {
+      question: 'API Key 批量检测支持哪些格式？支持哪些厂商？',
+      answer: (
+        <div className="space-y-2">
+          <p>
+            支持任意多行文本直接粘贴，系统会自动识别<strong>换行、逗号、分号</strong>等分隔符，并自动去除空格、注释行以及过滤重复 Key。
+          </p>
+          <p>
+            原生预置支持 OpenAI、Anthropic (Claude)、Google Gemini、DeepSeek、Groq、Cerebras、硅基流动、OpenRouter 以及任何自定义中转站 Base URL。
+          </p>
+        </div>
+      ),
+    },
+    {
+      question: '「有效、无额、限流、无效、重复」各代表什么状态？',
+      answer: (
+        <div className="space-y-2">
+          <ul className="list-disc list-inside space-y-1.5 pl-1 text-[#d4cebe]">
+            <li><strong>有效 (Active / HTTP 200)</strong>：Key 正常可用且能成功发起推理；</li>
+            <li><strong>无额 (Quota Exhausted / HTTP 402/429 Quota)</strong>：Key 存在但账户余额为 0 或已欠费；</li>
+            <li><strong>限流 (Rate Limited / HTTP 429)</strong>：触发了官方或中转站的 RPM/TPM 频率限制；</li>
+            <li><strong>无效 (Invalid / HTTP 401/403)</strong>：Key 错误、已过期、被封号或未授权；</li>
+            <li><strong>重复 (Duplicate)</strong>：粘贴的文本中包含多条相同 Key，系统已自动隔离。</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      question: '批量检测时，我的 API Key 会被你们服务器保存或记录吗？',
+      answer: (
         <p className="text-[#5db872] font-semibold">
-          绝不。API-QuickCheck 坚持 100% 纯前端零数据落盘原则。
+          绝不。API-QuickCheck 坚持 100% 纯前端内存直连原则，所有请求由你的浏览器直接或通过本地代理转发，无任何数据库落盘，断网或刷新页面后内存立即销毁。
         </p>
+      ),
+    },
+  ],
+
+  // 3. 性能测速
+  benchmark: [
+    {
+      question: 'TTFT 和 TPS 究竟代表什么？多少算优秀？',
+      answer: (
+        <div className="space-y-2">
+          <p>
+            <strong>TTFT (Time To First Token)</strong> 是从发送请求到接收到模型吐出第一个字的时间。TTFT &lt; 600ms 为优秀，600~1500ms 为正常，&gt; 2000ms 说明中转站网关排队或上游拥塞。
+          </p>
+          <p>
+            <strong>TPS (Tokens Per Second)</strong> 代表流式输出的吞吐速率。旗舰大模型（如 Claude 3.7 / GPT-4o）通常在 40~80 tokens/s；轻量模型（如 Groq / Gemini Flash）可达 100~300+ tokens/s。
+          </p>
+        </div>
+      ),
+    },
+    {
+      question: '为什么不同轮次的测速结果会有波动？',
+      answer: (
         <p>
-          你的所有 API Key 仅保存在你的浏览器内存中，直接与目标端点进行通信，绝不经过、也不保存到任何第三方云端数据库或后端服务器。代码完全开源透明，任何人均可审计源码。
+          中转站上游往往挂载了多个渠道账号做负载均衡，不同轮次可能被路由到了不同的底层节点；此外海外跨境网络链路的抖动也会影响首字延迟。建议开启「3 轮均值」或「5 轮压力测试」以获取稳定的性能基准。
         </p>
-      </div>
-    ),
-  },
-];
+      ),
+    },
+  ],
+
+  // 4. 模型巡检
+  scanner: [
+    {
+      question: '测完显示「0 个模型可用」，是中转站挂了吗？',
+      answer: (
+        <div className="space-y-2">
+          <p>常见原因分析：</p>
+          <ol className="list-decimal list-inside space-y-1.5 pl-1 text-[#d4cebe]">
+            <li><strong>中转站关闭了公开模型列表</strong>：很多中转站管理员在后台隐藏了 <code className="text-[#cc785c] font-mono">/v1/models</code> 路由。这种情况下，你依然可以在输入框直接手动填写模型名发起测试；</li>
+            <li><strong>API Key 额度用尽或未授权</strong>：Key 本身失效或账户欠费；</li>
+            <li><strong>本地网络与 CORS</strong>：系统已内置透明代理兜底，若依然拉取不到，请确认 Base URL 是否包含路径前缀（如标准 <code className="text-[#cc785c] font-mono">https://api.your-relay.com</code>）。</li>
+          </ol>
+        </div>
+      ),
+    },
+    {
+      question: '什么是「空壳模型 (404 / Fake Model)」？',
+      answer: (
+        <p>
+          部分中转站在模型列表里声明了支持某模型（如 <code className="text-[#faf9f5] font-mono">claude-3-7-sonnet</code>），但实际请求时上游并无可用渠道，直接返回 404 或 502。批量巡检会真实对每一个模型发送探测包，甄别出哪些是真实可用的、哪些只是写在列表里的空壳。
+        </p>
+      ),
+    },
+  ],
+
+  // 5. 客户端配置
+  export: [
+    {
+      question: '导出的配置支持哪些主流 AI 客户端？',
+      answer: (
+        <p>
+          支持一键导出适配 <strong>NextChat (ChatGPT-Next-Web)</strong>、<strong>Cherry Studio</strong>、<strong>Chatbox</strong>、<strong>Cline (VSCode 插件)</strong>、<strong>LiteLLM</strong>、<strong>cURL</strong> 以及环境变量命令。
+        </p>
+      ),
+    },
+    {
+      question: '为什么导出的地址有的是 /v1 有的没有？',
+      answer: (
+        <p>
+          不同客户端的规范不同。例如 NextChat 默认要求传入基础域名，而 LiteLLM / OpenAI SDK 需要标准的 <code className="text-[#cc785c] font-mono">/v1</code> 结尾。导出模块已自动根据目标软件的标准进行了自适应格式化。
+        </p>
+      ),
+    },
+  ],
+
+  // Fallback for capability
+  capability: [
+    {
+      question: '高级能力矩阵包含哪些维度的探针？',
+      answer: (
+        <p>
+          包含 Function Calling / Tool Use 工具调用探针、多模态 Vision 视觉解析、JSON Mode 严格结构化输出、系统提示词注入防御与长上下文检索能力。
+        </p>
+      ),
+    },
+  ],
+};
 
 export const FaqSection: React.FC = () => {
+  const { state } = useApp();
+  const { activeTab } = state;
+
   const [openIndex, setOpenIndex] = useState<number | null>(0); // Default open first
+
+  const currentFaqList = FAQ_BY_TAB[activeTab] || FAQ_BY_TAB.fidelity;
 
   const toggleAccordion = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -89,21 +190,16 @@ export const FaqSection: React.FC = () => {
 
   return (
     <div className="space-y-5 pt-6 border-t border-[#2e2b27]">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <HelpCircle className="w-5 h-5 text-[#cc785c]" />
-          <h3 className="font-serif-display text-2xl font-medium text-[#faf9f5] tracking-tight">
-            常见问题 (FAQ)
-          </h3>
-        </div>
-        <span className="text-xs text-[#9c9689] font-mono">
-          精选指南 · 权威鉴别解答
-        </span>
+      <div className="flex items-center gap-2.5">
+        <HelpCircle className="w-5 h-5 text-[#cc785c]" />
+        <h3 className="font-serif-display text-2xl font-medium text-[#faf9f5] tracking-tight">
+          常见问题 (FAQ)
+        </h3>
       </div>
 
       {/* Accordion Cards */}
       <div className="space-y-3">
-        {FAQ_LIST.map((item, idx) => {
+        {currentFaqList.map((item, idx) => {
           const isOpen = openIndex === idx;
 
           return (
