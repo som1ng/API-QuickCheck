@@ -50,5 +50,6 @@ CLAUDE.md
 docs/
 scratch/
 temp/
+.firecrawl/
 patch_*.cjs
 *.temp

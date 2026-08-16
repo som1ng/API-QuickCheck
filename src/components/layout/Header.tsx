@@ -23,9 +23,9 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(255,255,255,0.06)] bg-[#0d0d0c]/90 backdrop-blur-md">
-      <div className="w-full px-6 h-[52px] flex items-center justify-between">
-        {/* Brand Logo & Name */}
-        <div className="flex items-center gap-6">
+      <div className="w-full px-6 h-[52px] flex items-center justify-between relative">
+        {/* Left: Brand Logo & Name */}
+        <div className="flex items-center">
           <button
             type="button"
             onClick={() => handleSwitchTab('home')}
@@ -41,29 +41,32 @@ export const Header: React.FC = () => {
               API-QuickCheck
             </span>
           </button>
-
-          {/* Navigation Links (Developer Tool Style) */}
-          <nav className="flex items-center gap-5 text-[13px] font-sans">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSwitchTab(item.id)}
-                className={`transition-colors py-1 ${
-                  item.active
-                    ? 'text-[#ededed] font-medium'
-                    : 'text-[#737373] hover:text-[#b0b0b0]'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
         </div>
 
-        {/* Right Tools & GitHub */}
+        {/* Center: Centered Navigation Links */}
+        <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-7 text-[13px] font-sans">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleSwitchTab(item.id)}
+              className={`transition-colors py-1 relative ${
+                item.active
+                  ? 'text-[#ededed] font-semibold'
+                  : 'text-[#888888] hover:text-[#ededed]'
+              }`}
+            >
+              {item.label}
+              {item.active && (
+                <span className="absolute bottom-[-14px] left-0 right-0 h-[2px] bg-[#e8895d] rounded-full" />
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Right: Version & GitHub Link */}
         <div className="flex items-center gap-4">
-          <span className="text-[11px] font-mono text-[#525252]">v2.2.0</span>
+          <span className="text-[11px] font-mono text-[#525252]">v3.2.0</span>
           
           <a
             href="https://github.com/som1ng/API-QuickCheck"
