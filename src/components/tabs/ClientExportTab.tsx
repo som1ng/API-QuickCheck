@@ -12,7 +12,6 @@ import {
 import {
   ChevronRight,
   ChevronDown,
-  Copy,
   Search,
   ArrowLeft,
   ArrowRight,
@@ -32,7 +31,6 @@ export const ClientExportTab: React.FC = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [globalCopied, setGlobalCopied] = useState<boolean>(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
   // Resizable sidebar state (200px ~ 420px, default 220px)
@@ -160,27 +158,6 @@ export const ClientExportTab: React.FC = () => {
   };
 
   const cleanBaseUrl = (config.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
-
-  const handleCopyGlobalConfig = async () => {
-    const jsonConfig = JSON.stringify(
-      {
-        baseUrl: cleanBaseUrl,
-        apiKey: config.apiKey || 'sk-your-api-key-here',
-        selectedModel: config.selectedModel || 'claude-3-7-sonnet-20250219',
-        platformId: config.platformId,
-        exportedAt: new Date().toISOString(),
-      },
-      null,
-      2
-    );
-    try {
-      await navigator.clipboard.writeText(jsonConfig);
-      setGlobalCopied(true);
-      setTimeout(() => setGlobalCopied(false), 2000);
-    } catch {
-      // ignore
-    }
-  };
 
   if (!currentDoc) {
     return <div className="p-12 text-slate-400 font-mono text-xs">暂无可用文档</div>;
@@ -500,9 +477,9 @@ export const ClientExportTab: React.FC = () => {
         </main>
 
         {/* ========================================== */}
-        {/* 4. Far Right Column: TOC "本页内容"        */}
+        {/* 4. Far Right Column: TOC "本页内容" (Wider) */}
         {/* ========================================== */}
-        <aside className="hidden xl:flex w-52 shrink-0 py-10 pr-6 pl-4 flex-col sticky top-0 h-[calc(100vh-52px)] overflow-y-auto border-l border-white/5 select-none">
+        <aside className="hidden xl:flex w-64 shrink-0 py-10 pr-8 pl-5 flex-col sticky top-0 h-[calc(100vh-52px)] overflow-y-auto border-l border-white/5 select-none">
           <div className="space-y-3 sticky top-4">
             <div className="text-xs font-mono font-semibold text-slate-300 flex items-center gap-1.5">
               <AlignLeft className="w-3.5 h-3.5 text-[#e8895d]" />
@@ -526,16 +503,6 @@ export const ClientExportTab: React.FC = () => {
                 ))}
               </nav>
             )}
-
-            <div className="pt-3 border-t border-white/10">
-              <button
-                onClick={handleCopyGlobalConfig}
-                className="w-full flex items-center justify-center gap-1.5 rounded border border-white/10 bg-[#141413] py-1 text-xs text-slate-300 hover:text-white hover:border-[#e8895d] transition font-mono"
-              >
-                <Copy className="h-3 w-3" />
-                <span>{globalCopied ? '已复制' : '复制配置'}</span>
-              </button>
-            </div>
           </div>
         </aside>
 
