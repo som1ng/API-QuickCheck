@@ -18,9 +18,9 @@ export const Footer: React.FC = () => {
           <div className="space-y-3">
             <p className="text-xs font-mono font-semibold text-neutral-400 tracking-wider uppercase">产品功能</p>
             <div className="flex flex-col gap-2">
-              <button onClick={() => nav('home')} className="text-left text-neutral-300 hover:text-white font-medium transition-colors">中转站检测</button>
-              <button onClick={() => nav('quickping')} className="text-left text-neutral-300 hover:text-white font-medium transition-colors">API Key 批量检测</button>
-              <button onClick={() => nav('docs')} className="text-left text-neutral-300 hover:text-white font-medium transition-colors">文档与接入指南</button>
+              <button onClick={() => nav('home')} className="text-left text-neutral-300 hover:text-white transition-colors">中转站检测</button>
+              <button onClick={() => nav('quickping')} className="text-left text-neutral-300 hover:text-white transition-colors">API Key 批量检测</button>
+              <button onClick={() => nav('docs')} className="text-left text-neutral-300 hover:text-white transition-colors">文档</button>
             </div>
           </div>
 

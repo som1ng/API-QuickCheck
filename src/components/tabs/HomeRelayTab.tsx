@@ -391,9 +391,9 @@ export const HomeRelayTab: React.FC = () => {
                     {/* Instant Floating Dropdown Menu for Discovered Models */}
                     {isModelDropdownOpen && availableModels.length > 0 && (
                       <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in duration-150 p-2 space-y-1">
-                        <div className="px-3 py-1.5 text-[11px] font-semibold text-[#6ee7b7] uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1.5 mb-1">
-                          <span>🔍 已提取模型列表 ({availableModels.length})</span>
-                          <span className="text-neutral-400 font-normal">点击快速填入</span>
+                        <div className="px-3 py-1.5 text-[11px] font-semibold text-[#5db872] uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1.5 mb-1 font-mono">
+                          <span>已提取模型列表 ({availableModels.length})</span>
+                          <span className="text-neutral-400 font-normal">点击填入</span>
                         </div>
                         {availableModels.map((m) => (
                           <button
