@@ -16,7 +16,7 @@ import {
   Search,
   ArrowLeft,
   ArrowRight,
-  FileText,
+  AlignLeft,
 } from 'lucide-react';
 
 export const ClientExportTab: React.FC = () => {
@@ -35,10 +35,10 @@ export const ClientExportTab: React.FC = () => {
   const [globalCopied, setGlobalCopied] = useState<boolean>(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
-  // Resizable sidebar state (220px ~ 480px)
+  // Resizable sidebar state (200px ~ 420px, default 220px)
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const saved = localStorage.getItem('api_quickcheck_docs_sidebar_width');
-    return saved ? Math.max(220, Math.min(480, parseInt(saved, 10))) : 280;
+    return saved ? Math.max(200, Math.min(420, parseInt(saved, 10))) : 220;
   });
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -67,7 +67,7 @@ export const ClientExportTab: React.FC = () => {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
-      const newWidth = Math.max(220, Math.min(480, e.clientX));
+      const newWidth = Math.max(200, Math.min(420, e.clientX));
       setSidebarWidth(newWidth);
       localStorage.setItem('api_quickcheck_docs_sidebar_width', newWidth.toString());
     };
@@ -153,7 +153,7 @@ export const ClientExportTab: React.FC = () => {
   const scrollToHeading = (id: string) => {
     const elem = document.getElementById(id);
     if (elem) {
-      const yOffset = -80;
+      const yOffset = -70;
       const y = elem.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
@@ -183,94 +183,94 @@ export const ClientExportTab: React.FC = () => {
   };
 
   if (!currentDoc) {
-    return <div className="p-8 text-neutral-400">暂无可用文档</div>;
+    return <div className="p-12 text-neutral-500 font-mono text-xs">NO AVAILABLE DOCS</div>;
   }
 
   return (
-    <div className="flex-1 w-full flex flex-col min-h-screen bg-[#141413]">
+    <div className="flex-1 w-full flex flex-col min-h-screen bg-[#0d0d0c]">
       
-      {/* Full-width 3-column Layout */}
+      {/* Full-width Developer Layout */}
       <div className="flex-1 flex w-full relative">
         
         {/* ========================================== */}
-        {/* 1. Left Sidebar: Flush Left, Resizable     */}
+        {/* 1. Left Sidebar: Minimalist, 220px default */}
         {/* ========================================== */}
         <aside
           style={{ width: `${sidebarWidth}px` }}
-          className="shrink-0 sticky top-0 h-[calc(100vh-56px)] border-r border-[#2e2b27] bg-[#141413] flex flex-col z-20 select-none"
+          className="shrink-0 sticky top-0 h-[calc(100vh-52px)] border-r border-[rgba(255,255,255,0.06)] bg-[#0d0d0c] flex flex-col z-20 select-none"
         >
-          {/* Top Search */}
-          <div className="p-3 border-b border-[#2e2b27] bg-[#181715]">
+          {/* Minimal Search Input */}
+          <div className="p-3 border-b border-[rgba(255,255,255,0.04)]">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-neutral-400" />
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#737373]" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索文档..."
-                className="w-full rounded-md border border-[#2e2b27] bg-[#1f1e1b] py-1.5 pl-8 pr-14 text-xs text-[#faf9f5] placeholder-neutral-400 focus:border-[#cc785c] focus:outline-none transition font-sans"
+                placeholder="Search..."
+                className="w-full rounded bg-[#141413] border border-[rgba(255,255,255,0.06)] py-1.5 pl-8 pr-12 text-xs text-[#ededed] placeholder-[#737373] focus:border-[#e8895d] focus:outline-none transition font-sans"
               />
               <div className="absolute right-2 top-1.5 flex items-center">
                 {searchQuery ? (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-xs text-neutral-400 hover:text-white px-1"
+                    className="text-xs text-[#737373] hover:text-white px-1"
                   >
                     ✕
                   </button>
                 ) : (
-                  <span className="text-[10px] font-mono text-neutral-400 bg-[#252320] px-1.5 py-0.5 rounded border border-[#2e2b27]">
-                    Ctrl K
+                  <span className="text-[10px] font-mono text-[#737373] bg-[#1a1918] px-1 py-0.5 rounded border border-[rgba(255,255,255,0.06)]">
+                    ⌘K
                   </span>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Navigation Category Tree (Auto-generated from Markdown Frontmatter) */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {/* Navigation Category Groups */}
+          <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
             {filteredCategoryGroups.map((group) => {
               const isCollapsed = Boolean(collapsedCategories[group.id]);
 
               return (
                 <div key={group.id} className="space-y-1">
-                  {/* Category Header */}
+                  {/* Category Header: Uppercase English Tag */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
-                    className="w-full flex items-center justify-between px-2 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-neutral-400 hover:text-[#faf9f5] rounded transition"
+                    className="w-full flex items-center justify-between px-2 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-[#737373] hover:text-[#ededed] transition"
                   >
-                    <span className="truncate">{group.title}</span>
+                    <span className="truncate">{group.tag}</span>
                     <ChevronDown
-                      className={`h-3 w-3 text-neutral-400 transition-transform duration-200 ${
+                      className={`h-3 w-3 text-[#737373] transition-transform duration-200 ${
                         isCollapsed ? '-rotate-90' : 'rotate-0'
                       }`}
                     />
                   </button>
 
-                  {/* Document Items in Category */}
+                  {/* Document Links */}
                   {!isCollapsed && (
-                    <div className="space-y-0.5 pl-1">
+                    <div className="space-y-0.5 pt-0.5">
                       {group.docs.map((doc) => {
                         const isActive = currentDoc.slug === doc.slug;
                         return (
                           <button
                             key={doc.slug}
                             onClick={() => navigateToDoc(doc.slug)}
-                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition text-left ${
+                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-[13px] font-sans transition text-left ${
                               isActive
-                                ? 'bg-[#252320] text-[#faf9f5] font-semibold border-l-2 border-[#cc785c]'
-                                : 'text-neutral-300 hover:text-[#faf9f5] hover:bg-[#181715]'
+                                ? 'bg-[rgba(255,255,255,0.06)] text-[#ededed] font-medium'
+                                : 'text-[#a1a1aa] hover:text-[#ededed] hover:bg-[rgba(255,255,255,0.03)]'
                             }`}
                           >
                             <span className="truncate">{doc.frontmatter.title}</span>
                             {doc.frontmatter.badge && (
                               <span
-                                className={`text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0 ml-1.5 ${
+                                className={`text-[10px] px-1.5 py-0.2 rounded font-mono shrink-0 ml-1.5 ${
                                   isActive
-                                    ? 'bg-[#cc785c] text-white'
-                                    : 'bg-[#1f1e1b] text-neutral-400 border border-[#2e2b27]'
+                                    ? 'bg-[#e8895d] text-white'
+                                    : 'bg-[#1a1918] text-[#737373] border border-[rgba(255,255,255,0.06)]'
                                 }`}
                               >
                                 {doc.frontmatter.badge}
@@ -286,80 +286,80 @@ export const ClientExportTab: React.FC = () => {
             })}
           </div>
 
-          {/* Sidebar Bottom Status */}
-          <div className="p-3 border-t border-[#2e2b27] bg-[#181715] space-y-1 text-[11px]">
-            <div className="flex items-center justify-between text-neutral-400 font-medium">
-              <span className="font-mono uppercase text-[10px]">Endpoint</span>
+          {/* Sidebar Bottom Active Relay Status */}
+          <div className="p-3 border-t border-[rgba(255,255,255,0.04)] bg-[#0d0d0c] space-y-1 text-[11px] font-mono">
+            <div className="flex items-center justify-between text-[#737373]">
+              <span className="uppercase text-[10px] tracking-wider">ENDPOINT</span>
               <span className="h-1.5 w-1.5 rounded-full bg-[#5db872]" />
             </div>
-            <div className="font-mono text-neutral-300 text-xs truncate select-all" title={cleanBaseUrl}>
+            <div className="text-[#a1a1aa] text-xs truncate select-all" title={cleanBaseUrl}>
               {cleanBaseUrl}
             </div>
           </div>
         </aside>
 
         {/* ========================================== */}
-        {/* 2. Resizable Divider Handle (Drag to Resize) */}
+        {/* 2. Resizable Divider                       */}
         {/* ========================================== */}
         <div
           onMouseDown={startResizing}
-          className="w-1 hover:w-1.5 bg-transparent hover:bg-[#cc785c] transition-all cursor-col-resize z-30 shrink-0 select-none relative group -ml-0.5"
+          className="w-1 hover:w-1.5 bg-transparent hover:bg-[#e8895d] transition-all cursor-col-resize z-30 shrink-0 select-none relative group -ml-0.5"
           title="拖拽调整侧边栏宽度"
         >
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-3 h-8 -ml-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-            <div className="w-0.5 h-4 bg-[#faf9f5] rounded-full" />
+            <div className="w-0.5 h-4 bg-white rounded-full" />
           </div>
         </div>
 
         {/* ========================================== */}
-        {/* 3. Center Column: Main Markdown Article    */}
+        {/* 3. Center Column: Main Document (The Hero) */}
         {/* ========================================== */}
-        <div className="flex-1 min-w-0 flex justify-center py-8 px-6 lg:px-12 xl:px-16 overflow-y-auto">
+        <div className="flex-1 min-w-0 flex justify-center py-10 px-8 lg:px-14 xl:px-18 overflow-y-auto">
           
-          <div className="w-full max-w-4xl space-y-8 min-w-0">
+          <div className="w-full max-w-3xl space-y-8 min-w-0">
             
-            {/* Breadcrumbs */}
-            <div className="flex items-center gap-2 text-xs text-neutral-400 font-sans">
+            {/* Minimalist Breadcrumb */}
+            <div className="flex items-center gap-1.5 text-xs text-[#737373] font-mono uppercase tracking-wider">
               <span
-                className="hover:text-white cursor-pointer"
+                className="hover:text-[#ededed] cursor-pointer"
                 onClick={() => navigateToDoc(allDocs[0].slug)}
               >
-                文档
+                Docs
               </span>
-              <ChevronRight className="h-3 w-3 text-[#2e2b27]" />
-              <span className="text-neutral-300">{currentDoc.frontmatter.categoryTitle}</span>
-              <ChevronRight className="h-3 w-3 text-[#2e2b27]" />
-              <span className="text-[#faf9f5] font-semibold">{currentDoc.frontmatter.title}</span>
+              <ChevronRight className="h-3 w-3 text-[#333]" />
+              <span className="text-[#a1a1aa]">{currentDoc.frontmatter.categoryTag || currentDoc.frontmatter.category}</span>
+              <ChevronRight className="h-3 w-3 text-[#333]" />
+              <span className="text-[#ededed] font-medium">{currentDoc.frontmatter.title}</span>
             </div>
 
-            {/* Document Header */}
-            <div className="space-y-3 pb-6 border-b border-[#2e2b27]">
+            {/* Document Header (OpenCode Style) */}
+            <div className="space-y-3 pb-6 border-b border-[rgba(255,255,255,0.06)]">
               <div className="flex flex-wrap items-center gap-2">
                 {currentDoc.frontmatter.badge && (
-                  <span className="rounded border border-[#cc785c]/40 bg-[#cc785c]/10 px-2 py-0.5 text-xs font-mono font-medium text-[#cc785c]">
+                  <span className="rounded border border-[#e8895d]/30 bg-[#e8895d]/10 px-2 py-0.5 text-xs font-mono font-medium text-[#e8895d]">
                     {currentDoc.frontmatter.badge}
                   </span>
                 )}
                 {currentDoc.frontmatter.protocol && (
-                  <span className="rounded border border-[#2e2b27] bg-[#181715] px-2 py-0.5 text-xs font-mono text-neutral-300">
+                  <span className="rounded border border-[rgba(255,255,255,0.06)] bg-[#141413] px-2 py-0.5 text-xs font-mono text-[#a1a1aa]">
                     {currentDoc.frontmatter.protocol}
                   </span>
                 )}
               </div>
 
-              <h1 className="font-serif-display text-3xl md:text-4xl font-normal text-[#faf9f5] tracking-tight">
+              <h1 className="font-serif-display text-3xl sm:text-4xl font-normal text-[#ededed] tracking-tight">
                 {currentDoc.frontmatter.title}
               </h1>
 
               {currentDoc.frontmatter.subtitle && (
-                <p className="text-sm text-neutral-300 leading-relaxed font-sans">
+                <p className="text-[15px] text-[#9e9e9e] leading-relaxed font-sans pt-1">
                   {currentDoc.frontmatter.subtitle}
                 </p>
               )}
             </div>
 
             {/* Markdown Body Renderer */}
-            <article className="prose prose-invert max-w-none space-y-6">
+            <article className="prose prose-invert max-w-none text-[#b0b0b0] font-sans text-[15px] leading-[1.8]">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -369,10 +369,9 @@ export const ClientExportTab: React.FC = () => {
                     return (
                       <h2
                         id={id}
-                        className="text-base font-semibold text-[#faf9f5] uppercase tracking-wider font-mono pt-6 pb-2 border-b border-[#2e2b27] flex items-center gap-2"
+                        className="text-xl font-medium text-[#ededed] tracking-tight pt-8 pb-2 border-b border-[rgba(255,255,255,0.06)] mt-8 mb-4"
                       >
-                        <span className="text-[#cc785c]">#</span>
-                        <span>{children}</span>
+                        {children}
                       </h2>
                     );
                   },
@@ -382,24 +381,24 @@ export const ClientExportTab: React.FC = () => {
                     return (
                       <h3
                         id={id}
-                        className="text-sm font-semibold text-[#faf9f5] font-sans pt-4"
+                        className="text-base font-medium text-[#ededed] pt-4 mt-6 mb-2"
                       >
                         {children}
                       </h3>
                     );
                   },
                   p: ({ children }) => (
-                    <p className="text-sm text-neutral-300 leading-relaxed font-sans my-3">
+                    <p className="my-3.5 text-[#b0b0b0] leading-[1.8]">
                       {children}
                     </p>
                   ),
                   ul: ({ children }) => (
-                    <ul className="list-disc list-inside space-y-1.5 text-xs text-neutral-300 pl-2 font-sans my-3">
+                    <ul className="list-disc list-inside space-y-1.5 text-[14px] text-[#b0b0b0] pl-2 my-4">
                       {children}
                     </ul>
                   ),
                   ol: ({ children }) => (
-                    <ol className="list-decimal list-inside space-y-1.5 text-xs text-neutral-300 pl-2 font-sans my-3">
+                    <ol className="list-decimal list-inside space-y-1.5 text-[14px] text-[#b0b0b0] pl-2 my-4">
                       {children}
                     </ol>
                   ),
@@ -407,35 +406,35 @@ export const ClientExportTab: React.FC = () => {
                     <li className="leading-relaxed">{children}</li>
                   ),
                   blockquote: ({ children }) => (
-                    <blockquote className="rounded-md border border-[#cc785c]/40 bg-[#1f1a17] p-3.5 text-xs text-neutral-300 font-sans my-4 not-italic">
+                    <blockquote className="rounded-md border-l-2 border-[#e8895d] bg-[rgba(232,137,93,0.04)] pl-4 pr-3 py-2.5 text-[13.5px] text-[#a1a1aa] my-5 not-italic">
                       {children}
                     </blockquote>
                   ),
                   table: ({ children }) => (
-                    <div className="overflow-x-auto my-4 rounded-md border border-[#2e2b27]">
-                      <table className="w-full text-left text-xs font-mono divide-y divide-[#2e2b27]">
+                    <div className="overflow-x-auto my-5 rounded-lg border border-[rgba(255,255,255,0.06)]">
+                      <table className="w-full text-left text-xs font-mono divide-y divide-[rgba(255,255,255,0.06)]">
                         {children}
                       </table>
                     </div>
                   ),
                   thead: ({ children }) => (
-                    <thead className="bg-[#181715] text-neutral-400 uppercase font-semibold">
+                    <thead className="bg-[#141413] text-[#737373] uppercase font-mono tracking-wider">
                       {children}
                     </thead>
                   ),
                   tbody: ({ children }) => (
-                    <tbody className="divide-y divide-[#2e2b27] bg-[#141413]">
+                    <tbody className="divide-y divide-[rgba(255,255,255,0.04)] bg-[#0d0d0c]">
                       {children}
                     </tbody>
                   ),
                   tr: ({ children }) => (
-                    <tr className="hover:bg-[#181715]/60 transition">{children}</tr>
+                    <tr className="hover:bg-[rgba(255,255,255,0.02)] transition">{children}</tr>
                   ),
                   th: ({ children }) => (
-                    <th className="px-4 py-2.5 font-medium">{children}</th>
+                    <th className="px-4 py-3 font-medium">{children}</th>
                   ),
                   td: ({ children }) => (
-                    <td className="px-4 py-2.5 text-neutral-300">{children}</td>
+                    <td className="px-4 py-3 text-[#d4cebe]">{children}</td>
                   ),
                   code: ({ className, children, ...props }) => {
                     const match = /language-(\w+)/.exec(className || '');
@@ -443,7 +442,7 @@ export const ClientExportTab: React.FC = () => {
                     if (isInline) {
                       return (
                         <code
-                          className="rounded bg-[#1f1e1b] border border-[#2e2b27] px-1.5 py-0.5 text-xs font-mono text-[#cc785c]"
+                          className="rounded bg-[#181816] border border-[rgba(255,255,255,0.08)] px-1.5 py-0.5 text-xs font-mono text-[#e8895d]"
                           {...props}
                         >
                           {children}
@@ -451,7 +450,7 @@ export const ClientExportTab: React.FC = () => {
                       );
                     }
                     return (
-                      <div className="my-4">
+                      <div className="my-5">
                         <CodeBlock
                           code={String(children).replace(/\n$/, '')}
                           language={match ? match[1] : 'text'}
@@ -467,19 +466,19 @@ export const ClientExportTab: React.FC = () => {
             </article>
 
             {/* Bottom Prev / Next Navigation Cards */}
-            <div className="pt-8 border-t border-[#2e2b27] space-y-4">
+            <div className="pt-10 border-t border-[rgba(255,255,255,0.06)] space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {prevDoc ? (
                   <button
                     type="button"
                     onClick={() => navigateToDoc(prevDoc.slug)}
-                    className="flex flex-col items-start p-3.5 rounded-md border border-[#2e2b27] bg-[#181715] hover:border-[#cc785c] transition text-left"
+                    className="flex flex-col items-start p-4 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#121211] hover:border-[#e8895d]/50 hover:bg-[#161614] transition text-left"
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-neutral-400">
-                      <ArrowLeft className="h-3.5 w-3.5" />
-                      <span>上一篇</span>
+                    <div className="flex items-center gap-1.5 text-xs text-[#737373] font-mono">
+                      <ArrowLeft className="h-3 w-3" />
+                      <span>PREVIOUS</span>
                     </div>
-                    <div className="mt-1 font-semibold text-xs text-[#faf9f5] truncate w-full">
+                    <div className="mt-1 font-sans text-xs text-[#ededed] truncate w-full">
                       {prevDoc.frontmatter.title}
                     </div>
                   </button>
@@ -491,13 +490,13 @@ export const ClientExportTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigateToDoc(nextDoc.slug)}
-                    className="flex flex-col items-end p-3.5 rounded-md border border-[#2e2b27] bg-[#181715] hover:border-[#cc785c] transition text-right"
+                    className="flex flex-col items-end p-4 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#121211] hover:border-[#e8895d]/50 hover:bg-[#161614] transition text-right"
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-neutral-400">
-                      <span>下一篇</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1.5 text-xs text-[#737373] font-mono">
+                      <span>NEXT</span>
+                      <ArrowRight className="h-3 w-3" />
                     </div>
-                    <div className="mt-1 font-semibold text-xs text-[#faf9f5] truncate w-full">
+                    <div className="mt-1 font-sans text-xs text-[#ededed] truncate w-full">
                       {nextDoc.frontmatter.title}
                     </div>
                   </button>
@@ -507,15 +506,15 @@ export const ClientExportTab: React.FC = () => {
               </div>
 
               {/* Back to Top */}
-              <div className="flex items-center justify-between text-xs text-neutral-400 pt-2 font-mono">
+              <div className="flex items-center justify-between text-xs text-[#737373] pt-4 font-mono">
                 <div>
-                  当前: <span className="text-[#faf9f5]">{currentDoc.frontmatter.title}</span>
+                  <span className="text-[#a1a1aa]">{currentDoc.frontmatter.title}</span>
                 </div>
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="text-[#cc785c] hover:underline"
+                  className="text-[#e8895d] hover:underline"
                 >
-                  回到顶部 ↑
+                  Back to top ↑
                 </button>
               </div>
             </div>
@@ -523,25 +522,25 @@ export const ClientExportTab: React.FC = () => {
           </div>
 
           {/* ========================================== */}
-          {/* 4. Right Column: TOC "本页内容" (Sticky)   */}
+          {/* 4. Right Column: TOC "On this page" (Slim) */}
           {/* ========================================== */}
-          <div className="hidden xl:block w-52 ml-8 sticky top-6 h-fit space-y-3">
-            <div className="rounded-md border border-[#2e2b27] bg-[#181715] p-3.5 space-y-2.5">
-              <div className="text-xs font-mono uppercase font-semibold text-[#faf9f5] pb-2 border-b border-[#2e2b27] flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#cc785c]" />
-                <span>本页内容</span>
+          <div className="hidden xl:block w-48 ml-10 sticky top-8 h-fit space-y-4">
+            <div className="space-y-3">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] flex items-center gap-1.5">
+                <AlignLeft className="w-3.5 h-3.5" />
+                <span>On this page</span>
               </div>
 
               {currentDoc.headings.length === 0 ? (
-                <div className="text-xs text-neutral-500 font-sans">暂无子标题</div>
+                <div className="text-xs text-[#525252] font-sans">No subheadings</div>
               ) : (
-                <nav className="space-y-1 text-xs font-sans">
+                <nav className="space-y-1 text-[13px] font-sans">
                   {currentDoc.headings.map((heading, i) => (
                     <button
                       key={i}
                       onClick={() => scrollToHeading(heading.id)}
-                      className={`w-full text-left py-0.5 text-neutral-400 hover:text-white transition block truncate ${
-                        heading.level === 3 ? 'pl-2 text-neutral-500' : ''
+                      className={`w-full text-left py-1 text-[#737373] hover:text-[#ededed] transition block truncate leading-snug ${
+                        heading.level === 3 ? 'pl-2 text-xs text-[#525252]' : ''
                       }`}
                     >
                       {heading.text}
@@ -550,13 +549,13 @@ export const ClientExportTab: React.FC = () => {
                 </nav>
               )}
 
-              <div className="pt-2 border-t border-[#2e2b27]">
+              <div className="pt-3 border-t border-[rgba(255,255,255,0.06)]">
                 <button
                   onClick={handleCopyGlobalConfig}
-                  className="w-full flex items-center justify-center gap-1.5 rounded border border-[#2e2b27] bg-[#1f1e1b] py-1 text-xs text-neutral-300 hover:text-white hover:border-[#cc785c] transition font-mono"
+                  className="w-full flex items-center justify-center gap-1.5 rounded border border-[rgba(255,255,255,0.06)] bg-[#141413] py-1 text-xs text-[#a1a1aa] hover:text-[#ededed] hover:border-[#e8895d] transition font-mono"
                 >
                   <Copy className="h-3 w-3" />
-                  <span>{globalCopied ? '已复制' : '复制配置 JSON'}</span>
+                  <span>{globalCopied ? 'Copied' : 'Copy Config'}</span>
                 </button>
               </div>
             </div>

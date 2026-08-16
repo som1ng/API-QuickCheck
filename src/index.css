@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,37 +6,38 @@
 
 @layer base {
   :root {
-    --claude-bg: #141413;
-    --claude-surface: #1b1a18;
-    --claude-surface-elevated: #23211e;
-    --claude-border: #2e2b27;
-    --claude-border-subtle: rgba(230, 223, 216, 0.08);
-    --claude-primary: #cc785c;
-    --claude-primary-hover: #d98266;
-    --claude-primary-active: #a9583e;
-    --claude-text-primary: #faf9f5;
-    --claude-text-body: #d4cebe;
-    --claude-text-muted: #9c9689;
-    --claude-success: #5db872;
-    --claude-warning: #e8a55a;
-    --claude-error: #c64545;
+    --app-bg: #0d0d0c;
+    --app-surface: #131312;
+    --app-surface-elevated: #1a1918;
+    --app-border: rgba(255, 255, 255, 0.07);
+    --app-border-subtle: rgba(255, 255, 255, 0.04);
+    --app-primary: #e8895d;
+    --app-primary-hover: #f09a70;
+    --app-primary-active: #d6784d;
+    --app-text-primary: #ededed;
+    --app-text-body: #b0b0b0;
+    --app-text-muted: #737373;
+    --app-success: #5db872;
+    --app-warning: #e8a55a;
+    --app-error: #c64545;
 
     font-size: 15px;
   }
 
   body {
-    background-color: var(--claude-bg);
-    color: var(--claude-text-body);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--app-bg);
+    color: var(--app-text-body);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.6;
+    line-height: 1.8;
     text-rendering: optimizeLegibility;
   }
 
   h1, h2, .font-serif-display {
     font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
     letter-spacing: -0.02em;
+    color: #ededed;
   }
 
   code, pre, .font-mono {
@@ -49,73 +50,34 @@
   }
 }
 
-/* Custom Scrollbar for Claude Aesthetic */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #141413;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2e2b27;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d3934;
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Smooth micro-interactions and GPU-accelerated motion */
+/* Smooth micro-interactions */
 .smooth-card {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 0.2s ease, 
-              box-shadow 0.2s ease, 
-              background-color 0.2s ease;
-  will-change: transform;
-}
-
-.smooth-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(204, 120, 92, 0.35);
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(204, 120, 92, 0.1);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .smooth-btn {
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, box-shadow;
-}
-
-.smooth-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px -4px rgba(204, 120, 92, 0.4);
-}
-
-.smooth-btn:active {
-  transform: translateY(1px) scale(0.985);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .smooth-input {
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
-}
-
-.smooth-input:focus {
-  border-color: #cc785c;
-  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
-}
-
-.model-pill {
-  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.model-pill:hover {
-  transform: translateY(-1px);
-  border-color: rgba(204, 120, 92, 0.5);
-  color: #faf9f5;
-}
-
-.model-pill:active {
-  transform: scale(0.97);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }

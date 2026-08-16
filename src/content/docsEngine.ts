@@ -6,6 +6,7 @@ export interface DocFrontmatter {
   title: string;
   category: string;
   categoryTitle: string;
+  categoryTag?: string;
   badge?: string;
   protocol?: string;
   subtitle?: string;
@@ -28,10 +29,20 @@ export interface MarkdownDoc {
 
 export interface DocCategoryGroup {
   id: string;
+  tag: string;
   title: string;
   order: number;
   docs: MarkdownDoc[];
 }
+
+const CATEGORY_TAG_MAP: Record<string, { tag: string; title: string }> = {
+  overview: { tag: 'INTRODUCTION', title: '概览与设计' },
+  fidelity: { tag: 'ARCHITECTURE', title: '验真体系与密码学' },
+  relay_traps: { tag: 'SECURITY', title: '降级与作弊剖析' },
+  benchmarks: { tag: 'BENCHMARKS', title: '性能与基准测速' },
+  troubleshooting: { tag: 'DIAGNOSTICS', title: '排错与协议规范' },
+  developer_api: { tag: 'DEVELOPER', title: 'CI/CD 自动化集成' },
+};
 
 // Simple and robust YAML Frontmatter parser
 function parseFrontmatterAndContent(raw: string): { frontmatter: Partial<DocFrontmatter>; content: string } {
@@ -122,7 +133,9 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
     const folderName = parts.length > 4 ? parts[parts.length - 2] : 'general';
 
     const categoryId = frontmatter.category || folderName.replace(/^\d+-/, '');
-    const categoryTitle = frontmatter.categoryTitle || categoryId;
+    const preset = CATEGORY_TAG_MAP[categoryId] || { tag: categoryId.toUpperCase(), title: categoryId };
+    const categoryTitle = frontmatter.categoryTitle || preset.title;
+    const categoryTag = frontmatter.categoryTag || preset.tag;
     const title = frontmatter.title || fileName;
     const order = typeof frontmatter.order === 'number' ? frontmatter.order : 99;
 
@@ -135,6 +148,7 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
         title,
         category: categoryId,
         categoryTitle,
+        categoryTag,
         badge: frontmatter.badge || '',
         protocol: frontmatter.protocol || '',
         subtitle: frontmatter.subtitle || '',
@@ -154,9 +168,11 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
   for (const doc of docs) {
     const catId = doc.frontmatter.category;
     if (!categoryMap.has(catId)) {
+      const preset = CATEGORY_TAG_MAP[catId] || { tag: catId.toUpperCase(), title: catId };
       categoryMap.set(catId, {
         id: catId,
-        title: doc.frontmatter.categoryTitle,
+        tag: doc.frontmatter.categoryTag || preset.tag,
+        title: doc.frontmatter.categoryTitle || preset.title,
         order: doc.frontmatter.order || 99,
         docs: [],
       });
