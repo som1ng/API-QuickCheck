@@ -49,6 +49,21 @@
   }
 }
 
+/* KaTeX Display Math Center & Margins */
+.katex-display, .math-display {
+  margin: 2.25rem 0 !important;
+  padding: 0.5rem 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  overflow-x: auto;
+}
+
+.katex {
+  font-size: 1.08em;
+  color: #f1f5f9;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;

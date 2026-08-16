@@ -5,6 +5,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { useApp } from '../../context/AppContext';
 import { CodeBlock } from '../common/CodeBlock';
+import { MermaidBlock } from '../common/MermaidBlock';
 import {
   loadAllDocs,
   interpolateDocVariables,
@@ -402,6 +403,14 @@ export const ClientExportTab: React.FC = () => {
                   td: ({ children }) => (
                     <td className="py-3.5 px-4 text-sm text-slate-200 border-b border-white/5 leading-relaxed font-sans">{children}</td>
                   ),
+                  img: ({ src, alt, ...props }) => (
+                    <img
+                      src={src}
+                      alt={alt || '架构图'}
+                      className="my-8 mx-auto rounded-xl border border-white/10 shadow-2xl block max-w-full"
+                      {...props}
+                    />
+                  ),
                   code: ({ className, children, ...props }) => {
                     const match = /language-(\w+)/.exec(className || '');
                     const isInline = !match && !String(children).includes('\n');
@@ -414,6 +423,9 @@ export const ClientExportTab: React.FC = () => {
                           {children}
                         </code>
                       );
+                    }
+                    if (match && match[1] === 'mermaid') {
+                      return <MermaidBlock chart={String(children).replace(/\n$/, '')} />;
                     }
                     return (
                       <div className="my-5">
