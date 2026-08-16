@@ -27,6 +27,44 @@ import {
   ChevronDown,
   Award,
 } from 'lucide-react';
+import {
+  ClaudeLogo,
+  OpenAILogo,
+  GeminiLogo,
+  GrokLogo,
+} from '../common/ProviderLogos';
+
+const PROFILES: {
+  id: ModelVerificationProfile;
+  label: string;
+  subLabel: string;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
+}[] = [
+  {
+    id: 'claude',
+    label: 'Anthropic (Claude)',
+    subLabel: 'Thinking Signature 验签 + 原生流',
+    icon: ClaudeLogo,
+  },
+  {
+    id: 'openai',
+    label: 'OpenAI (GPT / o1 / o3)',
+    subLabel: '严格 JSON Schema + Reasoning 审计',
+    icon: OpenAILogo,
+  },
+  {
+    id: 'gemini',
+    label: 'Google (Gemini)',
+    subLabel: '100k+ NIAH 检索 + 原生 Thought',
+    icon: GeminiLogo,
+  },
+  {
+    id: 'xai',
+    label: 'xAI (Grok)',
+    subLabel: 'X 实时知识库断代 + 风格特征',
+    icon: GrokLogo,
+  },
+];
 
 export const HomeRelayTab: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -43,9 +81,11 @@ export const HomeRelayTab: React.FC = () => {
   const [selectedProfile, setSelectedProfile] = useState<ModelVerificationProfile>('claude');
   const [selectedDepth, setSelectedDepth] = useState<FidelityDepth>('standard');
 
-  // Model combobox dropdown open/close
+  // Dropdown states & refs
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const modelDropdownRef = useRef<HTMLDivElement>(null);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   // Fidelity Audit States
   const [isRunningAudit, setIsRunningAudit] = useState(false);
@@ -65,6 +105,9 @@ export const HomeRelayTab: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
         setIsModelDropdownOpen(false);
+      }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -390,7 +433,7 @@ export const HomeRelayTab: React.FC = () => {
 
                     {/* Instant Floating Dropdown Menu for Discovered Models */}
                     {isModelDropdownOpen && availableModels.length > 0 && (
-                      <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in duration-150 p-2 space-y-1">
+                      <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in zoom-in-95 duration-150 p-2 space-y-1">
                         <div className="px-3 py-1.5 text-[11px] font-semibold text-[#5db872] uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1.5 mb-1 font-mono">
                           <span>已提取模型列表 ({availableModels.length})</span>
                           <span className="text-neutral-400 font-normal">点击填入</span>
@@ -402,7 +445,7 @@ export const HomeRelayTab: React.FC = () => {
                             onClick={() => handleSelectModel(m.id)}
                             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-mono text-left transition ${
                               config.selectedModel === m.id
-                                ? 'bg-[#cc785c] text-white font-semibold'
+                                ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
                                 : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
                             }`}
                           >
@@ -419,22 +462,70 @@ export const HomeRelayTab: React.FC = () => {
 
                 {/* Sub-parameters: Profile & Depth (Equal Title Typography) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                  {/* Profile Selector (Pure AI Company Names) */}
-                  <div className="space-y-2">
+                  {/* Profile Selector with HD Company SVG Logos & Dynamic Flip */}
+                  <div className="space-y-2" ref={profileDropdownRef}>
                     <label className="text-sm font-semibold text-[#faf9f5] flex items-center gap-2">
                       <Sliders className="w-4 h-4 text-[#cc785c]" />
                       <span>检测体系</span>
                     </label>
-                    <select
-                      value={selectedProfile}
-                      onChange={(e) => setSelectedProfile(e.target.value as ModelVerificationProfile)}
-                      className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] font-semibold focus:border-[#cc785c] focus:outline-none cursor-pointer smooth-input tracking-wide"
-                    >
-                      <option value="claude">Anthropic (Claude)</option>
-                      <option value="openai">OpenAI</option>
-                      <option value="xai">xAI (Grok)</option>
-                      <option value="gemini">Google (Gemini)</option>
-                    </select>
+                    
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                        className="w-full flex items-center justify-between rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 text-sm text-[#faf9f5] font-semibold focus:border-[#cc785c] focus:outline-none transition smooth-input tracking-wide cursor-pointer hover:border-[#cc785c]/60"
+                      >
+                        <div className="flex items-center gap-3">
+                          {React.createElement(
+                            PROFILES.find((p) => p.id === selectedProfile)?.icon || ClaudeLogo,
+                            { className: 'w-4 h-4 shrink-0' }
+                          )}
+                          <span className="font-sans font-medium">{PROFILES.find((p) => p.id === selectedProfile)?.label || 'Anthropic (Claude)'}</span>
+                        </div>
+                        <ChevronDown
+                          className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${
+                            isProfileDropdownOpen ? 'rotate-180 text-[#cc785c]' : ''
+                          }`}
+                        />
+                      </button>
+
+                      {/* Dynamic Flip Floating Menu */}
+                      {isProfileDropdownOpen && (
+                        <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 p-2 space-y-1">
+                          <div className="px-3 py-1.5 text-[11px] font-semibold text-[#cc785c] uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1.5 mb-1 font-mono">
+                            <span>选择目标鉴别模型架构</span>
+                            <span className="text-neutral-400 font-normal">点击切换</span>
+                          </div>
+                          {PROFILES.map((p) => {
+                            const Icon = p.icon;
+                            const isSelected = selectedProfile === p.id;
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedProfile(p.id);
+                                  setIsProfileDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-sans text-left transition ${
+                                  isSelected
+                                    ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
+                                    : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <Icon className="w-4 h-4 shrink-0" />
+                                  <span className="font-semibold text-sm">{p.label}</span>
+                                </div>
+                                <span className={`text-[11px] font-mono truncate max-w-[170px] ${isSelected ? 'text-white/80' : 'text-neutral-400'}`}>
+                                  {p.subLabel}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Depth Selector */}
