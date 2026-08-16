@@ -18,6 +18,16 @@ import {
   AlignLeft,
 } from 'lucide-react';
 
+const getNodeText = (node: any): string => {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(getNodeText).join('');
+  if (node && typeof node === 'object' && node.props && node.props.children) {
+    return getNodeText(node.props.children);
+  }
+  return '';
+};
+
 export const ClientExportTab: React.FC = () => {
   const { state } = useApp();
   const { config } = state;
@@ -317,7 +327,7 @@ export const ClientExportTab: React.FC = () => {
                 remarkPlugins={[remarkGfm]}
                 components={{
                   h2: ({ children }) => {
-                    const text = String(children);
+                    const text = getNodeText(children);
                     const id = slugifyHeading(text);
                     return (
                       <h2
@@ -329,7 +339,7 @@ export const ClientExportTab: React.FC = () => {
                     );
                   },
                   h3: ({ children }) => {
-                    const text = String(children);
+                    const text = getNodeText(children);
                     const id = slugifyHeading(text);
                     return (
                       <h3

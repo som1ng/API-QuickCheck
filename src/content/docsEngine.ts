@@ -72,6 +72,14 @@ function parseFrontmatterAndContent(raw: string): { frontmatter: Partial<DocFron
   return { frontmatter, content };
 }
 
+function cleanHeadingText(raw: string): string {
+  return raw
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .trim();
+}
+
 // Extract H2 and H3 headings for the right-hand TOC
 function extractHeadings(content: string): DocHeading[] {
   const headings: DocHeading[] = [];
@@ -89,11 +97,11 @@ function extractHeadings(content: string): DocHeading[] {
     const h3Match = line.match(/^###\s+(.+)$/);
 
     if (h2Match) {
-      const text = h2Match[1].trim();
+      const text = cleanHeadingText(h2Match[1]);
       const id = slugifyHeading(text);
       headings.push({ id, text, level: 2 });
     } else if (h3Match) {
-      const text = h3Match[1].trim();
+      const text = cleanHeadingText(h3Match[1]);
       const id = slugifyHeading(text);
       headings.push({ id, text, level: 3 });
     }
