@@ -189,11 +189,11 @@ export const ClientExportTab: React.FC = () => {
   return (
     <div className="flex-1 w-full flex flex-col min-h-screen bg-[#0d0d0c]">
       
-      {/* Full-width Developer Layout */}
+      {/* Full-width 3-Column Developer Layout */}
       <div className="flex-1 flex w-full relative">
         
         {/* ========================================== */}
-        {/* 1. Left Sidebar: Minimalist, 220px default */}
+        {/* 1. Left Sidebar: Minimalist, Flush Left    */}
         {/* ========================================== */}
         <aside
           style={{ width: `${sidebarWidth}px` }}
@@ -235,7 +235,7 @@ export const ClientExportTab: React.FC = () => {
 
               return (
                 <div key={group.id} className="space-y-1">
-                  {/* Category Header: Larger, bold white and distinct */}
+                  {/* Category Header */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
@@ -301,9 +301,9 @@ export const ClientExportTab: React.FC = () => {
         </div>
 
         {/* ========================================== */}
-        {/* 3. Center Column: Main Document            */}
+        {/* 3. Center Column: Main Article Body        */}
         {/* ========================================== */}
-        <div className="flex-1 min-w-0 flex justify-center py-10 px-8 lg:px-14 xl:px-18 overflow-y-auto">
+        <main className="flex-1 min-w-0 flex justify-center py-10 px-6 sm:px-10 lg:px-14 overflow-y-auto">
           
           <div className="w-full max-w-3xl space-y-8 min-w-0">
             
@@ -497,47 +497,47 @@ export const ClientExportTab: React.FC = () => {
 
           </div>
 
-          {/* ========================================== */}
-          {/* 4. Right Column: TOC "本页内容" (Slim)     */}
-          {/* ========================================== */}
-          <div className="hidden xl:block w-48 ml-10 sticky top-8 h-fit space-y-4">
-            <div className="space-y-3">
-              <div className="text-xs font-mono font-semibold text-slate-300 flex items-center gap-1.5">
-                <AlignLeft className="w-3.5 h-3.5 text-[#e8895d]" />
-                <span>本页内容</span>
-              </div>
+        </main>
 
-              {currentDoc.headings.length === 0 ? (
-                <div className="text-xs text-slate-500 font-sans">暂无子标题</div>
-              ) : (
-                <nav className="space-y-1 text-[13px] font-sans">
-                  {currentDoc.headings.map((heading, i) => (
-                    <button
-                      key={i}
-                      onClick={() => scrollToHeading(heading.id)}
-                      className={`w-full text-left py-1 text-slate-400 hover:text-white transition block truncate leading-snug ${
-                        heading.level === 3 ? 'pl-2 text-xs text-slate-500' : ''
-                      }`}
-                    >
-                      {heading.text}
-                    </button>
-                  ))}
-                </nav>
-              )}
+        {/* ========================================== */}
+        {/* 4. Far Right Column: TOC "本页内容"        */}
+        {/* ========================================== */}
+        <aside className="hidden xl:flex w-52 shrink-0 py-10 pr-6 pl-4 flex-col sticky top-0 h-[calc(100vh-52px)] overflow-y-auto border-l border-white/5 select-none">
+          <div className="space-y-3 sticky top-4">
+            <div className="text-xs font-mono font-semibold text-slate-300 flex items-center gap-1.5">
+              <AlignLeft className="w-3.5 h-3.5 text-[#e8895d]" />
+              <span>本页内容</span>
+            </div>
 
-              <div className="pt-3 border-t border-white/10">
-                <button
-                  onClick={handleCopyGlobalConfig}
-                  className="w-full flex items-center justify-center gap-1.5 rounded border border-white/10 bg-[#141413] py-1 text-xs text-slate-300 hover:text-white hover:border-[#e8895d] transition font-mono"
-                >
-                  <Copy className="h-3 w-3" />
-                  <span>{globalCopied ? '已复制' : '复制配置'}</span>
-                </button>
-              </div>
+            {currentDoc.headings.length === 0 ? (
+              <div className="text-xs text-slate-500 font-sans">暂无子标题</div>
+            ) : (
+              <nav className="space-y-1 text-[13px] font-sans">
+                {currentDoc.headings.map((heading, i) => (
+                  <button
+                    key={i}
+                    onClick={() => scrollToHeading(heading.id)}
+                    className={`w-full text-left py-1 text-slate-400 hover:text-white transition block truncate leading-snug ${
+                      heading.level === 3 ? 'pl-2 text-xs text-slate-500' : ''
+                    }`}
+                  >
+                    {heading.text}
+                  </button>
+                ))}
+              </nav>
+            )}
+
+            <div className="pt-3 border-t border-white/10">
+              <button
+                onClick={handleCopyGlobalConfig}
+                className="w-full flex items-center justify-center gap-1.5 rounded border border-white/10 bg-[#141413] py-1 text-xs text-slate-300 hover:text-white hover:border-[#e8895d] transition font-mono"
+              >
+                <Copy className="h-3 w-3" />
+                <span>{globalCopied ? '已复制' : '复制配置'}</span>
+              </button>
             </div>
           </div>
-
-        </div>
+        </aside>
 
       </div>
     </div>
