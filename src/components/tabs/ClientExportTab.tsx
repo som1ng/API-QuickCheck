@@ -128,8 +128,6 @@ export const ClientExportTab: React.FC = () => {
     }
   };
 
-  const cleanBaseUrl = (config.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
-
   if (!currentDoc) {
     return <div className="p-12 text-slate-400 font-mono text-xs">暂无可用文档</div>;
   }
@@ -218,17 +216,6 @@ export const ClientExportTab: React.FC = () => {
                 </div>
               );
             })}
-          </div>
-
-          {/* Sidebar Bottom Active Relay Status */}
-          <div className="p-3 border-t border-white/5 bg-[#0d0d0c] space-y-1 text-[11px] font-mono">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] tracking-wider">当前接口</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5db872]" />
-            </div>
-            <div className="text-slate-300 text-xs truncate select-all" title={cleanBaseUrl}>
-              {cleanBaseUrl}
-            </div>
           </div>
         </aside>
 
