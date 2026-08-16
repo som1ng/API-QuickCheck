@@ -49,19 +49,42 @@
   }
 }
 
-/* KaTeX Display Math Center & Margins */
-.katex-display, .math-display {
+/* ========================================================= */
+/* KaTeX Math Formula Centering & Line Height Expansion      */
+/* ========================================================= */
+
+.katex-display {
+  display: block !important;
   margin: 2.25rem 0 !important;
-  padding: 0.5rem 0 !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  overflow-x: auto;
+  padding: 0.75rem 0 !important;
+  text-align: center !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  width: 100% !important;
+}
+
+.katex-display > .katex {
+  display: inline-block !important;
+  text-align: center !important;
+  font-size: 1.2em !important;
+  line-height: 2 !important;
+  white-space: nowrap !important;
 }
 
 .katex {
   font-size: 1.08em;
   color: #f1f5f9;
+  text-rendering: auto;
+  line-height: 1.6;
+}
+
+/* Ensure fractions, superscripts and subscripts don't collide */
+.katex .vlist-t {
+  border-collapse: collapse;
+}
+
+.katex .mord, .katex .mbin, .katex .mrel {
+  letter-spacing: 0.05em;
 }
 
 /* Custom Scrollbar */
