@@ -37,31 +37,26 @@ import {
 const PROFILES: {
   id: ModelVerificationProfile;
   label: string;
-  subLabel: string;
   icon: React.ComponentType<{ className?: string; size?: number }>;
 }[] = [
   {
     id: 'claude',
-    label: 'Anthropic (Claude)',
-    subLabel: 'Thinking Signature 验签 + 原生流',
+    label: 'Anthropic',
     icon: ClaudeLogo,
   },
   {
     id: 'openai',
-    label: 'OpenAI (GPT / o1 / o3)',
-    subLabel: '严格 JSON Schema + Reasoning 审计',
+    label: 'OpenAI',
     icon: OpenAILogo,
   },
   {
     id: 'gemini',
-    label: 'Google (Gemini)',
-    subLabel: '100k+ NIAH 检索 + 原生 Thought',
+    label: 'Google',
     icon: GeminiLogo,
   },
   {
     id: 'xai',
-    label: 'xAI (Grok)',
-    subLabel: 'X 实时知识库断代 + 风格特征',
+    label: 'xAI',
     icon: GrokLogo,
   },
 ];
@@ -480,7 +475,7 @@ export const HomeRelayTab: React.FC = () => {
                             PROFILES.find((p) => p.id === selectedProfile)?.icon || ClaudeLogo,
                             { className: 'w-4 h-4 shrink-0' }
                           )}
-                          <span className="font-sans font-medium">{PROFILES.find((p) => p.id === selectedProfile)?.label || 'Anthropic (Claude)'}</span>
+                          <span className="font-sans font-medium">{PROFILES.find((p) => p.id === selectedProfile)?.label || 'Anthropic'}</span>
                         </div>
                         <ChevronDown
                           className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${
@@ -491,11 +486,7 @@ export const HomeRelayTab: React.FC = () => {
 
                       {/* Dynamic Flip Floating Menu */}
                       {isProfileDropdownOpen && (
-                        <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 p-2 space-y-1">
-                          <div className="px-3 py-1.5 text-[11px] font-semibold text-[#cc785c] uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1.5 mb-1 font-mono">
-                            <span>选择目标鉴别模型架构</span>
-                            <span className="text-neutral-400 font-normal">点击切换</span>
-                          </div>
+                        <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 p-1.5 space-y-0.5">
                           {PROFILES.map((p) => {
                             const Icon = p.icon;
                             const isSelected = selectedProfile === p.id;
@@ -507,19 +498,14 @@ export const HomeRelayTab: React.FC = () => {
                                   setSelectedProfile(p.id);
                                   setIsProfileDropdownOpen(false);
                                 }}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-sans text-left transition ${
+                                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-sans text-left transition cursor-pointer ${
                                   isSelected
                                     ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
                                     : 'text-[#faf9f5] hover:bg-[#23211e] hover:text-white'
                                 }`}
                               >
-                                <div className="flex items-center gap-2.5">
-                                  <Icon className="w-4 h-4 shrink-0" />
-                                  <span className="font-semibold text-sm">{p.label}</span>
-                                </div>
-                                <span className={`text-[11px] font-mono truncate max-w-[170px] ${isSelected ? 'text-white/80' : 'text-neutral-400'}`}>
-                                  {p.subLabel}
-                                </span>
+                                <Icon className="w-4 h-4 shrink-0" />
+                                <span className="font-medium text-sm">{p.label}</span>
                               </button>
                             );
                           })}
