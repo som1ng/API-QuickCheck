@@ -68,6 +68,7 @@ export interface AuditReportV4 {
   summary: string;
   candidateDistances: Array<{ modelId: string; distance: number }>;
   fixtureHashes: Record<string, string>;
+  coverage: { executed: number; total: number; unavailable: number };
   seed: string;
   testedAt: string;
 }

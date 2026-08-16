@@ -28,8 +28,8 @@ const MainContent: React.FC = () => {
         </main>
       ) : (
         <>
-          <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12">
-            <div className="min-h-[560px]">
+          <main className="flex-1 w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 py-6">
+            <div>
               {isHome && (
                 <ErrorBoundary fallbackTitle="中转站检测模块异常">
                   <HomeRelayTab />
@@ -42,7 +42,10 @@ const MainContent: React.FC = () => {
               )}
             </div>
 
-            <FaqSection />
+            {/* FAQ Section cleanly pushed below the fold */}
+            <div className="mt-20 mb-12">
+              <FaqSection />
+            </div>
           </main>
 
           <Footer />
