@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -45,13 +45,6 @@ export const ClientExportTab: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
-
-  // Resizable sidebar state (200px ~ 420px, default 220px)
-  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
-    const saved = localStorage.getItem('api_quickcheck_docs_sidebar_width');
-    return saved ? Math.max(200, Math.min(420, parseInt(saved, 10))) : 220;
-  });
-  const [isResizing, setIsResizing] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard shortcut Ctrl+K / Cmd+K listener
@@ -68,41 +61,6 @@ export const ClientExportTab: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  // Resizable sidebar mouse event handlers
-  const startResizing = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-      const newWidth = Math.max(200, Math.min(420, e.clientX));
-      setSidebarWidth(newWidth);
-      localStorage.setItem('api_quickcheck_docs_sidebar_width', newWidth.toString());
-    };
-
-    const handleMouseUp = () => {
-      if (isResizing) {
-        setIsResizing(false);
-      }
-    };
-
-    if (isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-  }, [isResizing]);
 
   const toggleCategory = (catId: string) => {
     setCollapsedCategories((prev) => ({
@@ -183,12 +141,9 @@ export const ClientExportTab: React.FC = () => {
       <div className="flex-1 flex w-full relative">
         
         {/* ========================================== */}
-        {/* 1. Left Sidebar: Minimalist, Flush Left    */}
+        {/* 1. Left Sidebar: Clean, Fixed Width (w-64) */}
         {/* ========================================== */}
-        <aside
-          style={{ width: `${sidebarWidth}px` }}
-          className="shrink-0 sticky top-0 h-[calc(100vh-52px)] border-r border-white/10 bg-[#0d0d0c] flex flex-col z-20 select-none"
-        >
+        <aside className="w-64 shrink-0 sticky top-0 h-[calc(100vh-52px)] border-r border-white/10 bg-[#0d0d0c] flex flex-col z-20 select-none">
           {/* Minimal Search Input */}
           <div className="p-3 border-b border-white/5">
             <div className="relative flex items-center">
@@ -278,24 +233,11 @@ export const ClientExportTab: React.FC = () => {
         </aside>
 
         {/* ========================================== */}
-        {/* 2. Resizable Divider                       */}
+        {/* 2. Center Column: Main Article Body        */}
         {/* ========================================== */}
-        <div
-          onMouseDown={startResizing}
-          className="w-1 hover:w-1.5 bg-transparent hover:bg-[#e8895d] transition-all cursor-col-resize z-30 shrink-0 select-none relative group -ml-0.5"
-          title="拖拽调整侧边栏宽度"
-        >
-          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-3 h-8 -ml-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-            <div className="w-0.5 h-4 bg-white rounded-full" />
-          </div>
-        </div>
-
-        {/* ========================================== */}
-        {/* 3. Center Column: Main Article Body        */}
-        {/* ========================================== */}
-        <main className="flex-1 min-w-0 flex justify-center py-10 px-6 sm:px-10 lg:px-14 overflow-y-auto">
+        <main className="flex-1 min-w-0 flex justify-center py-10 px-8 sm:px-12 lg:px-16 overflow-y-auto">
           
-          <div className="w-full max-w-3xl space-y-8 min-w-0">
+          <div className="w-full max-w-4xl space-y-8 min-w-0">
             
             {/* Breadcrumb */}
             <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
@@ -502,7 +444,7 @@ export const ClientExportTab: React.FC = () => {
         </main>
 
         {/* ========================================== */}
-        {/* 4. Far Right Column: TOC "本页内容" (Wider) */}
+        {/* 3. Far Right Column: TOC "本页内容" (w-64)  */}
         {/* ========================================== */}
         <aside className="hidden xl:flex w-64 shrink-0 py-10 pr-8 pl-5 flex-col sticky top-0 h-[calc(100vh-52px)] overflow-y-auto border-l border-white/5 select-none">
           <div className="space-y-3 sticky top-4">
@@ -520,7 +462,7 @@ export const ClientExportTab: React.FC = () => {
                     key={i}
                     onClick={() => scrollToHeading(heading.id)}
                     className={`w-full text-left py-1 text-slate-400 hover:text-white transition block truncate leading-snug ${
-                      heading.level === 3 ? 'pl-2 text-xs text-slate-500' : ''
+                      heading.level === 3 ? 'pl-3 text-xs text-slate-500 hover:text-slate-200' : 'text-[13px]'
                     }`}
                   >
                     {heading.text}
