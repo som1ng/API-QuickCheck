@@ -387,30 +387,30 @@ export const ClientExportTab: React.FC = () => {
                     </blockquote>
                   ),
                   table: ({ children }) => (
-                    <div className="overflow-x-auto my-5 rounded-lg border border-white/10">
-                      <table className="w-full text-left text-xs font-mono divide-y divide-white/10">
+                    <div className="my-6 w-full overflow-x-auto rounded-xl border border-white/10 bg-[#121211] shadow-sm">
+                      <table className="w-full text-left text-sm border-collapse font-sans">
                         {children}
                       </table>
                     </div>
                   ),
                   thead: ({ children }) => (
-                    <thead className="bg-white/5 text-slate-300 font-semibold font-mono tracking-wider border-b border-white/10">
+                    <thead className="bg-white/[0.04] border-b border-white/10 text-slate-100 font-semibold font-sans">
                       {children}
                     </thead>
                   ),
                   tbody: ({ children }) => (
-                    <tbody className="divide-y divide-white/5 bg-[#0d0d0c]">
+                    <tbody className="divide-y divide-white/5 bg-transparent font-sans">
                       {children}
                     </tbody>
                   ),
                   tr: ({ children }) => (
-                    <tr className="hover:bg-white/[0.03] transition">{children}</tr>
+                    <tr className="hover:bg-white/[0.02] transition-colors">{children}</tr>
                   ),
                   th: ({ children }) => (
-                    <th className="px-4 py-3 font-semibold text-slate-300 text-xs">{children}</th>
+                    <th className="py-3 px-4 text-sm font-semibold text-slate-100 text-left font-sans">{children}</th>
                   ),
                   td: ({ children }) => (
-                    <td className="px-4 py-3 text-slate-200 text-xs">{children}</td>
+                    <td className="py-3.5 px-4 text-sm text-slate-200 border-b border-white/5 leading-relaxed font-sans">{children}</td>
                   ),
                   code: ({ className, children, ...props }) => {
                     const match = /language-(\w+)/.exec(className || '');
