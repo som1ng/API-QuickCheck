@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
   const navItems: { id: ActiveTabId; label: string; active: boolean }[] = [
     { id: 'home', label: '中转站检测', active: isHome },
     { id: 'quickping', label: 'API Key 批量', active: isKeys },
-    { id: 'docs', label: 'Docs', active: isDocs },
+    { id: 'docs', label: '文档', active: isDocs },
   ];
 
   return (

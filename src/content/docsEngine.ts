@@ -36,12 +36,12 @@ export interface DocCategoryGroup {
 }
 
 const CATEGORY_TAG_MAP: Record<string, { tag: string; title: string }> = {
-  overview: { tag: 'INTRODUCTION', title: '概览与设计' },
-  fidelity: { tag: 'ARCHITECTURE', title: '验真体系与密码学' },
-  relay_traps: { tag: 'SECURITY', title: '降级与作弊剖析' },
-  benchmarks: { tag: 'BENCHMARKS', title: '性能与基准测速' },
-  troubleshooting: { tag: 'DIAGNOSTICS', title: '排错与协议规范' },
-  developer_api: { tag: 'DEVELOPER', title: 'CI/CD 自动化集成' },
+  overview: { tag: '概览与导读', title: '概览与导读' },
+  fidelity: { tag: '验真体系与密码学', title: '验真体系与密码学' },
+  relay_traps: { tag: '中转降级手法剖析', title: '中转降级手法剖析' },
+  benchmarks: { tag: '性能与基准测速', title: '性能与基准测速' },
+  troubleshooting: { tag: '排错与协议规范', title: '排错与协议规范' },
+  developer_api: { tag: 'CI/CD 与自动化', title: 'CI/CD 与自动化' },
 };
 
 // Simple and robust YAML Frontmatter parser

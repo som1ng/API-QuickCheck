@@ -183,7 +183,7 @@ export const ClientExportTab: React.FC = () => {
   };
 
   if (!currentDoc) {
-    return <div className="p-12 text-neutral-500 font-mono text-xs">NO AVAILABLE DOCS</div>;
+    return <div className="p-12 text-neutral-500 font-mono text-xs">暂无可用文档</div>;
   }
 
   return (
@@ -208,7 +208,7 @@ export const ClientExportTab: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search..."
+                placeholder="搜索文档..."
                 className="w-full rounded bg-[#141413] border border-[rgba(255,255,255,0.06)] py-1.5 pl-8 pr-12 text-xs text-[#ededed] placeholder-[#737373] focus:border-[#e8895d] focus:outline-none transition font-sans"
               />
               <div className="absolute right-2 top-1.5 flex items-center">
@@ -221,7 +221,7 @@ export const ClientExportTab: React.FC = () => {
                   </button>
                 ) : (
                   <span className="text-[10px] font-mono text-[#737373] bg-[#1a1918] px-1 py-0.5 rounded border border-[rgba(255,255,255,0.06)]">
-                    ⌘K
+                    Ctrl K
                   </span>
                 )}
               </div>
@@ -235,13 +235,13 @@ export const ClientExportTab: React.FC = () => {
 
               return (
                 <div key={group.id} className="space-y-1">
-                  {/* Category Header: Uppercase English Tag */}
+                  {/* Category Header */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
-                    className="w-full flex items-center justify-between px-2 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-[#737373] hover:text-[#ededed] transition"
+                    className="w-full flex items-center justify-between px-2 py-1 text-xs font-mono font-medium text-[#737373] hover:text-[#ededed] transition"
                   >
-                    <span className="truncate">{group.tag}</span>
+                    <span className="truncate">{group.title}</span>
                     <ChevronDown
                       className={`h-3 w-3 text-[#737373] transition-transform duration-200 ${
                         isCollapsed ? '-rotate-90' : 'rotate-0'
@@ -249,7 +249,7 @@ export const ClientExportTab: React.FC = () => {
                     />
                   </button>
 
-                  {/* Document Links */}
+                  {/* Document Links without decorative right-side badges */}
                   {!isCollapsed && (
                     <div className="space-y-0.5 pt-0.5">
                       {group.docs.map((doc) => {
@@ -265,17 +265,6 @@ export const ClientExportTab: React.FC = () => {
                             }`}
                           >
                             <span className="truncate">{doc.frontmatter.title}</span>
-                            {doc.frontmatter.badge && (
-                              <span
-                                className={`text-[10px] px-1.5 py-0.2 rounded font-mono shrink-0 ml-1.5 ${
-                                  isActive
-                                    ? 'bg-[#e8895d] text-white'
-                                    : 'bg-[#1a1918] text-[#737373] border border-[rgba(255,255,255,0.06)]'
-                                }`}
-                              >
-                                {doc.frontmatter.badge}
-                              </span>
-                            )}
                           </button>
                         );
                       })}
@@ -289,7 +278,7 @@ export const ClientExportTab: React.FC = () => {
           {/* Sidebar Bottom Active Relay Status */}
           <div className="p-3 border-t border-[rgba(255,255,255,0.04)] bg-[#0d0d0c] space-y-1 text-[11px] font-mono">
             <div className="flex items-center justify-between text-[#737373]">
-              <span className="uppercase text-[10px] tracking-wider">ENDPOINT</span>
+              <span className="text-[10px] tracking-wider">当前接口</span>
               <span className="h-1.5 w-1.5 rounded-full bg-[#5db872]" />
             </div>
             <div className="text-[#a1a1aa] text-xs truncate select-all" title={cleanBaseUrl}>
@@ -312,41 +301,28 @@ export const ClientExportTab: React.FC = () => {
         </div>
 
         {/* ========================================== */}
-        {/* 3. Center Column: Main Document (The Hero) */}
+        {/* 3. Center Column: Main Document            */}
         {/* ========================================== */}
         <div className="flex-1 min-w-0 flex justify-center py-10 px-8 lg:px-14 xl:px-18 overflow-y-auto">
           
           <div className="w-full max-w-3xl space-y-8 min-w-0">
             
-            {/* Minimalist Breadcrumb */}
-            <div className="flex items-center gap-1.5 text-xs text-[#737373] font-mono uppercase tracking-wider">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-1.5 text-xs text-[#737373] font-sans">
               <span
                 className="hover:text-[#ededed] cursor-pointer"
                 onClick={() => navigateToDoc(allDocs[0].slug)}
               >
-                Docs
+                文档
               </span>
               <ChevronRight className="h-3 w-3 text-[#333]" />
-              <span className="text-[#a1a1aa]">{currentDoc.frontmatter.categoryTag || currentDoc.frontmatter.category}</span>
+              <span className="text-[#a1a1aa]">{currentDoc.frontmatter.categoryTitle}</span>
               <ChevronRight className="h-3 w-3 text-[#333]" />
               <span className="text-[#ededed] font-medium">{currentDoc.frontmatter.title}</span>
             </div>
 
-            {/* Document Header (OpenCode Style) */}
+            {/* Document Header */}
             <div className="space-y-3 pb-6 border-b border-[rgba(255,255,255,0.06)]">
-              <div className="flex flex-wrap items-center gap-2">
-                {currentDoc.frontmatter.badge && (
-                  <span className="rounded border border-[#e8895d]/30 bg-[#e8895d]/10 px-2 py-0.5 text-xs font-mono font-medium text-[#e8895d]">
-                    {currentDoc.frontmatter.badge}
-                  </span>
-                )}
-                {currentDoc.frontmatter.protocol && (
-                  <span className="rounded border border-[rgba(255,255,255,0.06)] bg-[#141413] px-2 py-0.5 text-xs font-mono text-[#a1a1aa]">
-                    {currentDoc.frontmatter.protocol}
-                  </span>
-                )}
-              </div>
-
               <h1 className="font-serif-display text-3xl sm:text-4xl font-normal text-[#ededed] tracking-tight">
                 {currentDoc.frontmatter.title}
               </h1>
@@ -369,7 +345,7 @@ export const ClientExportTab: React.FC = () => {
                     return (
                       <h2
                         id={id}
-                        className="text-xl font-medium text-[#ededed] tracking-tight pt-8 pb-2 border-b border-[rgba(255,255,255,0.06)] mt-8 mb-4"
+                        className="text-xl font-medium text-[#ededed] tracking-tight pt-8 pb-2 border-b border-[rgba(255,255,255,0.06)] mt-8 mb-4 font-sans"
                       >
                         {children}
                       </h2>
@@ -381,7 +357,7 @@ export const ClientExportTab: React.FC = () => {
                     return (
                       <h3
                         id={id}
-                        className="text-base font-medium text-[#ededed] pt-4 mt-6 mb-2"
+                        className="text-base font-medium text-[#ededed] pt-4 mt-6 mb-2 font-sans"
                       >
                         {children}
                       </h3>
@@ -474,9 +450,9 @@ export const ClientExportTab: React.FC = () => {
                     onClick={() => navigateToDoc(prevDoc.slug)}
                     className="flex flex-col items-start p-4 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#121211] hover:border-[#e8895d]/50 hover:bg-[#161614] transition text-left"
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-[#737373] font-mono">
+                    <div className="flex items-center gap-1.5 text-xs text-[#737373]">
                       <ArrowLeft className="h-3 w-3" />
-                      <span>PREVIOUS</span>
+                      <span>上一篇</span>
                     </div>
                     <div className="mt-1 font-sans text-xs text-[#ededed] truncate w-full">
                       {prevDoc.frontmatter.title}
@@ -492,8 +468,8 @@ export const ClientExportTab: React.FC = () => {
                     onClick={() => navigateToDoc(nextDoc.slug)}
                     className="flex flex-col items-end p-4 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#121211] hover:border-[#e8895d]/50 hover:bg-[#161614] transition text-right"
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-[#737373] font-mono">
-                      <span>NEXT</span>
+                    <div className="flex items-center gap-1.5 text-xs text-[#737373]">
+                      <span>下一篇</span>
                       <ArrowRight className="h-3 w-3" />
                     </div>
                     <div className="mt-1 font-sans text-xs text-[#ededed] truncate w-full">
@@ -514,7 +490,7 @@ export const ClientExportTab: React.FC = () => {
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="text-[#e8895d] hover:underline"
                 >
-                  Back to top ↑
+                  回到顶部 ↑
                 </button>
               </div>
             </div>
@@ -522,17 +498,17 @@ export const ClientExportTab: React.FC = () => {
           </div>
 
           {/* ========================================== */}
-          {/* 4. Right Column: TOC "On this page" (Slim) */}
+          {/* 4. Right Column: TOC "本页内容" (Slim)     */}
           {/* ========================================== */}
           <div className="hidden xl:block w-48 ml-10 sticky top-8 h-fit space-y-4">
             <div className="space-y-3">
-              <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] flex items-center gap-1.5">
+              <div className="text-xs font-mono font-medium text-[#737373] flex items-center gap-1.5">
                 <AlignLeft className="w-3.5 h-3.5" />
-                <span>On this page</span>
+                <span>本页内容</span>
               </div>
 
               {currentDoc.headings.length === 0 ? (
-                <div className="text-xs text-[#525252] font-sans">No subheadings</div>
+                <div className="text-xs text-[#525252] font-sans">暂无子标题</div>
               ) : (
                 <nav className="space-y-1 text-[13px] font-sans">
                   {currentDoc.headings.map((heading, i) => (
@@ -555,7 +531,7 @@ export const ClientExportTab: React.FC = () => {
                   className="w-full flex items-center justify-center gap-1.5 rounded border border-[rgba(255,255,255,0.06)] bg-[#141413] py-1 text-xs text-[#a1a1aa] hover:text-[#ededed] hover:border-[#e8895d] transition font-mono"
                 >
                   <Copy className="h-3 w-3" />
-                  <span>{globalCopied ? 'Copied' : 'Copy Config'}</span>
+                  <span>{globalCopied ? '已复制' : '复制配置'}</span>
                 </button>
               </div>
             </div>
