@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { useApp } from '../../context/AppContext';
 import { CodeBlock } from '../common/CodeBlock';
 import {
@@ -324,7 +326,8 @@ export const ClientExportTab: React.FC = () => {
             {/* Markdown Body Renderer */}
             <article className="prose prose-invert max-w-none text-slate-200 font-sans text-[15px] leading-[1.8]">
               <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
                 components={{
                   h2: ({ children }) => {
                     const text = getNodeText(children);
