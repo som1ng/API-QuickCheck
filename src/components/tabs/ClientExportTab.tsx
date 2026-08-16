@@ -201,26 +201,26 @@ export const ClientExportTab: React.FC = () => {
         >
           {/* Minimal Search Input */}
           <div className="p-3 border-b border-[rgba(255,255,255,0.04)]">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#737373]" />
+            <div className="relative flex items-center">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#737373] pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜索文档..."
-                className="w-full rounded bg-[#141413] border border-[rgba(255,255,255,0.06)] py-1.5 pl-8 pr-12 text-xs text-[#ededed] placeholder-[#737373] focus:border-[#e8895d] focus:outline-none transition font-sans"
+                className="w-full h-8 rounded bg-[#141413] border border-[rgba(255,255,255,0.06)] pl-8 pr-14 text-xs text-[#ededed] placeholder-[#737373] focus:border-[#e8895d] focus:outline-none transition font-sans"
               />
-              <div className="absolute right-2 top-1.5 flex items-center">
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
                 {searchQuery ? (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-xs text-[#737373] hover:text-white px-1"
+                    className="text-xs text-[#737373] hover:text-white px-1 pointer-events-auto"
                   >
                     ✕
                   </button>
                 ) : (
-                  <span className="text-[10px] font-mono text-[#737373] bg-[#1a1918] px-1 py-0.5 rounded border border-[rgba(255,255,255,0.06)]">
+                  <span className="text-[10px] font-mono text-[#8c8c8c] bg-[#1a1918] px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.06)] leading-none select-none">
                     Ctrl K
                   </span>
                 )}
@@ -235,15 +235,15 @@ export const ClientExportTab: React.FC = () => {
 
               return (
                 <div key={group.id} className="space-y-1">
-                  {/* Category Header */}
+                  {/* Category Header: Larger, clear, and prominent */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
-                    className="w-full flex items-center justify-between px-2 py-1 text-xs font-mono font-medium text-[#737373] hover:text-[#ededed] transition"
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-[14px] font-sans font-semibold text-[#faf9f5] hover:text-[#e8895d] transition rounded"
                   >
-                    <span className="truncate">{group.title}</span>
+                    <span className="truncate tracking-tight">{group.title}</span>
                     <ChevronDown
-                      className={`h-3 w-3 text-[#737373] transition-transform duration-200 ${
+                      className={`h-3.5 w-3.5 text-[#8c8c8c] transition-transform duration-200 ${
                         isCollapsed ? '-rotate-90' : 'rotate-0'
                       }`}
                     />
