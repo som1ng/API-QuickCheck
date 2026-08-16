@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { parseRawKeysInput, runBatchKeyTestPool } from '../../engine/batchKeys/keyPoolTester';
 import { BatchKeySummary, KeyCheckResult } from '../../types/batchKeys';
@@ -37,6 +37,25 @@ const PROVIDER_PRESETS: ProviderPreset[] = [
   { id: 'custom', name: '自定义接口 / 代理 URL', baseUrl: '', defaultModel: 'gpt-4o', category: '自定义' },
 ];
 
+type FilterTabId = 'active' | 'quota_exhausted' | 'rate_limited' | 'invalid' | 'duplicate';
+
+interface FilterTabConfig {
+  id: FilterTabId;
+  label: string;
+  countKey: 'activeCount' | 'exhaustedCount' | 'rateLimitedCount' | 'invalidCount' | 'duplicateCount';
+  color: string;
+  bg: string;
+  border: string;
+}
+
+const FILTER_TABS: FilterTabConfig[] = [
+  { id: 'active', label: '有效', countKey: 'activeCount', color: 'text-[#6ee7b7]', bg: 'bg-[#064e3b]', border: 'border-[#059669]' },
+  { id: 'quota_exhausted', label: '无额', countKey: 'exhaustedCount', color: 'text-[#fcd34d]', bg: 'bg-[#451a03]', border: 'border-[#d97706]' },
+  { id: 'rate_limited', label: '限流', countKey: 'rateLimitedCount', color: 'text-[#fcd34d]', bg: 'bg-[#451a03]', border: 'border-[#d97706]' },
+  { id: 'invalid', label: '无效', countKey: 'invalidCount', color: 'text-[#fda4af]', bg: 'bg-[#4c0519]', border: 'border-[#e11d48]' },
+  { id: 'duplicate', label: '重复', countKey: 'duplicateCount', color: 'text-[#faf9f5]', bg: 'bg-[#23211e]', border: 'border-[#44403c]' },
+];
+
 export const QuickPingTab: React.FC = () => {
   const { state } = useApp();
   const { config } = state;
@@ -58,13 +77,42 @@ export const QuickPingTab: React.FC = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [summary, setSummary] = useState<BatchKeySummary | null>(null);
   const [progress, setProgress] = useState<{ total: number; completed: number }>({ total: 0, completed: 0 });
-  const [activeFilterTab, setActiveFilterTab] = useState<'active' | 'quota_exhausted' | 'rate_limited' | 'invalid' | 'duplicate'>('active');
+  const [activeFilterTab, setActiveFilterTab] = useState<FilterTabId>('active');
 
   // Copy feedback
   const [copiedBatch, setCopiedBatch] = useState<boolean>(false);
   const [copiedKeyIndex, setCopiedKeyIndex] = useState<number | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
+
+  // Filter Tabs Sliding Pill Animation Ref & State
+  const filterTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [filterPillStyle, setFilterPillStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  const updateFilterPillPosition = useCallback(() => {
+    const activeEl = filterTabRefs.current[activeFilterTab];
+    if (activeEl) {
+      setFilterPillStyle({
+        left: activeEl.offsetLeft,
+        width: activeEl.offsetWidth,
+        opacity: 1,
+      });
+    }
+  }, [activeFilterTab]);
+
+  useEffect(() => {
+    updateFilterPillPosition();
+    const raf = requestAnimationFrame(updateFilterPillPosition);
+    window.addEventListener('resize', updateFilterPillPosition);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updateFilterPillPosition);
+    };
+  }, [updateFilterPillPosition, summary]);
 
   const handleSelectProvider = (p: ProviderPreset) => {
     setSelectedProvider(p);
@@ -118,15 +166,8 @@ export const QuickPingTab: React.FC = () => {
       results.total = totalCount;
 
       setSummary(results);
-      // Auto-switch to tab with items
-      if (results.activeCount > 0) setActiveFilterTab('active');
-      else if (results.exhaustedCount > 0) setActiveFilterTab('quota_exhausted');
-      else if (results.rateLimitedCount > 0) setActiveFilterTab('rate_limited');
-      else if (results.invalidCount > 0) setActiveFilterTab('invalid');
-      else if (results.duplicateCount > 0) setActiveFilterTab('duplicate');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      alert(`批量测试过程中断: ${msg}`);
+      alert(`检测异常: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsRunning(false);
     }
@@ -185,18 +226,18 @@ export const QuickPingTab: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* ── Main Two-Column Big Workspace ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
 
         {/* ── Left Column: Config, Provider & Big Key Textarea (5 cols) ── */}
-        <div className="lg:col-span-5 rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-7 sm:p-8 shadow-xl flex flex-col justify-between space-y-6 min-h-[640px] smooth-card">
-          <div className="space-y-6">
+        <div className="lg:col-span-5 rounded-2xl border border-[#2e2b27] bg-[#181715] p-6 sm:p-7 shadow-xl flex flex-col justify-between space-y-6 min-h-[660px] smooth-card">
+          <div className="space-y-5">
             {/* Header / Title */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#064e3b] border border-[#059669] flex items-center justify-center text-[#6ee7b7] shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-[#064e3b] border border-[#059669] flex items-center justify-center text-[#6ee7b7] shadow-sm shrink-0">
                 <KeyRound className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif-display text-xl font-semibold text-[#faf9f5]">
+                <h3 className="font-serif-display text-xl font-semibold text-white tracking-tight">
                   API KEY 批量检测
                 </h3>
                 <p className="text-xs text-neutral-300 font-medium mt-0.5">
@@ -206,7 +247,7 @@ export const QuickPingTab: React.FC = () => {
             </div>
 
             {/* 1. API Provider Selector & Stream Switch */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-[#faf9f5]">
                   API 提供商
@@ -248,24 +289,24 @@ export const QuickPingTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowProviderDropdown(!showProviderDropdown)}
-                  className="w-full flex items-center justify-between rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3.5 text-sm text-[#faf9f5] hover:border-[#cc785c]/60 transition smooth-input shadow-inner font-medium"
+                  className="w-full flex items-center justify-between rounded-xl border border-[#2e2b27] bg-[#121211] px-4 py-3 text-sm text-[#faf9f5] hover:border-[#cc785c]/60 transition smooth-input shadow-inner font-medium cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <ProviderIcon providerId={selectedProvider.id} className="w-5 h-5" />
                     <span className="font-semibold text-[#faf9f5]">{selectedProvider.name}</span>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${showProviderDropdown ? 'rotate-180 text-[#cc785c]' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${showProviderDropdown ? 'rotate-180 text-[#cc785c]' : ''}`} />
                 </button>
 
                 {showProviderDropdown && (
-                  <div className="absolute left-0 right-0 mt-2 rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-2.5 shadow-2xl z-50 max-h-80 overflow-y-auto space-y-2 animate-in fade-in duration-150">
+                  <div className="absolute left-0 right-0 mt-2 rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-2.5 shadow-2xl z-50 max-h-80 overflow-y-auto space-y-2 animate-in fade-in zoom-in-95 duration-150">
                     <div className="relative">
                       <input
                         type="text"
                         placeholder="搜索提供商..."
                         value={providerSearchQuery}
                         onChange={(e) => setProviderSearchQuery(e.target.value)}
-                        className="w-full rounded-lg border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-neutral-500 focus:outline-none focus:border-[#cc785c] smooth-input"
+                        className="w-full rounded-lg border border-[#2e2b27] bg-[#121211] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-neutral-500 focus:outline-none focus:border-[#cc785c] smooth-input"
                       />
                       <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-2.5" />
                     </div>
@@ -276,7 +317,7 @@ export const QuickPingTab: React.FC = () => {
                           key={p.id}
                           type="button"
                           onClick={() => handleSelectProvider(p)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm transition flex items-center justify-between ${
+                          className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm transition flex items-center justify-between cursor-pointer ${
                             selectedProvider.id === p.id
                               ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
                               : 'text-neutral-200 hover:bg-[#23211e] hover:text-white'
@@ -302,14 +343,14 @@ export const QuickPingTab: React.FC = () => {
                     placeholder="https://api.your-relay.com/v1"
                     value={customBaseUrl}
                     onChange={(e) => setCustomBaseUrl(e.target.value)}
-                    className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input"
+                    className="w-full rounded-xl border border-[#2e2b27] bg-[#121211] px-4 py-2.5 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:outline-none smooth-input"
                   />
                 </div>
               )}
             </div>
 
             {/* 2. Big Textarea for API Keys with razor-sharp crisp font */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <label className="text-sm font-semibold text-[#faf9f5]">
                   API Key 列表
@@ -332,7 +373,7 @@ export const QuickPingTab: React.FC = () => {
                 value={rawKeysText}
                 onChange={(e) => setRawKeysText(e.target.value)}
                 placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&#10;sk-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy&#10;sk-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz&#10;&#10;支持直接粘贴多行，自动排重、过滤空白与注释行"
-                className="w-full rounded-xl border border-[#3d3934] bg-[#141413] p-4 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/40 focus:outline-none transition leading-relaxed resize-none min-h-[280px] select-text shadow-inner tracking-wide smooth-input"
+                className="w-full rounded-xl border border-[#3d3934] bg-[#121211] p-4 font-mono text-sm text-[#faf9f5] placeholder-neutral-500 focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/40 focus:outline-none transition leading-relaxed resize-none min-h-[320px] h-[340px] select-text shadow-inner tracking-wide smooth-input"
               />
             </div>
           </div>
@@ -343,7 +384,7 @@ export const QuickPingTab: React.FC = () => {
               <button
                 type="button"
                 onClick={handleStop}
-                className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#c64545] hover:bg-[#a93a3a] py-4 text-base font-semibold text-[#faf9f5] shadow-lg transition smooth-btn tracking-wide"
+                className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#c64545] hover:bg-[#a93a3a] py-3.5 text-base font-semibold text-[#faf9f5] shadow-lg transition smooth-btn tracking-wide cursor-pointer"
               >
                 <Square className="w-4 h-4 fill-[#faf9f5]" />
                 <span>停止检测 ({progress.completed}/{progress.total})</span>
@@ -353,7 +394,7 @@ export const QuickPingTab: React.FC = () => {
                 type="button"
                 onClick={handleStartTesting}
                 disabled={parsedCount === 0}
-                className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] py-4 text-base font-semibold text-white shadow-lg transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer smooth-btn tracking-wide"
+                className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] py-3.5 text-base font-semibold text-white shadow-lg transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer smooth-btn tracking-wide"
               >
                 <Play className="w-4 h-4 fill-white" />
                 <span>开始检测</span>
@@ -363,39 +404,48 @@ export const QuickPingTab: React.FC = () => {
         </div>
 
         {/* ── Right Column: Big Categorized Results Panel (7 cols) ── */}
-        <div className="lg:col-span-7 rounded-2xl border border-[#2e2b27] bg-[#1b1a18] shadow-xl flex flex-col overflow-hidden min-h-[640px] smooth-card">
+        <div className="lg:col-span-7 rounded-2xl border border-[#2e2b27] bg-[#181715] shadow-xl flex flex-col overflow-hidden min-h-[660px] smooth-card">
 
           {/* Top Status Tabs Bar */}
-          <div className="px-6 py-4 sm:py-5 border-b border-[#2e2b27] flex flex-wrap items-center justify-between gap-4 bg-[#141413]/60">
-            {/* Status Tabs with Count Pills */}
-            <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
-              {[
-                { id: 'active', label: '有效', count: summary?.activeCount || 0, color: 'text-[#6ee7b7]', bg: 'bg-[#064e3b]', border: 'border-[#059669]' },
-                { id: 'quota_exhausted', label: '无额', count: summary?.exhaustedCount || 0, color: 'text-[#fcd34d]', bg: 'bg-[#451a03]', border: 'border-[#d97706]' },
-                { id: 'rate_limited', label: '限流', count: summary?.rateLimitedCount || 0, color: 'text-[#fcd34d]', bg: 'bg-[#451a03]', border: 'border-[#d97706]' },
-                { id: 'invalid', label: '无效', count: summary?.invalidCount || 0, color: 'text-[#fda4af]', bg: 'bg-[#4c0519]', border: 'border-[#e11d48]' },
-                { id: 'duplicate', label: '重复', count: summary?.duplicateCount || duplicates.length || 0, color: 'text-[#faf9f5]', bg: 'bg-[#23211e]', border: 'border-[#44403c]' },
-              ].map((tab) => {
+          <div className="px-5 sm:px-6 py-4 border-b border-[#2e2b27] flex flex-wrap items-center justify-between gap-4 bg-[#121211]/80">
+            {/* Status Tabs with Silky-Smooth Sliding Active Indicator */}
+            <nav className="relative flex items-center p-1 rounded-xl bg-[#141413] border border-white/[0.08] shadow-inner overflow-x-auto no-scrollbar">
+              {/* Sliding Active Pill Indicator */}
+              <span
+                className="absolute top-1 bottom-1 rounded-lg bg-[#262422] border border-white/15 shadow-[0_2px_12px_rgba(0,0,0,0.6)] pointer-events-none transition-all duration-300"
+                style={{
+                  transform: `translateX(${filterPillStyle.left}px)`,
+                  width: `${filterPillStyle.width}px`,
+                  opacity: filterPillStyle.opacity,
+                  transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+              >
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#e8895d] rounded-full shadow-[0_0_8px_#e8895d]" />
+              </span>
+
+              {FILTER_TABS.map((tab) => {
+                const count = tab.id === 'duplicate' ? (summary?.duplicateCount || duplicates.length || 0) : (summary?.[tab.countKey] || 0);
                 const isSelected = activeFilterTab === tab.id;
                 return (
                   <button
                     key={tab.id}
+                    ref={(el) => { filterTabRefs.current[tab.id] = el; }}
                     type="button"
-                    onClick={() => setActiveFilterTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition tracking-wide smooth-btn ${
+                    onClick={() => setActiveFilterTab(tab.id)}
+                    className={`relative z-10 flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-[13px] font-sans font-medium transition-colors duration-200 cursor-pointer ${
                       isSelected
-                        ? 'bg-[#23211e] border border-[#cc785c] text-[#faf9f5] shadow-sm'
-                        : 'text-neutral-300 hover:text-white hover:bg-[#23211e]/50'
+                        ? 'text-white font-semibold'
+                        : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <span>{tab.label}</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${tab.bg} ${tab.color} border ${tab.border} tracking-wide shadow-sm`}>
-                      {tab.count}
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono font-bold ${tab.bg} ${tab.color} border ${tab.border} tracking-wide shadow-sm`}>
+                      {count}
                     </span>
                   </button>
                 );
               })}
-            </div>
+            </nav>
 
             {/* Batch Export / Copy Button */}
             {summary && (
@@ -404,7 +454,7 @@ export const QuickPingTab: React.FC = () => {
                   type="button"
                   onClick={handleCopyCurrentTabKeys}
                   disabled={getFilteredItems().length === 0}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#23211e] hover:bg-[#2b2926] border border-[#2e2b27] text-xs font-semibold text-[#faf9f5] transition disabled:opacity-40 tracking-wide smooth-btn shadow-sm"
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#23211e] hover:bg-[#2b2926] border border-[#2e2b27] text-xs font-semibold text-[#faf9f5] transition disabled:opacity-40 tracking-wide smooth-btn shadow-sm cursor-pointer"
                 >
                   {copiedBatch ? (
                     <>
@@ -423,15 +473,15 @@ export const QuickPingTab: React.FC = () => {
           </div>
 
           {/* Main Results Container with Crisp Text Rendering */}
-          <div className="flex-1 p-7 flex flex-col overflow-y-auto max-h-[560px]">
+          <div className="flex-1 p-6 sm:p-7 flex flex-col overflow-y-auto max-h-[580px]">
             {/* Empty State */}
             {!summary && !isRunning && (
-              <div className="flex-1 flex flex-col items-center justify-center text-center py-20 space-y-4">
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-24 space-y-4">
                 <div className="w-20 h-20 rounded-3xl bg-[#23211e] border border-[#2e2b27] flex items-center justify-center text-[#cc785c] shadow-inner">
                   <Inbox className="w-10 h-10 opacity-75 text-[#cc785c]" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-base font-semibold text-[#faf9f5]">
+                  <h4 className="text-base font-semibold text-white">
                     检测结果将显示在这里
                   </h4>
                   <p className="text-xs text-neutral-300 max-w-xs leading-relaxed">
@@ -443,10 +493,10 @@ export const QuickPingTab: React.FC = () => {
 
             {/* Running Spinner & Live Progress */}
             {isRunning && (
-              <div className="flex-1 flex flex-col items-center justify-center text-center py-20 space-y-5">
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-24 space-y-5">
                 <Loader2 className="w-10 h-10 text-[#cc785c] animate-spin" />
                 <div className="space-y-2">
-                  <p className="text-base font-semibold text-[#faf9f5]">
+                  <p className="text-base font-semibold text-white">
                     并发验货检测中... ({progress.completed}/{progress.total})
                   </p>
                   <p className="text-xs text-neutral-300 font-mono tracking-wide">
@@ -493,7 +543,7 @@ export const QuickPingTab: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleCopySingleKey(item.key, idx)}
-                          className="p-2 rounded-lg text-neutral-300 hover:text-white hover:bg-[#2b2926] transition border border-[#2e2b27] smooth-btn"
+                          className="p-2 rounded-lg text-neutral-300 hover:text-white hover:bg-[#2b2926] transition border border-[#2e2b27] smooth-btn cursor-pointer"
                           title="复制完整 Key"
                         >
                           {copiedKeyIndex === idx ? (
@@ -512,7 +562,7 @@ export const QuickPingTab: React.FC = () => {
 
           {/* Footer Summary Stats */}
           {summary && (
-            <div className="px-7 py-4 border-t border-[#2e2b27] bg-[#141413]/60 flex items-center justify-between text-xs text-neutral-300 font-mono font-medium tracking-wide">
+            <div className="px-7 py-4 border-t border-[#2e2b27] bg-[#121211]/80 flex items-center justify-between text-xs text-neutral-300 font-mono font-medium tracking-wide">
               <span>总提交: <strong className="text-white font-bold">{summary.total}</strong></span>
               <span>有效可用率: <strong className="text-[#6ee7b7] font-bold">{Math.round((summary.activeCount / (summary.total || 1)) * 100)}%</strong></span>
               <span>平均延迟: <strong className="text-white font-bold">{Math.round(summary.results.reduce((a, b) => a + (b.latencyMs || 0), 0) / (summary.results.length || 1))} ms</strong></span>
@@ -533,7 +583,7 @@ export const QuickPingTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="text-neutral-400 hover:text-white text-sm p-1 rounded-md transition"
+                className="text-neutral-400 hover:text-white text-sm p-1 rounded-md transition cursor-pointer"
               >
                 ✕
               </button>
@@ -549,7 +599,7 @@ export const QuickPingTab: React.FC = () => {
                   value={testModel}
                   onChange={(e) => setTestModel(e.target.value)}
                   placeholder="gpt-4o / claude-3-7-sonnet"
-                  className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 text-sm text-[#faf9f5] focus:outline-none focus:border-[#cc785c] smooth-input"
+                  className="w-full rounded-xl border border-[#2e2b27] bg-[#121211] px-4 py-2.5 text-sm text-[#faf9f5] focus:outline-none focus:border-[#cc785c] smooth-input"
                 />
               </div>
 
@@ -582,7 +632,7 @@ export const QuickPingTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="px-6 py-2.5 rounded-xl bg-[#cc785c] text-sm font-semibold text-white hover:bg-[#d98266] transition shadow-md smooth-btn"
+                className="px-6 py-2.5 rounded-xl bg-[#cc785c] text-sm font-semibold text-white hover:bg-[#d98266] transition shadow-md smooth-btn cursor-pointer"
               >
                 确定保存
               </button>
