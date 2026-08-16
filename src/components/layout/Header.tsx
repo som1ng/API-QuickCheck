@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ActiveTabId } from '../../types/config';
 import { ShieldCheck, KeyRound, BookOpen } from 'lucide-react';
@@ -16,11 +16,42 @@ export const Header: React.FC = () => {
   const isKeys = activeTab === 'quickping';
   const isDocs = activeTab === 'docs' || activeTab === 'export';
 
+  const currentActiveGroupId: ActiveTabId = isHome ? 'home' : isKeys ? 'quickping' : 'docs';
+
   const navItems: { id: ActiveTabId; label: string; active: boolean; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'home', label: '中转站检测', active: isHome, icon: ShieldCheck },
     { id: 'quickping', label: 'API Key 批量', active: isKeys, icon: KeyRound },
     { id: 'docs', label: '文档', active: isDocs, icon: BookOpen },
   ];
+
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [pillStyle, setPillStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  const updatePillPosition = useCallback(() => {
+    const activeEl = tabRefs.current[currentActiveGroupId];
+    if (activeEl) {
+      setPillStyle({
+        left: activeEl.offsetLeft,
+        width: activeEl.offsetWidth,
+        opacity: 1,
+      });
+    }
+  }, [currentActiveGroupId]);
+
+  useEffect(() => {
+    // Immediate and next frame update to ensure dimensions are rendered
+    updatePillPosition();
+    const raf = requestAnimationFrame(updatePillPosition);
+    window.addEventListener('resize', updatePillPosition);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updatePillPosition);
+    };
+  }, [updatePillPosition]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#0d0d0c]/90 backdrop-blur-xl select-none">
@@ -31,7 +62,7 @@ export const Header: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSwitchTab('home')}
-            className="flex items-center gap-2.5 group transition"
+            className="flex items-center gap-2.5 group transition cursor-pointer"
           >
             <img
               src="/logo.png"
@@ -45,24 +76,42 @@ export const Header: React.FC = () => {
           </button>
         </div>
 
-        {/* Center: Razor-Sharp Minimalist Segmented Navigation */}
-        <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 rounded-xl bg-[#141413] border border-white/[0.08] shadow-inner">
+        {/* Center: Absolute 100% Mathematically Centered Floating Navigation */}
+        <nav
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center p-1 rounded-xl bg-[#141413] border border-white/[0.08] shadow-inner"
+        >
+          {/* Silky Sliding Active Pill Indicator */}
+          <span
+            className="absolute top-1 bottom-1 rounded-lg bg-[#262422] border border-white/10 shadow-[0_2px_12px_rgba(0,0,0,0.6)] pointer-events-none transition-all duration-300 ease-out"
+            style={{
+              transform: `translateX(${pillStyle.left}px)`,
+              width: `${pillStyle.width}px`,
+              opacity: pillStyle.opacity,
+              transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+          >
+            {/* Coral bottom accent line */}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#e8895d] rounded-full shadow-[0_0_8px_#e8895d]" />
+          </span>
+
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = item.active;
             return (
               <button
                 key={item.id}
+                ref={(el) => { tabRefs.current[item.id] = el; }}
                 type="button"
                 onClick={() => handleSwitchTab(item.id)}
-                className={`relative px-4 py-1.5 rounded-lg text-[13px] font-sans transition-all duration-200 flex items-center gap-2 cursor-pointer ${
-                  item.active
-                    ? 'bg-[#262422] text-white font-semibold shadow-sm border border-white/10'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
+                className={`relative z-10 px-4 py-1.5 rounded-lg text-[13px] font-sans transition-colors duration-200 flex items-center gap-2 cursor-pointer ${
+                  isActive
+                    ? 'text-white font-semibold'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <Icon
-                  className={`w-3.5 h-3.5 transition-colors ${
-                    item.active ? 'text-[#e8895d]' : 'text-zinc-500 group-hover:text-zinc-300'
+                  className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                    isActive ? 'text-[#e8895d]' : 'text-zinc-500'
                   }`}
                 />
                 <span className="tracking-tight">{item.label}</span>
