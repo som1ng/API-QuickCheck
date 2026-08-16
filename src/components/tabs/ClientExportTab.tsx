@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CodeBlock } from '../common/CodeBlock';
 import {
@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   HelpCircle,
   ChevronRight,
+  ChevronDown,
   Copy,
   Check,
   Globe,
@@ -23,7 +24,9 @@ import {
   Info,
   Workflow,
   Eye,
-  EyeOff
+  EyeOff,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 
 // ==========================================
@@ -41,10 +44,11 @@ export type DocItemId =
   // 快速开始
   | 'quickstart'
   // CLI & Agent 接入
+  | 'opencode'
   | 'claude_code'
   | 'cline'
   | 'cursor'
-  | 'opencode_aider'
+  | 'aider'
   // 桌面客户端
   | 'cherry_studio'
   | 'chatbox'
@@ -121,7 +125,7 @@ interface CategoryGroup {
 }
 
 // ==========================================
-// Category Definitions
+// Category Definitions (OpenCode Starlight Layout)
 // ==========================================
 
 const CATEGORIES: CategoryGroup[] = [
@@ -136,30 +140,31 @@ const CATEGORIES: CategoryGroup[] = [
   },
   {
     id: 'cli_agent',
-    title: 'CLI & Agent 接入',
+    title: 'CLI & 终端 Agent',
     badge: 'Agent',
     icon: Terminal,
     items: [
+      { id: 'opencode', title: 'OpenCode (AI 编码代理)', badge: '推荐' },
       { id: 'claude_code', title: 'Claude Code', badge: '官方 CLI' },
       { id: 'cline', title: 'Cline / Roo Code', badge: 'VS Code' },
       { id: 'cursor', title: 'Cursor', badge: 'AI IDE' },
-      { id: 'opencode_aider', title: 'OpenCode / Aider', badge: '终端 Agent' },
+      { id: 'aider', title: 'Aider', badge: 'Git 配对' },
     ],
   },
   {
     id: 'desktop_clients',
-    title: '桌面客户端',
+    title: '桌面与 Web 客户端',
     badge: 'Desktop',
     icon: Laptop,
     items: [
-      { id: 'cherry_studio', title: 'Cherry Studio', badge: '推荐' },
-      { id: 'chatbox', title: 'Chatbox', badge: '跨平台' },
+      { id: 'cherry_studio', title: 'Cherry Studio', badge: '全功能' },
+      { id: 'chatbox', title: 'Chatbox', badge: '开源跨平台' },
       { id: 'nextchat', title: 'NextChat', badge: 'Web/桌面' },
     ],
   },
   {
     id: 'enterprise_workflows',
-    title: '企业级与工作流',
+    title: '企业级与 SDK 接入',
     badge: 'Workflow',
     icon: Workflow,
     items: [
@@ -170,7 +175,7 @@ const CATEGORIES: CategoryGroup[] = [
   },
   {
     id: 'troubleshooting_specs',
-    title: '排错与规范',
+    title: '排错与协议规范',
     badge: 'Debug',
     icon: ShieldAlert,
     items: [
@@ -193,6 +198,30 @@ export const ClientExportTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showFullKey, setShowFullKey] = useState<boolean>(false);
   const [globalCopied, setGlobalCopied] = useState<boolean>(false);
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut Ctrl+K / Cmd+K listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      if (e.key === 'Escape' && document.activeElement === searchInputRef.current) {
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const toggleCategory = (catId: string) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [catId]: !prev[catId],
+    }));
+  };
 
   // Dynamic values injected from AppContext
   const cleanBaseUrl = (config.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
@@ -728,15 +757,172 @@ Model Name: ${model}
         ],
       },
 
-      // 5. OpenCode / Aider
-      opencode_aider: {
-        id: 'opencode_aider',
+      // 5. OpenCode (AI Coding Agent)
+      opencode: {
+        id: 'opencode',
         categoryId: 'cli_agent',
-        title: 'OpenCode / Aider (终端 Agent & 编码助手)',
+        title: 'OpenCode (终端 AI 编码代理)',
         badge: '终端利器',
+        protocol: 'OpenAI / Anthropic 双协议与 AI SDK',
+        subtitle:
+          '开源高性能终端 AI 编程代理，支持全工程感知、多文件编辑、命令执行、白名单过滤及插件生态。',
+        overviewSummary:
+          'OpenCode (opencode.ai) 支持通过 ~/.config/opencode/opencode.json 或项目根目录 opencode.json 进行全局与局部配置。配置白名单 (whitelist) 即可精确过滤非目标模型。',
+        keyParams: [
+          { label: '配置文件位置', value: '~/.config/opencode/opencode.json', hint: '全局默认配置文件' },
+          { label: '统一 Base URL', value: cleanBaseUrl, hint: '指向中转站端点' },
+          { label: 'API Key', value: maskedKey, hint: '中转站 API 令牌' },
+          { label: '激活模型', value: model, hint: '白名单中的当前首选模型' },
+        ],
+        codeTabs: [
+          {
+            id: 'opencode_json',
+            label: 'opencode.json (标准配置)',
+            language: 'json',
+            title: '~/.config/opencode/opencode.json',
+            code: `{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openai": {
+      "options": {
+        "baseURL": "${cleanBaseUrl}",
+        "apiKey": "${apiKey}"
+      },
+      "whitelist": [
+        "${model}"
+      ],
+      "models": {
+        "${model}": {
+          "name": "${model.toUpperCase()}",
+          "limit": {
+            "context": 1050000,
+            "output": 128000
+          },
+          "options": {
+            "store": false
+          },
+          "variants": {
+            "low": {},
+            "medium": {},
+            "high": {},
+            "xhigh": {},
+            "max": {}
+          }
+        }
+      }
+    }
+  },
+  "agent": {
+    "build": { "options": { "store": false } },
+    "plan": { "options": { "store": false } }
+  }
+}`,
+          },
+          {
+            id: 'install_cli',
+            label: 'Terminal 安装命令 (macOS/Linux)',
+            language: 'bash',
+            title: '终端一键安装脚本',
+            code: `# 1. 官方脚本安装
+curl -fsSL https://opencode.ai/install | bash
+
+# 2. 或使用 npm / bun / pnpm 全局安装
+npm install -g opencode-ai
+# bun install -g opencode-ai
+
+# 3. 运行并开启智能体编程
+opencode`,
+          },
+          {
+            id: 'windows_install',
+            label: 'Windows PowerShell 安装',
+            language: 'powershell',
+            title: 'Windows PowerShell',
+            code: `# 1. 使用 npm 全局安装
+npm install -g opencode-ai
+
+# 2. 配置文件路径:
+# $env:USERPROFILE\\.config\\opencode\\opencode.json
+
+# 3. 启动 OpenCode
+opencode`,
+          },
+          {
+            id: 'isolated_provider',
+            label: '自定义 Provider 隔离模式',
+            language: 'json',
+            title: '完全屏蔽官方默认 Catalog 的配置写法',
+            code: `{
+  "$schema": "https://opencode.ai/config.json",
+  "disabled_providers": ["openai"],
+  "provider": {
+    "my-relay": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "${cleanBaseUrl}",
+        "apiKey": "${apiKey}"
+      },
+      "models": {
+        "${model}": {
+          "name": "${model}"
+        }
+      }
+    }
+  }
+}`,
+          },
+        ],
+        steps: [
+          {
+            stepNumber: 1,
+            title: '安装 OpenCode 命令行客户端',
+            description: '通过官方脚本 `curl -fsSL https://opencode.ai/install | bash` 或 `npm install -g opencode-ai` 进行全局安装。',
+          },
+          {
+            stepNumber: 2,
+            title: '创建并写入 opencode.json 配置文件',
+            description:
+              '在 `~/.config/opencode/opencode.json` 中配置 baseURL、apiKey 以及 whitelist 白名单，避免识别多余的未授权模型。',
+          },
+          {
+            stepNumber: 3,
+            title: '启动 OpenCode 并验证模型',
+            description:
+              '在项目终端中输入 `opencode`，使用 `/models` 命令即可查看当前中转站已成功挂载的模型列表。',
+          },
+        ],
+        callouts: [
+          {
+            type: 'tip',
+            title: '为什么需要配置 whitelist 白名单？',
+            content:
+              'OpenCode 默认会将你填写的 models 与官方 OpenAI Catalog 目录进行合并 (Merge)。配置 whitelist 数组后，未列入白名单的官方内置模型将被自动隐藏。',
+          },
+          {
+            type: 'info',
+            title: '常用 TUI 快捷指令',
+            content:
+              '在 OpenCode 终端中，输入 /models 切换模型，输入 /theme 切换界面主题，按 Ctrl+P 可快速呼出模型切换面板。',
+          },
+        ],
+        faqs: [
+          {
+            question: '为什么改了配置还是能识别到额外的 OpenAI 模型？',
+            answer:
+              '因为 OpenCode 默认是增量合并机制。只需在 provider.openai 下添加 "whitelist": ["' + model + '"] 即可彻底过滤掉多余内置模型。',
+          },
+        ],
+      },
+
+      // 6. Aider
+      aider: {
+        id: 'aider',
+        categoryId: 'cli_agent',
+        title: 'Aider (终端 Git 配对编程)',
+        badge: 'Git 协同',
         protocol: 'OpenAI Compatible (LiteLLM)',
         subtitle:
-          '专注于终端与 Git 协同的 AI 配对编程助手，支持自动创建 Git Commit、多文件重构及终端指令自主执行。',
+          '专注于终端与 Git 协同的 AI 配对编程助手，支持自动创建规范 Git Commit、多文件重构及终端指令自主执行。',
         overviewSummary:
           'Aider 基于 LiteLLM 架构，支持通过 OPENAI_API_BASE 与 OPENAI_API_KEY 环境变量接入任意 OpenAI 兼容中转站。',
         keyParams: [
@@ -1571,34 +1757,52 @@ location / {
   // Category find helper
   const currentCategoryGroup = CATEGORIES.find((c) => c.id === currentDoc.categoryId) || CATEGORIES[0];
 
+  // Flat items for prev/next pagination
+  const allDocItems = useMemo(() => CATEGORIES.flatMap((c) => c.items), []);
+  const currentDocIndex = allDocItems.findIndex((item) => item.id === activeItem);
+  const prevDocItem = currentDocIndex > 0 ? allDocItems[currentDocIndex - 1] : null;
+  const nextDocItem =
+    currentDocIndex >= 0 && currentDocIndex < allDocItems.length - 1
+      ? allDocItems[currentDocIndex + 1]
+      : null;
+
+  const navigateToDoc = (docId: DocItemId) => {
+    setActiveItem(docId);
+    const doc = docContents[docId];
+    if (doc && doc.codeTabs.length > 0) {
+      setActiveCodeTab(doc.codeTabs[0].id);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Top Banner Card */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-xl">
+      {/* Top Banner Card - OpenCode Docs Style */}
+      <div className="relative overflow-hidden rounded-2xl border border-[#2e2b27] bg-[#1b1a18] p-6 shadow-xl smooth-card">
         <div className="absolute right-0 top-0 h-full w-96 bg-gradient-to-l from-[#cc785c]/10 to-transparent pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
           <div className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#cc785c]/30 bg-[#cc785c]/15 text-[#cc785c] shadow-inner">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#cc785c]/40 bg-[#cc785c]/15 text-[#cc785c] shadow-inner">
               <BookOpen className="h-6 w-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <h2 className="font-serif-display text-2xl md:text-3xl font-bold tracking-tight text-[#faf9f5]">
                   客户端与 Agent 接入文档
                 </h2>
-                <span className="rounded-full border border-[#cc785c]/30 bg-[#cc785c]/15 px-2.5 py-0.5 text-xs font-mono font-medium text-[#cc785c]">
-                  Docs Workbench
+                <span className="rounded-full border border-[#cc785c]/40 bg-[#cc785c]/15 px-2.5 py-0.5 text-xs font-mono font-semibold text-[#cc785c] tracking-wide">
+                  OpenCode Style AI Docs
                 </span>
               </div>
-              <p className="mt-1 text-sm text-[#9c9689]">
-                自动注入当前 Base URL、API Key 与 Model，为各大开发工具、Agent 及桌面端生成开箱即用的配置。
+              <p className="mt-1 text-sm text-neutral-300">
+                自动注入当前 Base URL、API Key 与 Model，为各大开发工具、Agent 及桌面端生成开箱即用的配置与命令。
               </p>
             </div>
           </div>
 
           {/* Quick Info & Copy All Config */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-lg border border-[#2e2b27] bg-[#141413] px-3 py-1.5 text-xs text-[#d4cebe]">
+            <div className="flex items-center gap-2 rounded-lg border border-[#2e2b27] bg-[#141413] px-3 py-1.5 text-xs text-neutral-300 shadow-inner">
               <Globe className="h-3.5 w-3.5 text-[#cc785c]" />
               <span className="font-mono text-[#faf9f5] truncate max-w-[200px]" title={cleanBaseUrl}>
                 {cleanBaseUrl}
@@ -1606,12 +1810,12 @@ location / {
             </div>
             <button
               onClick={handleCopyGlobalConfig}
-              className="flex items-center gap-1.5 rounded-lg border border-[#cc785c]/40 bg-[#cc785c]/15 px-3.5 py-1.5 text-xs font-medium text-[#faf9f5] transition hover:bg-[#cc785c] hover:text-white"
+              className="flex items-center gap-1.5 rounded-lg border border-[#cc785c]/50 bg-[#cc785c]/20 px-3.5 py-1.5 text-xs font-semibold text-[#faf9f5] transition hover:bg-[#cc785c] hover:text-white smooth-btn shadow-sm"
             >
               {globalCopied ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-[#5db872]" />
-                  <span className="text-[#5db872]">已复制配置 JSON</span>
+                  <Check className="h-3.5 w-3.5 text-[#6ee7b7]" />
+                  <span className="text-[#6ee7b7]">已复制配置 JSON</span>
                 </>
               ) : (
                 <>
@@ -1631,104 +1835,118 @@ location / {
         {/* Left Column: Sidebar Navigation (3 cols)   */}
         {/* ========================================== */}
         <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-20">
-          {/* Search Box */}
+          {/* Search Box with Ctrl+K shortcut badge */}
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#9c9689]" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="搜索文档、工具、客户端..."
-              className="w-full rounded-xl border border-[#2e2b27] bg-[#1b1a18] py-2 pl-9 pr-8 text-xs text-[#faf9f5] placeholder-[#9c9689] focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c] transition"
+              className="w-full rounded-xl border border-[#2e2b27] bg-[#1b1a18] py-2 pl-9 pr-16 text-xs text-[#faf9f5] placeholder-neutral-400 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c] transition smooth-input font-medium"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-2.5 text-xs text-[#9c9689] hover:text-[#faf9f5]"
-              >
-                ✕
-              </button>
-            )}
+            <div className="absolute right-2.5 top-2 flex items-center gap-1">
+              {searchQuery ? (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-xs text-neutral-400 hover:text-white px-1"
+                >
+                  ✕
+                </button>
+              ) : (
+                <span className="text-[10px] font-mono text-neutral-400 bg-[#23211e] px-1.5 py-0.5 rounded border border-[#2e2b27] select-none">
+                  Ctrl K
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Category Tree Navigation */}
-          <nav className="space-y-4 rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-3 shadow-md max-h-[75vh] overflow-y-auto">
+          {/* Category Tree Navigation with Collapse/Expand */}
+          <nav className="space-y-3 rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-3 shadow-md max-h-[75vh] overflow-y-auto smooth-card">
             {filteredCategories.map((group) => {
               const IconComp = group.icon;
+              const isCollapsed = Boolean(collapsedCategories[group.id]);
+
               return (
                 <div key={group.id} className="space-y-1">
-                  {/* Category Header */}
-                  <div className="flex items-center justify-between px-2.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#9c9689]">
-                    <div className="flex items-center gap-1.5">
+                  {/* Category Header Button */}
+                  <button
+                    type="button"
+                    onClick={() => toggleCategory(group.id)}
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-neutral-400 hover:text-white rounded-lg transition"
+                  >
+                    <div className="flex items-center gap-2">
                       <IconComp className="h-3.5 w-3.5 text-[#cc785c]" />
                       <span>{group.title}</span>
                     </div>
-                    {group.badge && (
-                      <span className="text-[10px] text-[#9c9689]/70 bg-[#23211e] px-1.5 py-0.2 rounded border border-[#2e2b27]">
-                        {group.badge}
-                      </span>
-                    )}
-                  </div>
+                    <div className="flex items-center gap-1.5">
+                      {group.badge && (
+                        <span className="text-[10px] text-neutral-400 bg-[#23211e] px-1.5 py-0.2 rounded border border-[#2e2b27]">
+                          {group.badge}
+                        </span>
+                      )}
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 ${
+                          isCollapsed ? '-rotate-90' : 'rotate-0'
+                        }`}
+                      />
+                    </div>
+                  </button>
 
                   {/* Category Item List */}
-                  <div className="space-y-0.5">
-                    {group.items.map((item) => {
-                      const isActive = activeItem === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            setActiveItem(item.id);
-                            // reset tab to first available
-                            const doc = docContents[item.id];
-                            if (doc && doc.codeTabs.length > 0) {
-                              setActiveCodeTab(doc.codeTabs[0].id);
-                            }
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition text-left ${
-                            isActive
-                              ? 'bg-[#cc785c]/15 text-[#faf9f5] font-semibold border-l-2 border-[#cc785c] shadow-sm'
-                              : 'text-[#d4cebe] hover:text-[#faf9f5] hover:bg-[#23211e]'
-                          }`}
-                        >
-                          <span className="truncate">{item.title}</span>
-                          {item.badge && (
-                            <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                                isActive
-                                  ? 'bg-[#cc785c] text-white'
-                                  : 'bg-[#23211e] text-[#9c9689] border border-[#2e2b27]'
-                              }`}
-                            >
-                              {item.badge}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {!isCollapsed && (
+                    <div className="space-y-0.5 pl-1 animate-in fade-in duration-150">
+                      {group.items.map((item) => {
+                        const isActive = activeItem === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => navigateToDoc(item.id)}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition text-left smooth-btn ${
+                              isActive
+                                ? 'bg-[#cc785c]/20 text-[#faf9f5] font-semibold border-l-2 border-[#cc785c] shadow-sm'
+                                : 'text-neutral-300 hover:text-white hover:bg-[#23211e] font-medium'
+                            }`}
+                          >
+                            <span className="truncate">{item.title}</span>
+                            {item.badge && (
+                              <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold tracking-wide ${
+                                  isActive
+                                    ? 'bg-[#cc785c] text-white shadow-sm'
+                                    : 'bg-[#23211e] text-neutral-400 border border-[#2e2b27]'
+                                }`}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
 
             {filteredCategories.length === 0 && (
-              <div className="p-4 text-center text-xs text-[#9c9689]">
+              <div className="p-4 text-center text-xs text-neutral-400">
                 未找到匹配的文档主题
               </div>
             )}
           </nav>
 
           {/* Quick Context Card */}
-          <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-3.5 space-y-2 text-xs">
-            <div className="flex items-center justify-between text-[#9c9689]">
+          <div className="rounded-xl border border-[#2e2b27] bg-[#141413] p-3.5 space-y-2 text-xs smooth-card">
+            <div className="flex items-center justify-between text-neutral-400 font-semibold tracking-wide">
               <span className="font-mono uppercase text-[10px]">Active Model</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5db872]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6ee7b7] animate-pulse" />
             </div>
-            <div className="font-mono text-[#faf9f5] font-semibold truncate" title={model}>
+            <div className="font-mono text-[#faf9f5] font-semibold truncate select-all" title={model}>
               {model}
             </div>
-            <div className="text-[11px] text-[#9c9689]">
+            <div className="text-[11px] text-neutral-300 font-normal">
               配置已实时贯通至下方所有代码片段。
             </div>
           </div>
@@ -1740,23 +1958,23 @@ location / {
         <main className="lg:col-span-6 xl:col-span-7 space-y-8 min-w-0">
           
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-2 text-xs text-[#9c9689]">
-            <span className="hover:text-[#faf9f5] cursor-pointer" onClick={() => setActiveItem('quickstart')}>
+          <div className="flex items-center gap-2 text-xs text-neutral-400">
+            <span className="hover:text-white cursor-pointer font-medium" onClick={() => navigateToDoc('quickstart')}>
               文档与接入 (Docs)
             </span>
             <ChevronRight className="h-3.5 w-3.5 text-[#2e2b27]" />
-            <span className="text-[#d4cebe]">{currentCategoryGroup.title}</span>
+            <span className="text-neutral-300 font-medium">{currentCategoryGroup.title}</span>
             <ChevronRight className="h-3.5 w-3.5 text-[#2e2b27]" />
-            <span className="text-[#cc785c] font-medium">{currentDoc.title.split(' ')[0]}</span>
+            <span className="text-[#cc785c] font-semibold">{currentDoc.title.split(' ')[0]}</span>
           </div>
 
           {/* Page Header */}
           <div className="space-y-3 pb-6 border-b border-[#2e2b27]">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-0.5 text-xs font-mono font-medium text-[#cc785c]">
+              <span className="rounded-md border border-[#cc785c]/40 bg-[#cc785c]/15 px-2.5 py-0.5 text-xs font-mono font-semibold text-[#cc785c] tracking-wide">
                 {currentDoc.badge}
               </span>
-              <span className="rounded-md border border-[#2e2b27] bg-[#23211e] px-2.5 py-0.5 text-xs font-mono text-[#9c9689]">
+              <span className="rounded-md border border-[#2e2b27] bg-[#23211e] px-2.5 py-0.5 text-xs font-mono text-neutral-300 font-medium">
                 {currentDoc.protocol}
               </span>
             </div>
@@ -1765,7 +1983,7 @@ location / {
               {currentDoc.title}
             </h1>
 
-            <p className="text-sm text-[#d4cebe] leading-relaxed">
+            <p className="text-sm text-neutral-300 leading-relaxed font-normal">
               {currentDoc.subtitle}
             </p>
           </div>
@@ -1779,7 +1997,7 @@ location / {
               <h2 className="text-base font-semibold text-[#faf9f5]">1. 连接参数总览 (Parameters Overview)</h2>
             </div>
 
-            <p className="text-xs text-[#9c9689] leading-relaxed">
+            <p className="text-xs text-neutral-300 leading-relaxed">
               {currentDoc.overviewSummary}
             </p>
 
@@ -1787,17 +2005,17 @@ location / {
               {currentDoc.keyParams.map((param, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-3.5 space-y-1.5 hover:border-[#cc785c]/40 transition"
+                  className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-3.5 space-y-1.5 hover:border-[#cc785c]/40 transition smooth-card"
                 >
-                  <div className="flex items-center justify-between text-xs text-[#9c9689]">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold">
                     <span>{param.label}</span>
                     {param.hint && (
-                      <span className="text-[10px] text-[#9c9689]/70">{param.hint}</span>
+                      <span className="text-[10px] text-neutral-400 font-normal">{param.hint}</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <span
-                      className="font-mono text-xs font-semibold text-[#faf9f5] truncate select-all"
+                      className="font-mono text-xs font-semibold text-[#faf9f5] truncate select-all tracking-wide"
                       title={param.value}
                     >
                       {param.value}
@@ -1805,7 +2023,7 @@ location / {
                     {param.label.includes('Key') && (
                       <button
                         onClick={() => setShowFullKey(!showFullKey)}
-                        className="text-[#9c9689] hover:text-[#faf9f5] transition p-1"
+                        className="text-neutral-400 hover:text-[#faf9f5] transition p-1 smooth-btn"
                         title={showFullKey ? '隐藏密钥' : '显示完整密钥'}
                       >
                         {showFullKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -1834,10 +2052,10 @@ location / {
                 <button
                   key={tab.id}
                   onClick={() => setActiveCodeTab(tab.id)}
-                  className={`rounded-t-lg px-3.5 py-2 text-xs font-medium transition whitespace-nowrap border-b-2 ${
+                  className={`rounded-t-lg px-3.5 py-2 text-xs font-semibold transition whitespace-nowrap border-b-2 smooth-btn ${
                     currentSelectedTab.id === tab.id
-                      ? 'border-[#cc785c] text-[#faf9f5] bg-[#23211e] font-semibold'
-                      : 'border-transparent text-[#9c9689] hover:text-[#faf9f5] hover:bg-[#1b1a18]'
+                      ? 'border-[#cc785c] text-[#faf9f5] bg-[#23211e]'
+                      : 'border-transparent text-neutral-400 hover:text-white hover:bg-[#1b1a18]'
                   }`}
                 >
                   {tab.label}
@@ -1853,9 +2071,9 @@ location / {
                 title={currentSelectedTab.title || `${activeItem}_${currentSelectedTab.id}`}
                 showLineNumbers
               />
-              <div className="flex items-center justify-between text-[11px] text-[#9c9689] px-1">
+              <div className="flex items-center justify-between text-[11px] text-neutral-300 px-1 font-medium">
                 <span>💡 提示：该配置已自动填入当前活跃的中转 Base URL 与 API Key。</span>
-                <span className="font-mono">{currentSelectedTab.language}</span>
+                <span className="font-mono text-neutral-400">{currentSelectedTab.language}</span>
               </div>
             </div>
           </section>
@@ -1873,15 +2091,15 @@ location / {
               {currentDoc.steps.map((step) => (
                 <div
                   key={step.stepNumber}
-                  className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-2 transition hover:border-[#cc785c]/30"
+                  className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-4 space-y-2 transition hover:border-[#cc785c]/40 smooth-card"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#cc785c] text-xs font-bold text-[#faf9f5]">
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#cc785c] text-xs font-bold text-[#faf9f5] shadow-sm">
                       {step.stepNumber}
                     </span>
                     <h3 className="text-sm font-semibold text-[#faf9f5]">{step.title}</h3>
                   </div>
-                  <p className="text-xs text-[#d4cebe] pl-9 leading-relaxed">
+                  <p className="text-xs text-neutral-300 pl-9 leading-relaxed font-normal">
                     {step.description}
                   </p>
                   {step.code && (
@@ -2010,17 +2228,60 @@ location / {
             </section>
           )}
 
-          {/* Bottom Pagination / Next Topic */}
-          <div className="pt-8 border-t border-[#2e2b27] flex items-center justify-between">
-            <div className="text-xs text-neutral-400">
-              当前正在浏览: <span className="text-[#faf9f5] font-semibold">{currentDoc.title}</span>
+          {/* Bottom Article Navigation Cards (OpenCode Docs Previous & Next) */}
+          <div className="pt-8 border-t border-[#2e2b27] space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Previous Article */}
+              {prevDocItem ? (
+                <button
+                  type="button"
+                  onClick={() => navigateToDoc(prevDocItem.id)}
+                  className="flex flex-col items-start p-4 rounded-xl border border-[#2e2b27] bg-[#1b1a18] hover:border-[#cc785c]/60 hover:bg-[#23211e] transition text-left smooth-card smooth-btn group"
+                >
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-400 group-hover:text-[#cc785c] transition font-medium">
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>上一篇</span>
+                  </div>
+                  <div className="mt-1 font-semibold text-sm text-[#faf9f5] group-hover:text-white truncate w-full">
+                    {prevDocItem.title}
+                  </div>
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {/* Next Article */}
+              {nextDocItem ? (
+                <button
+                  type="button"
+                  onClick={() => navigateToDoc(nextDocItem.id)}
+                  className="flex flex-col items-end p-4 rounded-xl border border-[#2e2b27] bg-[#1b1a18] hover:border-[#cc785c]/60 hover:bg-[#23211e] transition text-right smooth-card smooth-btn group"
+                >
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-400 group-hover:text-[#cc785c] transition font-medium">
+                    <span>下一篇</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="mt-1 font-semibold text-sm text-[#faf9f5] group-hover:text-white truncate w-full">
+                    {nextDocItem.title}
+                  </div>
+                </button>
+              ) : (
+                <div />
+              )}
             </div>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="text-xs text-[#cc785c] hover:underline flex items-center gap-1 font-semibold smooth-btn"
-            >
-              <span>回到顶部 ↑</span>
-            </button>
+
+            {/* Back to Top */}
+            <div className="flex items-center justify-between text-xs text-neutral-400 pt-2">
+              <div>
+                当前正在浏览: <span className="text-[#faf9f5] font-semibold">{currentDoc.title}</span>
+              </div>
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-[#cc785c] hover:underline flex items-center gap-1 font-semibold smooth-btn"
+              >
+                <span>回到顶部 ↑</span>
+              </button>
+            </div>
           </div>
         </main>
 
