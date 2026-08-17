@@ -338,7 +338,7 @@ export const ClientExportTab: React.FC = () => {
         {/* ========================================== */}
         {/* 2. Center Column: Main Article Body        */}
         {/* ========================================== */}
-        <main className="flex-1 min-w-0 flex justify-center py-10 px-8 sm:px-12 lg:px-16 overflow-y-auto bg-[#141413]">
+        <main className="flex-1 min-w-0 flex justify-center py-10 px-8 sm:px-12 lg:px-16 bg-[#141413]">
           
           {/* Silky Keyed Slide-Fade-In Animation on Article Switching */}
           <div

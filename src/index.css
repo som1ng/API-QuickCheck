@@ -121,17 +121,15 @@
 @keyframes docSlideIn {
   0% {
     opacity: 0;
-    transform: translate3d(0, 16px, 0);
   }
   100% {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
   }
 }
 
 .doc-transition-enter, .doc-slide-enter {
-  animation: docSlideIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: opacity, transform;
+  animation: docSlideIn 150ms ease-out both;
+  will-change: opacity;
 }
 
 

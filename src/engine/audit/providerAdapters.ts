@@ -12,6 +12,7 @@ export interface NativeResult {
   response: TransportResponse<Record<string, unknown>>;
   text: string;
   eventTypes: string[];
+  usage?: Record<string, unknown>;
   signature?: string;
   thinkingText?: string;
   toolCalled: boolean;
@@ -27,6 +28,9 @@ export interface ProviderAdapter {
   reasoning?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
   context?: ((baseUrl: string, apiKey: string, model: string, document: string) => NativeRequest) | undefined;
   stream?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
+  state?: ((baseUrl: string, apiKey: string, model: string, marker: string) => NativeRequest) | undefined;
+  stateContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, marker: string) => NativeRequest) | undefined;
+  cache?: ((baseUrl: string, apiKey: string, model: string, prefix: string) => NativeRequest) | undefined;
   toolContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, toolOutput: string) => NativeRequest) | undefined;
   signatureContinuation?: ((baseUrl: string, apiKey: string, model: string, thinkingText: string, signature: string) => NativeRequest) | undefined;
   parse(response: TransportResponse<Record<string, unknown>>): NativeResult;
@@ -56,6 +60,7 @@ const parseResponses = (response: TransportResponse<Record<string, unknown>>): N
     response,
     text,
     eventTypes: output.map((item) => String(item.type ?? 'unknown')),
+    usage: response.data?.usage,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: parseToolArguments(toolCall.arguments) } : undefined,
   };
@@ -69,6 +74,7 @@ const parseMessages = (response: TransportResponse<Record<string, unknown>>): Na
     response,
     text: content.filter((item) => item.type === 'text').map((item) => String(item.text ?? '')).join(''),
     eventTypes: content.map((item) => String(item.type ?? 'unknown')),
+    usage: response.data?.usage,
     signature: typeof thinking?.signature === 'string' ? thinking.signature : undefined,
     thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : undefined,
     toolCalled: Boolean(toolCall),
@@ -86,6 +92,7 @@ const parseInteractions = (response: TransportResponse<Record<string, unknown>>)
     response,
     text,
     eventTypes: output.map((item) => String(item.type ?? 'unknown')),
+    usage: response.data?.usage,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: toolCall.arguments ?? toolCall.input } : undefined,
   };
@@ -126,6 +133,21 @@ const openAiLike = (provider: 'openai' | 'xai'): ProviderAdapter => ({
     headers: { Authorization: `Bearer ${apiKey}` },
     body: { model, input: 'Return exactly: audit-ready.', stream: true },
   }),
+  state: (baseUrl, apiKey, model, marker) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: { model, input: `Remember this exact state marker: ${marker}. Reply with acknowledged.`, store: true },
+  }),
+  stateContinuation: (baseUrl, apiKey, model, result, marker) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: { model, previous_response_id: result.response.data?.id, input: `What was the exact state marker? Return only ${marker}.` },
+  }),
+  cache: (baseUrl, apiKey, model, prefix) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: { model, input: [{ role: 'user', content: [{ type: 'input_text', text: prefix }, { type: 'input_text', text: 'Return exactly: cache-ready.' }] }] },
+  }),
   toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
     url: endpoint(baseUrl, '/responses'),
     headers: { Authorization: `Bearer ${apiKey}` },
@@ -157,6 +179,21 @@ const anthropic: ProviderAdapter = {
     url: endpoint(baseUrl, '/messages'),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: { model, max_tokens: 128, messages: [{ role: 'user', content: 'Return exactly: audit-ready.' }], stream: true },
+  }),
+  state: (baseUrl, apiKey, model, marker) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: { model, max_tokens: 128, messages: [{ role: 'user', content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }] },
+  }),
+  stateContinuation: (baseUrl, apiKey, model, result, marker) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: { model, max_tokens: 128, messages: [{ role: 'user', content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }, { role: 'assistant', content: result.response.data?.content }, { role: 'user', content: `What was the exact state marker? Return only ${marker}.` }] },
+  }),
+  cache: (baseUrl, apiKey, model, prefix) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: { model, max_tokens: 128, messages: [{ role: 'user', content: [{ type: 'text', text: prefix, cache_control: { type: 'ephemeral' } }, { type: 'text', text: 'Return exactly: cache-ready.' }] }] },
   }),
   toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
     url: endpoint(baseUrl, '/messages'),

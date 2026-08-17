@@ -75,8 +75,10 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ chart }) => {
   return (
     <div
       ref={containerRef}
-      className="my-8 p-6 bg-[#181715] rounded-xl border border-[#2e2b27] flex justify-center items-center overflow-x-auto shadow-sm select-none"
-      dangerouslySetInnerHTML={{ __html: svgContent }}
+      className={`my-8 p-6 bg-[#181715] rounded-xl border border-[#2e2b27] flex justify-center items-center overflow-x-auto shadow-sm select-none min-h-[140px] transition-opacity duration-200 ${
+        svgContent ? 'opacity-100' : 'opacity-40'
+      }`}
+      dangerouslySetInnerHTML={{ __html: svgContent || '<div class="text-xs text-[#a09d96] font-mono">加载架构图中...</div>' }}
     />
   );
 };
