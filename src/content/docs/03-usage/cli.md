@@ -20,29 +20,40 @@ API-QuickCheck 内置专为开发者与运维工程师打造的 **无头 CLI 终
 
 ## 2. 快速上手
 
-在项目根目录下通过 `npx tsx` 或 `npm run apiqc` 即可极速启动 CLI：
-
+### 方式 1：免安装 npx 零配置秒开（推荐）
+无需克隆代码或安装任何依赖，直接在终端执行：
 ```bash
-# 1. 对指定中转站端点运行完整质量审计
-npx tsx scripts/apiqc.ts \
-  --url "https://api.your-relay.com/v1" \
-  --key "sk-your-relay-key" \
-  --model "claude-3-7-sonnet-20250219"
+# 对指定中转站端点运行完整质量审计
+npx api-quickcheck audit \
+  --model claude-3-7-sonnet-20250219 \
+  --base-url "https://api.your-relay.com/v1" \
+  --api-key "sk-your-relay-key"
+```
 
-# 2. 严格 CI/CD 门禁测试（要求总得分 >= 85 分，否则退出码 1）
-npx tsx scripts/apiqc.ts \
-  --url "https://api.your-relay.com/v1" \
-  --key "sk-your-relay-key" \
-  --model "gpt-4o" \
-  --fail-under 85 \
-  --output "audit-report.json"
+### 方式 2：全局安装为系统命令行工具
+```bash
+# 全局安装
+npm install -g api-quickcheck
 
-# 3. 官方端点黄金基线指纹采集与保存
-npx tsx scripts/apiqc.ts \
-  --url "https://api.openai.com/v1" \
-  --key "$OFFICIAL_OPENAI_KEY" \
-  --model "gpt-4o" \
-  --save-baseline "baseline-gpt4o.json"
+# 直接使用短命令执行审计
+apiqc audit \
+  --model gpt-5.6-sol \
+  --base-url "https://api.your-relay.com/v1" \
+  --api-key "sk-your-relay-key" \
+  --profile balanced \
+  --out audit-report.json
+
+# 采集官方黄金能力基准快照
+apiqc baseline capture \
+  --model gemini-3.7-flash \
+  --base-url "https://generativelanguage.googleapis.com/v1beta" \
+  --api-key "$GOOGLE_API_KEY" \
+  --source official
+```
+
+### 方式 3：仓库内源码开发运行
+```bash
+npm run apiqc -- audit --model gpt-5.6-sol --base-url "https://api.your-relay.com/v1" --api-key "sk-xxx"
 ```
 
 ---

@@ -7,14 +7,21 @@ import { AuditProfile, AuditProvider } from '../src/types/audit';
 
 type ParsedArgs = Record<string, string | boolean>;
 
-const LOGO = `\x1b[38;5;209m
-    █████╗ ██████╗ ██╗      ██████╗ ██╗   ██╗██╗ ██████╗
-   ██╔══██╗██╔══██╗██║     ██╔═══██╗██║   ██║██║██╔════╝
-   ███████║██████╔╝██║     ██║   ██║██║   ██║██║██║
-   ██╔══██║██╔═══╝ ██║     ██║   ██║╚██╗ ██╔╝██║██║
-   ██║  ██║██║     ███████╗╚██████╔╝ ╚████╔╝ ██║╚██████╗
-   ╚═╝  ╚═╝╚═╝     ╚══════╝ ╚═════╝   ╚═══╝  ╚═╝ ╚═════╝\x1b[0m
-                 \x1b[38;5;245mA P I  •  Q U I C K C H E C K\x1b[0m`;
+const LOGO = `\x1b[38;2;204;120;92m
+   █████╗ ██████╗ ██╗    ██████╗ ██╗   ██╗██╗ ██████╗██╗  ██╗
+  ██╔══██╗██╔══██╗██║   ██╔═══██╗██║   ██║██║██╔════╝██║ ██╔╝
+  ███████║██████╔╝██║   ██║   ██║██║   ██║██║██║     █████╔╝
+  ██╔══██║██╔═══╝ ██║   ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗
+  ██║  ██║██║     ██║   ╚██████╔╝╚██████╔╝██║╚██████╗██║  ██╗
+  ╚═╝  ╚═╝╚═╝     ╚═╝    ╚══▀▀═╝  ╚═════╝ ╚═╝ ╚═════╝╚═╝  ╚═╝
+               ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
+              ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
+              ██║     ███████║█████╗  ██║     █████╔╝
+              ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗
+              ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
+               ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝\x1b[0m
+\x1b[38;2;156;150;137m  ─────────────────────────────────────────────────────────────\x1b[0m
+\x1b[38;2;250;249;245m  AI RELAY AUDIT · PROTOCOL · CAPABILITY · BASELINE\x1b[0m`;
 
 function printHelp(): void {
   process.stdout.write(`${LOGO}\n\n用法:\n  npm run apiqc -- audit --model <id> --base-url <url> [选项]\n  npm run apiqc -- baseline capture --model <id> --base-url <url> [选项]\n\n选项:\n  --provider <auto|openai|anthropic|gemini|xai>\n  --profile <quick|balanced|deep>\n  --probes <id,id,...>       只执行指定测试\n  --api-key <key>            或使用 APIQC_API_KEY 环境变量\n  --out <file>               默认 audit-report.json\n  --baseline <id>            加载本地 baseline 文件 ID\n\n密钥只用于本次进程，不会写入报告。\n`);
@@ -72,7 +79,7 @@ async function main(): Promise<void> {
   const output = typeof args.out === 'string' ? args.out : isCapture ? `baseline-${model}.json` : 'audit-report.json';
 
   process.stdout.write(`${LOGO}\n\n目标: ${provider} / ${model}\n档位: ${profile}\n\n`);
-  const selectedProbeIds = typeof args.probes === 'string' ? args.probes.split(',').map((id) => id.trim()).filter(Boolean) : undefined;
+  const selectedProbeIds = typeof args.probes === 'string' ? args.probes.split(/[\s,]+/).map((id) => id.trim()).filter(Boolean) : undefined;
   const report = await runAudit({
     baseUrl,
     apiKey,

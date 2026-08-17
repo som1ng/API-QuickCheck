@@ -1,11 +1,42 @@
 {
   "name": "api-quickcheck",
-  "private": true,
-  "version": "0.0.0",
+  "version": "3.2.0",
+  "description": "Industrial-grade Headless AI API Quality Audit & Anti-Counterfeiting Platform (CPU-Z + Geekbench for AI APIs)",
   "type": "module",
+  "author": "som1ng",
+  "license": "MIT",
+  "homepage": "https://api-quick-check.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/som1ng/API-QuickCheck.git"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "api-audit",
+    "benchmark",
+    "openai",
+    "anthropic",
+    "claude",
+    "gemini",
+    "grok",
+    "deepseek",
+    "cli"
+  ],
+  "bin": {
+    "api-quickcheck": "./bin/apiqc.js",
+    "apiqc": "./bin/apiqc.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "README_zh.md"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build:web": "tsc -b && vite build",
+    "build:cli": "esbuild scripts/apiqc.ts --bundle --platform=node --target=node18 --format=esm --banner:js=\"#!/usr/bin/env node\" --outfile=bin/apiqc.js",
+    "build": "npm run build:web && npm run build:cli",
     "lint": "eslint .",
     "apiqc": "tsx scripts/apiqc.ts",
     "sync:audit-baselines": "tsx scripts/sync-audit-baselines.ts",
@@ -34,6 +65,7 @@
     "eslint": "^9.13.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "esbuild": "^0.24.0",
     "globals": "^15.11.0",
     "postcss": "^8.5.12",
     "tailwindcss": "^3.4.0",

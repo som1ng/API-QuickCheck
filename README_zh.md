@@ -151,27 +151,25 @@ API-QuickCheck 2.0 ──────────────┼── [ P2 能�
 API-QuickCheck 内置零外部依赖、完美适配 CI/CD 流水线的无头终端 CLI 工具（`scripts/apiqc.ts`），支持离线自动化真伪审计与黄金基线快照采集：
 
 ```bash
-# 1. 对指定中转站端点运行完整 24 项探针审计
-npm run apiqc -- audit \
+# 方式 A：免克隆、免安装 npx 零配置秒开（推荐）
+npx api-quickcheck audit \
   --model gpt-5.6-sol \
   --base-url https://api.your-relay.com/v1 \
-  --api-key sk-your-key-here \
-  --profile balanced \
-  --out audit-report.json
+  --api-key sk-your-key-here
 
-# 2. 仅运行 P0/P1 协议与流式私钥签名核心验真探针
-npm run apiqc -- audit \
+# 方式 B：全局安装为系统命令行工具
+npm install -g api-quickcheck
+apiqc audit \
   --model claude-fable-5 \
   --base-url https://api.your-relay.com/v1 \
   --api-key sk-your-key-here \
   --probes p0-stream-events,p0-strict-json,p1-signature-continuity
 
-# 3. 采集官方权威黄金能力基准快照 (用于模型能力对标与降级分析)
-npm run apiqc -- baseline capture \
-  --model gemini-3.7-flash \
-  --base-url https://generativelanguage.googleapis.com/v1beta \
-  --api-key your-google-api-key \
-  --source official
+# 方式 C：仓库内源码开发运行
+npm run apiqc -- audit \
+  --model gpt-5.6-sol \
+  --base-url https://api.your-relay.com/v1 \
+  --api-key sk-your-key-here
 ```
 
 ### CLI 参数一览
@@ -183,7 +181,7 @@ npm run apiqc -- baseline capture \
 | `--api-key` | `string` | **必填**（或通过 `APIQC_API_KEY` 环境变量注入）。仅在本次进程内存中使用，不落盘 | - |
 | `--provider` | `string` | 指定厂商：`auto`, `openai`, `anthropic`, `gemini`, `xai` | `auto` |
 | `--profile` | `string` | 审计档位：`quick` (4项), `balanced` (24项平衡档), `deep` (24项深度档) | `balanced` |
-| `--probes` | `string` | 逗号分隔的指定探针 ID 列表（如 `p0-stream-events,p0-strict-json`） | 当前档位全量探针 |
+| `--probes` | `string` | 逗号或空格分隔的指定探针 ID 列表（如 `p0-stream-events,p0-strict-json`） | 当前档位全量探针 |
 | `--out` | `string` | 结构化 JSON 审计报告输出路径 | `audit-report.json` |
 | `--baseline` | `string` | 加载对比的基线快照 ID（用于计算偏差与降级定论） | - |
 
@@ -208,7 +206,7 @@ npm install
 npm run dev
 
 # 4. 运行终端 CLI 审计帮助
-npm run apiqc -- --help
+npx tsx scripts/apiqc.ts --help
 
 # 5. 运行 24 项探针审计测试套件
 npm test

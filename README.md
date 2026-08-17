@@ -151,27 +151,25 @@ Test hundreds of API Keys concurrently with enterprise-grade resilience:
 API-QuickCheck features a zero-dependency, CI/CD-ready terminal CLI (`scripts/apiqc.ts`) for headless forensics and automated baseline capture.
 
 ```bash
-# 1. Run full 24-probe audit against a relay endpoint
-npm run apiqc -- audit \
+# Option A: Zero-install instant execution via npx (Recommended)
+npx api-quickcheck audit \
   --model gpt-5.6-sol \
   --base-url https://api.your-relay.com/v1 \
-  --api-key sk-your-key-here \
-  --profile balanced \
-  --out audit-report.json
+  --api-key sk-your-key-here
 
-# 2. Run specific P0/P1 cryptographic & stream probes only
-npm run apiqc -- audit \
+# Option B: Global CLI installation
+npm install -g api-quickcheck
+apiqc audit \
   --model claude-fable-5 \
   --base-url https://api.your-relay.com/v1 \
   --api-key sk-your-key-here \
   --probes p0-stream-events,p0-strict-json,p1-signature-continuity
 
-# 3. Capture an official capability baseline snapshot
-npm run apiqc -- baseline capture \
-  --model gemini-3.7-flash \
-  --base-url https://generativelanguage.googleapis.com/v1beta \
-  --api-key your-google-api-key \
-  --source official
+# Option C: In-repo developer execution
+npm run apiqc -- audit \
+  --model gpt-5.6-sol \
+  --base-url https://api.your-relay.com/v1 \
+  --api-key sk-your-key-here
 ```
 
 ### CLI Command Options
@@ -183,7 +181,7 @@ npm run apiqc -- baseline capture \
 | `--api-key` | `string` | **Required** (or `APIQC_API_KEY` env). Key used in-memory only | - |
 | `--provider` | `string` | `auto`, `openai`, `anthropic`, `gemini`, `xai` | `auto` |
 | `--profile` | `string` | Audit depth: `quick` (4 probes), `balanced` (24 probes), `deep` (24 probes) | `balanced` |
-| `--probes` | `string` | Comma-separated list of specific probe IDs to execute | All profile probes |
+| `--probes` | `string` | Comma- or space-separated list of specific probe IDs to execute | All profile probes |
 | `--out` | `string` | Path to save JSON audit report | `audit-report.json` |
 | `--baseline` | `string` | ID of stored baseline file for comparative scoring | - |
 
@@ -208,7 +206,7 @@ npm install
 npm run dev
 
 # 4. Run terminal CLI audit
-npm run apiqc -- --help
+npx tsx scripts/apiqc.ts --help
 
 # 5. Run 24-probe test suite
 npm test
