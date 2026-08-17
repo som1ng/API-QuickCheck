@@ -119,7 +119,8 @@ export function slugifyHeading(text: string): string {
 }
 
 // Automatically import all .md files in src/content/docs/ via Vite glob
-const rawDocsModules = import.meta.glob('/src/content/docs/**/*.md', {
+// Supports both relative and root-relative patterns for all deployment targets
+const rawDocsModules = import.meta.glob(['./docs/**/*.md', '/src/content/docs/**/*.md'], {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -127,14 +128,22 @@ const rawDocsModules = import.meta.glob('/src/content/docs/**/*.md', {
 
 export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGroup[] } {
   const docs: MarkdownDoc[] = [];
+  const seenSlugs = new Set<string>();
 
   for (const [filePath, rawContent] of Object.entries(rawDocsModules)) {
+    if (typeof rawContent !== 'string') continue;
     const { frontmatter, content } = parseFrontmatterAndContent(rawContent);
 
-    // Extract slug from filename: e.g. /src/content/docs/01-overview/about.md -> about
-    const parts = filePath.split('/');
+    // Normalize path separators to '/'
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    const parts = normalizedPath.split('/').filter(Boolean);
     const fileName = parts[parts.length - 1].replace(/\.md$/, '');
-    const folderName = parts.length > 4 ? parts[parts.length - 2] : 'general';
+
+    // Avoid duplicates if multiple glob patterns match the same file
+    if (seenSlugs.has(fileName)) continue;
+    seenSlugs.add(fileName);
+
+    const folderName = parts.length >= 2 ? parts[parts.length - 2] : 'general';
 
     const categoryId = frontmatter.category || folderName.replace(/^\d+-/, '');
     const preset = CATEGORY_TAG_MAP[categoryId] || { tag: categoryId.toUpperCase(), title: categoryId };

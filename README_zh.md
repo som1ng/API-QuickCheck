@@ -143,6 +143,47 @@ API-QuickCheck 2.0 ──────────────┼── [ P2 能�
 | **设计美学与交互** | 粗糙简陋 | 页面杂乱刺眼 | ✅ **Anthropic 暖暗调 + 磁吸物理滑块** |
 | **密钥安全性** | 上传服务端 | 存入云端数据库 | ✅ **零数据落盘 · 密钥安全不离浏览器** |
 
+## 💻 工业级无头 CLI 终端引擎 (Headless CLI)
+
+API-QuickCheck 内置零外部依赖、完美适配 CI/CD 流水线的无头终端 CLI 工具（`scripts/apiqc.ts`），支持离线自动化真伪审计与黄金基线快照采集：
+
+```bash
+# 1. 对指定中转站端点运行完整 24 项探针审计
+npm run apiqc -- audit \
+  --model gpt-5.6-sol \
+  --base-url https://api.your-relay.com/v1 \
+  --api-key sk-your-key-here \
+  --profile balanced \
+  --out audit-report.json
+
+# 2. 仅运行 P0/P1 协议与流式私钥签名核心验真探针
+npm run apiqc -- audit \
+  --model claude-fable-5 \
+  --base-url https://api.your-relay.com/v1 \
+  --api-key sk-your-key-here \
+  --probes p0-stream-events,p0-strict-json,p1-signature-continuity
+
+# 3. 采集官方权威黄金能力基准快照 (用于模型能力对标与降级分析)
+npm run apiqc -- baseline capture \
+  --model gemini-3.7-flash \
+  --base-url https://generativelanguage.googleapis.com/v1beta \
+  --api-key your-google-api-key \
+  --source official
+```
+
+### CLI 参数一览
+
+| 参数 | 类型 | 说明 | 默认值 |
+| :--- | :--- | :--- | :--- |
+| `--model` | `string` | **必填**。待审计目标模型 ID | - |
+| `--base-url` | `string` | **必填**（或通过 `APIQC_BASE_URL` 环境变量注入）。中转站或官方 Base URL | - |
+| `--api-key` | `string` | **必填**（或通过 `APIQC_API_KEY` 环境变量注入）。仅在本次进程内存中使用，不落盘 | - |
+| `--provider` | `string` | 指定厂商：`auto`, `openai`, `anthropic`, `gemini`, `xai` | `auto` |
+| `--profile` | `string` | 审计档位：`quick` (4项), `balanced` (24项平衡档), `deep` (24项深度档) | `balanced` |
+| `--probes` | `string` | 逗号分隔的指定探针 ID 列表（如 `p0-stream-events,p0-strict-json`） | 当前档位全量探针 |
+| `--out` | `string` | 结构化 JSON 审计报告输出路径 | `audit-report.json` |
+| `--baseline` | `string` | 加载对比的基线快照 ID（用于计算偏差与降级定论） | - |
+
 ---
 
 ## 🚀 快速开始
@@ -150,7 +191,7 @@ API-QuickCheck 2.0 ──────────────┼── [ P2 能�
 ### 方式 1：在线开箱即用（推荐）
 直接访问官方部署站点：**[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
 
-### 方式 2：本地极速运行
+### 方式 2：本地极速运行 & CLI
 
 ```bash
 # 1. 克隆代码仓库
@@ -163,10 +204,13 @@ npm install
 # 3. 启动本地开发服务
 npm run dev
 
-# 4. 运行 24 项探针审计测试套件
+# 4. 运行终端 CLI 审计帮助
+npm run apiqc -- --help
+
+# 5. 运行 24 项探针审计测试套件
 npm test
 
-# 5. 手动同步最新 2026 前沿模型基线
+# 6. 手动同步最新 2026 前沿模型基线
 npm run sync:models
 ```
 

@@ -86,10 +86,25 @@ export const ClientExportTab: React.FC = () => {
     }));
   };
 
-  // Current active doc
+  // Current active doc with safe fallback
   const currentDoc: MarkdownDoc = useMemo(() => {
     const found = allDocs.find((d) => d.slug === activeSlug);
-    return found || allDocs[0];
+    if (found) return found;
+    if (allDocs.length > 0) return allDocs[0];
+    return {
+      slug: 'about',
+      filePath: './docs/01-intro/about.md',
+      frontmatter: {
+        title: '关于 API-QuickCheck',
+        category: 'intro',
+        categoryTitle: '简介',
+        categoryTag: '简介',
+        subtitle: '面向现代 AI 中转站的真伪鉴别与性能基准',
+        order: 1,
+      },
+      content: '# 关于 API-QuickCheck\n\n欢迎使用 API-QuickCheck 文档中心。',
+      headings: [],
+    };
   }, [allDocs, activeSlug]);
 
   const updateSliderPositions = useCallback(() => {
