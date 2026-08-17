@@ -42,16 +42,20 @@ const CATEGORY_TAG_MAP: Record<string, { tag: string; title: string }> = {
 
 // Simple and robust YAML Frontmatter parser
 function parseFrontmatterAndContent(raw: string): { frontmatter: Partial<DocFrontmatter>; content: string } {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+  if (!raw || typeof raw !== 'string') {
+    return { frontmatter: {}, content: '' };
+  }
+  const cleanRaw = raw.replace(/^\uFEFF/, '').trimStart();
+  const match = cleanRaw.match(/^---[\r\n]+([\s\S]*?)[\r\n]+---[\r\n]*([\s\S]*)$/);
   if (!match) {
-    return { frontmatter: {}, content: raw };
+    return { frontmatter: {}, content: cleanRaw };
   }
 
   const yamlBlock = match[1];
   const content = match[2];
   const frontmatter: Record<string, any> = {};
 
-  const lines = yamlBlock.split('\n');
+  const lines = yamlBlock.split(/\r?\n/);
   for (const line of lines) {
     const colonIndex = line.indexOf(':');
     if (colonIndex > -1) {

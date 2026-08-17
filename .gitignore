@@ -43,11 +43,13 @@ lerna-debug.log*
 Thumbs.db
 Desktop.ini
 
-# AI Assistant rules & Local prompts (Keep local only, never commit to git)
+# AI Assistant rules & Local prompts & AI Workspaces (Keep local only, never commit to git)
 .antigravity/
 .antigravitycli/
-CLAUDE.md
-docs/
+/CLAUDE.md
+/agent_workspace/
+/.aiworkflow/
+/aiworkflow/
 scratch/
 temp/
 .firecrawl/

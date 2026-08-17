@@ -182,7 +182,8 @@ export const ClientExportTab: React.FC = () => {
   // Context interpolated markdown content
   const interpolatedContent = useMemo(() => {
     if (!currentDoc) return '';
-    const rawContent = (isBaselineDoc && syncedDocContent) ? syncedDocContent : currentDoc.content;
+    const hasValidSynced = typeof syncedDocContent === 'string' && syncedDocContent.trim().length > 100;
+    const rawContent = (isBaselineDoc && hasValidSynced) ? (syncedDocContent as string) : (currentDoc.content || '');
     return interpolateDocVariables(rawContent, {
       baseUrl: config.baseUrl || 'https://api.openai.com/v1',
       apiKey: config.apiKey || 'sk-your-api-key-here',
@@ -408,7 +409,7 @@ export const ClientExportTab: React.FC = () => {
             <article className="prose prose-invert max-w-none text-[#d5d1c8] font-sans text-[15px] leading-[1.8]">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex]}
+                rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
                 components={{
                   h2: ({ children }) => {
                     const text = getNodeText(children);
