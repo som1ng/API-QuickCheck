@@ -33,8 +33,9 @@
 <p>
   <a href="https://api-quick-check.vercel.app/"><strong>🚀 Live Demo</strong></a> ·
   <a href="#-why-api-quickcheck-20"><strong>Why QuickCheck</strong></a> ·
-  <a href="#-core-capabilities"><strong>Core Features</strong></a> ·
-  <a href="#-2026-frontier-model-baseline-matrix"><strong>2026 Baseline</strong></a> ·
+  <a href="#-the-9-frontier-models-supported"><strong>The 9 Flagship Models</strong></a> ·
+  <a href="#-24-probe-forensics-matrix"><strong>24-Probe Suite</strong></a> ·
+  <a href="#-batch-api-key-testing"><strong>Batch Testing</strong></a> ·
   <a href="#-quick-start"><strong>Quick Start</strong></a> ·
   <a href="./README_zh.md"><strong>🇨🇳 中文说明</strong></a>
 </p>
@@ -45,70 +46,96 @@
 
 ## ⚡ Why API-QuickCheck 2.0?
 
-In today's crowded AI proxy and middleman ecosystem, **model substitution fraud** (e.g. silently routing Claude 3.7 / OpenAI o3 to cheap alternatives, faking `<think>` tags in raw text, silent context truncation, and severe gateway queueing) has become a rampant trap for developers and AI agent builders.
+In today's AI API relay and proxy marketplace, **model substitution fraud** (e.g. routing requests to cheap quantized checkpoints, fake `<think>` reasoning tags, silent context truncation, and proxy-level rate-limiting) is rampant.
 
-**API-QuickCheck 2.0** provides an end-to-end cryptographic and runtime forensics engine:
+**API-QuickCheck 2.0** is an industrial-grade forensics engine designed to verify the true identity, streaming quality, and agent capability of your model endpoints against **the 9 latest frontier models**:
 
-- 🛡️ **Zero Guesswork**: Anthropic official private-key **Thinking Signature turn-2 cryptographic verification**;
-- 🧠 **Native Stream Forensics**: Validates raw `reasoning_content` delta chunks to uncover hardcoded `<think>` text fakes;
-- ⚡ **Microsecond Benchmarks**: Measures **TTFT (Time to First Token)**, real-time **TPS throughput**, and **Chunk Jitter variance**;
-- 🔑 **Intelligent Batch Key Tester**: High-concurrency ping pool with **±25% jitter anti-ban delay**, memory-cached endpoint routing, and quota extraction;
-- 🔄 **2026 Frontier Baseline Auto-Sync**: Automated CI/CD pipelines & manual triggers keep official capability baselines up to date every 3 days;
-- 🔒 **Absolute Privacy**: Crafted in the **Anthropic Claude Warm Dark Editorial Design System**, with **zero backend databases and zero data logging**.
+- 🛡️ **Cryptographic Proof**: Anthropic official private-key **Thinking Signature turn-2 verification**;
+- 🧠 **Thought Stream Forensics**: Native `reasoning_content` delta validation exposing hardcoded fake reasoning tags;
+- ⚡ **Microsecond Precision**: Measures **TTFT (Time to First Token)**, live **TPS throughput**, and **Chunk Jitter variance**;
+- 🔑 **Industrial Batch Testing**: **±25% Jitter anti-ban scheduling**, domain endpoint memory caching, and balance sniffing;
+- 🔄 **Autonomous 2026 Baselines**: 3-day automated CI/CD synchronization with authoritative model catalogs;
+- 🔒 **Zero Data Logging**: Crafted in the **Anthropic Claude Warm Dark Editorial Design System**, with **100% in-memory client execution**.
 
 ---
 
-## 🎯 Core Capabilities
+## 🏆 The 9 Frontier Models Supported
+
+API-QuickCheck 2.0 is calibrated against the 9 most powerful models shaping modern agent workflows across OpenAI, Anthropic, Google, and xAI:
 
 ```text
-                                 ┌── [ 1. Deep Forensics ] ➔ Claude Thinking Signature / R1 Reasoning Stream
-                                 ├── [ 2. Speed Benchmark ] ➔ Microsecond TTFT / Real-time TPS / Jitter Variance
-                                 ├── [ 3. Batch Key Ping ] ➔ Jitter Anti-Ban / Quota Sniffer / Multi-Format Export
-API-QuickCheck 2.0 ──────────────┼── [ 4. Model Discovery ] ➔ Dual-Engine Sniffing / 100% Hidden Model Probing
-                                 ├── [ 5. 2026 Baselines ] ➔ 24-Probe Policy / Automated 3-Day CI/CD Sync
-                                 └── [ 6. Agent Adapter ] ➔ Claude Code / Cline / Cursor / Dify 1-Click Config
+┌─────────────────────────┬───────────────────────────────┬─────────────────────────────────────────────────────────────┐
+│ Provider                │ Model ID                      │ Frontier Tier & Core Forensics Focus                        │
+├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 🟢 OpenAI               │ gpt-5.6-sol                   │ Flagship Frontier · Hard Tool Planning, Code Repair, 64K    │
+│                         │ gpt-5.6-terra                 │ Balanced Workhorse · Responses API & Strict JSON Schema     │
+│                         │ gpt-5.6-luna                  │ Sub-Second High-Throughput · Low Latency Agent Execution   │
+├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 🟠 Anthropic            │ claude-fable-5                │ Next-Gen Frontier · Adaptive Thinking Signature Continuity │
+│                         │ claude-opus-5                 │ Frontier Coding & Deep Reasoning · Complex Tool Chains      │
+│                         │ claude-sonnet-5               │ Balanced Agent Workhorse · Messages API & Prompt Caching    │
+├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 🔵 Google               │ gemini-3.1-pro-preview        │ 2M Multimodal Frontier · Thought Signature & PDF/Chart Ext  │
+│                         │ gemini-3.7-flash              │ Ultra-Fast Agent Orchestrator · Interactions API Routine    │
+├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ ⚫ xAI                  │ grok-4.6                      │ Realtime Frontier · Controlled Tools, Reasoning & Sandbox   │
+└─────────────────────────┴───────────────────────────────┴─────────────────────────────────────────────────────────────┘
 ```
 
-### 1. Deep Fidelity & Model Fraud Forensics
-- **Anthropic Official Cryptographic Validation (Thinking Signature)**:
-  Extracts Anthropic's private-key cryptographic signature from `thinking` blocks and submits it back to Anthropic in turn 2 for official cryptographic verification. **Spoofing or relaying via cheap models is mathematically impossible!**
-- **DeepSeek-R1 / OpenAI o-Series Native Reasoning Stream Check**:
-  Verifies the native `delta.reasoning_content` protocol layer, instantly exposing fake `<think>` text tags inserted by low-quality gateways.
-- **Metacognitive Conflict & SVG Spatial Probes**:
-  Uncovers stealthy `"You are Claude"` system prompt injections; verifies SVG 3D geometry and knowledge cutoff dates.
+---
 
-### 2. Microsecond Latency & Performance Benchmark
-- **Time to First Token (TTFT)**: Precisely measures network handshake and gateway queueing delay before the first token arrives.
-- **Live TPS Throughput**: Tracks real-time token generation velocity with an interactive typewriter terminal.
-- **Jitter Variance**: Calculates inter-chunk arrival variance to diagnose rate limits, Nginx buffer delays, and gateway congestion.
+## 🎯 24-Probe Forensics & Capability Matrix
 
-### 3. Smart Batch API-Key Testing & Anti-Ban Pool
-- **Intelligent Raw Input Cleaning**: Extracts clean API keys from plain text, commas, CSV columns, and JSON arrays.
+Every model is audited against our **24-Probe Balanced Suite** across 4 critical layers:
+
+```text
+                                 ┌── [ P0 Protocol (7) ] ➔ Model Discovery, Native Route, Auth, SSE Stream, Strict JSON, Tool Shape, Invalid Param
+                                 ├── [ P1 Architecture (5) ] ➔ Reasoning Config, State Continuity, Tool Roundtrip, Signature Continuity, Cache Semantics
+API-QuickCheck 2.0 ──────────────┼── [ P2 Capability (8) ] ➔ Constraint JSON, Tool Planning, Code Repair (A/B), Vision Chart, Needle Context (Start/Mid/End)
+                                 └── [ P3 Quality (4) ] ➔ Cold Start TTFT, Concurrency TPS, Network Jitter, P95 Stability Samples
+```
+
+### 1. Deep Fidelity & Downgrade Forensics
+- **Anthropic Official Private-Key Thinking Signature Check (`p1-signature-continuity`)**:
+  Captures the cryptographic private-key signature inside the `thinking` block, then injects it back in turn 2. If the relay routed to a downgraded or counterfeit model, the second turn will fail cryptographic verification instantly!
+- **Native Thought Stream vs. Injected Text (`p0-native-route`)**:
+  Differentiates between true SSE `reasoning_content` delta events and text `<think>` tags spoofed by middleman proxies.
+- **Metacognitive & 64K Needle In A Haystack Probes (`p2-context-start/middle/end`)**:
+  Tests deep context retrieval at 64,000 tokens across start, middle, and end positions to catch silent context truncations.
+
+### 2. High-Precision Streaming Speed Benchmark
+- **Microsecond TTFT (Time to First Token)**: Accurately isolates network queueing and handshake latency from model compute time.
+- **Real-Time Token Throughput (TPS)**: Live velocity tracker with visual terminal typewriter animation.
+- **Jitter Variance Matrix**: Measures inter-chunk delivery variance to reveal proxy rate-limiting and buffer stalling.
+
+---
+
+## 🔑 Batch API-Key Testing & Anti-Ban Pool
+
+Test hundreds of API Keys concurrently with enterprise-grade resilience:
+
+- **Smart Dirty Text Extraction**: Cleans messy pastes from plain text, commas, CSV columns, and JSON arrays.
 - **Adaptive Anti-Ban Protection**:
-  - **±25% Jitter Delay**: Randomizes concurrent request intervals to prevent IP rate-limit bans;
-  - **Memory Endpoint Cache**: Remembers verified working endpoints to reduce subsequent payload traffic by 80%;
+  - **±25% Jitter Delay**: Desynchronizes concurrent requests to bypass middleman rate-limit thresholds;
+  - **Domain Endpoint Memory Pool**: Caches working endpoint routes to reduce probing traffic by 80%;
   - **429 Circuit Breaker**: Automatically backs off upon gateway congestion.
-- **Balance & Quota Sniffer**: Auto-detects balances across **OneAPI, NewAPI, DoneAPI, OpenRouter, SiliconFlow, DeepSeek**.
-- **Multi-Format Export & History**: 1-click export to TXT, CSV (Excel BOM compliant), JSON, with local persistent recovery.
-
-### 4. 2026 Frontier Model Baselines & 24-Probe Policy
-- Complete coverage across **24 logical audit probes** spanning Protocol (P0), Architecture (P1), Capability (P2), and Quality (P3);
-- Built-in GitHub Actions workflow (`sync-model-baselines.yml`) syncing authoritative global models every 3 days;
-- In-document **[🔄 Manual Sync]** button for instant in-browser updates.
+- **Universal Quota Sniffer**: Multi-endpoint balance parser supporting **OneAPI, NewAPI, DoneAPI, OpenRouter, SiliconFlow, DeepSeek**.
+- **Multi-Format Export**: 1-click export to TXT, CSV (Excel UTF-8 BOM compliant), JSON with 20-batch history rollback.
 
 ---
 
 ## 📊 Technical Comparison Matrix
 
-| Evaluation Dimension | Traditional Shell Scripts | Generic Online Ping Tools | **API-QuickCheck 2.0** |
+| Evaluation Dimension | Traditional Shell Scripts | Generic Online Ping Sites | **API-QuickCheck 2.0** |
 | :--- | :---: | :---: | :---: |
-| **Claude Private-Key Auth** | Not Supported | ⚠️ Incomplete text heuristic | ✅ **100% Official Turn-2 Cryptographic Check** |
+| **Frontier Model Coverage** | Outdated (GPT-3.5/4) | Partial Claude 3.5 | ✅ **Full 9 Flagship Models (GPT-5.6 / Fable 5 / Gemini 3.7 / Grok 4.6)** |
+| **Private-Key Cryptographic Auth** | Not Supported | ⚠️ Incomplete text heuristic | ✅ **100% Official Turn-2 Signature Verification** |
 | **Reasoning Stream Forensics** | Not Supported | Not Supported | ✅ **Native `reasoning_content` validation** |
 | **Batch Key Anti-Ban Engine** | ⚠️ High ban risk | Basic sequential ping | ✅ **±25% Jitter + Endpoint Memory Cache** |
 | **Hidden Model Discovery** | Exits on 404 | Not Supported | ✅ **Dual-Engine + 16-Model Fast Prober** |
-| **2026 Model Baseline Sync** | Hardcoded | Outdated | ✅ **Every 3-Day CI/CD Auto-Sync & Manual UI** |
+| **Automated 2026 Baseline Sync** | Hardcoded | Outdated | ✅ **Every 3-Day CI/CD Auto-Sync & Manual UI** |
 | **Design Aesthetics** | Basic / Cluttered | Chaotic dashboard | ✅ **Anthropic Warm Dark + Tactile Magic Slider** |
-| **API Key Privacy** | Uploaded to server | Stored in cloud DB | ✅ **100% In-Memory · Never Leaves Browser** |
+| **API Key Privacy** | Uploaded to server | Stored in cloud DB | ✅ **100% In-Memory · Zero Server Logging** |
 
 ---
 
@@ -130,10 +157,10 @@ npm install
 # 3. Start local development server
 npm run dev
 
-# 4. (Optional) Run 24-probe audit test suite
+# 4. Run 24-probe audit test suite
 npm test
 
-# 5. (Optional) Sync latest 2026 model baselines
+# 5. Sync latest 2026 model baselines
 npm run sync:models
 ```
 
@@ -141,8 +168,8 @@ npm run sync:models
 
 ## 🛠️ Tech Stack
 
-- **Core**: React 18, TypeScript, Vite
-- **Styling**: TailwindCSS, Anthropic Claude Warm-Dark Editorial System
+- **Core Engine**: React 18, TypeScript, Vite
+- **Design System**: Anthropic Claude Warm Dark Editorial System, TailwindCSS
 - **Rendering & Math**: ReactMarkdown, KaTeX, Rehype-Katex, Mermaid.js
 - **Icons**: Lucide React
 - **Edge Deployment**: Vercel Serverless Edge Functions
