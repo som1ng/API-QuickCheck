@@ -118,42 +118,13 @@ export function slugifyHeading(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// Explicit static raw imports to guarantee 100% bundling across all environments
-import aboutRaw from './docs/01-intro/about.md?raw';
-import frontierRaw from './docs/01-intro/frontier-model-baseline-2026-08-16.md?raw';
-import overviewRaw from './docs/02-algorithms/overview.md?raw';
-import claudeRaw from './docs/02-algorithms/claude.md?raw';
-import openaiRaw from './docs/02-algorithms/openai.md?raw';
-import geminiRaw from './docs/02-algorithms/gemini.md?raw';
-import grokRaw from './docs/02-algorithms/grok.md?raw';
-
-const BUILTIN_DOCS: Record<string, string> = {
-  './docs/01-intro/about.md': aboutRaw,
-  './docs/01-intro/frontier-model-baseline-2026-08-16.md': frontierRaw,
-  './docs/02-algorithms/overview.md': overviewRaw,
-  './docs/02-algorithms/claude.md': claudeRaw,
-  './docs/02-algorithms/openai.md': openaiRaw,
-  './docs/02-algorithms/gemini.md': geminiRaw,
-  './docs/02-algorithms/grok.md': grokRaw,
-};
-
-// Dynamic glob fallback
-const dynamicDocsModules = import.meta.glob('./docs/**/*.md', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-}) as Record<string, string>;
-
-const rawDocsModules: Record<string, string> = {
-  ...BUILTIN_DOCS,
-  ...dynamicDocsModules,
-};
+import { EMBEDDED_DOCS } from './docsStore';
 
 export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGroup[] } {
   const docs: MarkdownDoc[] = [];
   const seenSlugs = new Set<string>();
 
-  for (const [filePath, rawContent] of Object.entries(rawDocsModules)) {
+  for (const [filePath, rawContent] of Object.entries(EMBEDDED_DOCS)) {
     if (typeof rawContent !== 'string') continue;
     const { frontmatter, content } = parseFrontmatterAndContent(rawContent);
 
