@@ -18,12 +18,12 @@ function initMermaid() {
       themeVariables: {
         darkMode: true,
         background: 'transparent',
-        primaryColor: '#1e293b',
-        primaryTextColor: '#f8fafc',
-        primaryBorderColor: '#475569',
-        lineColor: '#e8895d',
-        secondaryColor: '#0f172a',
-        tertiaryColor: '#1e1b18',
+        primaryColor: '#252320',
+        primaryTextColor: '#faf9f5',
+        primaryBorderColor: '#2e2b27',
+        lineColor: '#cc785c',
+        secondaryColor: '#181715',
+        tertiaryColor: '#1f1e1b',
       },
     });
     mermaidInitialized = true;
@@ -66,7 +66,7 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ chart }) => {
 
   if (hasError) {
     return (
-      <div className="my-8 p-6 bg-slate-900/60 rounded-xl border border-red-500/20 text-xs font-mono text-slate-400 overflow-x-auto">
+      <div className="my-8 p-6 bg-[#181715] rounded-xl border border-[#c64545]/30 text-xs font-mono text-[#a09d96] overflow-x-auto">
         <pre>{chart}</pre>
       </div>
     );
@@ -75,7 +75,7 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ chart }) => {
   return (
     <div
       ref={containerRef}
-      className="my-8 p-6 bg-slate-900/60 rounded-xl border border-white/10 flex justify-center items-center overflow-x-auto shadow-sm select-none"
+      className="my-8 p-6 bg-[#181715] rounded-xl border border-[#2e2b27] flex justify-center items-center overflow-x-auto shadow-sm select-none"
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />
   );

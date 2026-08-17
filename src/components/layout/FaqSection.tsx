@@ -167,12 +167,12 @@ export const FaqSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => toggleAccordion(idx)}
-                className="w-full flex items-center justify-between p-4 text-left transition"
+                className="w-full flex items-center justify-between p-4 text-left transition cursor-pointer"
               >
                 <span className="text-xs font-semibold text-[#faf9f5] pr-4 font-sans">
                   {item.question}
                 </span>
-                <span className="text-neutral-400 shrink-0">
+                <span className="text-[#a09d96] shrink-0">
                   <ChevronDown
                     className={`w-3.5 h-3.5 transition-transform duration-200 ${
                       isOpen ? 'rotate-180 text-[#cc785c]' : ''
@@ -182,11 +182,11 @@ export const FaqSection: React.FC = () => {
               </button>
 
               {isOpen && (
-                <div className="px-4 pb-4 pt-1 text-xs text-neutral-300 leading-relaxed border-t border-[#2e2b27]/60 space-y-2 font-sans">
+                <div className="px-4 pb-4 pt-1 text-xs text-[#d5d1c8] leading-relaxed border-t border-[#2e2b27]/60 space-y-2 font-sans">
                   {item.answer}
 
                   {item.summaryNote && (
-                    <div className="mt-2 pt-2 border-t border-[#2e2b27]/40 text-xs text-neutral-300 bg-[#1f1e1b] border border-[#2e2b27] p-2.5 rounded">
+                    <div className="mt-2 pt-2 border-t border-[#2e2b27]/40 text-xs text-[#d5d1c8] bg-[#1f1e1b] border border-[#2e2b27] p-2.5 rounded">
                       {item.summaryNote}
                     </div>
                   )}

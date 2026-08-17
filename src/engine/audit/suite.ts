@@ -40,10 +40,30 @@ export const BALANCED_SUITE: ProbeDefinition[] = [
   probe('p3-repeat-d', 'P3', '运行质量样本 D', ['runtime'], 'repeat-d', 'latency-success'),
 ];
 
-export function selectSuite(profile: AuditProfile): ProbeDefinition[] {
-  if (profile === 'balanced') return BALANCED_SUITE;
-  if (profile === 'quick') return BALANCED_SUITE.filter((item) => item.layer === 'P0' || item.id === 'p1-tool-roundtrip');
-  return BALANCED_SUITE;
+export const AUDIT_PRESETS: Record<AuditProfile, { label: string; description: string; probeIds: string[] }> = {
+  quick: {
+    label: '快速',
+    description: '基础连通、认证、严格 JSON 和工具结构，适合先确认接口形状。',
+    probeIds: ['p0-model-discovery', 'p0-native-route', 'p0-auth-shape', 'p0-strict-json'],
+  },
+  balanced: {
+    label: '平衡',
+    description: '完整选择 24 项平衡档计划，暂不可用项会明确标注。',
+    probeIds: BALANCED_SUITE.map((item) => item.id),
+  },
+  deep: {
+    label: '深度',
+    description: '选择完整 24 项计划，为后续长上下文、工具闭环和本地任务预留。',
+    probeIds: BALANCED_SUITE.map((item) => item.id),
+  },
+};
+
+export function selectSuite(profile: AuditProfile, selectedProbeIds?: string[]): ProbeDefinition[] {
+  if (selectedProbeIds) {
+    const selected = new Set(selectedProbeIds);
+    return BALANCED_SUITE.filter((item) => selected.has(item.id));
+  }
+  return BALANCED_SUITE.filter((item) => AUDIT_PRESETS[profile].probeIds.includes(item.id));
 }
 
 export function hashFixture(value: string): string {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -19,7 +19,9 @@ import {
   ArrowLeft,
   ArrowRight,
   AlignLeft,
+  RefreshCw,
 } from 'lucide-react';
+import { fetchLatestFrontierModels } from '../../engine/baselines/modelSyncService';
 
 const getNodeText = (node: any): string => {
   if (typeof node === 'string') return node;
@@ -46,6 +48,21 @@ export const ClientExportTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Left sidebar sliding indicator refs and per-group position state
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [pillPositions, setPillPositions] = useState<Record<string, { top: number; height: number; opacity: number }>>({});
+
+  // Dynamic overrides for baseline doc when manually synced in-browser
+  const [syncedDocContent, setSyncedDocContent] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('aqc_cached_frontier_models_doc');
+    } catch {
+      return null;
+    }
+  });
+  const [isSyncingModels, setIsSyncingModels] = useState<boolean>(false);
+  const [syncStatusMessage, setSyncStatusMessage] = useState<string | null>(null);
 
   // Keyboard shortcut Ctrl+K / Cmd+K listener
   useEffect(() => {
@@ -75,15 +92,82 @@ export const ClientExportTab: React.FC = () => {
     return found || allDocs[0];
   }, [allDocs, activeSlug]);
 
+  const updateSliderPositions = useCallback(() => {
+    const next: Record<string, { top: number; height: number; opacity: number }> = {};
+    for (const group of categoryGroups) {
+      const activeDoc = group.docs.find((d) => d.slug === currentDoc?.slug);
+      if (activeDoc) {
+        const btn = itemRefs.current[activeDoc.slug];
+        if (btn) {
+          next[group.id] = {
+            top: btn.offsetTop,
+            height: btn.offsetHeight || 34,
+            opacity: 1,
+          };
+        } else {
+          const idx = group.docs.findIndex((d) => d.slug === activeDoc.slug);
+          next[group.id] = {
+            top: idx * 38,
+            height: 34,
+            opacity: 1,
+          };
+        }
+      } else {
+        next[group.id] = { top: 0, height: 34, opacity: 0 };
+      }
+    }
+    setPillPositions(next);
+  }, [categoryGroups, currentDoc?.slug]);
+
+  useEffect(() => {
+    updateSliderPositions();
+    const timer = setTimeout(updateSliderPositions, 40);
+    const raf = requestAnimationFrame(updateSliderPositions);
+    window.addEventListener('resize', updateSliderPositions);
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updateSliderPositions);
+    };
+  }, [updateSliderPositions, collapsedCategories, searchQuery]);
+
+  const isBaselineDoc = useMemo(() => {
+    return (
+      currentDoc.slug.includes('frontier-model-baseline') ||
+      currentDoc.frontmatter.title.includes('前沿模型基线')
+    );
+  }, [currentDoc]);
+
+  const handleManualSyncModels = async () => {
+    setIsSyncingModels(true);
+    setSyncStatusMessage(null);
+    try {
+      const result = await fetchLatestFrontierModels();
+      setSyncedDocContent(result.rawMarkdown);
+      try {
+        localStorage.setItem('aqc_cached_frontier_models_doc', result.rawMarkdown);
+      } catch {
+        /* ignore */
+      }
+      setSyncStatusMessage(`已同步 ${result.totalModels} 个前沿模型 (${result.updatedAt})`);
+      setTimeout(() => setSyncStatusMessage(null), 4000);
+    } catch (err: unknown) {
+      alert(`同步失败: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsSyncingModels(false);
+    }
+  };
+
   // Context interpolated markdown content
   const interpolatedContent = useMemo(() => {
     if (!currentDoc) return '';
-    return interpolateDocVariables(currentDoc.content, {
+    const rawContent = (isBaselineDoc && syncedDocContent) ? syncedDocContent : currentDoc.content;
+    return interpolateDocVariables(rawContent, {
       baseUrl: config.baseUrl || 'https://api.openai.com/v1',
       apiKey: config.apiKey || 'sk-your-api-key-here',
       model: config.selectedModel || 'claude-3-7-sonnet-20250219',
     });
-  }, [currentDoc, config.baseUrl, config.apiKey, config.selectedModel]);
+  }, [currentDoc, isBaselineDoc, syncedDocContent, config.baseUrl, config.apiKey, config.selectedModel]);
 
   // Filtered categories based on search
   const filteredCategoryGroups = useMemo(() => {
@@ -116,7 +200,7 @@ export const ClientExportTab: React.FC = () => {
 
   const navigateToDoc = (slug: string) => {
     setActiveSlug(slug);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const scrollToHeading = (id: string) => {
@@ -133,37 +217,37 @@ export const ClientExportTab: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 w-full flex flex-col min-h-screen bg-[#0d0d0c]">
+    <div className="flex-1 w-full flex flex-col min-h-screen bg-[#141413]">
       
       {/* Full-width 3-Column Developer Layout */}
       <div className="flex-1 flex w-full relative">
         
         {/* ========================================== */}
-        {/* 1. Left Sidebar: Clean, Fixed Width (w-64) */}
+        {/* 1. Left Sidebar: Fixed at top-[52px]       */}
         {/* ========================================== */}
-        <aside className="w-64 shrink-0 sticky top-0 h-[calc(100vh-52px)] border-r border-white/10 bg-[#0d0d0c] flex flex-col z-20 select-none">
+        <aside className="w-64 shrink-0 sticky top-[52px] h-[calc(100vh-52px)] border-r border-[#2e2b27] bg-[#181715] flex flex-col z-20 select-none">
           {/* Minimal Search Input */}
-          <div className="p-3 border-b border-white/5">
+          <div className="p-3 border-b border-[#2e2b27]">
             <div className="relative flex items-center">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6c6a64] pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜索文档..."
-                className="w-full h-8 rounded bg-[#141413] border border-white/10 pl-8 pr-14 text-xs text-white placeholder-slate-400 focus:border-[#e8895d] focus:outline-none transition font-sans"
+                className="w-full h-8 rounded bg-[#141413] border border-[#2e2b27] pl-8 pr-14 text-xs text-[#faf9f5] placeholder-[#6c6a64] focus:border-[#cc785c] focus:outline-none transition font-sans"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
                 {searchQuery ? (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-xs text-slate-400 hover:text-white px-1 pointer-events-auto"
+                    className="text-xs text-[#a09d96] hover:text-[#faf9f5] px-1 pointer-events-auto"
                   >
                     ✕
                   </button>
                 ) : (
-                  <span className="text-[10px] font-mono text-slate-400 bg-[#1a1918] px-1.5 py-0.5 rounded border border-white/10 leading-none select-none">
+                  <span className="text-[10px] font-mono text-[#a09d96] bg-[#252320] px-1.5 py-0.5 rounded border border-[#2e2b27] leading-none select-none">
                     Ctrl K
                   </span>
                 )}
@@ -171,40 +255,57 @@ export const ClientExportTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Category Groups */}
+          {/* Navigation Category Groups with Precise Magnetic Sliding Capsule */}
           <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
             {filteredCategoryGroups.map((group) => {
               const isCollapsed = Boolean(collapsedCategories[group.id]);
+              const groupPill = pillPositions[group.id];
+              const hasActiveDocInGroup = group.docs.some((d) => d.slug === currentDoc.slug);
 
               return (
-                <div key={group.id} className="space-y-1">
+                <div key={group.id} className="space-y-1.5">
                   {/* Category Header */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
-                    className="w-full flex items-center justify-between px-2 py-1.5 text-[14px] font-sans font-bold text-white hover:text-[#e8895d] transition rounded"
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-[14px] font-sans font-bold text-[#faf9f5] hover:text-[#cc785c] transition rounded cursor-pointer"
                   >
                     <span className="truncate tracking-tight">{group.title}</span>
                     <ChevronDown
-                      className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${
+                      className={`h-3.5 w-3.5 text-[#a09d96] transition-transform duration-200 ${
                         isCollapsed ? '-rotate-90' : 'rotate-0'
                       }`}
                     />
                   </button>
 
-                  {/* Document Links */}
+                  {/* Document Links with High-Precision Relative Slider */}
                   {!isCollapsed && (
-                    <div className="space-y-0.5 pt-0.5">
+                    <div className="space-y-1 pt-0.5 relative">
+                      {/* Precise Floating Active Pill inside category list container */}
+                      {hasActiveDocInGroup && groupPill && (
+                        <div
+                          aria-hidden="true"
+                          className="absolute left-0 right-0 rounded-lg bg-[#252320] border-l-[3px] border-[#cc785c] border-r border-t border-b border-[#36332e] shadow-[0_2px_10px_rgba(0,0,0,0.5)] pointer-events-none transition-all duration-250 ease-out z-0"
+                          style={{
+                            transform: `translate3d(0, ${groupPill.top}px, 0)`,
+                            height: `${groupPill.height}px`,
+                            opacity: groupPill.opacity,
+                            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                          }}
+                        />
+                      )}
+
                       {group.docs.map((doc) => {
                         const isActive = currentDoc.slug === doc.slug;
                         return (
                           <button
+                            ref={(el) => { itemRefs.current[doc.slug] = el; }}
                             key={doc.slug}
                             onClick={() => navigateToDoc(doc.slug)}
-                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-[13px] font-sans transition text-left ${
+                            className={`w-full relative z-10 flex items-center justify-between px-2.5 h-[34px] rounded-lg text-[13px] font-sans transition-colors duration-200 text-left cursor-pointer ${
                               isActive
-                                ? 'bg-white/10 text-white font-semibold'
-                                : 'text-slate-300 hover:text-white hover:bg-white/5'
+                                ? 'text-[#faf9f5] font-semibold'
+                                : 'text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#1f1e1b]/50'
                             }`}
                           >
                             <span className="truncate">{doc.frontmatter.title}</span>
@@ -222,39 +323,65 @@ export const ClientExportTab: React.FC = () => {
         {/* ========================================== */}
         {/* 2. Center Column: Main Article Body        */}
         {/* ========================================== */}
-        <main className="flex-1 min-w-0 flex justify-center py-10 px-8 sm:px-12 lg:px-16 overflow-y-auto">
+        <main className="flex-1 min-w-0 flex justify-center py-10 px-8 sm:px-12 lg:px-16 overflow-y-auto bg-[#141413]">
           
-          <div className="w-full max-w-4xl space-y-8 min-w-0">
+          {/* Silky Keyed Slide-Fade-In Animation on Article Switching */}
+          <div
+            key={currentDoc.slug}
+            className="w-full max-w-4xl space-y-8 min-w-0 doc-transition-enter"
+          >
             
             {/* Breadcrumb */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
+            <div className="flex items-center gap-1.5 text-xs text-[#a09d96] font-sans">
               <span
-                className="hover:text-white cursor-pointer"
+                className="hover:text-[#faf9f5] cursor-pointer"
                 onClick={() => navigateToDoc(allDocs[0].slug)}
               >
                 文档
               </span>
-              <ChevronRight className="h-3 w-3 text-slate-600" />
-              <span className="text-slate-300">{currentDoc.frontmatter.categoryTitle}</span>
-              <ChevronRight className="h-3 w-3 text-slate-600" />
-              <span className="text-white font-medium">{currentDoc.frontmatter.title}</span>
+              <ChevronRight className="h-3 w-3 text-[#6c6a64]" />
+              <span className="text-[#a09d96]">{currentDoc.frontmatter.categoryTitle}</span>
+              <ChevronRight className="h-3 w-3 text-[#6c6a64]" />
+              <span className="text-[#faf9f5] font-medium">{currentDoc.frontmatter.title}</span>
             </div>
 
-            {/* Document Header */}
-            <div className="space-y-3 pb-6 border-b border-white/10">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight font-sans">
-                {currentDoc.frontmatter.title}
-              </h1>
+            {/* Document Header with Top-Right Manual Sync Action */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-[#2e2b27]">
+              <div className="space-y-2 flex-1 min-w-0">
+                <h1 className="text-3xl sm:text-4xl font-bold text-[#faf9f5] tracking-tight font-sans">
+                  {currentDoc.frontmatter.title}
+                </h1>
 
-              {currentDoc.frontmatter.subtitle && (
-                <p className="text-[15px] text-slate-300 leading-relaxed font-sans pt-1">
-                  {currentDoc.frontmatter.subtitle}
-                </p>
+                {currentDoc.frontmatter.subtitle && (
+                  <p className="text-[15px] text-[#a09d96] leading-relaxed font-sans pt-1">
+                    {currentDoc.frontmatter.subtitle}
+                  </p>
+                )}
+              </div>
+
+              {/* Manual Sync Button for Frontier Baseline Document */}
+              {isBaselineDoc && (
+                <div className="flex flex-col items-start sm:items-end gap-1.5 shrink-0 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleManualSyncModels}
+                    disabled={isSyncingModels}
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#252320] hover:bg-[#2e2b27] border border-[#2e2b27] hover:border-[#cc785c]/60 text-xs font-semibold text-[#faf9f5] transition smooth-btn shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-[#cc785c] ${isSyncingModels ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                    <span>{isSyncingModels ? '正在从权威源同步...' : '手动更新最新基线'}</span>
+                  </button>
+                  {syncStatusMessage && (
+                    <span className="text-[11px] font-mono text-[#5db872] animate-in fade-in">
+                      ✓ {syncStatusMessage}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
             {/* Markdown Body Renderer */}
-            <article className="prose prose-invert max-w-none text-slate-200 font-sans text-[15px] leading-[1.8]">
+            <article className="prose prose-invert max-w-none text-[#d5d1c8] font-sans text-[15px] leading-[1.8]">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex]}
@@ -265,7 +392,7 @@ export const ClientExportTab: React.FC = () => {
                     return (
                       <h2
                         id={id}
-                        className="text-xl font-bold text-white tracking-tight pt-8 pb-2 border-b border-white/10 mt-8 mb-4 font-sans"
+                        className="text-xl font-bold text-[#faf9f5] tracking-tight pt-8 pb-2 border-b border-[#2e2b27] mt-8 mb-4 font-sans"
                       >
                         {children}
                       </h2>
@@ -277,66 +404,66 @@ export const ClientExportTab: React.FC = () => {
                     return (
                       <h3
                         id={id}
-                        className="text-base font-bold text-white pt-4 mt-6 mb-2 font-sans"
+                        className="text-base font-bold text-[#faf9f5] pt-4 mt-6 mb-2 font-sans"
                       >
                         {children}
                       </h3>
                     );
                   },
                   p: ({ children }) => (
-                    <p className="my-3.5 text-slate-200 leading-[1.8]">
+                    <p className="my-3.5 text-[#d5d1c8] leading-[1.8]">
                       {children}
                     </p>
                   ),
                   ul: ({ children }) => (
-                    <ul className="list-disc list-inside space-y-1.5 text-[15px] text-slate-200 pl-2 my-4">
+                    <ul className="list-disc list-inside space-y-1.5 text-[15px] text-[#d5d1c8] pl-2 my-4">
                       {children}
                     </ul>
                   ),
                   ol: ({ children }) => (
-                    <ol className="list-decimal list-inside space-y-1.5 text-[15px] text-slate-200 pl-2 my-4">
+                    <ol className="list-decimal list-inside space-y-1.5 text-[15px] text-[#d5d1c8] pl-2 my-4">
                       {children}
                     </ol>
                   ),
                   li: ({ children }) => (
-                    <li className="leading-relaxed text-slate-200">{children}</li>
+                    <li className="leading-relaxed text-[#d5d1c8]">{children}</li>
                   ),
                   blockquote: ({ children }) => (
-                    <blockquote className="rounded-md border-l-2 border-[#e8895d] bg-white/[0.03] pl-4 pr-3 py-2.5 text-[14px] text-slate-300 my-5 not-italic">
+                    <blockquote className="rounded-md border-l-2 border-[#cc785c] bg-[#1f1e1b] pl-4 pr-3 py-2.5 text-[14px] text-[#d5d1c8] my-5 not-italic">
                       {children}
                     </blockquote>
                   ),
                   table: ({ children }) => (
-                    <div className="my-6 w-full overflow-x-auto rounded-xl border border-white/10 bg-[#121211] shadow-sm">
+                    <div className="my-6 w-full overflow-x-auto rounded-xl border border-[#2e2b27] bg-[#181715] shadow-sm">
                       <table className="w-full text-left text-sm border-collapse font-sans">
                         {children}
                       </table>
                     </div>
                   ),
                   thead: ({ children }) => (
-                    <thead className="bg-white/[0.04] border-b border-white/10 text-slate-100 font-semibold font-sans">
+                    <thead className="bg-[#252320] border-b border-[#2e2b27] text-[#faf9f5] font-semibold font-sans">
                       {children}
                     </thead>
                   ),
                   tbody: ({ children }) => (
-                    <tbody className="divide-y divide-white/5 bg-transparent font-sans">
+                    <tbody className="divide-y divide-[#2e2b27]/60 bg-transparent font-sans">
                       {children}
                     </tbody>
                   ),
                   tr: ({ children }) => (
-                    <tr className="hover:bg-white/[0.02] transition-colors">{children}</tr>
+                    <tr className="hover:bg-[#1f1e1b] transition-colors">{children}</tr>
                   ),
                   th: ({ children }) => (
-                    <th className="py-3 px-4 text-sm font-semibold text-slate-100 text-left font-sans">{children}</th>
+                    <th className="py-3 px-4 text-sm font-semibold text-[#faf9f5] text-left font-sans">{children}</th>
                   ),
                   td: ({ children }) => (
-                    <td className="py-3.5 px-4 text-sm text-slate-200 border-b border-white/5 leading-relaxed font-sans">{children}</td>
+                    <td className="py-3.5 px-4 text-sm text-[#d5d1c8] border-b border-[#2e2b27]/40 leading-relaxed font-sans">{children}</td>
                   ),
                   img: ({ src, alt, ...props }) => (
                     <img
                       src={src}
                       alt={alt || '架构图'}
-                      className="my-8 mx-auto rounded-xl border border-white/10 shadow-2xl block max-w-full"
+                      className="my-8 mx-auto rounded-xl border border-[#2e2b27] shadow-2xl block max-w-full"
                       {...props}
                     />
                   ),
@@ -346,7 +473,7 @@ export const ClientExportTab: React.FC = () => {
                     if (isInline) {
                       return (
                         <code
-                          className="rounded bg-white/10 border border-white/10 px-1.5 py-0.5 text-xs font-mono text-[#e8895d]"
+                          className="rounded bg-[#252320] border border-[#2e2b27] px-1.5 py-0.5 text-xs font-mono text-[#cc785c]"
                           {...props}
                         >
                           {children}
@@ -373,19 +500,19 @@ export const ClientExportTab: React.FC = () => {
             </article>
 
             {/* Bottom Prev / Next Navigation Cards */}
-            <div className="pt-10 border-t border-white/10 space-y-4">
+            <div className="pt-10 border-t border-[#2e2b27] space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {prevDoc ? (
                   <button
                     type="button"
                     onClick={() => navigateToDoc(prevDoc.slug)}
-                    className="flex flex-col items-start p-4 rounded-lg border border-white/10 bg-[#121211] hover:border-[#e8895d]/50 hover:bg-[#161614] transition text-left"
+                    className="flex flex-col items-start p-4 rounded-lg border border-[#2e2b27] bg-[#181715] hover:border-[#cc785c]/60 hover:bg-[#252320] transition text-left cursor-pointer"
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs text-[#a09d96]">
                       <ArrowLeft className="h-3 w-3" />
                       <span>上一篇</span>
                     </div>
-                    <div className="mt-1 font-sans text-xs text-white font-medium truncate w-full">
+                    <div className="mt-1 font-sans text-xs text-[#faf9f5] font-medium truncate w-full">
                       {prevDoc.frontmatter.title}
                     </div>
                   </button>
@@ -397,13 +524,13 @@ export const ClientExportTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigateToDoc(nextDoc.slug)}
-                    className="flex flex-col items-end p-4 rounded-lg border border-white/10 bg-[#121211] hover:border-[#e8895d]/50 hover:bg-[#161614] transition text-right"
+                    className="flex flex-col items-end p-4 rounded-lg border border-[#2e2b27] bg-[#181715] hover:border-[#cc785c]/60 hover:bg-[#252320] transition text-right cursor-pointer"
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs text-[#a09d96]">
                       <span>下一篇</span>
                       <ArrowRight className="h-3 w-3" />
                     </div>
-                    <div className="mt-1 font-sans text-xs text-white font-medium truncate w-full">
+                    <div className="mt-1 font-sans text-xs text-[#faf9f5] font-medium truncate w-full">
                       {nextDoc.frontmatter.title}
                     </div>
                   </button>
@@ -413,13 +540,13 @@ export const ClientExportTab: React.FC = () => {
               </div>
 
               {/* Back to Top */}
-              <div className="flex items-center justify-between text-xs text-slate-400 pt-4 font-mono">
+              <div className="flex items-center justify-between text-xs text-[#a09d96] pt-4 font-mono">
                 <div>
-                  <span className="text-slate-300">{currentDoc.frontmatter.title}</span>
+                  <span className="text-[#faf9f5]">{currentDoc.frontmatter.title}</span>
                 </div>
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="text-[#e8895d] hover:underline"
+                  className="text-[#cc785c] hover:underline cursor-pointer"
                 >
                   回到顶部 ↑
                 </button>
@@ -431,25 +558,25 @@ export const ClientExportTab: React.FC = () => {
         </main>
 
         {/* ========================================== */}
-        {/* 3. Far Right Column: TOC "本页内容" (w-64)  */}
+        {/* 3. Far Right Column: TOC (Fixed Spacing)   */}
         {/* ========================================== */}
-        <aside className="hidden xl:flex w-64 shrink-0 py-10 pr-8 pl-5 flex-col sticky top-0 h-[calc(100vh-52px)] overflow-y-auto border-l border-white/5 select-none">
-          <div className="space-y-3 sticky top-4">
-            <div className="text-xs font-mono font-semibold text-slate-300 flex items-center gap-1.5">
-              <AlignLeft className="w-3.5 h-3.5 text-[#e8895d]" />
-              <span>本页内容</span>
+        <aside className="hidden xl:flex w-64 shrink-0 pt-10 pb-10 pr-8 pl-5 flex-col sticky top-[52px] h-[calc(100vh-52px)] overflow-y-auto border-l border-[#2e2b27] select-none bg-[#181715]/40">
+          <div className="space-y-3.5">
+            <div className="text-[15px] font-sans font-bold text-[#faf9f5] flex items-center gap-2 tracking-tight">
+              <AlignLeft className="w-4 h-4 text-[#cc785c]" />
+              <span>本页目录</span>
             </div>
 
             {currentDoc.headings.length === 0 ? (
-              <div className="text-xs text-slate-500 font-sans">暂无子标题</div>
+              <div className="text-xs text-[#6c6a64] font-sans">暂无子标题</div>
             ) : (
               <nav className="space-y-1 text-[13px] font-sans">
                 {currentDoc.headings.map((heading, i) => (
                   <button
                     key={i}
                     onClick={() => scrollToHeading(heading.id)}
-                    className={`w-full text-left py-1 text-slate-400 hover:text-white transition block truncate leading-snug ${
-                      heading.level === 3 ? 'pl-3 text-xs text-slate-500 hover:text-slate-200' : 'text-[13px]'
+                    className={`w-full text-left py-1 text-[#a09d96] hover:text-[#faf9f5] transition block truncate leading-snug cursor-pointer ${
+                      heading.level === 3 ? 'pl-3 text-xs text-[#6c6a64] hover:text-[#a09d96]' : 'text-[13px]'
                     }`}
                   >
                     {heading.text}
@@ -464,3 +591,4 @@ export const ClientExportTab: React.FC = () => {
     </div>
   );
 };
+

@@ -25,6 +25,35 @@ type AppAction =
 const initialPlatformId = getPlatformOptions()[0]?.value || 'openai';
 const initialPlatform = PLATFORMS[initialPlatformId] || PLATFORMS.openai;
 
+const VALID_TABS: ActiveTabId[] = [
+  'home',
+  'quickping',
+  'docs',
+  'fidelity',
+  'benchmark',
+  'scanner',
+  'capability',
+  'export',
+];
+
+function getInitialActiveTab(): ActiveTabId {
+  try {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace(/^#\/?/, '').trim() as ActiveTabId;
+      if (VALID_TABS.includes(hash)) {
+        return hash;
+      }
+      const saved = localStorage.getItem('aqc_activeTab') as ActiveTabId;
+      if (saved && VALID_TABS.includes(saved)) {
+        return saved;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return 'home';
+}
+
 const initialState: AppState = {
   config: {
     platformId: initialPlatformId,
@@ -33,7 +62,7 @@ const initialState: AppState = {
     selectedModel: 'gpt-4o',
     timeoutMs: 8000,
   },
-  activeTab: 'home',
+  activeTab: getInitialActiveTab(),
   availableModels: [],
   isLoadingModels: false,
   modelError: null,
@@ -71,11 +100,20 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         config: { ...state.config, selectedModel: action.payload },
       };
-    case 'SET_ACTIVE_TAB':
+    case 'SET_ACTIVE_TAB': {
+      try {
+        localStorage.setItem('aqc_activeTab', action.payload);
+        if (typeof window !== 'undefined' && window.location.hash !== `#${action.payload}`) {
+          window.history.replaceState(null, '', `#${action.payload}`);
+        }
+      } catch {
+        // ignore
+      }
       return {
         ...state,
         activeTab: action.payload,
       };
+    }
     case 'SET_AVAILABLE_MODELS':
       return {
         ...state,
@@ -113,11 +151,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const savedBaseUrl = localStorage.getItem('aqc_baseUrl');
       const savedPlatformId = localStorage.getItem('aqc_platformId') || initialPlatformId;
       const savedModel = localStorage.getItem('aqc_model');
-      
+      const initialTab = getInitialActiveTab();
+
       const platform = PLATFORMS[savedPlatformId] || initialPlatform;
 
       return {
         ...initialState,
+        activeTab: initialTab,
         config: {
           ...initialState.config,
           platformId: savedPlatformId,
@@ -130,17 +170,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
 
+  // Sync state changes with localStorage and URL Hash
   useEffect(() => {
     try {
       localStorage.setItem('aqc_baseUrl', state.config.baseUrl);
       localStorage.setItem('aqc_platformId', state.config.platformId);
+      localStorage.setItem('aqc_activeTab', state.activeTab);
+      if (typeof window !== 'undefined' && window.location.hash !== `#${state.activeTab}`) {
+        window.history.replaceState(null, '', `#${state.activeTab}`);
+      }
       if (state.config.selectedModel) {
         localStorage.setItem('aqc_model', state.config.selectedModel);
       }
     } catch {
       // ignore
     }
-  }, [state.config.baseUrl, state.config.platformId, state.config.selectedModel]);
+  }, [state.config.baseUrl, state.config.platformId, state.config.selectedModel, state.activeTab]);
+
+  // Sync hashchange from browser back/forward or manual hash change
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '').trim() as ActiveTabId;
+      if (VALID_TABS.includes(hash) && hash !== state.activeTab) {
+        dispatch({ type: 'SET_ACTIVE_TAB', payload: hash });
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [state.activeTab]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

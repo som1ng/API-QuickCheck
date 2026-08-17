@@ -12,7 +12,6 @@ const MainContent: React.FC = () => {
   const { state } = useApp();
   const { activeTab } = state;
 
-  const isHome = activeTab === 'home' || activeTab === 'fidelity' || activeTab === 'benchmark' || activeTab === 'scanner';
   const isBatchKeys = activeTab === 'quickping';
   const isDocs = activeTab === 'docs' || activeTab === 'export';
 
@@ -26,26 +25,30 @@ const MainContent: React.FC = () => {
             <ClientExportTab />
           </ErrorBoundary>
         </main>
-      ) : (
+      ) : isBatchKeys ? (
         <>
-          <main className="flex-1 w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 py-6">
-            <div>
-              {isHome && (
-                <ErrorBoundary fallbackTitle="中转站检测模块异常">
-                  <HomeRelayTab />
-                </ErrorBoundary>
-              )}
-              {isBatchKeys && (
-                <ErrorBoundary fallbackTitle="API Key 批量检测模块异常">
-                  <QuickPingTab />
-                </ErrorBoundary>
-              )}
-            </div>
+          <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-8">
+            <ErrorBoundary fallbackTitle="API Key 批量检测模块异常">
+              <QuickPingTab />
+            </ErrorBoundary>
 
-            {/* FAQ Section cleanly pushed below the fold */}
-            <div className="mt-20 mb-12">
+            <div className="mt-28 mb-16">
               <FaqSection />
             </div>
+          </main>
+
+          <Footer />
+        </>
+      ) : (
+        <>
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+            <div className="min-h-[520px]">
+              <ErrorBoundary fallbackTitle="中转站检测模块异常">
+                <HomeRelayTab />
+              </ErrorBoundary>
+            </div>
+
+            <FaqSection />
           </main>
 
           <Footer />

@@ -1,0 +1,41 @@
+name: Sync 2026 Frontier Models Baseline
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every 3 days
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  sync-models:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Execute Model Baseline Sync
+        run: npm run sync:models
+
+      - name: Commit and Push Changes if Baseline Updated
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/content/docs/ src/content/baselines/
+          if git diff --staged --quiet; then
+            echo "No model baseline changes detected."
+          else
+            git commit -m "chore(baseline): auto-sync 2026 frontier models baseline [skip ci]"
+            git push
+          fi

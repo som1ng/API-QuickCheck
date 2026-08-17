@@ -1,0 +1,501 @@
+{
+  "updatedAt": "2026-08-17",
+  "totalModels": 55,
+  "models": [
+    {
+      "provider": "OpenAI",
+      "modelId": "gpt-5.6-sol",
+      "name": "GPT-5.6 Sol",
+      "tier": "旗舰复杂推理与自主代码 (Flagship)",
+      "surface": "Responses",
+      "contextLength": 256000,
+      "notes": "OpenAI 新代旗舰推理与代码模型；`gpt-5.6` 别名自动路由至此"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "gpt-5.6-terra",
+      "name": "GPT-5.6 Terra",
+      "tier": "均衡全能工作马 (Balanced)",
+      "surface": "Responses",
+      "contextLength": 200000,
+      "notes": "通用均衡型高性价比旗舰，适合大部分复杂 Agent 编排"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "gpt-5.6-luna",
+      "name": "GPT-5.6 Luna",
+      "tier": "极速低延迟轻量级 (High-Throughput)",
+      "surface": "Responses",
+      "contextLength": 128000,
+      "notes": "高吞吐成本敏感型，亚秒级延迟"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "o3",
+      "name": "OpenAI o3",
+      "tier": "深度强化推理系统 (Deep Reasoning)",
+      "surface": "Responses",
+      "contextLength": 200000,
+      "notes": "前沿思维链强化推理模型，用于数学、竞赛代码与科学推演"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "gpt-4.5-preview",
+      "name": "GPT-4.5",
+      "tier": "知识与文风密集型旗舰 (Creative & Knowledge)",
+      "surface": "Responses",
+      "contextLength": 128000,
+      "notes": "超大参数规模知识检索与创作模型"
+    },
+    {
+      "provider": "Anthropic",
+      "modelId": "claude-fable-5",
+      "name": "Claude Fable 5",
+      "tier": "全能旗舰与顶尖编程 (Next-Gen Flagship)",
+      "surface": "Messages",
+      "contextLength": 500000,
+      "notes": "广泛可用最高能力，原生支持 Adaptive Thinking"
+    },
+    {
+      "provider": "Anthropic",
+      "modelId": "claude-mythos-5",
+      "name": "Claude Mythos 5",
+      "tier": "Project Glasswing 邀请制 (Enterprise Frontier)",
+      "surface": "Messages",
+      "contextLength": 1000000,
+      "notes": "顶级企业与战略研究专用，需独立官方签名基线验证"
+    },
+    {
+      "provider": "Anthropic",
+      "modelId": "claude-3-7-sonnet-20250219",
+      "name": "Claude 3.7 Sonnet",
+      "tier": "混合推理与代码旗舰 (Hybrid Reasoning)",
+      "surface": "Messages",
+      "contextLength": 200000,
+      "notes": "行业标准编程与复杂架构分析基准，支持动态思考预算控制"
+    },
+    {
+      "provider": "Anthropic",
+      "modelId": "claude-3-5-sonnet-20241022",
+      "name": "Claude 3.5 Sonnet v2",
+      "tier": "生产级高能稳定 (Production Benchmark)",
+      "surface": "Messages",
+      "contextLength": 200000,
+      "notes": "成熟生产环境首选基线，用于常规降级与防冒充检测"
+    },
+    {
+      "provider": "Google",
+      "modelId": "gemini-3.1-pro-preview",
+      "name": "Gemini 3.1 Pro Preview",
+      "tier": "多模态与长上下文旗舰 (Multimodal Frontier)",
+      "surface": "Interactions",
+      "contextLength": 2000000,
+      "notes": "超长上下文深度推演，支持 Thought Signatures 跨轮保持"
+    },
+    {
+      "provider": "Google",
+      "modelId": "gemini-3.7-flash",
+      "name": "Gemini 3.7 Flash",
+      "tier": "极速代码与 Agent 工作马 (Ultra Fast)",
+      "surface": "Interactions",
+      "contextLength": 1000000,
+      "notes": "GA 生产级 Agent 调度模型，低延迟高并发吞吐"
+    },
+    {
+      "provider": "Google",
+      "modelId": "gemini-2.0-flash",
+      "name": "Gemini 2.0 Flash",
+      "tier": "通用高效多模态 (Universal Speed)",
+      "surface": "Interactions",
+      "contextLength": 1000000,
+      "notes": "高性价比实时交互与视觉理解基线"
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "deepseek-reasoner",
+      "name": "DeepSeek R1",
+      "tier": "开源深度推理领航 (Deep Reasoning R1)",
+      "surface": "ChatCompletions",
+      "contextLength": 128000,
+      "notes": "开源思维链推理模型，包含完整推理思考内容 (reasoning_content)"
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "deepseek-chat",
+      "name": "DeepSeek V3",
+      "tier": "MoE 超高性价比全能 (MoE General V3)",
+      "surface": "ChatCompletions",
+      "contextLength": 128000,
+      "notes": "671B MoE 架构通用基线，代码与中英双语能力强劲"
+    },
+    {
+      "provider": "xAI",
+      "modelId": "grok-4.6",
+      "name": "Grok 4.6",
+      "tier": "全模态实时推理与代码 (Realtime Agent)",
+      "surface": "Responses",
+      "contextLength": 256000,
+      "notes": "原生集成 X 实时搜索、Python 代码沙箱与结构化工具消费"
+    },
+    {
+      "provider": "xAI",
+      "modelId": "grok-3",
+      "name": "Grok 3",
+      "tier": "旗舰推理与通用计算 (Flagship Reasoning)",
+      "surface": "Responses",
+      "contextLength": 131072,
+      "notes": "xAI 核心主力推理模型"
+    },
+    {
+      "provider": "Meta",
+      "modelId": "llama-3.3-70b-instruct",
+      "name": "Llama 3.3 70B Instruct",
+      "tier": "开源生态主流基准 (Open-Source Standard)",
+      "surface": "ChatCompletions",
+      "contextLength": 128000,
+      "notes": "开源权重顶尖指令微调模型，常作为私有中转站对照"
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "deepseek/deepseek-v4-pro-0813",
+      "name": "DeepSeek: DeepSeek V4 Pro 0813",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "ChatCompletions",
+      "contextLength": 1048576,
+      "notes": "DeepSeek V4 Pro 0813 is a large-scale mixture-of-experts model from DeepSeek. Th"
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "~deepseek/deepseek-v4-flash-latest",
+      "name": "DeepSeek V4 Flash Latest",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "ChatCompletions",
+      "contextLength": 1048576,
+      "notes": "This model always redirects to the latest model in the DeepSeek V4 Flash family."
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "deepseek/deepseek-v4-flash-0731",
+      "name": "DeepSeek: DeepSeek V4 Flash 0731",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "ChatCompletions",
+      "contextLength": 1048576,
+      "notes": "DeepSeek V4 Flash 0731 is a sparse mixture-of-experts model from DeepSeek, with "
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.6-flash",
+      "name": "Google: Gemini 3.6 Flash",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 3.6 Flash is a high-efficiency model from Google for coding, agentic work"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.5-flash-lite",
+      "name": "Google: Gemini 3.5 Flash Lite",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 3.5 Flash Lite is a high-efficiency model from Google with upgraded agent"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.1-flash-lite-image",
+      "name": "Google: Nano Banana 2 Lite (Gemini 3.1 Flash Lite Image)",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 65536,
+      "notes": "Nano Banana 2 Lite (Gemini 3.1 Flash Lite Image) is Google's fastest, most cost-"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.1-flash-image",
+      "name": "Google: Nano Banana 2 (Gemini 3.1 Flash Image)",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 131072,
+      "notes": "Gemini 3.1 Flash Image, a.k.a. \"Nano Banana 2,\" is Google’s latest state of the "
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3-pro-image",
+      "name": "Google: Nano Banana Pro (Gemini 3 Pro Image)",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 131072,
+      "notes": "Nano Banana Pro is Google’s most advanced image-generation and editing model, bu"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.5-flash",
+      "name": "Google: Gemini 3.5 Flash",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 3.5 Flash is Google's high-efficiency multimodal model, bringing near-Pro"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.1-flash-lite",
+      "name": "Google: Gemini 3.1 Flash Lite",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 3.1 Flash Lite is Google’s GA high-efficiency multimodal model optimized "
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.5-pro",
+      "name": "OpenAI: GPT-5.5 Pro",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 1050000,
+      "notes": "GPT-5.5 Pro is OpenAI’s high-capability model optimized for deep reasoning and a"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.5",
+      "name": "OpenAI: GPT-5.5",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 1050000,
+      "notes": "GPT-5.5 is OpenAI’s frontier model designed for complex professional workloads, "
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "deepseek/deepseek-v4-pro",
+      "name": "DeepSeek: DeepSeek V4 Pro 0423",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "ChatCompletions",
+      "contextLength": 1048576,
+      "notes": "DeepSeek V4 Pro is a large-scale Mixture-of-Experts model from DeepSeek with 1.6"
+    },
+    {
+      "provider": "DeepSeek",
+      "modelId": "deepseek/deepseek-v4-flash",
+      "name": "DeepSeek: DeepSeek V4 Flash 0423",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "ChatCompletions",
+      "contextLength": 1048576,
+      "notes": "DeepSeek V4 Flash is an efficiency-optimized Mixture-of-Experts model from DeepS"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.4-image-2",
+      "name": "OpenAI: GPT-5.4 Image 2",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 272000,
+      "notes": "[GPT-5.4](https://openrouter.ai/openai/gpt-5.4) Image 2 combines OpenAI's GPT-5."
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.4-nano",
+      "name": "OpenAI: GPT-5.4 Nano",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.4 nano is the most lightweight and cost-efficient variant of the GPT-5.4 f"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.4-mini",
+      "name": "OpenAI: GPT-5.4 Mini",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.4 mini brings the core capabilities of GPT-5.4 to a faster, more efficient"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.4-pro",
+      "name": "OpenAI: GPT-5.4 Pro",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 1050000,
+      "notes": "GPT-5.4 Pro is OpenAI's most advanced model, building on GPT-5.4's unified archi"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.4",
+      "name": "OpenAI: GPT-5.4",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 1050000,
+      "notes": "GPT-5.4 is OpenAI’s latest frontier model, unifying the Codex and GPT lines into"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.3-codex",
+      "name": "OpenAI: GPT-5.3-Codex",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.3-Codex is OpenAI’s most advanced agentic coding model, combining the fron"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.2-codex",
+      "name": "OpenAI: GPT-5.2-Codex",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.2-Codex is an upgraded version of GPT-5.1-Codex optimized for software eng"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3-flash-preview",
+      "name": "Google: Gemini 3 Flash Preview",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 3 Flash Preview is a high speed, high value thinking model designed for a"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.2-chat",
+      "name": "OpenAI: GPT-5.2 Chat",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 128000,
+      "notes": "GPT-5.2 Chat (AKA Instant) is the fast, lightweight member of the 5.2 family, op"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.2-pro",
+      "name": "OpenAI: GPT-5.2 Pro",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.2 Pro is OpenAI’s most advanced model, offering major improvements in agen"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.2",
+      "name": "OpenAI: GPT-5.2",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.2 is the latest frontier-grade model in the GPT-5 series, offering stronge"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.1-codex-max",
+      "name": "OpenAI: GPT-5.1-Codex-Max",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.1-Codex-Max is OpenAI’s latest agentic coding model, designed for long-run"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5.1",
+      "name": "OpenAI: GPT-5.1",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5.1 is the latest frontier-grade model in the GPT-5 series, offering stronge"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5-image-mini",
+      "name": "OpenAI: GPT-5 Image Mini",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5 Image Mini combines OpenAI's advanced language capabilities, powered by [G"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5-image",
+      "name": "OpenAI: GPT-5 Image",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "[GPT-5](https://openrouter.ai/openai/gpt-5) Image combines OpenAI's GPT-5 model "
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-2.5-flash-image",
+      "name": "Google: Nano Banana (Gemini 2.5 Flash Image)",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 32768,
+      "notes": "Gemini 2.5 Flash Image, a.k.a. \"Nano Banana,\" is now generally available. It is "
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5-pro",
+      "name": "OpenAI: GPT-5 Pro",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5 Pro is OpenAI’s most advanced model, offering major improvements in reason"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5-codex:batch",
+      "name": "OpenAI: GPT-5 Codex (batch)",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5-Codex is a specialized version of GPT-5 optimized for software engineering"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/gpt-5",
+      "name": "OpenAI: GPT-5",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 400000,
+      "notes": "GPT-5 is OpenAI’s most advanced model, offering major improvements in reasoning,"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-2.5-flash-lite",
+      "name": "Google: Gemini 2.5 Flash Lite",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 2.5 Flash-Lite is a lightweight reasoning model in the Gemini 2.5 family,"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-2.5-flash",
+      "name": "Google: Gemini 2.5 Flash",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 2.5 Flash is Google's state-of-the-art workhorse model, specifically desi"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-2.5-pro",
+      "name": "Google: Gemini 2.5 Pro",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 2.5 Pro is Google’s state-of-the-art AI model designed for advanced reaso"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/o4-mini-high",
+      "name": "OpenAI: o4 Mini High",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 200000,
+      "notes": "OpenAI o4-mini-high is the same model as [o4-mini](/openai/o4-mini) with reasoni"
+    },
+    {
+      "provider": "OpenAI",
+      "modelId": "openai/o4-mini",
+      "name": "OpenAI: o4 Mini",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 200000,
+      "notes": "OpenAI o4-mini is a compact reasoning model in the o-series, optimized for fast,"
+    }
+  ]
+}

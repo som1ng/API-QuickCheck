@@ -115,6 +115,44 @@ npm run dev
 open http://localhost:5173/
 ```
 
+### 基线协议审计 CLI
+
+浏览器里的「基线审计」只运行低成本 P0/P1 协议检查。它不会把单次回答或文风当成模型身份凭证；没有官方能力快照时，报告结论固定为「证据不足」。
+
+CLI 会直接复用网页审计 runner，适合在本地 agent 环境中保存完整 JSON 报告。启动时会在终端显示 API-QuickCheck 立体 Logo，API Key 只存在于当前进程内。
+
+```bash
+# 使用命令行运行审计，密钥也可以改用 APIQC_API_KEY 环境变量
+npx tsx scripts/apiqc.ts audit \
+  --provider auto \
+  --model gpt-5.6-sol \
+  --profile balanced \
+  --base-url https://api.example.com/v1 \
+  --api-key "$API_KEY" \
+   --out reports/audit.json
+
+# 只执行指定测试，适合先做低成本真实 API 验证
+npx tsx scripts/apiqc.ts audit \
+  --model gpt-5.6-sol \
+  --profile quick \
+  --probes p0-native-route,p0-auth-shape,p0-strict-json \
+  --base-url https://api.example.com/v1 \
+  --api-key "$API_KEY" \
+  --out reports/quick-audit.json
+
+# 捕获一份带来源和覆盖率标记的快照
+npx tsx scripts/apiqc.ts baseline capture \
+  --provider openai \
+  --model gpt-5.6-sol \
+  --profile balanced \
+  --base-url https://api.openai.com/v1 \
+  --api-key "$OPENAI_API_KEY" \
+  --source official \
+  --out baselines/openai-gpt-5.6-sol.json
+```
+
+快照文件会记录 `provider/model/api-surface/region/service-tier/date`、协议事件、夹具哈希、运行质量和覆盖率，不保存 API Key。当前浏览器执行器还没有 P2/P3 代码补丁、视觉、长上下文和重复采样任务；因此通过 `baseline capture` 生成的文件应先检查 `source` 与 `coverage`，不能把不完整采样当作官方能力基线。
+
 ---
 
 ## ⭐ 一键 Vercel 部署

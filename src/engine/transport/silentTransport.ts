@@ -39,7 +39,7 @@ export async function silentFetch<T = unknown>(
   } = options;
 
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     controller.abort(new Error('Request Timeout'));
   }, timeoutMs);
 
@@ -62,7 +62,7 @@ export async function silentFetch<T = unknown>(
       signal: combinedSignal,
     });
 
-    window.clearTimeout(timeoutId);
+    clearTimeout(timeoutId);
     const latencyMs = Math.round(performance.now() - startTime);
 
     let rawText = '';
@@ -83,6 +83,7 @@ export async function silentFetch<T = unknown>(
     // and fallback is not disabled, silently retry once through serverless proxy
     if (
       !response.ok &&
+      typeof window !== 'undefined' &&
       !disableFallback &&
       !url.startsWith('/api/proxy') &&
       [404, 403, 405, 502, 503].includes(response.status)
@@ -136,7 +137,7 @@ export async function silentFetch<T = unknown>(
       errorMessage,
     };
   } catch (err: unknown) {
-    window.clearTimeout(timeoutId);
+    clearTimeout(timeoutId);
     const latencyMs = Math.round(performance.now() - startTime);
     const errorObj = err instanceof Error ? err : new Error(String(err));
 
@@ -144,7 +145,7 @@ export async function silentFetch<T = unknown>(
     const isCors = errorObj.name === 'TypeError' && (errorObj.message.includes('fetch') || errorObj.message.includes('NetworkError') || errorObj.message.includes('Failed'));
 
     // If blocked by CORS or NetworkError in browser, silently fallback to proxy
-    if (!userSignal?.aborted && !disableFallback && !url.startsWith('/api/proxy')) {
+    if (typeof window !== 'undefined' && !userSignal?.aborted && !disableFallback && !url.startsWith('/api/proxy')) {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
       return silentFetch<T>({
         ...options,
@@ -178,13 +179,13 @@ export async function silentStreamingFetch(
   try {
     const res = await fetch(url, options);
     // If direct response was blocked with 404/403/502 by WAF, retry via proxy
-    if (!res.ok && [404, 403, 405, 502].includes(res.status) && !url.startsWith('/api/proxy')) {
+    if (typeof window !== 'undefined' && !res.ok && [404, 403, 405, 502].includes(res.status) && !url.startsWith('/api/proxy')) {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
       return await fetch(proxyUrl, options);
     }
     return res;
   } catch (err: unknown) {
-    if (!url.startsWith('/api/proxy')) {
+    if (typeof window !== 'undefined' && !url.startsWith('/api/proxy')) {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(url)}`;
       return await fetch(proxyUrl, options);
     }

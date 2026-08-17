@@ -164,7 +164,7 @@ export async function fetchRemoteModels(
   }
 
   // 2. Dedicated proxy retry phase for top 2 candidates
-  const proxyTargets = candidateUrls.slice(0, 2);
+  const proxyTargets = typeof window !== 'undefined' ? candidateUrls.slice(0, 2) : [];
   for (const targetUrl of proxyTargets) {
     try {
       const proxyUrl = `/api/proxy?target=${encodeURIComponent(targetUrl)}`;

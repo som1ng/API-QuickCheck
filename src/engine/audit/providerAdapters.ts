@@ -13,7 +13,9 @@ export interface NativeResult {
   text: string;
   eventTypes: string[];
   signature?: string;
+  thinkingText?: string;
   toolCalled: boolean;
+  toolCall?: { id: string; name: string; arguments: unknown };
 }
 
 export interface ProviderAdapter {
@@ -23,6 +25,10 @@ export interface ProviderAdapter {
   strictJson?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
   tool?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
   reasoning?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
+  context?: ((baseUrl: string, apiKey: string, model: string, document: string) => NativeRequest) | undefined;
+  stream?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
+  toolContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, toolOutput: string) => NativeRequest) | undefined;
+  signatureContinuation?: ((baseUrl: string, apiKey: string, model: string, thinkingText: string, signature: string) => NativeRequest) | undefined;
   parse(response: TransportResponse<Record<string, unknown>>): NativeResult;
 }
 
@@ -35,24 +41,38 @@ const textFromContent = (content: unknown): string => Array.isArray(content)
   ? content.map((part) => typeof part === 'object' && part !== null && 'text' in part ? String((part as Record<string, unknown>).text ?? '') : '').join('')
   : typeof content === 'string' ? content : '';
 
+const parseToolArguments = (value: unknown): unknown => {
+  if (typeof value !== 'string') return value;
+  try { return JSON.parse(value); } catch { return value; }
+};
+
 const parseResponses = (response: TransportResponse<Record<string, unknown>>): NativeResult => {
   const output = Array.isArray(response.data?.output) ? response.data?.output as Record<string, unknown>[] : [];
   const text = typeof response.data?.output_text === 'string'
     ? response.data.output_text
     : output.map((item) => textFromContent(item.content)).join('');
-  const toolCalled = output.some((item) => item.type === 'function_call');
-  return { response, text, eventTypes: output.map((item) => String(item.type ?? 'unknown')), toolCalled };
+  const toolCall = output.find((item) => item.type === 'function_call');
+  return {
+    response,
+    text,
+    eventTypes: output.map((item) => String(item.type ?? 'unknown')),
+    toolCalled: Boolean(toolCall),
+    toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: parseToolArguments(toolCall.arguments) } : undefined,
+  };
 };
 
 const parseMessages = (response: TransportResponse<Record<string, unknown>>): NativeResult => {
   const content = Array.isArray(response.data?.content) ? response.data.content as Record<string, unknown>[] : [];
   const thinking = content.find((item) => item.type === 'thinking');
+  const toolCall = content.find((item) => item.type === 'tool_use');
   return {
     response,
     text: content.filter((item) => item.type === 'text').map((item) => String(item.text ?? '')).join(''),
     eventTypes: content.map((item) => String(item.type ?? 'unknown')),
     signature: typeof thinking?.signature === 'string' ? thinking.signature : undefined,
-    toolCalled: content.some((item) => item.type === 'tool_use'),
+    thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : undefined,
+    toolCalled: Boolean(toolCall),
+    toolCall: toolCall ? { id: String(toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: toolCall.input } : undefined,
   };
 };
 
@@ -61,11 +81,13 @@ const parseInteractions = (response: TransportResponse<Record<string, unknown>>)
   const text = typeof response.data?.output_text === 'string'
     ? response.data.output_text
     : output.map((item) => textFromContent(item.content)).join('');
+  const toolCall = output.find((item) => item.type === 'function_call' || item.type === 'tool_call');
   return {
     response,
     text,
     eventTypes: output.map((item) => String(item.type ?? 'unknown')),
-    toolCalled: output.some((item) => item.type === 'function_call' || item.type === 'tool_call'),
+    toolCalled: Boolean(toolCall),
+    toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: toolCall.arguments ?? toolCall.input } : undefined,
   };
 };
 
@@ -90,6 +112,29 @@ const openAiLike = (provider: 'openai' | 'xai'): ProviderAdapter => ({
   reasoning: (baseUrl, apiKey, model) => ({
     url: endpoint(baseUrl, '/responses'), headers: { Authorization: `Bearer ${apiKey}` }, body: { model, input: 'What is 19 multiplied by 23? Return only the number.', reasoning: { effort: 'high' } },
   }),
+  context: (baseUrl, apiKey, model, document) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      input: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.\n\n${document}`,
+      max_output_tokens: 64,
+    },
+  }),
+  stream: (baseUrl, apiKey, model) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: { model, input: 'Return exactly: audit-ready.', stream: true },
+  }),
+  toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      previous_response_id: result.response.data?.id,
+      input: [{ type: 'function_call_output', call_id: result.toolCall?.id, output: toolOutput }],
+    },
+  }),
   parse: parseResponses,
 });
 
@@ -99,6 +144,52 @@ const anthropic: ProviderAdapter = {
   strictJson: undefined,
   tool: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/messages'), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 256, tools: [{ name: 'audit_sum', description: 'Adds two integers.', input_schema: { type: 'object', properties: { a: { type: 'integer' }, b: { type: 'integer' } }, required: ['a', 'b'], additionalProperties: false } }], messages: [{ role: 'user', content: 'Call audit_sum with a=19 and b=23. Do not answer in prose.' }] } }),
   reasoning: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/messages'), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 256, thinking: { type: 'adaptive' }, output_config: { effort: 'high' }, messages: [{ role: 'user', content: 'What is 19 multiplied by 23? Return only the number.' }] } }),
+  context: (baseUrl, apiKey, model, document) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: {
+      model,
+      max_tokens: 64,
+      messages: [{ role: 'user', content: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.\n\n${document}` }],
+    },
+  }),
+  stream: (baseUrl, apiKey, model) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: { model, max_tokens: 128, messages: [{ role: 'user', content: 'Return exactly: audit-ready.' }], stream: true },
+  }),
+  toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: {
+      model,
+      max_tokens: 256,
+      messages: [
+        { role: 'user', content: 'Call audit_sum with a=19 and b=23. Do not answer in prose.' },
+        { role: 'assistant', content: result.response.data?.content },
+        { role: 'user', content: [{ type: 'tool_result', tool_use_id: result.toolCall?.id, content: toolOutput }] },
+      ],
+    },
+  }),
+  signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: {
+      model,
+      max_tokens: 256,
+      messages: [
+        { role: 'user', content: 'What is 19 multiplied by 23? Return only the number.' },
+        {
+          role: 'assistant',
+          content: [
+            { type: 'thinking', thinking: thinkingText, signature },
+            { type: 'text', text: '19 * 23 = 437.' },
+          ],
+        },
+        { role: 'user', content: 'Now add 10 to that result.' },
+      ],
+    },
+  }),
   parse: parseMessages,
 };
 
@@ -108,6 +199,15 @@ const gemini: ProviderAdapter = {
   strictJson: undefined,
   tool: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/interactions'), headers: { 'x-goog-api-key': apiKey }, body: { model, input: 'Call audit_sum with a=19 and b=23. Do not answer in prose.', tools: [{ function_declarations: [{ name: 'audit_sum', description: 'Adds two integers.', parameters_json_schema: { type: 'object', properties: { a: { type: 'integer' }, b: { type: 'integer' } }, required: ['a', 'b'] } }] }] } }),
   reasoning: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/interactions'), headers: { 'x-goog-api-key': apiKey }, body: { model, input: 'What is 19 multiplied by 23? Return only the number.', generation_config: { thinking_level: 'high' } } }),
+  context: (baseUrl, apiKey, model, document) => ({
+    url: endpoint(baseUrl, '/interactions'),
+    headers: { 'x-goog-api-key': apiKey },
+    body: {
+      model,
+      input: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.\n\n${document}`,
+      generation_config: { max_output_tokens: 64 },
+    },
+  }),
   parse: parseInteractions,
 };
 

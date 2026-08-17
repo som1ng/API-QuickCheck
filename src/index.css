@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,37 +6,44 @@
 
 @layer base {
   :root {
-    --app-bg: #0d0d0c;
-    --app-surface: #131312;
-    --app-surface-elevated: #1a1918;
-    --app-border: rgba(255, 255, 255, 0.08);
-    --app-border-subtle: rgba(255, 255, 255, 0.04);
-    --app-primary: #e8895d;
-    --app-primary-hover: #f09a70;
-    --app-primary-active: #d6784d;
-    --app-text-primary: #ffffff;
-    --app-text-body: #e2e8f0;
-    --app-text-muted: #94a3b8;
+    --app-bg: #141413;
+    --app-surface: #181715;
+    --app-surface-elevated: #252320;
+    --app-surface-soft: #1f1e1b;
+    --app-border: #2e2b27;
+    --app-border-subtle: #252320;
+    --app-primary: #cc785c;
+    --app-primary-hover: #d98266;
+    --app-primary-active: #a9583e;
+    --app-primary-disabled: #e6dfd8;
+    --app-text-primary: #faf9f5;
+    --app-text-body: #d5d1c8;
+    --app-text-muted: #a09d96;
+    --app-accent-teal: #5db8a6;
+    --app-accent-amber: #e8a55a;
     --app-success: #5db872;
-    --app-warning: #e8a55a;
+    --app-warning: #d4a017;
     --app-error: #c64545;
 
     font-size: 15px;
   }
 
+  html, body, #root, * {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: geometricPrecision !important;
+  }
+
   html, body {
     background-color: var(--app-bg);
     color: var(--app-text-body);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    line-height: 1.8;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    color: #ffffff;
-    letter-spacing: -0.02em;
+    color: #faf9f5;
+    letter-spacing: normal;
   }
 
   code, pre, .font-mono {
@@ -111,10 +118,38 @@
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
+@keyframes docSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.doc-transition-enter, .doc-slide-enter {
+  animation: docSlideIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+
 .smooth-btn {
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .smooth-input {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

@@ -7,6 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "apiqc": "tsx scripts/apiqc.ts",
+    "sync:audit-baselines": "tsx scripts/sync-audit-baselines.ts",
+    "sync:models": "tsx scripts/sync-model-baselines.ts",
+    "test": "tsx --test tests/audit.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -33,6 +37,7 @@
     "globals": "^15.11.0",
     "postcss": "^8.5.12",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.23.12",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.11.0",
     "vite": "^5.4.10"

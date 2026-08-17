@@ -4,6 +4,7 @@ export type EvidenceStatus = 'pass' | 'fail' | 'unavailable';
 export type AuditConclusion = 'consistent' | 'suspect_downgraded' | 'inconclusive';
 export type AuditProfile = 'quick' | 'balanced' | 'deep';
 export type AuditLayer = 'P0' | 'P1' | 'P2' | 'P3';
+export type ProbeDisposition = 'standard_benchmark' | 'exploratory_test' | 'not_claimed';
 
 export interface FrontierModelDefinition {
   id: string;
@@ -35,6 +36,8 @@ export interface ProtocolEvidence {
   detail: string;
   latencyMs?: number;
   rawEventTypes?: string[];
+  disposition?: ProbeDisposition;
+  countsTowardOfficialConclusion?: boolean;
 }
 
 export interface CapabilityMetric {
@@ -45,6 +48,7 @@ export interface CapabilityMetric {
   confidenceInterval?: [number, number];
   status: EvidenceStatus;
   detail: string;
+  exploratoryScores?: number[];
 }
 
 export interface RuntimeQuality {
@@ -68,7 +72,8 @@ export interface AuditReportV4 {
   summary: string;
   candidateDistances: Array<{ modelId: string; distance: number }>;
   fixtureHashes: Record<string, string>;
-  coverage: { executed: number; total: number; unavailable: number };
+  coverage: { executed: number; total: number; unavailable: number; notClaimed?: number; exploratory?: number };
+  selectedProbeIds: string[];
   seed: string;
   testedAt: string;
 }
@@ -87,4 +92,6 @@ export interface BaselineSnapshot {
   capabilityDistributions: Record<CapabilityMetric['domain'], number[]>;
   runtime: { p50LatencyMs?: number; p95LatencyMs?: number; successRate: number };
   estimatedCostUsd: number;
+  source: 'official' | 'user' | 'unknown';
+  coverage: { executed: number; total: number; unavailable: number };
 }

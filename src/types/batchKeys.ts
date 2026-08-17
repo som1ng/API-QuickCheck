@@ -8,6 +8,13 @@ export type KeyHealthStatus =
   | 'pending' 
   | 'testing';
 
+export interface KeyBalanceDetails {
+  total?: number;
+  used?: number;
+  remain?: number;
+  currency?: string;
+}
+
 export interface KeyCheckResult {
   index: number;
   key: string;
@@ -15,11 +22,20 @@ export interface KeyCheckResult {
   status: KeyHealthStatus;
   httpStatus?: number;
   balance?: string;
+  balanceDetails?: KeyBalanceDetails;
+  availableModels?: string[];
+  checkModel?: string;
   latencyMs?: number;
   errorMessage?: string;
 }
 
 export interface BatchKeySummary {
+  id?: string | number;
+  timestamp?: number;
+  providerId?: string;
+  providerName?: string;
+  baseUrl?: string;
+  testModel?: string;
   total: number;
   completed: number;
   activeCount: number;

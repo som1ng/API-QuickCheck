@@ -15,57 +15,75 @@ export interface SSEChunkEvent {
   rawJson?: unknown;
 }
 
-export async function* readSSEStream(
+export interface SSEWireEvent {
+  event: string;
+  data: unknown;
+}
+
+export async function* readSSEEvents(
   response: Response,
-  signal?: AbortSignal
-): AsyncGenerator<SSEChunkEvent, void, unknown> {
-  if (!response.body) {
-    throw new Error('Response body is null, cannot stream');
-  }
+  signal?: AbortSignal,
+): AsyncGenerator<SSEWireEvent, void, unknown> {
+  if (!response.body) throw new Error('Response body is null, cannot stream');
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
+  let eventName = '';
+  let dataLines: string[] = [];
+
+  const flush = (): SSEWireEvent | null => {
+    if (dataLines.length === 0) {
+      eventName = '';
+      return null;
+    }
+    const rawData = dataLines.join('\n');
+    dataLines = [];
+    const currentEvent = eventName || 'message';
+    eventName = '';
+    if (rawData === '[DONE]' || currentEvent === 'message_stop') return null;
+    try {
+      return { event: currentEvent, data: JSON.parse(rawData) };
+    } catch {
+      return { event: currentEvent, data: rawData };
+    }
+  };
 
   try {
     while (true) {
-      if (signal?.aborted) {
-        break;
-      }
-
+      if (signal?.aborted) break;
       const { done, value } = await reader.read();
       if (done) break;
-
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
+      const lines = buffer.split(/\r?\n/);
       buffer = lines.pop() || '';
-
       for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith(':')) {
-          continue; // Ping / comment line
+        if (line === '') {
+          const event = flush();
+          if (event) yield event;
+          continue;
         }
-
-        if (trimmed === 'data: [DONE]' || trimmed === 'event: message_stop') {
-          return;
-        }
-
-        if (trimmed.startsWith('data:')) {
-          const jsonStr = trimmed.replace(/^data:\s*/, '');
-          try {
-            const data = JSON.parse(jsonStr);
-            const event = parseSSEData(data);
-            if (event) {
-              yield event;
-            }
-          } catch {
-            // Ignore non-JSON chunks or incomplete lines
-          }
-        }
+        if (line.startsWith(':')) continue;
+        if (line.startsWith('event:')) eventName = line.slice(6).trim();
+        if (line.startsWith('data:')) dataLines.push(line.slice(5).trimStart());
       }
     }
+    const event = flush();
+    if (event) yield event;
   } finally {
     reader.releaseLock();
+  }
+}
+
+export async function* readSSEStream(
+  response: Response,
+  signal?: AbortSignal
+): AsyncGenerator<SSEChunkEvent, void, unknown> {
+  for await (const wireEvent of readSSEEvents(response, signal)) {
+    if (typeof wireEvent.data === 'object' && wireEvent.data !== null) {
+      const event = parseSSEData(wireEvent.data);
+      if (event) yield event;
+    }
   }
 }
 
