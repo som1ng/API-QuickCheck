@@ -9,14 +9,20 @@
     </td>
     <td width="72%" align="left" style="border:none; background: transparent; vertical-align: middle;">
       <pre lang="text">
-   █████╗ ██████╗ ██╗     ██████╗ ██╗   ██╗██╗ ██████╗██╗  ██╗
-  ██╔══██╗██╔══██╗██║    ██╔═══██╗██║   ██║██║██╔════╝██║ ██╔╝
-  ███████║██████╔╝██║    ██║   ██║██║   ██║██║██║     █████╔╝ 
-  ██╔══██║██╔═══╝ ██║    ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗ 
-  ██║  ██║██║     ██║    ╚██████╔╝╚██████╔╝██║╚██████╗██║  ██╗
-  ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══▀▀═╝  ╚═════╝ ╚═╝ ╚═════╝╚═╝  ╚═╝
-  ─────────────────────────────────────────────────────────────
-  ⚡ Universal AI Relay Forensics, Batch Testing & Agent Adapter
+  █████╗ ██████╗ ██╗    ██████╗ ██╗   ██╗██╗ ██████╗██╗  ██╗
+ ██╔══██╗██╔══██╗██║   ██╔═══██╗██║   ██║██║██╔════╝██║ ██╔╝
+ ███████║██████╔╝██║   ██║   ██║██║   ██║██║██║     █████╔╝ 
+ ██╔══██║██╔═══╝ ██║   ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗ 
+ ██║  ██║██║     ██║   ╚██████╔╝╚██████╔╝██║╚██████╗██║  ██╗
+ ╚═╝  ╚═╝╚═╝     ╚═╝    ╚══▀▀═╝  ╚═════╝ ╚═╝ ╚═════╝╚═╝  ╚═╝
+               ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
+              ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
+              ██║     ███████║█████╗  ██║     █████╔╝ 
+              ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ 
+              ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
+               ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝
+ ─────────────────────────────────────────────────────────────
+ ⚡ Universal AI Relay Forensics, Batch Testing & Agent Adapter
       </pre>
     </td>
   </tr>
@@ -75,7 +81,7 @@ API-QuickCheck 2.0 is calibrated against the 9 most powerful models shaping mode
 │                         │ claude-opus-5                 │ Frontier Coding & Deep Reasoning · Complex Tool Chains      │
 │                         │ claude-sonnet-5               │ Balanced Agent Workhorse · Messages API & Prompt Caching    │
 ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 🔵 Google               │ gemini-3.1-pro-preview        │ 2M Multimodal Frontier · Thought Signature & PDF/Chart Ext  │
+│ 🔵 Google               │ gemini-3.1-pro-preview        │ 200M Multimodal Frontier · Thought Signature & PDF/Chart Ext│
 │                         │ gemini-3.7-flash              │ Ultra-Fast Agent Orchestrator · Interactions API Routine    │
 ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
 │ ⚫ xAI                  │ grok-4.6                      │ Realtime Frontier · Controlled Tools, Reasoning & Sandbox   │
