@@ -118,13 +118,36 @@ export function slugifyHeading(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// Automatically import all .md files in src/content/docs/ via Vite glob
-// Supports both relative and root-relative patterns for all deployment targets
-const rawDocsModules = import.meta.glob(['./docs/**/*.md', '/src/content/docs/**/*.md'], {
+// Explicit static raw imports to guarantee 100% bundling across all environments
+import aboutRaw from './docs/01-intro/about.md?raw';
+import frontierRaw from './docs/01-intro/frontier-model-baseline-2026-08-16.md?raw';
+import overviewRaw from './docs/02-algorithms/overview.md?raw';
+import claudeRaw from './docs/02-algorithms/claude.md?raw';
+import openaiRaw from './docs/02-algorithms/openai.md?raw';
+import geminiRaw from './docs/02-algorithms/gemini.md?raw';
+import grokRaw from './docs/02-algorithms/grok.md?raw';
+
+const BUILTIN_DOCS: Record<string, string> = {
+  './docs/01-intro/about.md': aboutRaw,
+  './docs/01-intro/frontier-model-baseline-2026-08-16.md': frontierRaw,
+  './docs/02-algorithms/overview.md': overviewRaw,
+  './docs/02-algorithms/claude.md': claudeRaw,
+  './docs/02-algorithms/openai.md': openaiRaw,
+  './docs/02-algorithms/gemini.md': geminiRaw,
+  './docs/02-algorithms/grok.md': grokRaw,
+};
+
+// Dynamic glob fallback
+const dynamicDocsModules = import.meta.glob('./docs/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 }) as Record<string, string>;
+
+const rawDocsModules: Record<string, string> = {
+  ...BUILTIN_DOCS,
+  ...dynamicDocsModules,
+};
 
 export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGroup[] } {
   const docs: MarkdownDoc[] = [];
@@ -139,7 +162,7 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
     const parts = normalizedPath.split('/').filter(Boolean);
     const fileName = parts[parts.length - 1].replace(/\.md$/, '');
 
-    // Avoid duplicates if multiple glob patterns match the same file
+    // Avoid duplicates
     if (seenSlugs.has(fileName)) continue;
     seenSlugs.add(fileName);
 

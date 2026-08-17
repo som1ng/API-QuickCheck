@@ -53,3 +53,8 @@ temp/
 .firecrawl/
 patch_*.cjs
 *.temp
+audit-report.json
+baseline-*.json
+*.tmp
+coverage/
+test-results/
