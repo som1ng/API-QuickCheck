@@ -29,10 +29,10 @@
 </table>
 
 <p>
+  <a href="https://www.npmjs.com/package/api-quickcheck"><img src="https://img.shields.io/npm/v/api-quickcheck?style=flat-square&color=cc785c&logo=npm" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/api-quickcheck"><img src="https://img.shields.io/npm/dm/api-quickcheck?style=flat-square&color=5db872&logo=npm" alt="npm downloads"></a>
   <a href="https://github.com/som1ng/API-QuickCheck/stargazers"><img src="https://img.shields.io/github/stars/som1ng/API-QuickCheck?style=flat-square&color=cc785c" alt="Stars"></a>
-  <a href="https://github.com/som1ng/API-QuickCheck/network/members"><img src="https://img.shields.io/github/forks/som1ng/API-QuickCheck?style=flat-square&color=383531" alt="Forks"></a>
-  <a href="https://github.com/som1ng/API-QuickCheck/blob/main/LICENSE"><img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=5db872" alt="License"></a>
-  <a href="https://github.com/som1ng/API-QuickCheck/releases"><img src="https://img.shields.io/badge/version-2.2.0-cc785c.svg?style=flat-square" alt="Version"></a>
+  <a href="https://github.com/som1ng/API-QuickCheck/blob/main/LICENSE"><img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=383531" alt="License"></a>
   <a href="https://api-quick-check.vercel.app/"><img src="https://img.shields.io/badge/Vercel-在线体验-141413?style=flat-square&logo=vercel" alt="Vercel"></a>
 </p>
 
@@ -187,12 +187,26 @@ npm run apiqc -- audit \
 
 ---
 
-## 快速开始
+## 🚀 快速开始
+ 
+### 方式 1：免安装 npx 零配置秒开（最推荐）
+无需克隆代码，直接在终端执行：
+```bash
+npx api-quickcheck audit --model gpt-5.6-sol --base-url https://api.your-relay.com/v1 --api-key sk-xxx
+```
 
-### 方式 1：在线开箱即用（推荐）
+### 方式 2：在线 Web 端开箱即用
 直接访问官方部署站点：**[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
 
-### 方式 2：本地极速运行 & CLI
+### 方式 3：npm 全局安装为系统命令
+```bash
+npm install -g api-quickcheck
+
+# 全局安装后使用短命令
+apiqc audit --model claude-fable-5 --base-url https://api.your-relay.com/v1 --api-key sk-xxx
+```
+
+### 方式 4：本地源码克隆运行 & 深度二次开发
 
 ```bash
 # 1. 克隆代码仓库
@@ -202,17 +216,11 @@ cd API-QuickCheck
 # 2. 安装依赖
 npm install
 
-# 3. 启动本地开发服务
+# 3. 启动本地 Web 开发服务
 npm run dev
 
-# 4. 运行终端 CLI 审计帮助
-npx tsx scripts/apiqc.ts --help
-
-# 5. 运行 24 项探针审计测试套件
+# 4. 运行 24 项探针审计测试套件
 npm test
-
-# 6. 手动同步最新 2026 前沿模型基线
-npm run sync:models
 ```
 
 ---

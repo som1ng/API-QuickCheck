@@ -1867,11 +1867,13 @@ function basicEvidence(result, provider, model) {
   if (status === "pass" && result.text.includes("audit-ready.") && validation.pass) {
     return { id: "p0-native-route", title: "\u539F\u751F API \u8DEF\u7531", status, detail: "\u539F\u751F\u8BF7\u6C42\u6210\u529F\uFF0C\u54CD\u5E94 envelope \u548C\u56FA\u5B9A\u5939\u5177\u5747\u7B26\u5408\u3002", latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes };
   }
+  const validationStatus = status === "pass" ? "fail" : status;
+  const responseShape = validation.issues.includes("response_not_object") ? `\uFF08\u54CD\u5E94\u6570\u636E\u975E JSON \u5BF9\u8C61\uFF0CrawText ${result.response.rawText.length} \u5B57\u7B26\uFF0CContent-Type ${result.response.headers.get("content-type") || "unknown"}\uFF09` : "";
   return {
     id: "p0-native-route",
     title: "\u539F\u751F API \u8DEF\u7531",
-    status,
-    detail: status === "unavailable" ? "\u539F\u751F\u8DEF\u7531\u672A\u5F00\u653E\u6216\u4EE3\u7406\u94FE\u8DEF\u4E0D\u53EF\u7528\u3002" : `\u54CD\u5E94\u672A\u901A\u8FC7\u534F\u8BAE\u6216\u56FA\u5B9A\u5939\u5177\u6821\u9A8C\uFF1A${validation.issues.join(", ") || result.text.slice(0, 120)}`,
+    status: validationStatus,
+    detail: status === "unavailable" ? "\u539F\u751F\u8DEF\u7531\u672A\u5F00\u653E\u6216\u4EE3\u7406\u94FE\u8DEF\u4E0D\u53EF\u7528\u3002" : `\u54CD\u5E94\u672A\u901A\u8FC7\u534F\u8BAE\u6216\u56FA\u5B9A\u5939\u5177\u6821\u9A8C\uFF1A${validation.issues.join(", ") || result.text.slice(0, 120)}${responseShape}`,
     latencyMs: result.response.latencyMs,
     rawEventTypes: result.eventTypes
   };

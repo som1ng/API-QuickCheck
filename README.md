@@ -29,10 +29,10 @@
 </table>
 
 <p>
+  <a href="https://www.npmjs.com/package/api-quickcheck"><img src="https://img.shields.io/npm/v/api-quickcheck?style=flat-square&color=cc785c&logo=npm" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/api-quickcheck"><img src="https://img.shields.io/npm/dm/api-quickcheck?style=flat-square&color=5db872&logo=npm" alt="npm downloads"></a>
   <a href="https://github.com/som1ng/API-QuickCheck/stargazers"><img src="https://img.shields.io/github/stars/som1ng/API-QuickCheck?style=flat-square&color=cc785c" alt="Stars"></a>
-  <a href="https://github.com/som1ng/API-QuickCheck/network/members"><img src="https://img.shields.io/github/forks/som1ng/API-QuickCheck?style=flat-square&color=383531" alt="Forks"></a>
-  <a href="https://github.com/som1ng/API-QuickCheck/blob/main/LICENSE"><img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=5db872" alt="License"></a>
-  <a href="https://github.com/som1ng/API-QuickCheck/releases"><img src="https://img.shields.io/badge/version-2.2.0-cc785c.svg?style=flat-square" alt="Version"></a>
+  <a href="https://github.com/som1ng/API-QuickCheck/blob/main/LICENSE"><img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=383531" alt="License"></a>
   <a href="https://api-quick-check.vercel.app/"><img src="https://img.shields.io/badge/Vercel-Live%20Demo-141413?style=flat-square&logo=vercel" alt="Vercel"></a>
 </p>
 
@@ -189,10 +189,24 @@ npm run apiqc -- audit \
 
 ## Quick Start
 
-### Option 1: Live Web App (No Installation Needed)
-Visit the live deployment directly: **[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
+### Option 1: Zero-Install Instant Execution via npx (Recommended)
+Run directly in any terminal without cloning the repo:
+```bash
+npx api-quickcheck audit --model gpt-5.6-sol --base-url https://api.your-relay.com/v1 --api-key sk-xxx
+```
 
-### Option 2: Local Development & CLI
+### Option 2: Live Web App
+Visit the official deployment directly: **[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
+
+### Option 3: Global System Command Installation
+```bash
+npm install -g api-quickcheck
+
+# Run anytime using the short alias:
+apiqc audit --model claude-fable-5 --base-url https://api.your-relay.com/v1 --api-key sk-xxx
+```
+
+### Option 4: Local Source Code Development
 
 ```bash
 # 1. Clone repository
@@ -205,14 +219,8 @@ npm install
 # 3. Start local development server
 npm run dev
 
-# 4. Run terminal CLI audit
-npx tsx scripts/apiqc.ts --help
-
-# 5. Run 24-probe test suite
+# 4. Run automated test suite
 npm test
-
-# 6. Sync latest 2026 model baselines
-npm run sync:models
 ```
 
 ---

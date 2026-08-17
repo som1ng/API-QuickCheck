@@ -81,13 +81,17 @@ function basicEvidence(result: NativeResult, provider: AuditProvider, model: str
   if (status === 'pass' && result.text.includes('audit-ready.') && validation.pass) {
     return { id: 'p0-native-route', title: '原生 API 路由', status, detail: '原生请求成功，响应 envelope 和固定夹具均符合。', latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes };
   }
+  const validationStatus = status === 'pass' ? 'fail' : status;
+  const responseShape = validation.issues.includes('response_not_object')
+    ? `（响应数据非 JSON 对象，rawText ${result.response.rawText.length} 字符，Content-Type ${result.response.headers.get('content-type') || 'unknown'}）`
+    : '';
   return {
     id: 'p0-native-route',
     title: '原生 API 路由',
-    status,
+    status: validationStatus,
     detail: status === 'unavailable'
       ? '原生路由未开放或代理链路不可用。'
-      : `响应未通过协议或固定夹具校验：${validation.issues.join(', ') || result.text.slice(0, 120)}`,
+      : `响应未通过协议或固定夹具校验：${validation.issues.join(', ') || result.text.slice(0, 120)}${responseShape}`,
     latencyMs: result.response.latencyMs,
     rawEventTypes: result.eventTypes,
   };
