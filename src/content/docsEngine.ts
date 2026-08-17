@@ -37,6 +37,7 @@ export interface DocCategoryGroup {
 
 const CATEGORY_TAG_MAP: Record<string, { tag: string; title: string }> = {
   intro: { tag: '简介', title: '简介' },
+  usage: { tag: '使用', title: '使用' },
   algorithms: { tag: '鉴别算法', title: '鉴别算法' },
 };
 
