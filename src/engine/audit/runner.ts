@@ -5,7 +5,7 @@ import { PROVIDER_ADAPTERS, ProviderAdapter, NativeResult, NativeRequest, detect
 import { hashFixture, selectSuite } from './suite';
 import { determineConclusion } from './statistics';
 import { validateAnthropicMessage, validateChatCompletionEnvelope, validateResponsesEnvelope } from './protocolValidators';
-import { createNeedleFixture, scoreNeedleResponse } from './localFixtures';
+import { createCodeRepairFixture, createNeedleFixture, scoreCodeRepairResponse, scoreNeedleResponse } from './localFixtures';
 import { bootstrapDifference } from './statistics';
 import { findStoredBaseline, loadBaselineSnapshot } from './baseline';
 import { readSSEEvents } from '../transport/sseReader';
@@ -54,6 +54,21 @@ function routeStatus(response: TransportResponse<unknown>): 'pass' | 'fail' | 'u
   if (response.ok) return 'pass';
   if ([0, 404, 405, 408, 502, 503, 504].includes(response.status)) return 'unavailable';
   return 'fail';
+}
+
+function usageNumber(result: NativeResult, path: string[]): number | undefined {
+  let value: unknown = result.usage;
+  for (const key of path) {
+    if (typeof value !== 'object' || value === null) return undefined;
+    value = (value as Record<string, unknown>)[key];
+  }
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function cachedInputTokens(result: NativeResult): number | undefined {
+  return usageNumber(result, ['input_tokens_details', 'cached_tokens'])
+    ?? usageNumber(result, ['cache_read_input_tokens'])
+    ?? usageNumber(result, ['cached_content_token_count']);
 }
 
 function basicEvidence(result: NativeResult, provider: AuditProvider, model: string): ProtocolEvidence {
@@ -281,7 +296,33 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
   }
   if (shouldExecute('p1-reasoning-config') || shouldExecute('p1-signature-continuity')) progress('推理配置');
 
-  if (shouldExecute('p1-state-continuity')) protocol.push(unavailableEvidence('p1-state-continuity', '跨轮状态连续性', '需要 provider-specific 多轮状态执行器。'));
+  if (shouldExecute('p1-state-continuity')) {
+    const marker = `STATE_MARKER_${options.model.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    if (!adapter.state || !adapter.stateContinuation) {
+      protocol.push(unavailableEvidence('p1-state-continuity', '跨轮状态连续性', provider === 'gemini' ? 'Gemini Interaction continuation 的字段契约尚未完成验证。' : '当前 Provider Adapter 没有状态连续性能力声明。'));
+    } else {
+      try {
+        const first = await execute(adapter, adapter.state(options.baseUrl, options.apiKey, options.model, marker), options.signal);
+        nativeResults.push(first);
+        const continuation = first.response.ok
+          ? await execute(adapter, adapter.stateContinuation(options.baseUrl, options.apiKey, options.model, first, marker), options.signal)
+          : undefined;
+        if (continuation) nativeResults.push(continuation);
+        const passed = Boolean(first.response.ok && continuation?.response.ok && continuation.text.includes(marker));
+        if (first.response.ok && continuation) recordScore('tools', passed ? 1 : 0, 'p1-state-continuity');
+        protocol.push({
+          id: 'p1-state-continuity',
+          title: '跨轮状态连续性',
+          status: !first.response.ok ? routeStatus(first.response) : !continuation ? 'unavailable' : continuation.response.ok ? (passed ? 'pass' : 'fail') : routeStatus(continuation.response),
+          detail: passed ? '第二轮请求通过 provider 原生状态引用恢复并回显 marker。' : continuation?.response.errorMessage || '第二轮未恢复第一轮保存的状态 marker。',
+          latencyMs: continuation?.response.latencyMs ?? first.response.latencyMs,
+          rawEventTypes: [...first.eventTypes, ...(continuation?.eventTypes || [])],
+        });
+      } catch {
+        protocol.push(unavailableEvidence('p1-state-continuity', '跨轮状态连续性', '跨轮状态请求未能完成。'));
+      }
+    }
+  }
 
   const runToolRoundtrip = async (id: string, title: string) => {
     if (!adapter.tool || !adapter.toolContinuation) {
@@ -335,7 +376,33 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
   } else if (shouldExecute('p1-signature-continuity')) {
     protocol.push(unavailableEvidence('p1-signature-continuity', '思考签名连续性', '该检查仅适用于 Anthropic Messages thinking 协议。'));
   }
-  if (shouldExecute('p1-cache-semantics')) protocol.push(unavailableEvidence('p1-cache-semantics', '缓存语义', '缓存语义需要 provider-specific 成本与命中证据。'));
+  if (shouldExecute('p1-cache-semantics')) {
+    if (!adapter.cache) {
+      protocol.push(unavailableEvidence('p1-cache-semantics', '缓存语义', provider === 'gemini' ? 'Gemini context caching 请求字段尚未完成验证。' : '当前 Provider Adapter 没有缓存请求能力声明。'));
+    } else {
+      const cachePrefix = Array.from({ length: 1_400 }, (_, index) => `cache-prefix-token-${index}`).join(' ');
+      try {
+        const first = await execute(adapter, adapter.cache(options.baseUrl, options.apiKey, options.model, cachePrefix), options.signal);
+        nativeResults.push(first);
+        const second = await execute(adapter, adapter.cache(options.baseUrl, options.apiKey, options.model, cachePrefix), options.signal);
+        nativeResults.push(second);
+        const firstCached = cachedInputTokens(first);
+        const secondCached = cachedInputTokens(second);
+        const hasEvidence = firstCached !== undefined && secondCached !== undefined;
+        const passed = hasEvidence && (secondCached ?? 0) > (firstCached ?? 0);
+        protocol.push({
+          id: 'p1-cache-semantics',
+          title: '缓存语义',
+          status: !first.response.ok ? routeStatus(first.response) : !second.response.ok ? routeStatus(second.response) : !hasEvidence ? 'unavailable' : passed ? 'pass' : 'fail',
+          detail: passed ? `第二次请求缓存输入 token 增加（${firstCached} -> ${secondCached}）。` : hasEvidence ? `未观察到第二次请求缓存命中增加（${firstCached} -> ${secondCached}）。` : '响应未暴露可验证的缓存 token usage 字段。',
+          latencyMs: second.response.latencyMs,
+          rawEventTypes: [...first.eventTypes, ...second.eventTypes],
+        });
+      } catch {
+        protocol.push(unavailableEvidence('p1-cache-semantics', '缓存语义', '缓存语义请求未能完成。'));
+      }
+    }
+  }
   if (['p1-state-continuity', 'p1-tool-roundtrip', 'p1-signature-continuity', 'p1-cache-semantics'].some(shouldExecute)) progress('P1 状态覆盖');
 
   const contextProbeIds = ['p2-context-start', 'p2-context-middle', 'p2-context-end'].filter(shouldExecute);
@@ -388,7 +455,24 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
   for (const probeId of ['p2-chart-extraction', 'p2-code-repair-a', 'p2-code-repair-b']) {
     if (shouldExecute(probeId)) {
       const title = suite.find((item) => item.id === probeId)?.title || probeId;
-      protocol.push(unavailableEvidence(probeId, title, '该 P2 任务需要本地视觉、工具 mock 或隔离代码仓库执行器，当前网页阶段尚未实现。'));
+      if (!probeId.startsWith('p2-code-repair')) {
+        protocol.push(unavailableEvidence(probeId, title, '该 P2 任务需要视觉输入适配器，当前网页阶段尚未实现。'));
+        continue;
+      }
+      if (!adapter.codeRepair) {
+        protocol.push(unavailableEvidence(probeId, title, '当前 Provider Adapter 未实现代码修复请求。'));
+        continue;
+      }
+      try {
+        const fixture = createCodeRepairFixture(probeId.endsWith('-a') ? 'arithmetic' : 'set');
+        const result = await execute(adapter, adapter.codeRepair(options.baseUrl, options.apiKey, options.model, fixture.instruction, fixture.source), options.signal);
+        nativeResults.push(result);
+        const score = scoreCodeRepairResponse(result.text, fixture);
+        recordScore('code', score.score / 100, probeId);
+        protocol.push({ id: probeId, title, status: result.response.ok ? (score.passed ? 'pass' : 'fail') : routeStatus(result.response), detail: result.response.ok ? `隐藏断言通过 ${score.matched.length}/${fixture.expectedTokens.length} 项。` : result.response.errorMessage || `HTTP ${result.response.status}`, latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes });
+      } catch {
+        protocol.push(unavailableEvidence(probeId, title, '代码修复请求未能完成。'));
+      }
     }
   }
 

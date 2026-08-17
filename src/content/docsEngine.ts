@@ -118,13 +118,18 @@ export function slugifyHeading(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-import { EMBEDDED_DOCS } from './docsStore';
+// Direct Vite Glob Loader for all Markdown docs in src/content/docs/
+const rawDocsModules = import.meta.glob('./docs/**/*.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
 
 export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGroup[] } {
   const docs: MarkdownDoc[] = [];
   const seenSlugs = new Set<string>();
 
-  for (const [filePath, rawContent] of Object.entries(EMBEDDED_DOCS)) {
+  for (const [filePath, rawContent] of Object.entries(rawDocsModules)) {
     if (typeof rawContent !== 'string') continue;
     const { frontmatter, content } = parseFrontmatterAndContent(rawContent);
 

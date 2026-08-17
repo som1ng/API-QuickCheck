@@ -16,6 +16,13 @@ export interface NeedleFixture {
   estimatedTokens: number;
 }
 
+export interface CodeRepairFixture {
+  id: 'arithmetic' | 'set';
+  instruction: string;
+  source: string;
+  expectedTokens: string[];
+}
+
 export interface RepeatSample {
   ok: boolean;
   latencyMs: number;
@@ -60,6 +67,29 @@ export function scoreNeedleResponse(output: string, expectedAnswer: string): { s
   const expected = expectedAnswer.trim().toLowerCase();
   const passed = normalized.includes(expected);
   return { score: passed ? 100 : 0, passed };
+}
+
+export function createCodeRepairFixture(id: CodeRepairFixture['id']): CodeRepairFixture {
+  if (id === 'arithmetic') {
+    return {
+      id,
+      instruction: '修复算术模块中的税后总价计算，并只返回修复后的代码。',
+      source: 'function totalWithTax(price, taxRate) {\n  return price + taxRate;\n}\nmodule.exports = { totalWithTax };',
+      expectedTokens: ['return price * (1 + taxRate);', 'module.exports = { totalWithTax };'],
+    };
+  }
+  return {
+    id,
+    instruction: '修复集合模块，使函数返回去重后且保持首次出现顺序的数组，并只返回修复后的代码。',
+    source: 'function unique(values) {\n  return values.sort();\n}\nmodule.exports = { unique };',
+    expectedTokens: ['return [...new Set(values)];', 'module.exports = { unique };'],
+  };
+}
+
+export function scoreCodeRepairResponse(output: string, fixture: CodeRepairFixture): { score: number; passed: boolean; matched: string[] } {
+  const normalized = output.toLowerCase();
+  const matched = fixture.expectedTokens.filter((token) => normalized.includes(token.toLowerCase()));
+  return { score: Math.round((matched.length / fixture.expectedTokens.length) * 100), passed: matched.length === fixture.expectedTokens.length, matched };
 }
 
 export function summarizeRepeatSamples(samples: RepeatSample[]): RepeatSummary {

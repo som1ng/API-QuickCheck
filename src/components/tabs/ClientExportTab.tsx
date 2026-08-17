@@ -49,9 +49,22 @@ export const ClientExportTab: React.FC = () => {
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Left sidebar sliding indicator refs and per-group position state
-  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [pillPositions, setPillPositions] = useState<Record<string, { top: number; height: number; opacity: number }>>({});
+  // Left sidebar sliding indicator refs and position state (like top header navbar)
+  const sidebarNavRef = useRef<HTMLDivElement>(null);
+  const docItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [sidebarPill, setSidebarPill] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    opacity: number;
+  }>({
+    top: 0,
+    left: 12,
+    width: 0,
+    height: 34,
+    opacity: 0,
+  });
 
   // Dynamic overrides for baseline doc when manually synced in-browser
   const [syncedDocContent, setSyncedDocContent] = useState<string | null>(() => {
@@ -107,44 +120,37 @@ export const ClientExportTab: React.FC = () => {
     };
   }, [allDocs, activeSlug]);
 
-  const updateSliderPositions = useCallback(() => {
-    const next: Record<string, { top: number; height: number; opacity: number }> = {};
-    for (const group of categoryGroups) {
-      const activeDoc = group.docs.find((d) => d.slug === currentDoc?.slug);
-      if (activeDoc) {
-        const btn = itemRefs.current[activeDoc.slug];
-        if (btn) {
-          next[group.id] = {
-            top: btn.offsetTop,
-            height: btn.offsetHeight || 34,
-            opacity: 1,
-          };
-        } else {
-          const idx = group.docs.findIndex((d) => d.slug === activeDoc.slug);
-          next[group.id] = {
-            top: idx * 38,
-            height: 34,
-            opacity: 1,
-          };
-        }
-      } else {
-        next[group.id] = { top: 0, height: 34, opacity: 0 };
-      }
+  const updateSidebarPill = useCallback(() => {
+    const activeEl = docItemRefs.current[activeSlug];
+    const container = sidebarNavRef.current;
+    if (activeEl && container) {
+      const activeRect = activeEl.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const relativeTop = activeRect.top - containerRect.top + container.scrollTop;
+      const relativeLeft = activeRect.left - containerRect.left + container.scrollLeft;
+      setSidebarPill({
+        top: relativeTop,
+        left: relativeLeft,
+        width: activeRect.width,
+        height: activeRect.height || 34,
+        opacity: 1,
+      });
+    } else {
+      setSidebarPill((prev) => ({ ...prev, opacity: 0 }));
     }
-    setPillPositions(next);
-  }, [categoryGroups, currentDoc?.slug]);
+  }, [activeSlug]);
 
   useEffect(() => {
-    updateSliderPositions();
-    const timer = setTimeout(updateSliderPositions, 40);
-    const raf = requestAnimationFrame(updateSliderPositions);
-    window.addEventListener('resize', updateSliderPositions);
+    updateSidebarPill();
+    const raf = requestAnimationFrame(updateSidebarPill);
+    const timer = setTimeout(updateSidebarPill, 40);
+    window.addEventListener('resize', updateSidebarPill);
     return () => {
-      clearTimeout(timer);
       cancelAnimationFrame(raf);
-      window.removeEventListener('resize', updateSliderPositions);
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateSidebarPill);
     };
-  }, [updateSliderPositions, collapsedCategories, searchQuery]);
+  }, [updateSidebarPill, collapsedCategories, searchQuery]);
 
   const isBaselineDoc = useMemo(() => {
     return (
@@ -215,7 +221,6 @@ export const ClientExportTab: React.FC = () => {
 
   const navigateToDoc = (slug: string) => {
     setActiveSlug(slug);
-    window.scrollTo(0, 0);
   };
 
   const scrollToHeading = (id: string) => {
@@ -270,20 +275,37 @@ export const ClientExportTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Category Groups with Precise Magnetic Sliding Capsule */}
-          <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+          {/* Navigation Category Groups with Sliding Capsule Indicator */}
+          <div
+            ref={sidebarNavRef}
+            className="flex-1 overflow-y-auto px-3 py-4 space-y-4 relative"
+          >
+            {/* Silky Sliding Active Pill Indicator (Hardware Transform translate3d) */}
+            <span
+              aria-hidden="true"
+              className="absolute top-0 left-0 rounded-lg bg-[#252320] border-l-[3px] border-[#cc785c] border-r border-t border-b border-[#36332e] shadow-[0_2px_12px_rgba(0,0,0,0.5)] pointer-events-none transition-all duration-200 ease-out z-0"
+              style={{
+                transform: `translate3d(${sidebarPill.left}px, ${sidebarPill.top}px, 0)`,
+                width: `${sidebarPill.width}px`,
+                height: `${sidebarPill.height}px`,
+                opacity: sidebarPill.opacity,
+                transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            >
+              {/* Amber active glow marker */}
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#cc785c] shadow-[0_0_6px_#cc785c]" />
+            </span>
+
             {filteredCategoryGroups.map((group) => {
               const isCollapsed = Boolean(collapsedCategories[group.id]);
-              const groupPill = pillPositions[group.id];
-              const hasActiveDocInGroup = group.docs.some((d) => d.slug === currentDoc.slug);
 
               return (
-                <div key={group.id} className="space-y-1.5">
+                <div key={group.id} className="space-y-1">
                   {/* Category Header */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
-                    className="w-full flex items-center justify-between px-2 py-1.5 text-[14px] font-sans font-bold text-[#faf9f5] hover:text-[#cc785c] transition rounded cursor-pointer"
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-[13px] font-sans font-semibold text-[#faf9f5] hover:text-[#cc785c] transition rounded cursor-pointer select-none"
                   >
                     <span className="truncate tracking-tight">{group.title}</span>
                     <ChevronDown
@@ -293,34 +315,21 @@ export const ClientExportTab: React.FC = () => {
                     />
                   </button>
 
-                  {/* Document Links with High-Precision Relative Slider */}
+                  {/* Document Links */}
                   {!isCollapsed && (
-                    <div className="space-y-1 pt-0.5 relative">
-                      {/* Precise Floating Active Pill inside category list container */}
-                      {hasActiveDocInGroup && groupPill && (
-                        <div
-                          aria-hidden="true"
-                          className="absolute left-0 right-0 rounded-lg bg-[#252320] border-l-[3px] border-[#cc785c] border-r border-t border-b border-[#36332e] shadow-[0_2px_10px_rgba(0,0,0,0.5)] pointer-events-none transition-all duration-250 ease-out z-0"
-                          style={{
-                            transform: `translate3d(0, ${groupPill.top}px, 0)`,
-                            height: `${groupPill.height}px`,
-                            opacity: groupPill.opacity,
-                            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                          }}
-                        />
-                      )}
-
+                    <div className="space-y-0.5 pt-0.5">
                       {group.docs.map((doc) => {
                         const isActive = currentDoc.slug === doc.slug;
                         return (
                           <button
-                            ref={(el) => { itemRefs.current[doc.slug] = el; }}
                             key={doc.slug}
+                            ref={(el) => { docItemRefs.current[doc.slug] = el; }}
+                            type="button"
                             onClick={() => navigateToDoc(doc.slug)}
-                            className={`w-full relative z-10 flex items-center justify-between px-2.5 h-[34px] rounded-lg text-[13px] font-sans transition-colors duration-200 text-left cursor-pointer ${
+                            className={`w-full relative z-10 flex items-center justify-between px-3 h-[34px] rounded-lg text-[13px] font-sans text-left transition-colors duration-200 cursor-pointer ${
                               isActive
                                 ? 'text-[#faf9f5] font-semibold'
-                                : 'text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#1f1e1b]/50'
+                                : 'text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#1f1e1b]/40'
                             }`}
                           >
                             <span className="truncate">{doc.frontmatter.title}</span>

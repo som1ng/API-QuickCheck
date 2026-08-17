@@ -4,7 +4,7 @@ import { BALANCED_SUITE, hashFixture, selectSuite } from '../src/engine/audit/su
 import { bootstrapDifference, determineConclusion } from '../src/engine/audit/statistics';
 import { CapabilityMetric } from '../src/types/audit';
 import { validateAnthropicMessage, validateChatCompletionEnvelope, validateResponsesEnvelope } from '../src/engine/audit/protocolValidators';
-import { createNeedleFixture, scoreNeedleResponse, summarizeRepeatSamples } from '../src/engine/audit/localFixtures';
+import { createCodeRepairFixture, createNeedleFixture, scoreCodeRepairResponse, scoreNeedleResponse, summarizeRepeatSamples } from '../src/engine/audit/localFixtures';
 import { PROVIDER_ADAPTERS } from '../src/engine/audit/providerAdapters';
 import { validateBaselineSnapshot } from '../src/engine/audit/baseline';
 import { readSSEEvents } from '../src/engine/transport/sseReader';
@@ -98,6 +98,12 @@ test('local needle fixtures are deterministic and score only the expected marker
   assert.equal(scoreNeedleResponse('a plausible but different answer', first.expectedAnswer).passed, false);
 });
 
+test('code repair fixtures use deterministic hidden assertions', () => {
+  const fixture = createCodeRepairFixture('arithmetic');
+  assert.equal(scoreCodeRepairResponse(`${fixture.expectedTokens[0]}\n${fixture.expectedTokens[1]}`, fixture).passed, true);
+  assert.equal(scoreCodeRepairResponse('return price + taxRate;', fixture).passed, false);
+});
+
 test('repeat quality summary reports success rate and percentiles', () => {
   const summary = summarizeRepeatSamples([
     { ok: true, latencyMs: 10 },
@@ -130,6 +136,29 @@ test('provider adapters preserve tool call identity for continuation requests', 
   const continuation = PROVIDER_ADAPTERS.openai.toolContinuation?.('https://api.openai.com/v1', 'key', 'gpt-5.6', first, '42');
   assert.equal(continuation?.body.previous_response_id, 'resp_123');
   assert.deepEqual(continuation?.body.input, [{ type: 'function_call_output', call_id: 'call_123', output: '42' }]);
+});
+
+test('provider adapters expose state and cache probe requests with usage parsing', () => {
+  const first = PROVIDER_ADAPTERS.openai.parse({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    data: { id: 'resp_state', output_text: 'acknowledged', usage: { input_tokens_details: { cached_tokens: 12 } } },
+    rawText: '',
+    latencyMs: 5,
+    headers: new Headers(),
+  });
+  assert.equal(first.usage?.input_tokens_details && (first.usage?.input_tokens_details as Record<string, unknown>).cached_tokens, 12);
+  const state = PROVIDER_ADAPTERS.openai.state?.('https://api.openai.com/v1', 'key', 'gpt-5.6', 'STATE_MARKER');
+  assert.equal(state?.body.store, true);
+  const continuation = PROVIDER_ADAPTERS.openai.stateContinuation?.('https://api.openai.com/v1', 'key', 'gpt-5.6', first, 'STATE_MARKER');
+  assert.equal(continuation?.body.previous_response_id, 'resp_state');
+  const cache = PROVIDER_ADAPTERS.anthropic.cache?.('https://api.anthropic.com/v1', 'key', 'claude-sonnet-5', 'stable-prefix');
+  const cacheContent = (cache?.body.messages as Array<{ content: unknown }>)[0]?.content as Array<Record<string, unknown>>;
+  assert.deepEqual(cacheContent[0]?.cache_control, { type: 'ephemeral' });
+  assert.equal(getProbeRoute('openai', 'gpt-5.6-sol', 'p1-state-continuity').disposition, 'standard_benchmark');
+  assert.equal(getProbeRoute('openai', 'gpt-5.6-sol', 'p1-cache-semantics').disposition, 'standard_benchmark');
+  assert.equal(getProbeRoute('openai', 'gpt-5.6-sol', 'p2-code-repair-a').disposition, 'standard_benchmark');
 });
 
 test('baseline validation rejects malformed capability distributions', () => {

@@ -27,6 +27,7 @@ export interface ProviderAdapter {
   tool?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
   reasoning?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
   context?: ((baseUrl: string, apiKey: string, model: string, document: string) => NativeRequest) | undefined;
+  codeRepair?: ((baseUrl: string, apiKey: string, model: string, instruction: string, source: string) => NativeRequest) | undefined;
   stream?: ((baseUrl: string, apiKey: string, model: string) => NativeRequest) | undefined;
   state?: ((baseUrl: string, apiKey: string, model: string, marker: string) => NativeRequest) | undefined;
   stateContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, marker: string) => NativeRequest) | undefined;
@@ -50,6 +51,11 @@ const parseToolArguments = (value: unknown): unknown => {
   try { return JSON.parse(value); } catch { return value; }
 };
 
+const usageFromResponse = (response: TransportResponse<Record<string, unknown>>): Record<string, unknown> | undefined => {
+  const usage = response.data?.usage;
+  return typeof usage === 'object' && usage !== null ? usage as Record<string, unknown> : undefined;
+};
+
 const parseResponses = (response: TransportResponse<Record<string, unknown>>): NativeResult => {
   const output = Array.isArray(response.data?.output) ? response.data?.output as Record<string, unknown>[] : [];
   const text = typeof response.data?.output_text === 'string'
@@ -60,7 +66,7 @@ const parseResponses = (response: TransportResponse<Record<string, unknown>>): N
     response,
     text,
     eventTypes: output.map((item) => String(item.type ?? 'unknown')),
-    usage: response.data?.usage,
+    usage: usageFromResponse(response),
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: parseToolArguments(toolCall.arguments) } : undefined,
   };
@@ -74,7 +80,7 @@ const parseMessages = (response: TransportResponse<Record<string, unknown>>): Na
     response,
     text: content.filter((item) => item.type === 'text').map((item) => String(item.text ?? '')).join(''),
     eventTypes: content.map((item) => String(item.type ?? 'unknown')),
-    usage: response.data?.usage,
+    usage: usageFromResponse(response),
     signature: typeof thinking?.signature === 'string' ? thinking.signature : undefined,
     thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : undefined,
     toolCalled: Boolean(toolCall),
@@ -92,7 +98,7 @@ const parseInteractions = (response: TransportResponse<Record<string, unknown>>)
     response,
     text,
     eventTypes: output.map((item) => String(item.type ?? 'unknown')),
-    usage: response.data?.usage,
+    usage: usageFromResponse(response),
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: toolCall.arguments ?? toolCall.input } : undefined,
   };
@@ -127,6 +133,11 @@ const openAiLike = (provider: 'openai' | 'xai'): ProviderAdapter => ({
       input: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.\n\n${document}`,
       max_output_tokens: 64,
     },
+  }),
+  codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
+    url: endpoint(baseUrl, '/responses'),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: { model, input: `${instruction}\n\n源码：\n${source}`, max_output_tokens: 512 },
   }),
   stream: (baseUrl, apiKey, model) => ({
     url: endpoint(baseUrl, '/responses'),
@@ -174,6 +185,11 @@ const anthropic: ProviderAdapter = {
       max_tokens: 64,
       messages: [{ role: 'user', content: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.\n\n${document}` }],
     },
+  }),
+  codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
+    url: endpoint(baseUrl, '/messages'),
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: { model, max_tokens: 512, messages: [{ role: 'user', content: `${instruction}\n\n源码：\n${source}` }] },
   }),
   stream: (baseUrl, apiKey, model) => ({
     url: endpoint(baseUrl, '/messages'),
@@ -244,6 +260,11 @@ const gemini: ProviderAdapter = {
       input: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.\n\n${document}`,
       generation_config: { max_output_tokens: 64 },
     },
+  }),
+  codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
+    url: endpoint(baseUrl, '/interactions'),
+    headers: { 'x-goog-api-key': apiKey },
+    body: { model, input: `${instruction}\n\n源码：\n${source}`, generation_config: { max_output_tokens: 512 } },
   }),
   parse: parseInteractions,
 };
