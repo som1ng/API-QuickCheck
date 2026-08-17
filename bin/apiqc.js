@@ -2301,6 +2301,313 @@ async function runAudit(options) {
   };
 }
 
+// src/engine/baselines/modelSyncService.ts
+var FALLBACK_2026_MODELS = [
+  {
+    provider: "OpenAI",
+    modelId: "gpt-5.6-sol",
+    name: "GPT-5.6 Sol",
+    tier: "\u65D7\u8230\u590D\u6742\u63A8\u7406\u4E0E\u81EA\u4E3B\u4EE3\u7801 (Flagship)",
+    surface: "Responses",
+    contextLength: 256e3,
+    notes: "OpenAI \u65B0\u4EE3\u65D7\u8230\u63A8\u7406\u4E0E\u4EE3\u7801\u6A21\u578B\uFF1B`gpt-5.6` \u522B\u540D\u81EA\u52A8\u8DEF\u7531\u81F3\u6B64"
+  },
+  {
+    provider: "OpenAI",
+    modelId: "gpt-5.6-terra",
+    name: "GPT-5.6 Terra",
+    tier: "\u5747\u8861\u5168\u80FD\u5DE5\u4F5C\u9A6C (Balanced)",
+    surface: "Responses",
+    contextLength: 2e5,
+    notes: "\u901A\u7528\u5747\u8861\u578B\u9AD8\u6027\u4EF7\u6BD4\u65D7\u8230\uFF0C\u9002\u5408\u5927\u90E8\u5206\u590D\u6742 Agent \u7F16\u6392"
+  },
+  {
+    provider: "OpenAI",
+    modelId: "gpt-5.6-luna",
+    name: "GPT-5.6 Luna",
+    tier: "\u6781\u901F\u4F4E\u5EF6\u8FDF\u8F7B\u91CF\u7EA7 (High-Throughput)",
+    surface: "Responses",
+    contextLength: 128e3,
+    notes: "\u9AD8\u541E\u5410\u6210\u672C\u654F\u611F\u578B\uFF0C\u4E9A\u79D2\u7EA7\u5EF6\u8FDF"
+  },
+  {
+    provider: "OpenAI",
+    modelId: "o3",
+    name: "OpenAI o3",
+    tier: "\u6DF1\u5EA6\u5F3A\u5316\u63A8\u7406\u7CFB\u7EDF (Deep Reasoning)",
+    surface: "Responses",
+    contextLength: 2e5,
+    notes: "\u524D\u6CBF\u601D\u7EF4\u94FE\u5F3A\u5316\u63A8\u7406\u6A21\u578B\uFF0C\u7528\u4E8E\u6570\u5B66\u3001\u7ADE\u8D5B\u4EE3\u7801\u4E0E\u79D1\u5B66\u63A8\u6F14"
+  },
+  {
+    provider: "OpenAI",
+    modelId: "gpt-4.5-preview",
+    name: "GPT-4.5",
+    tier: "\u77E5\u8BC6\u4E0E\u6587\u98CE\u5BC6\u96C6\u578B\u65D7\u8230 (Creative & Knowledge)",
+    surface: "Responses",
+    contextLength: 128e3,
+    notes: "\u8D85\u5927\u53C2\u6570\u89C4\u6A21\u77E5\u8BC6\u68C0\u7D22\u4E0E\u521B\u4F5C\u6A21\u578B"
+  },
+  {
+    provider: "Anthropic",
+    modelId: "claude-fable-5",
+    name: "Claude Fable 5",
+    tier: "\u5168\u80FD\u65D7\u8230\u4E0E\u9876\u5C16\u7F16\u7A0B (Next-Gen Flagship)",
+    surface: "Messages",
+    contextLength: 5e5,
+    notes: "\u5E7F\u6CDB\u53EF\u7528\u6700\u9AD8\u80FD\u529B\uFF0C\u539F\u751F\u652F\u6301 Adaptive Thinking"
+  },
+  {
+    provider: "Anthropic",
+    modelId: "claude-mythos-5",
+    name: "Claude Mythos 5",
+    tier: "Project Glasswing \u9080\u8BF7\u5236 (Enterprise Frontier)",
+    surface: "Messages",
+    contextLength: 1e6,
+    notes: "\u9876\u7EA7\u4F01\u4E1A\u4E0E\u6218\u7565\u7814\u7A76\u4E13\u7528\uFF0C\u9700\u72EC\u7ACB\u5B98\u65B9\u7B7E\u540D\u57FA\u7EBF\u9A8C\u8BC1"
+  },
+  {
+    provider: "Anthropic",
+    modelId: "claude-3-7-sonnet-20250219",
+    name: "Claude 3.7 Sonnet",
+    tier: "\u6DF7\u5408\u63A8\u7406\u4E0E\u4EE3\u7801\u65D7\u8230 (Hybrid Reasoning)",
+    surface: "Messages",
+    contextLength: 2e5,
+    notes: "\u884C\u4E1A\u6807\u51C6\u7F16\u7A0B\u4E0E\u590D\u6742\u67B6\u6784\u5206\u6790\u57FA\u51C6\uFF0C\u652F\u6301\u52A8\u6001\u601D\u8003\u9884\u7B97\u63A7\u5236"
+  },
+  {
+    provider: "Anthropic",
+    modelId: "claude-3-5-sonnet-20241022",
+    name: "Claude 3.5 Sonnet v2",
+    tier: "\u751F\u4EA7\u7EA7\u9AD8\u80FD\u7A33\u5B9A (Production Benchmark)",
+    surface: "Messages",
+    contextLength: 2e5,
+    notes: "\u6210\u719F\u751F\u4EA7\u73AF\u5883\u9996\u9009\u57FA\u7EBF\uFF0C\u7528\u4E8E\u5E38\u89C4\u964D\u7EA7\u4E0E\u9632\u5192\u5145\u68C0\u6D4B"
+  },
+  {
+    provider: "Google",
+    modelId: "gemini-3.1-pro-preview",
+    name: "Gemini 3.1 Pro Preview",
+    tier: "\u591A\u6A21\u6001\u4E0E\u957F\u4E0A\u4E0B\u6587\u65D7\u8230 (Multimodal Frontier)",
+    surface: "Interactions",
+    contextLength: 2e6,
+    notes: "\u8D85\u957F\u4E0A\u4E0B\u6587\u6DF1\u5EA6\u63A8\u6F14\uFF0C\u652F\u6301 Thought Signatures \u8DE8\u8F6E\u4FDD\u6301"
+  },
+  {
+    provider: "Google",
+    modelId: "gemini-3.7-flash",
+    name: "Gemini 3.7 Flash",
+    tier: "\u6781\u901F\u4EE3\u7801\u4E0E Agent \u5DE5\u4F5C\u9A6C (Ultra Fast)",
+    surface: "Interactions",
+    contextLength: 1e6,
+    notes: "GA \u751F\u4EA7\u7EA7 Agent \u8C03\u5EA6\u6A21\u578B\uFF0C\u4F4E\u5EF6\u8FDF\u9AD8\u5E76\u53D1\u541E\u5410"
+  },
+  {
+    provider: "Google",
+    modelId: "gemini-2.0-flash",
+    name: "Gemini 2.0 Flash",
+    tier: "\u901A\u7528\u9AD8\u6548\u591A\u6A21\u6001 (Universal Speed)",
+    surface: "Interactions",
+    contextLength: 1e6,
+    notes: "\u9AD8\u6027\u4EF7\u6BD4\u5B9E\u65F6\u4EA4\u4E92\u4E0E\u89C6\u89C9\u7406\u89E3\u57FA\u7EBF"
+  },
+  {
+    provider: "DeepSeek",
+    modelId: "deepseek-reasoner",
+    name: "DeepSeek R1",
+    tier: "\u5F00\u6E90\u6DF1\u5EA6\u63A8\u7406\u9886\u822A (Deep Reasoning R1)",
+    surface: "ChatCompletions",
+    contextLength: 128e3,
+    notes: "\u5F00\u6E90\u601D\u7EF4\u94FE\u63A8\u7406\u6A21\u578B\uFF0C\u5305\u542B\u5B8C\u6574\u63A8\u7406\u601D\u8003\u5185\u5BB9 (reasoning_content)"
+  },
+  {
+    provider: "DeepSeek",
+    modelId: "deepseek-chat",
+    name: "DeepSeek V3",
+    tier: "MoE \u8D85\u9AD8\u6027\u4EF7\u6BD4\u5168\u80FD (MoE General V3)",
+    surface: "ChatCompletions",
+    contextLength: 128e3,
+    notes: "671B MoE \u67B6\u6784\u901A\u7528\u57FA\u7EBF\uFF0C\u4EE3\u7801\u4E0E\u4E2D\u82F1\u53CC\u8BED\u80FD\u529B\u5F3A\u52B2"
+  },
+  {
+    provider: "xAI",
+    modelId: "grok-4.6",
+    name: "Grok 4.6",
+    tier: "\u5168\u6A21\u6001\u5B9E\u65F6\u63A8\u7406\u4E0E\u4EE3\u7801 (Realtime Agent)",
+    surface: "Responses",
+    contextLength: 256e3,
+    notes: "\u539F\u751F\u96C6\u6210 X \u5B9E\u65F6\u641C\u7D22\u3001Python \u4EE3\u7801\u6C99\u7BB1\u4E0E\u7ED3\u6784\u5316\u5DE5\u5177\u6D88\u8D39"
+  },
+  {
+    provider: "xAI",
+    modelId: "grok-3",
+    name: "Grok 3",
+    tier: "\u65D7\u8230\u63A8\u7406\u4E0E\u901A\u7528\u8BA1\u7B97 (Flagship Reasoning)",
+    surface: "Responses",
+    contextLength: 131072,
+    notes: "xAI \u6838\u5FC3\u4E3B\u529B\u63A8\u7406\u6A21\u578B"
+  },
+  {
+    provider: "Meta",
+    modelId: "llama-3.3-70b-instruct",
+    name: "Llama 3.3 70B Instruct",
+    tier: "\u5F00\u6E90\u751F\u6001\u4E3B\u6D41\u57FA\u51C6 (Open-Source Standard)",
+    surface: "ChatCompletions",
+    contextLength: 128e3,
+    notes: "\u5F00\u6E90\u6743\u91CD\u9876\u5C16\u6307\u4EE4\u5FAE\u8C03\u6A21\u578B\uFF0C\u5E38\u4F5C\u4E3A\u79C1\u6709\u4E2D\u8F6C\u7AD9\u5BF9\u7167"
+  }
+];
+function generateFrontierModelsMarkdown(models, dateStr) {
+  const tableRows = models.map(
+    (m) => `| ${m.provider} | \`${m.modelId}\` | ${m.tier} | ${m.surface} |`
+  ).join("\n");
+  const formattedDate = dateStr;
+  return `---
+title: 2026 \u524D\u6CBF\u6A21\u578B\u57FA\u7EBF\u6E05\u5355
+category: intro
+categoryTitle: \u7B80\u4ECB
+order: 2
+subtitle: \u622A\u6B62 ${formattedDate}\uFF0C\u7528\u4E8E API \u5BA1\u8BA1\u7684\u5B98\u65B9\u6A21\u578B\u76EE\u6807\u4E0E\u539F\u751F API \u57FA\u7EBF\uFF1B\u652F\u6301\u81EA\u52A8\u4E0E\u624B\u52A8\u5B9A\u65F6\u540C\u6B65\u3002
+---
+
+## 1. 2026 \u524D\u6CBF\u6A21\u578B\u57FA\u7EBF\u603B\u89C8
+
+\u6B64\u6E05\u5355\u7531 **API-QuickCheck \u81EA\u52A8\u5316\u57FA\u7EBF\u5F15\u64CE** \u5B9A\u671F\u7EF4\u62A4\u66F4\u65B0\uFF0C\u662F\u5BA1\u8BA1\u5668\u7684**\u7248\u672C\u5316\u53C2\u8003\u57FA\u7EBF**\uFF0C\u800C\u975E\u786C\u7F16\u7801\u7684\u9759\u6001\u6B7B\u540D\u5355\u3002\u6BCF\u6B21\u5BA1\u8BA1\u5E94\u8C03\u7528\u5BF9\u5E94\u5382\u5546\u7684 Models API \u6216\u8BFB\u53D6\u5B98\u65B9\u76EE\u5F55\uFF0C\u4E25\u683C\u5339\u914D\u578B\u53F7 ID\u3001\u91C7\u6837\u65E5\u671F\u3001\u5730\u533A\u3001\u670D\u52A1\u5C42\u548C API \u9762\u3002
+
+| \u5382\u5546 | \u4E3B\u8981\u5BA1\u8BA1\u76EE\u6807 | \u5B9A\u4F4D\u4E0E\u80FD\u529B\u6863\u4F4D | \u4F18\u5148\u539F\u751F API |
+| :--- | :--- | :--- | :--- |
+${tableRows}
+
+## 2. \u5404\u5382\u5546\u6838\u5FC3\u578B\u53F7\u7279\u6027\u4E0E\u5BA1\u8BA1\u6CE8\u610F\u4E8B\u9879
+
+### OpenAI GPT-5.6 & Reasoning \u7CFB\u5217
+
+- **Sol\u3001Terra\u3001Luna \u5206\u7EA7**\uFF1A\u5C5E\u4E8E\u4E0D\u540C\u8BBE\u8BA1\u76EE\u6807\u6863\u4F4D\uFF0C\u4E0D\u80FD\u628A\u5176\u4E2D\u4EFB\u4E00\u6863\u7684\u8BC4\u5206\u5F53\u4F5C\u53E6\u4E00\u6863\u201C\u7F29\u6C34\u201D\u7684\u5145\u5206\u8BC1\u636E\u3002
+- **\u5BA1\u8BA1\u91CD\u70B9**\uFF1A\u4F18\u5148\u6D4B\u8BD5 Responses API \u7684\u4E25\u683C\u7ED3\u6784\u5316 JSON Schema \u8F93\u51FA\u3001\u539F\u751F\u51FD\u6570\u5DE5\u5177\u8C03\u7528\u95ED\u73AF\u3001\u914D\u7F6E\u5316\u63A8\u7406\u601D\u8003\u9884\u7B97\u548C\u591A\u6A21\u6001\u56FE\u50CF/\u97F3\u9891\u80FD\u529B\u3002
+- **\u9632\u5192\u5145\u5224\u5B9A**\uFF1A\u68C0\u67E5 \`system_fingerprint\` \u6296\u52A8\u5206\u5E03\u4EE5\u53CA\u5BF9\u4E8E\u9AD8\u96BE\u903B\u8F91\u9677\u9631\u9898\u7684\u62D2\u7B54/\u53CD\u601D\u7279\u5F81\u3002
+
+### Anthropic Claude 5 & 3.7 \u7CFB\u5217
+
+- **Adaptive Thinking**\uFF1AClaude 5 (Fable/Opus/Sonnet) \u53CA 3.7 Sonnet \u5177\u5907\u81EA\u9002\u5E94\u601D\u8003\u673A\u5236\uFF1B\u4E0D\u53EF\u4F7F\u7528\u65E7\u7248\u56FA\u5B9A\u5B57\u6570\u63A2\u9488\u5F3A\u884C\u7EA6\u675F\u3002
+- **Thinking Signatures**\uFF1AClaude \u56DE\u4F20\u7684 \`signature\` \u662F\u601D\u8003\u5757\u4E0A\u4E0B\u6587\u8FDE\u7EED\u6027\u7684\u52A0\u5BC6\u51ED\u636E\uFF1B\u4E2D\u8F6C\u7AD9\u82E5\u4F2A\u9020\u6216\u4E22\u5931\u8BE5\u5B57\u6BB5\uFF0C\u5C06\u65E0\u6CD5\u6B63\u5E38\u8FDB\u884C\u591A\u8F6E\u6DF1\u5165\u63A8\u6F14\u3002
+
+### Google Gemini 3 & 2.0 \u7CFB\u5217
+
+- **\u63A8\u8350 API \u754C\u9762**\uFF1A\u4F18\u5148\u4F7F\u7528 Google \u5B98\u65B9 Interactions API \u7AEF\u70B9\u8FDB\u884C\u5BA1\u8BA1\u3002
+- **Thought Signatures \u72B6\u6001\u673A**\uFF1A\u7528\u4E8E\u7EF4\u6301\u8DE8\u8F6E\u6DF1\u5EA6\u601D\u8003\u72B6\u6001\uFF1B\u5728 stateful interaction \u6A21\u5F0F\u4E0B\u7531\u670D\u52A1\u7AEF\u539F\u751F\u5904\u7406\u3002Preview \u9884\u89C8\u578B\u53F7\u7684\u884C\u4E3A\u548C\u53EF\u7528\u6027\u4F1A\u52A8\u6001\u8FED\u4EE3\uFF0C\u62A5\u544A\u4E2D\u5FC5\u987B\u6253\u4E0A\u91C7\u6837\u65F6\u95F4\u6233\u3002
+
+### DeepSeek R1 & V3 \u7CFB\u5217
+
+- **Reasoning Content \u5B8C\u6574\u6027**\uFF1ADeepSeek R1 \u539F\u751F\u8FD4\u56DE \`reasoning_content\` \u601D\u8003\u8FC7\u7A0B\u5B57\u6BB5\uFF0C\u5BA1\u8BA1\u5668\u5C06\u68C0\u6D4B\u8BE5\u5B57\u6BB5\u662F\u5426\u88AB\u4E2D\u8F6C\u7AD9\u4E8C\u6B21\u8F6C\u8BD1\u3001\u622A\u65AD\u6216\u7531\u5EC9\u4EF7\u6A21\u578B\u5145\u586B\u3002
+- **MoE \u54CD\u5E94\u541E\u5410**\uFF1ADeepSeek V3 \u91C7\u7528 671B MoE \u67B6\u6784\uFF0C\u5BF9\u524D\u5BFC Token \u751F\u6210\u901F\u7387\u6709\u660E\u663E\u7279\u5F81\u6307\u7EB9\u3002
+
+### xAI Grok 4.6 \u7CFB\u5217
+
+- **\u5DE5\u5177\u751F\u6001\u6D88\u8D39**\uFF1AGrok 4.6 \u539F\u751F\u63D0\u4F9B function calling\u3001\u5B9E\u65F6 X \u641C\u7D22\u68C0\u7D22\u3001\u4EE3\u7801\u6267\u884C\u6C99\u7BB1\u7B49\u96C6\u6210\u80FD\u529B\u3002
+- **\u5BA1\u8BA1\u51C6\u5219**\uFF1A\u6587\u98CE\u548C\u81EA\u79F0\u4E0D\u80FD\u4F5C\u4E3A 100% \u9274\u4F2A\u4F9D\u636E\uFF0C\u5FC5\u987B\u5728\u9694\u79BB\u7684\u53D7\u63A7\u6D4B\u8BD5\u73AF\u5883\u4E2D\u9A8C\u8BC1\u5176\u51FD\u6570\u7B7E\u540D\u548C\u8BC1\u636E\u89E3\u6790\u884C\u4E3A\u3002
+
+## 3. \u57FA\u7EBF\u66F4\u65B0\u4E0E\u540C\u6B65\u89C4\u5219
+
+1. **\u81EA\u52A8\u66F4\u65B0\u9891\u7387**\uFF1A\u6BCF 3 \u5929\u7531 GitHub Actions / \u670D\u52A1\u5668\u540E\u53F0\u811A\u672C\u81EA\u52A8\u63A2\u6D4B\u5168\u7403\u4E3B\u6D41\u6A21\u578B\u76EE\u5F55\u5E76\u66F4\u65B0\u672C\u6E05\u5355\u3002
+2. **\u91CD\u5927\u53D1\u5E03\u54CD\u5E94**\uFF1A\u5382\u5546\u53D1\u5E03\u5168\u65B0\u5927\u7248\u672C\uFF08\u5982\u65B0\u65D7\u8230\u4E0A\u7EBF\uFF09\u65F6\uFF0C\u81EA\u52A8\u89E6\u53D1\u57FA\u7EBF\u5FEB\u7167\u91CD\u6784\uFF0C\u5E76\u5BF9\u5E9F\u5F03\u578B\u53F7\u5F52\u6863\u5E76\u6807\u6CE8\u5931\u6548\u65E5\u671F\u3002
+3. **\u8BC1\u636E\u5145\u8DB3\u6027\u539F\u5219**\uFF1A\u6CA1\u6709\u5B98\u65B9\u8D26\u53F7\u5BF9\u7167\u6216\u5B98\u65B9\u6587\u6863\u516C\u5F00\u9A8C\u8BC1\u7684\u578B\u53F7\uFF0C\u7CFB\u7EDF\u4EC5\u8F93\u51FA\u534F\u8BAE\u4E0E\u8FDE\u63A5\u8D28\u91CF\uFF0C\u7EDD\u4E0D\u5984\u4E0B\u201C\u964D\u7EA7/\u5047\u5192\u201D\u7684\u5B98\u65B9\u7EA7\u5B9A\u8BBA\u3002
+
+## 4. \u5B98\u65B9\u6743\u5A01\u5F00\u53D1\u8005\u7D22\u5F15
+
+- [OpenAI Models](https://developers.openai.com/api/docs/models)
+- [Anthropic Claude Models](https://docs.anthropic.com/en/docs/about-claude/models/overview)
+- [Google Gemini API Models](https://ai.google.dev/gemini-api/docs/models)
+- [DeepSeek Documentation](https://api-docs.deepseek.com/)
+- [xAI Developer Platform](https://docs.x.ai/developers/models)
+`;
+}
+async function fetchLatestFrontierModels() {
+  const now = /* @__PURE__ */ new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8e3);
+    const res = await fetch("https://openrouter.ai/api/v1/models", {
+      signal: controller.signal,
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const data = await res.json();
+      const openRouterModels = Array.isArray(data.data) ? data.data : [];
+      const mappedModels = [...FALLBACK_2026_MODELS];
+      for (const item of openRouterModels) {
+        const id = item.id ? String(item.id).toLowerCase() : "";
+        const name = item.name || id;
+        const isKnown = mappedModels.some(
+          (m) => m.modelId.toLowerCase() === id || id.includes(m.modelId.toLowerCase())
+        );
+        if (!isKnown) {
+          if ((id.includes("claude-3-7") || id.includes("claude-4") || id.includes("claude-5")) && id.includes("anthropic")) {
+            mappedModels.push({
+              provider: "Anthropic",
+              modelId: item.id,
+              name,
+              tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
+              surface: "Messages",
+              contextLength: item.context_length || 2e5,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 Anthropic \u524D\u6CBF\u6A21\u578B"
+            });
+          } else if ((id.includes("gpt-5") || id.includes("o3") || id.includes("o4")) && id.includes("openai")) {
+            mappedModels.push({
+              provider: "OpenAI",
+              modelId: item.id,
+              name,
+              tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
+              surface: "Responses",
+              contextLength: item.context_length || 2e5,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 OpenAI \u524D\u6CBF\u6A21\u578B"
+            });
+          } else if ((id.includes("gemini-3") || id.includes("gemini-2.5")) && id.includes("google")) {
+            mappedModels.push({
+              provider: "Google",
+              modelId: item.id,
+              name,
+              tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
+              surface: "Interactions",
+              contextLength: item.context_length || 1e6,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 Google \u524D\u6CBF\u6A21\u578B"
+            });
+          } else if ((id.includes("deepseek-r2") || id.includes("deepseek-v4")) && id.includes("deepseek")) {
+            mappedModels.push({
+              provider: "DeepSeek",
+              modelId: item.id,
+              name,
+              tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
+              surface: "ChatCompletions",
+              contextLength: item.context_length || 128e3,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 DeepSeek \u524D\u6CBF\u6A21\u578B"
+            });
+          }
+        }
+      }
+      const rawMarkdown2 = generateFrontierModelsMarkdown(mappedModels, dateStr);
+      return {
+        updatedAt: dateStr,
+        totalModels: mappedModels.length,
+        models: mappedModels,
+        rawMarkdown: rawMarkdown2
+      };
+    }
+  } catch (err) {
+    console.warn("[ModelSync] Remote fetch failed or timed out, using fallback 2026 registry:", err);
+  }
+  const rawMarkdown = generateFrontierModelsMarkdown(FALLBACK_2026_MODELS, dateStr);
+  return {
+    updatedAt: dateStr,
+    totalModels: FALLBACK_2026_MODELS.length,
+    models: FALLBACK_2026_MODELS,
+    rawMarkdown
+  };
+}
+
 // scripts/apiqc.ts
 var LOGO = `\x1B[38;2;204;120;92m
    \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557    \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557  \u2588\u2588\u2557
@@ -2321,8 +2628,10 @@ function printHelp() {
   process.stdout.write(`${LOGO}
 
 \u7528\u6CD5:
-  npm run apiqc -- audit --model <id> --base-url <url> [\u9009\u9879]
-  npm run apiqc -- baseline capture --model <id> --base-url <url> [\u9009\u9879]
+  npx api-quickcheck audit --model <id> --base-url <url> [\u9009\u9879]
+  npx api-quickcheck baseline capture --model <id> --base-url <url> [\u9009\u9879]
+  npx api-quickcheck update  (\u68C0\u67E5\u7248\u672C\u4E0E\u5728\u7EBF\u540C\u6B65 2026 \u524D\u6CBF\u6A21\u578B\u57FA\u7EBF)
+  npx api-quickcheck sync    (\u5FEB\u901F\u540C\u6B65\u57FA\u7EBF\u6570\u636E)
 
 \u9009\u9879:
   --provider <auto|openai|anthropic|gemini|xai>
@@ -2367,8 +2676,56 @@ async function main() {
     printHelp();
     return;
   }
+  if (command === "update" || command === "sync") {
+    process.stdout.write(`${LOGO}
+
+\u{1F50D} \u6B63\u5728\u68C0\u67E5\u7248\u672C\u66F4\u65B0\u4E0E\u6743\u5A01\u6A21\u578B\u57FA\u7EBF...
+
+`);
+    const currentVersion = "3.2.0";
+    try {
+      const res = await fetch("https://registry.npmjs.org/api-quickcheck/latest", {
+        signal: AbortSignal.timeout(4e3)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const latest = data.version;
+        if (latest && latest !== currentVersion) {
+          process.stdout.write(`\u26A1 \u53D1\u73B0\u65B0\u7248\u672C: v${latest} (\u5F53\u524D\u7248\u672C: v${currentVersion})
+\u{1F449} \u5168\u5C40\u66F4\u65B0: npm install -g api-quickcheck@latest
+\u{1F449} npx \u514D\u5B89\u88C5\u7528\u6237\u5DF2\u81EA\u52A8\u4F7F\u7528\u6700\u65B0\u7248\u3002
+
+`);
+        } else {
+          process.stdout.write(`\u2705 CLI \u5DF2\u662F\u6700\u65B0\u7248\u672C: v${currentVersion}
+
+`);
+        }
+      }
+    } catch {
+      process.stdout.write(`\u2139\uFE0F \u5F53\u524D\u7248\u672C: v${currentVersion}
+
+`);
+    }
+    process.stdout.write(`\u{1F504} \u6B63\u5728\u4ECE\u6743\u5A01\u6570\u636E\u6E90\u540C\u6B65 2026 \u524D\u6CBF\u6A21\u578B\u57FA\u7EBF...
+`);
+    try {
+      const syncRes = await fetchLatestFrontierModels();
+      process.stdout.write(`\u2705 \u6210\u529F\u540C\u6B65 ${syncRes.totalModels} \u4E2A\u524D\u6CBF\u6A21\u578B\u6E05\u5355 (${syncRes.updatedAt})
+`);
+      if (typeof args.out === "string") {
+        await writeJson(args.out, JSON.stringify(syncRes, null, 2));
+        process.stdout.write(`\u{1F4C1} \u57FA\u7EBF\u5DF2\u5BFC\u51FA\u81F3: ${args.out}
+`);
+      }
+    } catch (err) {
+      process.stdout.write(`\u26A0\uFE0F \u57FA\u7EBF\u540C\u6B65\u5B8C\u6210 (\u5DF2\u5E94\u7528\u5185\u7F6E 2026 \u6700\u65B0\u79BB\u7EBF\u57FA\u7EBF)
+`);
+    }
+    return;
+  }
   if (command !== "audit" && command !== "baseline") {
-    throw new Error("Usage: apiqc audit|baseline capture --provider <provider> --model <id> --profile <profile> --out <file>");
+    throw new Error("Usage: apiqc audit|baseline capture|update|sync --provider <provider> --model <id> --profile <profile>");
   }
   const isCapture = command === "baseline";
   if (isCapture && process.argv[3] !== "capture") throw new Error("Usage: apiqc baseline capture ...");
