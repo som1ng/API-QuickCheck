@@ -170,7 +170,7 @@
       "name": "DeepSeek V4 Flash Latest",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "ChatCompletions",
-      "contextLength": 1048576,
+      "contextLength": 1310720,
       "notes": "This model always redirects to the latest model in the DeepSeek V4 Flash family."
     },
     {
@@ -179,7 +179,7 @@
       "name": "DeepSeek: DeepSeek V4 Flash 0731",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "ChatCompletions",
-      "contextLength": 1048576,
+      "contextLength": 1310720,
       "notes": "DeepSeek V4 Flash 0731 is a sparse mixture-of-experts model from DeepSeek, with "
     },
     {

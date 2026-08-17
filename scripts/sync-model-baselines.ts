@@ -41,13 +41,6 @@ async function main() {
   );
   console.log(`📦 已生成结构化 JSON: src/content/baselines/frontierModels.json`);
 
-  // Keep runtime policy and official claims in the Vite-served content tree.
-  for (const file of ['official-model-claims.json', 'probe-policy.json']) {
-    const source = join(ROOT_DIR, 'agent_workspace/baselines', file);
-    const destination = join(ROOT_DIR, 'src/content/baselines', file);
-    await writeFile(destination, await readFile(source, 'utf8'), 'utf8');
-    console.log(`📋 已同步审计策略: src/content/baselines/${file}`);
-  }
   console.log(`🎉 2026 模型基线自动更新圆满完成！`);
 }
 

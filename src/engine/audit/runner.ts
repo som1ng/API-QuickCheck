@@ -90,7 +90,7 @@ function basicEvidence(result: NativeResult, provider: AuditProvider, model: str
     title: '原生 API 路由',
     status: validationStatus,
     detail: status === 'unavailable'
-      ? '原生路由未开放或代理链路不可用。'
+      ? result.response.errorMessage || '原生路由未开放或代理链路不可用。'
       : `响应未通过协议或固定夹具校验：${validation.issues.join(', ') || result.text.slice(0, 120)}${responseShape}`,
     latencyMs: result.response.latencyMs,
     rawEventTypes: result.eventTypes,
@@ -293,7 +293,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
       reasoningResult = await execute(adapter, adapter.reasoning(options.baseUrl, options.apiKey, options.model), options.signal);
       nativeResults.push(reasoningResult);
       const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type));
-      protocol.push({ id: 'p1-reasoning-config', title: '推理配置透传', status: reasoningResult.response.ok ? (hasReasoning ? 'pass' : 'fail') : routeStatus(reasoningResult.response), detail: hasReasoning ? '捕获到原生推理事件类型。' : '响应成功但未捕获原生推理事件。', latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
+      protocol.push({ id: 'p1-reasoning-config', title: '推理配置透传', status: reasoningResult.response.ok ? (hasReasoning ? 'pass' : 'fail') : routeStatus(reasoningResult.response), detail: hasReasoning ? '捕获到原生推理事件类型。' : reasoningResult.response.ok ? '响应成功但未捕获原生推理事件。' : reasoningResult.response.errorMessage || `HTTP ${reasoningResult.response.status}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
     } catch { protocol.push(unavailableEvidence('p1-reasoning-config', '推理配置透传', '推理请求未能完成。')); }
   } else if (shouldExecute('p1-reasoning-config')) {
     protocol.push(unavailableEvidence('p1-reasoning-config', '推理配置透传', '当前原生适配器没有推理能力声明。'));
@@ -398,7 +398,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
           id: 'p1-cache-semantics',
           title: '缓存语义',
           status: !first.response.ok ? routeStatus(first.response) : !second.response.ok ? routeStatus(second.response) : !hasEvidence ? 'unavailable' : passed ? 'pass' : 'fail',
-          detail: passed ? `第二次请求缓存输入 token 增加（${firstCached} -> ${secondCached}）。` : hasEvidence ? `未观察到第二次请求缓存命中增加（${firstCached} -> ${secondCached}）。` : '响应未暴露可验证的缓存 token usage 字段。',
+          detail: passed ? `第二次请求缓存输入 token 增加（${firstCached} -> ${secondCached}）。` : !first.response.ok ? first.response.errorMessage || `HTTP ${first.response.status}` : !second.response.ok ? second.response.errorMessage || `HTTP ${second.response.status}` : hasEvidence ? `未观察到第二次请求缓存命中增加（${firstCached} -> ${secondCached}）。` : '响应未暴露可验证的缓存 token usage 字段。',
           latencyMs: second.response.latencyMs,
           rawEventTypes: [...first.eventTypes, ...second.eventTypes],
         });

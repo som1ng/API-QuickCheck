@@ -161,6 +161,13 @@ test('provider adapters expose state and cache probe requests with usage parsing
   assert.equal(getProbeRoute('openai', 'gpt-5.6-sol', 'p2-code-repair-a').disposition, 'standard_benchmark');
 });
 
+test('anthropic adapter builds the standard Messages endpoint from a root URL', () => {
+  const basic = PROVIDER_ADAPTERS.anthropic.basic;
+  assert.equal(basic('https://relay.example', 'key', 'claude-test').url, 'https://relay.example/v1/messages');
+  assert.equal(basic('https://relay.example/v1', 'key', 'claude-test').url, 'https://relay.example/v1/messages');
+  assert.equal(basic('https://relay.example/messages', 'key', 'claude-test').url, 'https://relay.example/messages');
+});
+
 test('baseline validation rejects malformed capability distributions', () => {
   const valid = {
     schemaVersion: '1.0',

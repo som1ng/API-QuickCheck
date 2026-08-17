@@ -36,6 +36,7 @@ import {
   Trash2,
   Sparkles,
   Layers,
+  X,
 } from 'lucide-react';
 
 interface ProviderPreset {
@@ -150,7 +151,13 @@ export const QuickPingTab: React.FC = () => {
     return config.selectedModel || 'auto';
   });
 
-  const [isStreamCheck, setIsStreamCheck] = useState<boolean>(false);
+  const [isStreamCheck, setIsStreamCheck] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('aqc_batch_stream_check');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return false;
+  });
   const [concurrency, setConcurrency] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('aqc_batch_concurrency');
@@ -243,6 +250,7 @@ export const QuickPingTab: React.FC = () => {
       localStorage.setItem('aqc_batch_concurrency', String(concurrency));
       localStorage.setItem('aqc_batch_antiban_mode', antiBanMode);
       localStorage.setItem('aqc_batch_request_delay', String(requestDelayMs));
+      localStorage.setItem('aqc_batch_stream_check', String(isStreamCheck));
       localStorage.setItem('aqc_batch_check_balance', String(checkBalance));
       localStorage.setItem('aqc_batch_check_models', String(checkModels));
       localStorage.setItem('aqc_batch_provider_id', selectedProvider.id);
@@ -258,6 +266,7 @@ export const QuickPingTab: React.FC = () => {
     rawKeysText,
     customBaseUrl,
     testModel,
+    isStreamCheck,
     concurrency,
     antiBanMode,
     requestDelayMs,
@@ -521,42 +530,22 @@ export const QuickPingTab: React.FC = () => {
               </div>
             </div>
 
-            {/* 1. API Provider Selector & Stream Switch */}
+            {/* 1. API Provider Selector & Settings Modal Trigger */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-[#faf9f5]">
                   API 提供商
                 </label>
 
-                <div className="flex items-center gap-3">
-                  {/* Stream Detection Toggle */}
-                  <label className="flex items-center gap-2 text-xs text-[#a09d96] cursor-pointer select-none font-semibold tracking-wide">
-                    <span>流式检测</span>
-                    <button
-                      type="button"
-                      onClick={() => setIsStreamCheck(!isStreamCheck)}
-                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        isStreamCheck ? 'bg-[#cc785c]' : 'bg-[#252320]'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                          isStreamCheck ? 'translate-x-4' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </label>
-
-                  {/* Settings Gear */}
-                  <button
-                    type="button"
-                    onClick={() => setShowSettingsModal(!showSettingsModal)}
-                    className="p-1.5 rounded-lg text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#252320] transition border border-[#2e2b27] smooth-btn cursor-pointer"
-                    title="并发数与探针参数设置"
-                  >
-                    <Settings className="w-4 h-4 text-[#cc785c]" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSettingsModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#252320] hover:bg-[#2e2b27] border border-[#2e2b27] hover:border-[#cc785c]/40 text-xs font-semibold text-[#faf9f5] transition smooth-btn shadow-sm cursor-pointer"
+                  title="配置探针模型、并发数、流式检测与防封策略"
+                >
+                  <Settings className="w-4 h-4 text-[#cc785c]" />
+                  <span>参数配置</span>
+                </button>
               </div>
 
               {/* Provider Combobox Dropdown with Official SVG Logos */}
@@ -1016,37 +1005,45 @@ export const QuickPingTab: React.FC = () => {
 
       {/* ── Advanced Settings Popover Modal ── */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-[#2e2b27] bg-[#181715] p-7 space-y-6 shadow-2xl animate-in fade-in">
-            <div className="flex items-center justify-between border-b border-[#2e2b27] pb-3.5">
-              <h3 className="text-base font-bold text-[#faf9f5] flex items-center gap-2.5">
-                <Settings className="w-5 h-5 text-[#cc785c]" />
-                <span>批量检测参数设置</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl sm:max-w-2xl rounded-2xl border border-[#2e2b27] bg-[#181715] p-7 sm:p-8 space-y-6 shadow-2xl animate-in fade-in max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#2e2b27] pb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-[#faf9f5] flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#cc785c]/15 border border-[#cc785c]/30 flex items-center justify-center text-[#cc785c] shrink-0">
+                  <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-[#cc785c]" />
+                </div>
+                <span>批量检测参数配置</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="text-[#a09d96] hover:text-[#faf9f5] text-sm p-1 rounded-md transition cursor-pointer"
+                className="p-1.5 rounded-lg text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#252320] transition border border-transparent hover:border-[#2e2b27] cursor-pointer"
+                title="关闭"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-5 text-sm">
-              <div>
-                <label className="block text-xs font-semibold text-[#faf9f5] mb-2">
-                  测试探针模型 (Target Model)
-                </label>
+            <div className="space-y-6">
+              {/* 1. Target Probe Model */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-[#faf9f5]">
+                    测试探针模型 (Target Model)
+                  </label>
+                  <span className="text-xs text-[#a09d96]">自适应探测或手动指定</span>
+                </div>
                 <input
                   type="text"
                   value={testModel}
                   onChange={(e) => setTestModel(e.target.value)}
                   placeholder="auto / gpt-4o-mini / deepseek-chat"
-                  className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 text-sm text-[#faf9f5] focus:outline-none focus:border-[#cc785c] smooth-input font-mono"
+                  className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 text-sm text-[#faf9f5] focus:outline-none focus:border-[#cc785c] smooth-input font-mono shadow-inner"
                 />
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div className="flex flex-wrap gap-2 pt-1">
                   {[
-                    { id: 'auto', label: '⚡ auto (自适应探针)' },
+                    { id: 'auto', label: 'auto (自适应)' },
                     { id: 'gpt-4o-mini', label: 'gpt-4o-mini' },
                     { id: 'deepseek-chat', label: 'deepseek-chat' },
                     { id: 'claude-3-7-sonnet-20250219', label: 'claude-3-7-sonnet' },
@@ -1056,10 +1053,10 @@ export const QuickPingTab: React.FC = () => {
                       key={chip.id}
                       type="button"
                       onClick={() => setTestModel(chip.id)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-mono border transition cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg text-sm font-mono border transition cursor-pointer ${
                         testModel === chip.id
-                          ? 'bg-[#cc785c] text-white border-[#cc785c]'
-                          : 'bg-[#252320] text-[#a09d96] border-[#2e2b27] hover:border-[#cc785c]/40'
+                          ? 'bg-[#cc785c] text-white border-[#cc785c] font-semibold shadow-sm'
+                          : 'bg-[#252320] text-[#a09d96] border-[#2e2b27] hover:text-[#faf9f5] hover:border-[#cc785c]/40'
                       }`}
                     >
                       {chip.label}
@@ -1068,22 +1065,22 @@ export const QuickPingTab: React.FC = () => {
                 </div>
               </div>
 
-              {/* ── 🛡️ 防封控与频率安全策略 (Anti-Ban Guard) ── */}
-              <div className="space-y-3 pt-2 border-t border-[#2e2b27]">
+              {/* 2. Frequency & Anti-Ban Strategy */}
+              <div className="space-y-3 pt-4 border-t border-[#2e2b27]">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[#faf9f5]">
-                    🛡️ 防封控与频率策略
+                  <label className="text-sm font-semibold text-[#faf9f5]">
+                    频率与防封策略
                   </label>
-                  <span className="text-[11px] font-mono text-[#cc785c]">
+                  <span className="text-xs font-mono text-[#cc785c] font-medium">
                     {antiBanMode === 'safe'
-                      ? '安全防封 (2线程 + 250ms抖动)'
+                      ? '安全防封 (2 线程 + 250ms 延时)'
                       : antiBanMode === 'turbo'
-                      ? '极速清洗 (10+线程 + 0ms延时)'
-                      : '平衡推荐 (5线程 + 50ms抖动)'}
+                      ? '极速清洗 (10+ 线程 + 0ms 延时)'
+                      : '标准平衡 (5 线程 + 50ms 延时)'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -1091,14 +1088,15 @@ export const QuickPingTab: React.FC = () => {
                       setConcurrency(2);
                       setRequestDelayMs(250);
                     }}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium border transition text-center cursor-pointer ${
+                    className={`p-3.5 rounded-xl border transition text-left cursor-pointer ${
                       antiBanMode === 'safe'
-                        ? 'bg-[#cc785c]/20 border-[#cc785c] text-[#faf9f5] font-semibold'
-                        : 'bg-[#141413] border-[#2e2b27] text-[#a09d96] hover:text-[#faf9f5]'
+                        ? 'bg-[#cc785c]/15 border-[#cc785c] ring-1 ring-[#cc785c]/30'
+                        : 'bg-[#141413] border-[#2e2b27] hover:bg-[#252320]'
                     }`}
                   >
-                    <div className="text-[#5db872] font-bold mb-0.5">🛡️ 安全防封</div>
-                    <div className="text-[10px] text-[#6c6a64]">慢速温和 · 避开WAF</div>
+                    <div className="text-[#5db872] font-bold text-sm mb-1">安全防封</div>
+                    <div className="text-xs text-[#a09d96]">慢速温和 · 避开 WAF</div>
+                    <div className="text-xs text-[#6c6a64] font-mono mt-1">2 线程 · 250ms 延时</div>
                   </button>
 
                   <button
@@ -1108,14 +1106,15 @@ export const QuickPingTab: React.FC = () => {
                       setConcurrency(5);
                       setRequestDelayMs(50);
                     }}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium border transition text-center cursor-pointer ${
+                    className={`p-3.5 rounded-xl border transition text-left cursor-pointer ${
                       antiBanMode === 'balanced'
-                        ? 'bg-[#cc785c]/20 border-[#cc785c] text-[#faf9f5] font-semibold'
-                        : 'bg-[#141413] border-[#2e2b27] text-[#a09d96] hover:text-[#faf9f5]'
+                        ? 'bg-[#cc785c]/15 border-[#cc785c] ring-1 ring-[#cc785c]/30'
+                        : 'bg-[#141413] border-[#2e2b27] hover:bg-[#252320]'
                     }`}
                   >
-                    <div className="text-[#e8a55a] font-bold mb-0.5">⚖️ 标准平衡</div>
-                    <div className="text-[10px] text-[#6c6a64]">默认推荐 · 速度与稳</div>
+                    <div className="text-[#e8a55a] font-bold text-sm mb-1">标准平衡</div>
+                    <div className="text-xs text-[#a09d96]">默认推荐 · 速度与稳</div>
+                    <div className="text-xs text-[#6c6a64] font-mono mt-1">5 线程 · 50ms 延时</div>
                   </button>
 
                   <button
@@ -1125,48 +1124,51 @@ export const QuickPingTab: React.FC = () => {
                       setConcurrency(10);
                       setRequestDelayMs(0);
                     }}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium border transition text-center cursor-pointer ${
+                    className={`p-3.5 rounded-xl border transition text-left cursor-pointer ${
                       antiBanMode === 'turbo'
-                        ? 'bg-[#cc785c]/20 border-[#cc785c] text-[#faf9f5] font-semibold'
-                        : 'bg-[#141413] border-[#2e2b27] text-[#a09d96] hover:text-[#faf9f5]'
+                        ? 'bg-[#cc785c]/15 border-[#cc785c] ring-1 ring-[#cc785c]/30'
+                        : 'bg-[#141413] border-[#2e2b27] hover:bg-[#252320]'
                     }`}
                   >
-                    <div className="text-[#c64545] font-bold mb-0.5">⚡ 极速清洗</div>
-                    <div className="text-[10px] text-[#6c6a64]">私有节点 · 满速狂飙</div>
+                    <div className="text-[#cc785c] font-bold text-sm mb-1">极速清洗</div>
+                    <div className="text-xs text-[#a09d96]">私有节点 · 满速狂飙</div>
+                    <div className="text-xs text-[#6c6a64] font-mono mt-1">10 线程 · 0ms 延时</div>
                   </button>
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-[#faf9f5]">
+              {/* 3. Concurrency Thread Count (1-50) */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-[#faf9f5]">
                     并发请求线程数
                   </label>
-                  <span className="text-xs font-mono text-[#cc785c] font-bold">
+                  <span className="text-sm font-mono text-[#cc785c] font-bold">
                     {concurrency} 线程
                   </span>
                 </div>
                 <input
                   type="range"
                   min={1}
-                  max={20}
+                  max={50}
                   value={concurrency}
                   onChange={(e) => setConcurrency(Number(e.target.value))}
                   className="w-full accent-[#cc785c] h-2 bg-[#252320] rounded-lg cursor-pointer"
                 />
-                <div className="flex justify-between text-xs text-[#a09d96] mt-1.5 font-mono">
-                  <span>1 (极度安全)</span>
-                  <span>5 (平衡推荐)</span>
-                  <span>20 (极速压测)</span>
+                <div className="flex justify-between text-xs text-[#a09d96] font-mono">
+                  <span>1 线程 (极度安全)</span>
+                  <span>10 线程 (标准并发)</span>
+                  <span>50 线程 (满速极速)</span>
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-[#faf9f5]">
+              {/* 4. Request Delay & Jitter Delay */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-[#faf9f5]">
                     请求防封间隔与随机抖动 (Jitter Delay)
                   </label>
-                  <span className="text-xs font-mono text-[#cc785c] font-bold">
+                  <span className="text-sm font-mono text-[#cc785c] font-bold">
                     {requestDelayMs} ms (±25% 随机)
                   </span>
                 </div>
@@ -1179,50 +1181,73 @@ export const QuickPingTab: React.FC = () => {
                   onChange={(e) => setRequestDelayMs(Number(e.target.value))}
                   className="w-full accent-[#cc785c] h-2 bg-[#252320] rounded-lg cursor-pointer"
                 />
-                <div className="flex justify-between text-xs text-[#a09d96] mt-1.5 font-mono">
-                  <span>0ms (无间隔)</span>
-                  <span>150ms (防突发)</span>
-                  <span>1000ms (人类节奏)</span>
+                <div className="flex justify-between text-xs text-[#a09d96] font-mono">
+                  <span>0 ms (无间隔)</span>
+                  <span>150 ms (防突发)</span>
+                  <span>1000 ms (人类节奏)</span>
                 </div>
               </div>
 
-              {/* Advanced toggles */}
-              <div className="pt-2 border-t border-[#2e2b27] space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-[#faf9f5]">自动穿透嗅探余额/额度</p>
-                    <p className="text-[11px] text-[#a09d96]">探测 OneAPI/NewAPI/OpenAI 账户剩余额度</p>
+              {/* 5. Feature Toggles (Stream Check, Quota Sniff, Model Discovery) */}
+              <div className="pt-4 border-t border-[#2e2b27] space-y-4">
+                {/* Stream Check */}
+                <div className="flex items-center justify-between gap-4 p-3.5 rounded-xl bg-[#141413] border border-[#2e2b27]">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-semibold text-[#faf9f5]">流式响应检测 (Stream Check)</p>
+                    <p className="text-xs text-[#a09d96]">启用 SSE 流式数据块实时测活，更贴近真实大模型对话调用场景</p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setCheckBalance(!checkBalance)}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      checkBalance ? 'bg-[#cc785c]' : 'bg-[#252320]'
+                    onClick={() => setIsStreamCheck(!isStreamCheck)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                      isStreamCheck ? 'bg-[#cc785c]' : 'bg-[#252320]'
                     }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        checkBalance ? 'translate-x-4' : 'translate-x-0'
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        isStreamCheck ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-[#faf9f5]">嗅探可用模型列表</p>
-                    <p className="text-[11px] text-[#a09d96]">探测 /v1/models 获取该 Key 授权的所有模型</p>
+                {/* Sniff Balance */}
+                <div className="flex items-center justify-between gap-4 p-3.5 rounded-xl bg-[#141413] border border-[#2e2b27]">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-semibold text-[#faf9f5]">自动穿透嗅探余额/额度</p>
+                    <p className="text-xs text-[#a09d96]">探测 OneAPI / NewAPI / OpenAI 等账户剩余额度与有效状态</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCheckBalance(!checkBalance)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                      checkBalance ? 'bg-[#cc785c]' : 'bg-[#252320]'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        checkBalance ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Sniff Models */}
+                <div className="flex items-center justify-between gap-4 p-3.5 rounded-xl bg-[#141413] border border-[#2e2b27]">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-semibold text-[#faf9f5]">嗅探可用模型列表</p>
+                    <p className="text-xs text-[#a09d96]">穿透探测 /v1/models 接口获取该 Key 授权的所有可用模型清单</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setCheckModels(!checkModels)}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
                       checkModels ? 'bg-[#cc785c]' : 'bg-[#252320]'
                     }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        checkModels ? 'translate-x-4' : 'translate-x-0'
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        checkModels ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
                   </button>
@@ -1230,13 +1255,17 @@ export const QuickPingTab: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 flex justify-end">
+            {/* Modal Footer */}
+            <div className="pt-4 border-t border-[#2e2b27] flex items-center justify-between flex-wrap gap-3">
+              <span className="text-xs text-[#a09d96]">
+                配置项将自动保存在当前浏览器本地
+              </span>
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="px-6 py-2.5 rounded-xl bg-[#cc785c] text-sm font-semibold text-white hover:bg-[#d98266] transition shadow-md smooth-btn cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-[#cc785c] hover:bg-[#d98266] active:bg-[#a9583e] text-sm font-semibold text-white transition shadow-md smooth-btn cursor-pointer"
               >
-                确定保存
+                保存并返回
               </button>
             </div>
           </div>
@@ -1271,9 +1300,10 @@ export const QuickPingTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowHistoryModal(false)}
-                  className="text-[#a09d96] hover:text-[#faf9f5] text-sm p-1.5 rounded-lg transition cursor-pointer"
+                  className="p-1.5 rounded-lg text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#252320] transition border border-transparent hover:border-[#2e2b27] cursor-pointer"
+                  title="关闭"
                 >
-                  ✕
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>

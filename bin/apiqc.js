@@ -461,6 +461,11 @@ var endpoint = (baseUrl, suffix) => {
   const base = normalizeBaseUrl(baseUrl);
   return base.endsWith(suffix) ? base : `${base}${suffix}`;
 };
+var anthropicEndpoint = (baseUrl) => {
+  const base = normalizeBaseUrl(baseUrl);
+  if (base.endsWith("/messages")) return base;
+  return base.endsWith("/v1") ? `${base}/messages` : `${base}/v1/messages`;
+};
 var textFromContent = (content) => Array.isArray(content) ? content.map((part) => typeof part === "object" && part !== null && "text" in part ? String(part.text ?? "") : "").join("") : typeof content === "string" ? content : "";
 var parseToolArguments = (value) => {
   if (typeof value !== "string") return value;
@@ -599,12 +604,12 @@ ${source}`, max_output_tokens: 512 }
 var anthropic = {
   provider: "anthropic",
   surface: "messages",
-  basic: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, "/messages"), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 128, messages: [{ role: "user", content: "Return exactly: audit-ready." }] } }),
+  basic: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 128, messages: [{ role: "user", content: "Return exactly: audit-ready." }] } }),
   strictJson: void 0,
-  tool: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, "/messages"), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 256, tools: [{ name: "audit_sum", description: "Adds two integers.", input_schema: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"], additionalProperties: false } }], messages: [{ role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, "/messages"), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 256, thinking: { type: "adaptive" }, output_config: { effort: "high" }, messages: [{ role: "user", content: "What is 19 multiplied by 23? Return only the number." }] } }),
+  tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 256, tools: [{ name: "audit_sum", description: "Adds two integers.", input_schema: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"], additionalProperties: false } }], messages: [{ role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] } }),
+  reasoning: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 256, thinking: { type: "adaptive" }, output_config: { effort: "high" }, messages: [{ role: "user", content: "What is 19 multiplied by 23? Return only the number." }] } }),
   context: (baseUrl, apiKey, model, document) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: {
       model,
@@ -615,7 +620,7 @@ ${document}` }]
     }
   }),
   codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: { model, max_tokens: 512, messages: [{ role: "user", content: `${instruction}
 
@@ -623,27 +628,27 @@ ${document}` }]
 ${source}` }] }
   }),
   stream: (baseUrl, apiKey, model) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: { model, max_tokens: 128, messages: [{ role: "user", content: "Return exactly: audit-ready." }], stream: true }
   }),
   state: (baseUrl, apiKey, model, marker) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: { model, max_tokens: 128, messages: [{ role: "user", content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }] }
   }),
   stateContinuation: (baseUrl, apiKey, model, result, marker) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: { model, max_tokens: 128, messages: [{ role: "user", content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }, { role: "assistant", content: result.response.data?.content }, { role: "user", content: `What was the exact state marker? Return only ${marker}.` }] }
   }),
   cache: (baseUrl, apiKey, model, prefix) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: { model, max_tokens: 128, messages: [{ role: "user", content: [{ type: "text", text: prefix, cache_control: { type: "ephemeral" } }, { type: "text", text: "Return exactly: cache-ready." }] }] }
   }),
   toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: {
       model,
@@ -656,7 +661,7 @@ ${source}` }] }
     }
   }),
   signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature) => ({
-    url: endpoint(baseUrl, "/messages"),
+    url: anthropicEndpoint(baseUrl),
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: {
       model,
@@ -1873,7 +1878,7 @@ function basicEvidence(result, provider, model) {
     id: "p0-native-route",
     title: "\u539F\u751F API \u8DEF\u7531",
     status: validationStatus,
-    detail: status === "unavailable" ? "\u539F\u751F\u8DEF\u7531\u672A\u5F00\u653E\u6216\u4EE3\u7406\u94FE\u8DEF\u4E0D\u53EF\u7528\u3002" : `\u54CD\u5E94\u672A\u901A\u8FC7\u534F\u8BAE\u6216\u56FA\u5B9A\u5939\u5177\u6821\u9A8C\uFF1A${validation.issues.join(", ") || result.text.slice(0, 120)}${responseShape}`,
+    detail: status === "unavailable" ? result.response.errorMessage || "\u539F\u751F\u8DEF\u7531\u672A\u5F00\u653E\u6216\u4EE3\u7406\u94FE\u8DEF\u4E0D\u53EF\u7528\u3002" : `\u54CD\u5E94\u672A\u901A\u8FC7\u534F\u8BAE\u6216\u56FA\u5B9A\u5939\u5177\u6821\u9A8C\uFF1A${validation.issues.join(", ") || result.text.slice(0, 120)}${responseShape}`,
     latencyMs: result.response.latencyMs,
     rawEventTypes: result.eventTypes
   };
@@ -2052,7 +2057,7 @@ async function runAudit(options) {
       reasoningResult = await execute(adapter, adapter.reasoning(options.baseUrl, options.apiKey, options.model), options.signal);
       nativeResults.push(reasoningResult);
       const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type));
-      protocol.push({ id: "p1-reasoning-config", title: "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", status: reasoningResult.response.ok ? hasReasoning ? "pass" : "fail" : routeStatus(reasoningResult.response), detail: hasReasoning ? "\u6355\u83B7\u5230\u539F\u751F\u63A8\u7406\u4E8B\u4EF6\u7C7B\u578B\u3002" : "\u54CD\u5E94\u6210\u529F\u4F46\u672A\u6355\u83B7\u539F\u751F\u63A8\u7406\u4E8B\u4EF6\u3002", latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
+      protocol.push({ id: "p1-reasoning-config", title: "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", status: reasoningResult.response.ok ? hasReasoning ? "pass" : "fail" : routeStatus(reasoningResult.response), detail: hasReasoning ? "\u6355\u83B7\u5230\u539F\u751F\u63A8\u7406\u4E8B\u4EF6\u7C7B\u578B\u3002" : reasoningResult.response.ok ? "\u54CD\u5E94\u6210\u529F\u4F46\u672A\u6355\u83B7\u539F\u751F\u63A8\u7406\u4E8B\u4EF6\u3002" : reasoningResult.response.errorMessage || `HTTP ${reasoningResult.response.status}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
     } catch {
       protocol.push(unavailableEvidence("p1-reasoning-config", "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", "\u63A8\u7406\u8BF7\u6C42\u672A\u80FD\u5B8C\u6210\u3002"));
     }
@@ -2154,7 +2159,7 @@ async function runAudit(options) {
           id: "p1-cache-semantics",
           title: "\u7F13\u5B58\u8BED\u4E49",
           status: !first.response.ok ? routeStatus(first.response) : !second.response.ok ? routeStatus(second.response) : !hasEvidence ? "unavailable" : passed ? "pass" : "fail",
-          detail: passed ? `\u7B2C\u4E8C\u6B21\u8BF7\u6C42\u7F13\u5B58\u8F93\u5165 token \u589E\u52A0\uFF08${firstCached} -> ${secondCached}\uFF09\u3002` : hasEvidence ? `\u672A\u89C2\u5BDF\u5230\u7B2C\u4E8C\u6B21\u8BF7\u6C42\u7F13\u5B58\u547D\u4E2D\u589E\u52A0\uFF08${firstCached} -> ${secondCached}\uFF09\u3002` : "\u54CD\u5E94\u672A\u66B4\u9732\u53EF\u9A8C\u8BC1\u7684\u7F13\u5B58 token usage \u5B57\u6BB5\u3002",
+          detail: passed ? `\u7B2C\u4E8C\u6B21\u8BF7\u6C42\u7F13\u5B58\u8F93\u5165 token \u589E\u52A0\uFF08${firstCached} -> ${secondCached}\uFF09\u3002` : !first.response.ok ? first.response.errorMessage || `HTTP ${first.response.status}` : !second.response.ok ? second.response.errorMessage || `HTTP ${second.response.status}` : hasEvidence ? `\u672A\u89C2\u5BDF\u5230\u7B2C\u4E8C\u6B21\u8BF7\u6C42\u7F13\u5B58\u547D\u4E2D\u589E\u52A0\uFF08${firstCached} -> ${secondCached}\uFF09\u3002` : "\u54CD\u5E94\u672A\u66B4\u9732\u53EF\u9A8C\u8BC1\u7684\u7F13\u5B58 token usage \u5B57\u6BB5\u3002",
           latencyMs: second.response.latencyMs,
           rawEventTypes: [...first.eventTypes, ...second.eventTypes]
         });
@@ -2638,7 +2643,7 @@ function printHelp() {
   --profile <quick|balanced|deep>
   --probes <id,id,...>       \u53EA\u6267\u884C\u6307\u5B9A\u6D4B\u8BD5
   --api-key <key>            \u6216\u4F7F\u7528 APIQC_API_KEY \u73AF\u5883\u53D8\u91CF
-  --out <file>               \u9ED8\u8BA4 audit-report.json
+  --out <file>               \u9ED8\u8BA4 reports/audit-report.json
   --baseline <id>            \u52A0\u8F7D\u672C\u5730 baseline \u6587\u4EF6 ID
 
 \u5BC6\u94A5\u53EA\u7528\u4E8E\u672C\u6B21\u8FDB\u7A0B\uFF0C\u4E0D\u4F1A\u5199\u5165\u62A5\u544A\u3002
@@ -2736,7 +2741,7 @@ async function main() {
   const apiKey = typeof args["api-key"] === "string" ? args["api-key"] : process.env.APIQC_API_KEY;
   if (!baseUrl || !apiKey) throw new Error("Provide --base-url and --api-key, or set APIQC_BASE_URL and APIQC_API_KEY");
   const profile = typeof args.profile === "string" ? args.profile : "balanced";
-  const output = typeof args.out === "string" ? args.out : isCapture ? `baseline-${model}.json` : "audit-report.json";
+  const output = typeof args.out === "string" ? args.out : isCapture ? `baseline-${model}.json` : "reports/audit-report.json";
   process.stdout.write(`${LOGO}
 
 \u76EE\u6807: ${provider} / ${model}

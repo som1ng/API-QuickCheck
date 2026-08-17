@@ -42,6 +42,12 @@ const endpoint = (baseUrl: string, suffix: string) => {
   return base.endsWith(suffix) ? base : `${base}${suffix}`;
 };
 
+const anthropicEndpoint = (baseUrl: string) => {
+  const base = normalizeBaseUrl(baseUrl);
+  if (base.endsWith('/messages')) return base;
+  return base.endsWith('/v1') ? `${base}/messages` : `${base}/v1/messages`;
+};
+
 const textFromContent = (content: unknown): string => Array.isArray(content)
   ? content.map((part) => typeof part === 'object' && part !== null && 'text' in part ? String((part as Record<string, unknown>).text ?? '') : '').join('')
   : typeof content === 'string' ? content : '';
@@ -173,12 +179,12 @@ const openAiLike = (provider: 'openai' | 'xai'): ProviderAdapter => ({
 
 const anthropic: ProviderAdapter = {
   provider: 'anthropic', surface: 'messages',
-  basic: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/messages'), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 128, messages: [{ role: 'user', content: 'Return exactly: audit-ready.' }] } }),
+  basic: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 128, messages: [{ role: 'user', content: 'Return exactly: audit-ready.' }] } }),
   strictJson: undefined,
-  tool: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/messages'), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 256, tools: [{ name: 'audit_sum', description: 'Adds two integers.', input_schema: { type: 'object', properties: { a: { type: 'integer' }, b: { type: 'integer' } }, required: ['a', 'b'], additionalProperties: false } }], messages: [{ role: 'user', content: 'Call audit_sum with a=19 and b=23. Do not answer in prose.' }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, '/messages'), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 256, thinking: { type: 'adaptive' }, output_config: { effort: 'high' }, messages: [{ role: 'user', content: 'What is 19 multiplied by 23? Return only the number.' }] } }),
+  tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 256, tools: [{ name: 'audit_sum', description: 'Adds two integers.', input_schema: { type: 'object', properties: { a: { type: 'integer' }, b: { type: 'integer' } }, required: ['a', 'b'], additionalProperties: false } }], messages: [{ role: 'user', content: 'Call audit_sum with a=19 and b=23. Do not answer in prose.' }] } }),
+  reasoning: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: { model, max_tokens: 256, thinking: { type: 'adaptive' }, output_config: { effort: 'high' }, messages: [{ role: 'user', content: 'What is 19 multiplied by 23? Return only the number.' }] } }),
   context: (baseUrl, apiKey, model, document) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: {
       model,
@@ -187,32 +193,32 @@ const anthropic: ProviderAdapter = {
     },
   }),
   codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: { model, max_tokens: 512, messages: [{ role: 'user', content: `${instruction}\n\n源码：\n${source}` }] },
   }),
   stream: (baseUrl, apiKey, model) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: { model, max_tokens: 128, messages: [{ role: 'user', content: 'Return exactly: audit-ready.' }], stream: true },
   }),
   state: (baseUrl, apiKey, model, marker) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: { model, max_tokens: 128, messages: [{ role: 'user', content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }] },
   }),
   stateContinuation: (baseUrl, apiKey, model, result, marker) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: { model, max_tokens: 128, messages: [{ role: 'user', content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }, { role: 'assistant', content: result.response.data?.content }, { role: 'user', content: `What was the exact state marker? Return only ${marker}.` }] },
   }),
   cache: (baseUrl, apiKey, model, prefix) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: { model, max_tokens: 128, messages: [{ role: 'user', content: [{ type: 'text', text: prefix, cache_control: { type: 'ephemeral' } }, { type: 'text', text: 'Return exactly: cache-ready.' }] }] },
   }),
   toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: {
       model,
@@ -225,7 +231,7 @@ const anthropic: ProviderAdapter = {
     },
   }),
   signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature) => ({
-    url: endpoint(baseUrl, '/messages'),
+    url: anthropicEndpoint(baseUrl),
     headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: {
       model,

@@ -58,6 +58,7 @@ patch_*.cjs
 audit-report.json
 *-report.json
 *-connectivity.json
+reports/
 baseline-*.json
 *.tmp
 coverage/

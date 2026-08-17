@@ -37,7 +37,7 @@ function printHelp(): void {
   --profile <quick|balanced|deep>
   --probes <id,id,...>       只执行指定测试
   --api-key <key>            或使用 APIQC_API_KEY 环境变量
-  --out <file>               默认 audit-report.json
+  --out <file>               默认 reports/audit-report.json
   --baseline <id>            加载本地 baseline 文件 ID
 
 密钥只用于本次进程，不会写入报告。\n`);
@@ -127,7 +127,7 @@ async function main(): Promise<void> {
   const apiKey = typeof args['api-key'] === 'string' ? args['api-key'] : process.env.APIQC_API_KEY;
   if (!baseUrl || !apiKey) throw new Error('Provide --base-url and --api-key, or set APIQC_BASE_URL and APIQC_API_KEY');
   const profile = (typeof args.profile === 'string' ? args.profile : 'balanced') as AuditProfile;
-  const output = typeof args.out === 'string' ? args.out : isCapture ? `baseline-${model}.json` : 'audit-report.json';
+  const output = typeof args.out === 'string' ? args.out : isCapture ? `baseline-${model}.json` : 'reports/audit-report.json';
 
   process.stdout.write(`${LOGO}\n\n目标: ${provider} / ${model}\n档位: ${profile}\n\n`);
   const selectedProbeIds = typeof args.probes === 'string' ? args.probes.split(/[\s,]+/).map((id) => id.trim()).filter(Boolean) : undefined;
