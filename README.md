@@ -1,145 +1,154 @@
 <div align="center">
-  <img src="./public/logo.png" width="108" height="108" alt="API-QuickCheck Logo" style="border-radius: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" />
-  <h1>API-QuickCheck 2.0</h1>
-  <p><strong>Universal AI API Relay Authenticity Forensics, Streaming Benchmark & Agent Adapter Suite</strong></p>
 
-  <p>
-    <a href="https://github.com/som1ng/API-QuickCheck/stargazers"><img src="https://img.shields.io/github/stars/som1ng/API-QuickCheck?style=flat-square&color=cc785c" alt="Stars"></a>
-    <a href="https://github.com/som1ng/API-QuickCheck/network/members"><img src="https://img.shields.io/github/forks/som1ng/API-QuickCheck?style=flat-square&color=383531" alt="Forks"></a>
-    <a href="https://github.com/som1ng/API-QuickCheck/blob/main/LICENSE"><img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=5db872" alt="License"></a>
-    <a href="https://github.com/som1ng/API-QuickCheck/releases"><img src="https://img.shields.io/badge/version-2.2.0-cc785c.svg?style=flat-square" alt="Version"></a>
-    <a href="https://vercel.com/"><img src="https://img.shields.io/badge/Vercel-Serverless%20Edge-black?style=flat-square&logo=vercel" alt="Vercel"></a>
-  </p>
+<table>
+  <tr>
+    <td width="28%" align="center" style="border:none; background: transparent; vertical-align: middle;">
+      <img src="./public/logo.png" width="130" height="130" alt="API-QuickCheck Logo" style="border-radius: 26px; box-shadow: 0 12px 36px rgba(204,120,92,0.35);" />
+      <br />
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: bold; color: #cc785c; letter-spacing: 0.5px;">API-QUICKCHECK 2.0</span>
+    </td>
+    <td width="72%" align="left" style="border:none; background: transparent; vertical-align: middle;">
+      <pre lang="text">
+   █████╗ ██████╗ ██╗     ██████╗ ██╗   ██╗██╗ ██████╗██╗  ██╗
+  ██╔══██╗██╔══██╗██║    ██╔═══██╗██║   ██║██║██╔════╝██║ ██╔╝
+  ███████║██████╔╝██║    ██║   ██║██║   ██║██║██║     █████╔╝ 
+  ██╔══██║██╔═══╝ ██║    ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗ 
+  ██║  ██║██║     ██║    ╚██████╔╝╚██████╔╝██║╚██████╗██║  ██╗
+  ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══▀▀═╝  ╚═════╝ ╚═╝ ╚═════╝╚═╝  ╚═╝
+  ─────────────────────────────────────────────────────────────
+  ⚡ Universal AI Relay Forensics, Batch Testing & Agent Adapter
+      </pre>
+    </td>
+  </tr>
+</table>
 
-  <p>
-    <a href="https://api-quick-check.vercel.app/"><strong>Live Demo</strong></a> ·
-    <a href="#-why-api-quickcheck-20"><strong>Why QuickCheck</strong></a> ·
-    <a href="#-core-modules"><strong>Features</strong></a> ·
-    <a href="#-quick-start"><strong>Quick Start</strong></a> ·
-    <a href="#-deploy-to-vercel"><strong>Deploy</strong></a> ·
-    <a href="./README_zh.md"><strong>中文说明</strong></a>
-  </p>
+<p>
+  <a href="https://github.com/som1ng/API-QuickCheck/stargazers"><img src="https://img.shields.io/github/stars/som1ng/API-QuickCheck?style=flat-square&color=cc785c" alt="Stars"></a>
+  <a href="https://github.com/som1ng/API-QuickCheck/network/members"><img src="https://img.shields.io/github/forks/som1ng/API-QuickCheck?style=flat-square&color=383531" alt="Forks"></a>
+  <a href="https://github.com/som1ng/API-QuickCheck/blob/main/LICENSE"><img src="https://img.shields.io/github/license/som1ng/API-QuickCheck?style=flat-square&color=5db872" alt="License"></a>
+  <a href="https://github.com/som1ng/API-QuickCheck/releases"><img src="https://img.shields.io/badge/version-2.2.0-cc785c.svg?style=flat-square" alt="Version"></a>
+  <a href="https://api-quick-check.vercel.app/"><img src="https://img.shields.io/badge/Vercel-Live%20Demo-141413?style=flat-square&logo=vercel" alt="Vercel"></a>
+</p>
+
+<p>
+  <a href="https://api-quick-check.vercel.app/"><strong>🚀 Live Demo</strong></a> ·
+  <a href="#-why-api-quickcheck-20"><strong>Why QuickCheck</strong></a> ·
+  <a href="#-core-capabilities"><strong>Core Features</strong></a> ·
+  <a href="#-2026-frontier-model-baseline-matrix"><strong>2026 Baseline</strong></a> ·
+  <a href="#-quick-start"><strong>Quick Start</strong></a> ·
+  <a href="./README_zh.md"><strong>🇨🇳 中文说明</strong></a>
+</p>
+
 </div>
 
 ---
 
-## ⭐ Why API-QuickCheck 2.0?
+## ⚡ Why API-QuickCheck 2.0?
 
-In today's crowded AI API proxy/middleman ecosystem, **model substitution fraud** (e.g. routing Claude 3.7 / o1 to cheap alternatives, faking `<think>` tags in text, silent context truncation, and severe gateway queueing) has become a common trap for developers and agent builders.
+In today's crowded AI proxy and middleman ecosystem, **model substitution fraud** (e.g. silently routing Claude 3.7 / OpenAI o3 to cheap alternatives, faking `<think>` tags in raw text, silent context truncation, and severe gateway queueing) has become a rampant trap for developers and AI agent builders.
 
-**API-QuickCheck 2.0** is purpose-built to solve this:
-- **No Guesswork**: Features **Anthropic official private-key Thinking Signature turn-2 cryptographic verification**;
-- **No Shallow Pings**: Provides comprehensive **microsecond TTFT, real-time TPS throughput, and inter-chunk Jitter variance**;
-- **No Dead Ends**: Built-in **Dual-Engine model discovery** and **Vercel Serverless Edge proxy**, completely eliminating browser CORS and Cloudflare blocking;
-- **Strict Privacy**: Crafted in the **Anthropic Claude Editorial Design System**, with zero backend databases and zero data persistence.
+**API-QuickCheck 2.0** provides an end-to-end cryptographic and runtime forensics engine:
 
----
-
-## ⭐ Core Modules
-
-```
-                                 ┌── [ 1. Fidelity ] ➔ Claude Thinking Signature / R1 Reasoning Stream
-                                 ├── [ 2. Benchmark ] ➔ Microsecond TTFT / Real-time TPS / Jitter Variance
-                                 ├── [ 3. Scanner ] ➔ Dual-Engine Discovery / 5-Thread Pool Classifier
-API-QuickCheck 2.0 ──────────────┼── [ 4. Capability ] ➔ SSE Stream / Tool Calling / Vision / JSON Mode
-                                 ├── [ 5. Balance ] ➔ OneAPI / NewAPI / DoneAPI / OpenRouter Quota Sniffing
-                                 └── [ 6. Adapter ] ➔ Claude Code / Cline / Cursor / Dify 1-Click Configs
-```
-
-### 1. Deep Fidelity & Downgrade Forensics
-- **Anthropic Official Thinking Signature Cryptographic Validation**:
-  Extracts Anthropic's private-key signature from `thinking` blocks and submits it back to Anthropic in turn 2 for official cryptographic verification. **Spoofing or relaying with cheap models is mathematically impossible!**
-- **DeepSeek-R1 / OpenAI o1 Native Reasoning Stream Check**:
-  Verifies the native `delta.reasoning_content` protocol layer, instantly detecting fake `<think>` text tags.
-- **Metacognitive Conflict & SVG Topology Probes**:
-  Detects injected `"You are Claude"` system prompts; verifies SVG 3D spatial geometry and knowledge cutoffs.
-
-### 2. Streaming Latency & Performance Benchmark
-- **Microsecond TTFT (Time to First Token)**: Precisely measures network handshake and queueing delay until the first data chunk arrives.
-- **Real-Time TPS Throughput**: Tracks live token velocity with an integrated streaming terminal typewriter.
-- **Jitter Variance**: Calculates inter-chunk arrival variance to diagnose rate limits and proxy buffer congestion.
-
-### 3. Dual-Engine 100% Model Discovery
-- **Engine 1 (Standard Cascade)**: Concurrently polls `/v1/models`, `/models`, `/api/models` with universal payload extractors.
-- **Engine 2 (Fast Chat Prober Fallback)**: **Even if the relay admin hides `/v1/models`**, fast concurrent probing across top 16 models in 500ms will 100% discover all active models.
-
-### 4. Capability & Agent Readiness Matrix
-- **SSE Stream**: Tests if persistent connections are broken by reverse proxies.
-- **Tool / Function Calling**: Validates if middleman gateways strip or corrupt `tools` schemas (essential for **Cline, Cursor, Claude Code**).
-- **Vision Multimodal**: Sends 1x1 base64 image probes to verify multimodal pipeline viability.
-- **JSON Mode**: Validates `response_format` strict compliance.
-
-### 5. Universal Relay Balance & Quota Sniffer
-- Compatible with **OneAPI, NewAPI, DoneAPI, VoAPI, V3, OpenRouter, SiliconFlow, DeepSeek**.
-- Normalizes 500,000-point ratios to USD / CNY amounts.
-
-### 6. Coding Agent 1-Click Auto-Adapter
-- Instantly generates validated configuration code for:
-  - **Claude Code** (Anthropic CLI)
-  - **Cline / Roo Code** (VS Code Agent)
-  - **Cursor IDE**
-  - **Cherry Studio / Chatbox**
-  - **NextChat / Dify / FastGPT**
+- 🛡️ **Zero Guesswork**: Anthropic official private-key **Thinking Signature turn-2 cryptographic verification**;
+- 🧠 **Native Stream Forensics**: Validates raw `reasoning_content` delta chunks to uncover hardcoded `<think>` text fakes;
+- ⚡ **Microsecond Benchmarks**: Measures **TTFT (Time to First Token)**, real-time **TPS throughput**, and **Chunk Jitter variance**;
+- 🔑 **Intelligent Batch Key Tester**: High-concurrency ping pool with **±25% jitter anti-ban delay**, memory-cached endpoint routing, and quota extraction;
+- 🔄 **2026 Frontier Baseline Auto-Sync**: Automated CI/CD pipelines & manual triggers keep official capability baselines up to date every 3 days;
+- 🔒 **Absolute Privacy**: Crafted in the **Anthropic Claude Warm Dark Editorial Design System**, with **zero backend databases and zero data logging**.
 
 ---
 
-## ⭐ Technical Comparison Matrix
+## 🎯 Core Capabilities
 
-| Evaluation Dimension | Traditional Shell Scripts | Common Online Ping Sites | **API-QuickCheck 2.0** |
+```text
+                                 ┌── [ 1. Deep Forensics ] ➔ Claude Thinking Signature / R1 Reasoning Stream
+                                 ├── [ 2. Speed Benchmark ] ➔ Microsecond TTFT / Real-time TPS / Jitter Variance
+                                 ├── [ 3. Batch Key Ping ] ➔ Jitter Anti-Ban / Quota Sniffer / Multi-Format Export
+API-QuickCheck 2.0 ──────────────┼── [ 4. Model Discovery ] ➔ Dual-Engine Sniffing / 100% Hidden Model Probing
+                                 ├── [ 5. 2026 Baselines ] ➔ 24-Probe Policy / Automated 3-Day CI/CD Sync
+                                 └── [ 6. Agent Adapter ] ➔ Claude Code / Cline / Cursor / Dify 1-Click Config
+```
+
+### 1. Deep Fidelity & Model Fraud Forensics
+- **Anthropic Official Cryptographic Validation (Thinking Signature)**:
+  Extracts Anthropic's private-key cryptographic signature from `thinking` blocks and submits it back to Anthropic in turn 2 for official cryptographic verification. **Spoofing or relaying via cheap models is mathematically impossible!**
+- **DeepSeek-R1 / OpenAI o-Series Native Reasoning Stream Check**:
+  Verifies the native `delta.reasoning_content` protocol layer, instantly exposing fake `<think>` text tags inserted by low-quality gateways.
+- **Metacognitive Conflict & SVG Spatial Probes**:
+  Uncovers stealthy `"You are Claude"` system prompt injections; verifies SVG 3D geometry and knowledge cutoff dates.
+
+### 2. Microsecond Latency & Performance Benchmark
+- **Time to First Token (TTFT)**: Precisely measures network handshake and gateway queueing delay before the first token arrives.
+- **Live TPS Throughput**: Tracks real-time token generation velocity with an interactive typewriter terminal.
+- **Jitter Variance**: Calculates inter-chunk arrival variance to diagnose rate limits, Nginx buffer delays, and gateway congestion.
+
+### 3. Smart Batch API-Key Testing & Anti-Ban Pool
+- **Intelligent Raw Input Cleaning**: Extracts clean API keys from plain text, commas, CSV columns, and JSON arrays.
+- **Adaptive Anti-Ban Protection**:
+  - **±25% Jitter Delay**: Randomizes concurrent request intervals to prevent IP rate-limit bans;
+  - **Memory Endpoint Cache**: Remembers verified working endpoints to reduce subsequent payload traffic by 80%;
+  - **429 Circuit Breaker**: Automatically backs off upon gateway congestion.
+- **Balance & Quota Sniffer**: Auto-detects balances across **OneAPI, NewAPI, DoneAPI, OpenRouter, SiliconFlow, DeepSeek**.
+- **Multi-Format Export & History**: 1-click export to TXT, CSV (Excel BOM compliant), JSON, with local persistent recovery.
+
+### 4. 2026 Frontier Model Baselines & 24-Probe Policy
+- Complete coverage across **24 logical audit probes** spanning Protocol (P0), Architecture (P1), Capability (P2), and Quality (P3);
+- Built-in GitHub Actions workflow (`sync-model-baselines.yml`) syncing authoritative global models every 3 days;
+- In-document **[🔄 Manual Sync]** button for instant in-browser updates.
+
+---
+
+## 📊 Technical Comparison Matrix
+
+| Evaluation Dimension | Traditional Shell Scripts | Generic Online Ping Tools | **API-QuickCheck 2.0** |
 | :--- | :---: | :---: | :---: |
-| **Claude Private-Key Auth** | Not Supported | ⚠️ Incomplete text heuristic | ✅ **100% Official Cryptographic Turn-2 Check** |
-| **Reasoning Stream Check** | Not Supported | Not Supported | ✅ **Native `reasoning_content` validation** |
-| **Browser CORS Resolution** | ⚠️ Network Error | ⚠️ Centralized private server | ✅ **Local Middleware + Vercel Serverless Edge** |
-| **Hidden Model Discovery** | Exits on 404 | Not Supported | ✅ **Candidate Routes + 16-Model Fast Prober** |
-| **Design Aesthetics** | Basic / Cluttered | Chaotic dashboard | ✅ **Anthropic Claude Editorial System** |
-| **API Key Privacy** | Uploaded to server | Saved to cloud DB | ✅ **100% In-Memory · Never Leaves Browser** |
+| **Claude Private-Key Auth** | Not Supported | ⚠️ Incomplete text heuristic | ✅ **100% Official Turn-2 Cryptographic Check** |
+| **Reasoning Stream Forensics** | Not Supported | Not Supported | ✅ **Native `reasoning_content` validation** |
+| **Batch Key Anti-Ban Engine** | ⚠️ High ban risk | Basic sequential ping | ✅ **±25% Jitter + Endpoint Memory Cache** |
+| **Hidden Model Discovery** | Exits on 404 | Not Supported | ✅ **Dual-Engine + 16-Model Fast Prober** |
+| **2026 Model Baseline Sync** | Hardcoded | Outdated | ✅ **Every 3-Day CI/CD Auto-Sync & Manual UI** |
+| **Design Aesthetics** | Basic / Cluttered | Chaotic dashboard | ✅ **Anthropic Warm Dark + Tactile Magic Slider** |
+| **API Key Privacy** | Uploaded to server | Stored in cloud DB | ✅ **100% In-Memory · Never Leaves Browser** |
 
 ---
 
-## ⭐ Quick Start
+## 🚀 Quick Start
 
-### Local Development
+### Option 1: Live Web App (No Installation Needed)
+Visit the live deployment directly: **[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
+
+### Option 2: Local Development
 
 ```bash
-# 1. Clone the repository
+# 1. Clone repository
 git clone https://github.com/som1ng/API-QuickCheck.git
 cd API-QuickCheck
 
 # 2. Install dependencies
 npm install
 
-# 3. Start development server (with CORS-free transparent proxy middleware)
+# 3. Start local development server
 npm run dev
 
-# 4. Open in browser
-open http://localhost:5173/
+# 4. (Optional) Run 24-probe audit test suite
+npm test
+
+# 5. (Optional) Sync latest 2026 model baselines
+npm run sync:models
 ```
 
 ---
 
-## ⭐ Deploy to Vercel
+## 🛠️ Tech Stack
 
-Optimized for **Vercel Serverless Edge Runtime** (`api/proxy.ts` and `vercel.json`):
-
-1. **Fork** this repository to your GitHub account;
-2. Log into [Vercel](https://vercel.com/), import the repository, and click **Deploy**;
-3. Vercel automatically deploys the proxy as an Edge Function and the frontend to global CDN!
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsom1ng%2FAPI-QuickCheck)
+- **Core**: React 18, TypeScript, Vite
+- **Styling**: TailwindCSS, Anthropic Claude Warm-Dark Editorial System
+- **Rendering & Math**: ReactMarkdown, KaTeX, Rehype-Katex, Mermaid.js
+- **Icons**: Lucide React
+- **Edge Deployment**: Vercel Serverless Edge Functions
 
 ---
 
-## ⚠️ Privacy & Security Commitment
+## 📄 License
 
-- **Zero Data Persistence**: All keys are processed in client memory and never saved to any database.
-- **100% Open Source**: Every network call and scoring algorithm is fully auditable.
-
----
-
-## License
-
-Released under the **[MIT License](./LICENSE)**.
-
-<div align="center">
-  <sub>Designed with Anthropic Editorial Aesthetics · Built for the Global AI Developer & Agent Community.</sub>
-</div>
+Distributed under the **MIT License**. See `LICENSE` for more information.
