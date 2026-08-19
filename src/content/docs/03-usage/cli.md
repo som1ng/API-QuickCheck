@@ -2,7 +2,7 @@
 title: 使用 CLI
 category: usage
 categoryTitle: 使用
-order: 10
+order: 2
 subtitle: 工业级无头终端命令行引擎，零外部依赖，完美适配 CI/CD 自动化流水线与离线基准快照采集。
 ---
 

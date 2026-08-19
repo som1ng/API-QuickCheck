@@ -22,6 +22,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { fetchLatestFrontierModels } from '../../engine/baselines/modelSyncService';
+import { ProviderIcon } from '../common/ProviderLogos';
 
 const getNodeText = (node: any): string => {
   if (typeof node === 'string') return node;
@@ -93,10 +94,16 @@ export const ClientExportTab: React.FC = () => {
   }, []);
 
   const toggleCategory = (catId: string) => {
-    setCollapsedCategories((prev) => ({
-      ...prev,
-      [catId]: !prev[catId],
-    }));
+    setCollapsedCategories((prev) => {
+      const willBeCollapsed = !prev[catId];
+      if (willBeCollapsed && currentDoc.frontmatter.category === catId) {
+        setSidebarPill((p) => ({ ...p, opacity: 0 }));
+      }
+      return {
+        ...prev,
+        [catId]: willBeCollapsed,
+      };
+    });
   };
 
   // Current active doc with safe fallback
@@ -123,31 +130,49 @@ export const ClientExportTab: React.FC = () => {
   const updateSidebarPill = useCallback(() => {
     const activeEl = docItemRefs.current[activeSlug];
     const container = sidebarNavRef.current;
+    const activeCategory = currentDoc.frontmatter.category;
+    const isCategoryCollapsed = Boolean(collapsedCategories[activeCategory]);
+
+    // If parent category is collapsed, immediately hide the floating pill
+    if (isCategoryCollapsed) {
+      setSidebarPill((prev) => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
     if (activeEl && container) {
       const activeRect = activeEl.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
+
+      // If element is visually hidden or collapsed to 0 height
+      if (activeRect.height < 10 || activeEl.offsetParent === null) {
+        setSidebarPill((prev) => ({ ...prev, opacity: 0 }));
+        return;
+      }
+
       const relativeTop = activeRect.top - containerRect.top + container.scrollTop;
       const relativeLeft = activeRect.left - containerRect.left + container.scrollLeft;
       setSidebarPill({
         top: relativeTop,
         left: relativeLeft,
         width: activeRect.width,
-        height: activeRect.height || 34,
+        height: activeRect.height,
         opacity: 1,
       });
     } else {
       setSidebarPill((prev) => ({ ...prev, opacity: 0 }));
     }
-  }, [activeSlug]);
+  }, [activeSlug, currentDoc, collapsedCategories]);
 
   useEffect(() => {
     updateSidebarPill();
-    const raf = requestAnimationFrame(updateSidebarPill);
-    const timer = setTimeout(updateSidebarPill, 40);
+    const timer1 = setTimeout(updateSidebarPill, 50);
+    const timer2 = setTimeout(updateSidebarPill, 150);
+    const timer3 = setTimeout(updateSidebarPill, 320);
     window.addEventListener('resize', updateSidebarPill);
     return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       window.removeEventListener('resize', updateSidebarPill);
     };
   }, [updateSidebarPill, collapsedCategories, searchQuery]);
@@ -306,39 +331,45 @@ export const ClientExportTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => toggleCategory(group.id)}
-                    className="w-full flex items-center justify-between px-2 py-1.5 text-[13px] font-sans font-semibold text-[#faf9f5] hover:text-[#cc785c] transition rounded cursor-pointer select-none"
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-[13px] font-sans font-semibold text-[#faf9f5] hover:text-[#cc785c] transition rounded cursor-pointer select-none group"
                   >
                     <span className="truncate tracking-tight">{group.title}</span>
                     <ChevronDown
-                      className={`h-3.5 w-3.5 text-[#a09d96] transition-transform duration-200 ${
-                        isCollapsed ? '-rotate-90' : 'rotate-0'
+                      className={`h-3.5 w-3.5 text-[#a09d96] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                        isCollapsed ? '-rotate-90 text-neutral-500' : 'rotate-0 text-[#cc785c]'
                       }`}
                     />
                   </button>
 
-                  {/* Document Links */}
-                  {!isCollapsed && (
-                    <div className="space-y-0.5 pt-0.5">
-                      {group.docs.map((doc) => {
-                        const isActive = currentDoc.slug === doc.slug;
-                        return (
-                          <button
-                            key={doc.slug}
-                            ref={(el) => { docItemRefs.current[doc.slug] = el; }}
-                            type="button"
-                            onClick={() => navigateToDoc(doc.slug)}
-                            className={`w-full relative z-10 flex items-center justify-between px-3 h-[34px] rounded-lg text-[13px] font-sans text-left transition-colors duration-200 cursor-pointer ${
-                              isActive
-                                ? 'text-[#faf9f5] font-semibold'
-                                : 'text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#1f1e1b]/40'
-                            }`}
-                          >
-                            <span className="truncate">{doc.frontmatter.title}</span>
-                          </button>
-                        );
-                      })}
+                  {/* Document Links with Silky Smooth Downward Grid Transition */}
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      !isCollapsed ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="space-y-0.5 pt-0.5">
+                        {group.docs.map((doc) => {
+                          const isActive = currentDoc.slug === doc.slug;
+                          return (
+                            <button
+                              key={doc.slug}
+                              ref={(el) => { docItemRefs.current[doc.slug] = el; }}
+                              type="button"
+                              onClick={() => navigateToDoc(doc.slug)}
+                              className={`w-full relative z-10 flex items-center justify-between px-3 h-[34px] rounded-lg text-[13px] font-sans text-left transition-colors duration-200 cursor-pointer ${
+                                isActive
+                                  ? 'text-[#faf9f5] font-semibold'
+                                  : 'text-[#a09d96] hover:text-[#faf9f5] hover:bg-[#1f1e1b]/40'
+                              }`}
+                            >
+                              <span className="truncate">{doc.frontmatter.title}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
@@ -481,9 +512,41 @@ export const ClientExportTab: React.FC = () => {
                   th: ({ children }) => (
                     <th className="py-3 px-4 text-sm font-semibold text-[#faf9f5] text-left font-sans">{children}</th>
                   ),
-                  td: ({ children }) => (
-                    <td className="py-3.5 px-4 text-sm text-[#d5d1c8] border-b border-[#2e2b27]/40 leading-relaxed font-sans">{children}</td>
-                  ),
+                  td: ({ children }) => {
+                    const text = getNodeText(children).trim();
+                    const lower = text.toLowerCase();
+                    let providerId: string | null = null;
+
+                    // Match strictly vendor names (e.g. "OpenAI", "Anthropic", "Google", "xAI")
+                    // or matrix cells like "OpenAI GPT-5.6-Sol"
+                    if (lower === 'openai' || lower.startsWith('openai ')) {
+                      providerId = 'openai';
+                    } else if (lower === 'anthropic' || lower.startsWith('anthropic ')) {
+                      providerId = 'anthropic';
+                    } else if (lower === 'google' || lower.startsWith('google ')) {
+                      providerId = 'google';
+                    } else if (
+                      lower === 'xai' ||
+                      lower === 'x-ai' ||
+                      lower.startsWith('xai ') ||
+                      lower.startsWith('x-ai ')
+                    ) {
+                      providerId = 'xai';
+                    }
+
+                    return (
+                      <td className="py-3.5 px-4 text-sm text-[#d5d1c8] border-b border-[#2e2b27]/40 leading-relaxed font-sans">
+                        {providerId ? (
+                          <span className="inline-flex items-center gap-2">
+                            <ProviderIcon providerId={providerId} className="w-4 h-4 flex-shrink-0" size={16} />
+                            <span>{children}</span>
+                          </span>
+                        ) : (
+                          children
+                        )}
+                      </td>
+                    );
+                  },
                   img: ({ src, alt, ...props }) => (
                     <img
                       src={src}

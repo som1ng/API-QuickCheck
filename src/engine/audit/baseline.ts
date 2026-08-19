@@ -54,7 +54,7 @@ export function validateBaselineSnapshot(value: unknown): value is BaselineSnaps
     && Object.values(snapshot.capabilityDistributions || {}).every((values) => Array.isArray(values) && values.every((score) => typeof score === 'number' && Number.isFinite(score)))
     && typeof snapshot.runtime === 'object'
     && typeof snapshot.coverage === 'object'
-    && (snapshot.source === 'official' || snapshot.source === 'user' || snapshot.source === 'unknown');
+    && (snapshot.source === 'official' || snapshot.source === 'reference' || snapshot.source === 'user' || snapshot.source === 'unknown');
 }
 
 const STORAGE_PREFIX = 'apiqc:baseline:';

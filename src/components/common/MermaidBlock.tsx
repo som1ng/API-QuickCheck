@@ -11,6 +11,7 @@ function initMermaid() {
   if (!mermaidInitialized) {
     mermaid.initialize({
       startOnLoad: false,
+      suppressErrorRendering: true,
       theme: 'dark',
       darkMode: true,
       securityLevel: 'loose',
@@ -51,6 +52,11 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ chart }) => {
         }
       } catch (err) {
         console.warn('Mermaid rendering error:', err);
+        // Clean up any error DOM elements injected by mermaid
+        const el1 = document.getElementById(uniqueId);
+        if (el1) el1.remove();
+        const el2 = document.getElementById('d' + uniqueId);
+        if (el2) el2.remove();
         if (isMounted) {
           setHasError(true);
         }

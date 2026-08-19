@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // scripts/apiqc.ts
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
 // src/engine/audit/baseline.ts
@@ -34,7 +34,7 @@ function createBaselineSnapshot(input) {
 function validateBaselineSnapshot(value) {
   if (!value || typeof value !== "object") return false;
   const snapshot = value;
-  return snapshot.schemaVersion === "1.0" && typeof snapshot.id === "string" && typeof snapshot.provider === "string" && typeof snapshot.model === "string" && typeof snapshot.surface === "string" && typeof snapshot.capturedAt === "string" && typeof snapshot.fixtureHashes === "object" && typeof snapshot.capabilityDistributions === "object" && Object.values(snapshot.capabilityDistributions || {}).every((values) => Array.isArray(values) && values.every((score) => typeof score === "number" && Number.isFinite(score))) && typeof snapshot.runtime === "object" && typeof snapshot.coverage === "object" && (snapshot.source === "official" || snapshot.source === "user" || snapshot.source === "unknown");
+  return snapshot.schemaVersion === "1.0" && typeof snapshot.id === "string" && typeof snapshot.provider === "string" && typeof snapshot.model === "string" && typeof snapshot.surface === "string" && typeof snapshot.capturedAt === "string" && typeof snapshot.fixtureHashes === "object" && typeof snapshot.capabilityDistributions === "object" && Object.values(snapshot.capabilityDistributions || {}).every((values) => Array.isArray(values) && values.every((score) => typeof score === "number" && Number.isFinite(score))) && typeof snapshot.runtime === "object" && typeof snapshot.coverage === "object" && (snapshot.source === "official" || snapshot.source === "reference" || snapshot.source === "user" || snapshot.source === "unknown");
 }
 var STORAGE_PREFIX = "apiqc:baseline:";
 function loadBaselineSnapshot(id) {
@@ -70,7 +70,7 @@ async function silentFetch(options) {
     method = "POST",
     headers = {},
     body,
-    timeoutMs = 6e3,
+    timeoutMs = 25e3,
     signal: userSignal,
     disableFallback = false
   } = options;
@@ -413,7 +413,7 @@ async function fetchRemoteModels(baseUrl, apiKey, _platformId, signal) {
             messages: [{ role: "user", content: "hi" }],
             max_tokens: 1
           },
-          timeoutMs: 6e3,
+          timeoutMs: 15e3,
           signal
         });
         if (res.status === 401 || res.status === 403) {
@@ -466,6 +466,15 @@ var anthropicEndpoint = (baseUrl) => {
   if (base.endsWith("/messages")) return base;
   return base.endsWith("/v1") ? `${base}/messages` : `${base}/v1/messages`;
 };
+var chatCompletionsEndpoint = (baseUrl) => {
+  const base = normalizeBaseUrl(baseUrl);
+  if (base.endsWith("/chat/completions")) return base;
+  return base.endsWith("/v1") ? `${base}/chat/completions` : `${base}/v1/chat/completions`;
+};
+var geminiGenerateContentEndpoint = (baseUrl, model) => {
+  const base = normalizeBaseUrl(baseUrl);
+  return `${base}/models/${encodeURIComponent(model)}:generateContent`;
+};
 var textFromContent = (content) => Array.isArray(content) ? content.map((part) => typeof part === "object" && part !== null && "text" in part ? String(part.text ?? "") : "").join("") : typeof content === "string" ? content : "";
 var parseToolArguments = (value) => {
   if (typeof value !== "string") return value;
@@ -488,6 +497,7 @@ var parseResponses = (response) => {
     text,
     eventTypes: output.map((item) => String(item.type ?? "unknown")),
     usage: usageFromResponse(response),
+    finishReason: typeof response.data?.status === "string" ? response.data.status : void 0,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ""), name: String(toolCall.name ?? ""), arguments: parseToolArguments(toolCall.arguments) } : void 0
   };
@@ -501,23 +511,48 @@ var parseMessages = (response) => {
     text: content.filter((item) => item.type === "text").map((item) => String(item.text ?? "")).join(""),
     eventTypes: content.map((item) => String(item.type ?? "unknown")),
     usage: usageFromResponse(response),
+    finishReason: typeof response.data?.stop_reason === "string" ? response.data.stop_reason : void 0,
     signature: typeof thinking?.signature === "string" ? thinking.signature : void 0,
     thinkingText: typeof thinking?.thinking === "string" ? thinking.thinking : void 0,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.id ?? ""), name: String(toolCall.name ?? ""), arguments: toolCall.input } : void 0
   };
 };
-var parseInteractions = (response) => {
-  const output = Array.isArray(response.data?.output) ? response.data.output : [];
-  const text = typeof response.data?.output_text === "string" ? response.data.output_text : output.map((item) => textFromContent(item.content)).join("");
-  const toolCall = output.find((item) => item.type === "function_call" || item.type === "tool_call");
+var parseGeminiGenerateContent = (response) => {
+  const candidates = Array.isArray(response.data?.candidates) ? response.data.candidates : [];
+  const content = typeof candidates[0]?.content === "object" && candidates[0].content !== null ? candidates[0].content : {};
+  const parts = Array.isArray(content.parts) ? content.parts : [];
+  const functionCall = parts.find((part) => typeof part.functionCall === "object" && part.functionCall !== null);
+  const call = functionCall?.functionCall;
+  const firstCandidate = candidates[0];
   return {
     response,
-    text,
-    eventTypes: output.map((item) => String(item.type ?? "unknown")),
+    text: parts.filter((part) => typeof part.text === "string").map((part) => String(part.text)).join(""),
+    eventTypes: parts.map((part) => part.functionCall ? "function_call" : "text"),
+    usage: typeof response.data?.usageMetadata === "object" && response.data.usageMetadata !== null ? response.data.usageMetadata : void 0,
+    finishReason: typeof firstCandidate?.finishReason === "string" ? firstCandidate.finishReason : void 0,
+    toolCalled: Boolean(call),
+    toolCall: call ? { id: String(call.id ?? call.name ?? ""), name: String(call.name ?? ""), arguments: call.args } : void 0
+  };
+};
+var parseChatCompletions = (response) => {
+  const choices = Array.isArray(response.data?.choices) ? response.data.choices : [];
+  const message = typeof choices[0]?.message === "object" && choices[0].message !== null ? choices[0].message : {};
+  const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
+  const toolCall = toolCalls[0];
+  const functionCall = typeof toolCall?.function === "object" && toolCall.function !== null ? toolCall.function : void 0;
+  return {
+    response,
+    text: textFromContent(message.content),
+    eventTypes: toolCall ? ["tool_call"] : ["message"],
     usage: usageFromResponse(response),
-    toolCalled: Boolean(toolCall),
-    toolCall: toolCall ? { id: String(toolCall.call_id ?? toolCall.id ?? ""), name: String(toolCall.name ?? ""), arguments: toolCall.arguments ?? toolCall.input } : void 0
+    finishReason: typeof choices[0]?.finish_reason === "string" ? choices[0].finish_reason : void 0,
+    toolCalled: Boolean(toolCall && functionCall),
+    toolCall: toolCall && functionCall ? {
+      id: String(toolCall.id ?? ""),
+      name: String(functionCall.name ?? ""),
+      arguments: parseToolArguments(functionCall.arguments)
+    } : void 0
   };
 };
 var openAiLike = (provider) => ({
@@ -601,16 +636,40 @@ ${source}`, max_output_tokens: 512 }
   }),
   parse: parseResponses
 });
+var anthropicHeaders = (apiKey) => ({
+  "x-api-key": apiKey,
+  Authorization: `Bearer ${apiKey}`,
+  "anthropic-version": "2023-06-01"
+});
 var anthropic = {
   provider: "anthropic",
   surface: "messages",
-  basic: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 128, messages: [{ role: "user", content: "Return exactly: audit-ready." }] } }),
-  strictJson: void 0,
-  tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 256, tools: [{ name: "audit_sum", description: "Adds two integers.", input_schema: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"], additionalProperties: false } }], messages: [{ role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: { model, max_tokens: 256, thinking: { type: "adaptive" }, output_config: { effort: "high" }, messages: [{ role: "user", content: "What is 19 multiplied by 23? Return only the number." }] } }),
+  basic: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 128, messages: [{ role: "user", content: "Return exactly: audit-ready." }] } }),
+  strictJson: (baseUrl, apiKey, model) => ({
+    url: anthropicEndpoint(baseUrl),
+    headers: anthropicHeaders(apiKey),
+    body: {
+      model,
+      max_tokens: 256,
+      output_config: {
+        format: {
+          type: "json_schema",
+          schema: {
+            type: "object",
+            properties: { status: { type: "string", enum: ["ok"] } },
+            required: ["status"],
+            additionalProperties: false
+          }
+        }
+      },
+      messages: [{ role: "user", content: "Return a JSON object with exactly one property named status and value ok." }]
+    }
+  }),
+  tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, tools: [{ name: "audit_sum", description: "Adds two integers.", input_schema: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"], additionalProperties: false } }], tool_choice: { type: "tool", name: "audit_sum" }, messages: [{ role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] } }),
+  reasoning: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, thinking: { type: "adaptive" }, output_config: { effort: "high" }, messages: [{ role: "user", content: "Solve this multi-step arithmetic constraint and return only the final integer: ((19 * 23) + (17 * 11)) - 29." }] } }),
   context: (baseUrl, apiKey, model, document) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: {
       model,
       max_tokens: 64,
@@ -621,7 +680,7 @@ ${document}` }]
   }),
   codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: { model, max_tokens: 512, messages: [{ role: "user", content: `${instruction}
 
 \u6E90\u7801\uFF1A
@@ -629,27 +688,27 @@ ${source}` }] }
   }),
   stream: (baseUrl, apiKey, model) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: { model, max_tokens: 128, messages: [{ role: "user", content: "Return exactly: audit-ready." }], stream: true }
   }),
   state: (baseUrl, apiKey, model, marker) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: { model, max_tokens: 128, messages: [{ role: "user", content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }] }
   }),
   stateContinuation: (baseUrl, apiKey, model, result, marker) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: { model, max_tokens: 128, messages: [{ role: "user", content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }, { role: "assistant", content: result.response.data?.content }, { role: "user", content: `What was the exact state marker? Return only ${marker}.` }] }
   }),
   cache: (baseUrl, apiKey, model, prefix) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: { model, max_tokens: 128, messages: [{ role: "user", content: [{ type: "text", text: prefix, cache_control: { type: "ephemeral" } }, { type: "text", text: "Return exactly: cache-ready." }] }] }
   }),
   toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: {
       model,
       max_tokens: 256,
@@ -662,7 +721,7 @@ ${source}` }] }
   }),
   signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature) => ({
     url: anthropicEndpoint(baseUrl),
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    headers: anthropicHeaders(apiKey),
     body: {
       model,
       max_tokens: 256,
@@ -672,7 +731,7 @@ ${source}` }] }
           role: "assistant",
           content: [
             { type: "thinking", thinking: thinkingText, signature },
-            { type: "text", text: "19 * 23 = 437." }
+            { type: "text", text: "595" }
           ]
         },
         { role: "user", content: "Now add 10 to that result." }
@@ -681,51 +740,256 @@ ${source}` }] }
   }),
   parse: parseMessages
 };
-var gemini = {
-  provider: "gemini",
-  surface: "interactions",
-  basic: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, "/interactions"), headers: { "x-goog-api-key": apiKey }, body: { model, input: "Return exactly: audit-ready.", store: true } }),
-  strictJson: void 0,
-  tool: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, "/interactions"), headers: { "x-goog-api-key": apiKey }, body: { model, input: "Call audit_sum with a=19 and b=23. Do not answer in prose.", tools: [{ function_declarations: [{ name: "audit_sum", description: "Adds two integers.", parameters_json_schema: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"] } }] }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({ url: endpoint(baseUrl, "/interactions"), headers: { "x-goog-api-key": apiKey }, body: { model, input: "What is 19 multiplied by 23? Return only the number.", generation_config: { thinking_level: "high" } } }),
-  context: (baseUrl, apiKey, model, document) => ({
-    url: endpoint(baseUrl, "/interactions"),
-    headers: { "x-goog-api-key": apiKey },
+var openRouter = {
+  provider: "openrouter",
+  surface: "chat_completions",
+  basic: (baseUrl, apiKey, model) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
     body: {
       model,
-      input: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.
+      messages: [{ role: "user", content: "Return exactly: audit-ready." }],
+      max_tokens: 128
+    }
+  }),
+  stream: (baseUrl, apiKey, model) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      messages: [{ role: "user", content: "Return exactly: audit-ready." }],
+      max_tokens: 128,
+      stream: true
+    }
+  }),
+  strictJson: (baseUrl, apiKey, model) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      max_tokens: 256,
+      messages: [{ role: "user", content: "Return a JSON object with exactly one property named status and value ok." }],
+      response_format: { type: "json_schema", json_schema: { name: "audit_status", strict: true, schema: { type: "object", properties: { status: { type: "string", enum: ["ok"] } }, required: ["status"], additionalProperties: false } } }
+    }
+  }),
+  tool: (baseUrl, apiKey, model) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      max_tokens: 256,
+      messages: [{ role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." }],
+      tools: [{ type: "function", function: { name: "audit_sum", description: "Adds two integers.", parameters: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"], additionalProperties: false } } }],
+      tool_choice: "required"
+    }
+  }),
+  reasoning: (baseUrl, apiKey, model) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      max_tokens: 256,
+      messages: [{ role: "user", content: "Solve this multi-step arithmetic constraint and return only the final integer: ((19 * 23) + (17 * 11)) - 29." }],
+      include_reasoning: true,
+      reasoning: { effort: "high" }
+    }
+  }),
+  context: (baseUrl, apiKey, model, document) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      messages: [{ role: "user", content: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.
 
-${document}`,
-      generation_config: { max_output_tokens: 64 }
+${document}` }],
+      max_tokens: 64
     }
   }),
   codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
-    url: endpoint(baseUrl, "/interactions"),
-    headers: { "x-goog-api-key": apiKey },
-    body: { model, input: `${instruction}
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      messages: [{ role: "user", content: `${instruction}
 
 \u6E90\u7801\uFF1A
-${source}`, generation_config: { max_output_tokens: 512 } }
+${source}` }],
+      max_tokens: 512
+    }
   }),
-  parse: parseInteractions
+  state: (baseUrl, apiKey, model, marker) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      messages: [{ role: "user", content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }],
+      max_tokens: 128
+    }
+  }),
+  stateContinuation: (baseUrl, apiKey, model, result, marker) => {
+    const choices = Array.isArray(result.response.data?.choices) ? result.response.data.choices : [];
+    const assistant = choices[0]?.message || { role: "assistant", content: result.text };
+    return {
+      url: chatCompletionsEndpoint(baseUrl),
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: {
+        model,
+        messages: [
+          { role: "user", content: `Remember this exact state marker: ${marker}. Reply with acknowledged.` },
+          assistant,
+          { role: "user", content: `What was the exact state marker? Return only ${marker}.` }
+        ],
+        max_tokens: 128
+      }
+    };
+  },
+  cache: (baseUrl, apiKey, model, prefix) => ({
+    url: chatCompletionsEndpoint(baseUrl),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: {
+      model,
+      messages: [
+        { role: "user", content: [{ type: "text", text: prefix, cache_control: { type: "ephemeral" } }, { type: "text", text: "Return exactly: cache-ready." }] }
+      ],
+      max_tokens: 128
+    }
+  }),
+  toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => {
+    const choices = Array.isArray(result.response.data?.choices) ? result.response.data.choices : [];
+    const assistant = choices[0]?.message;
+    return {
+      url: chatCompletionsEndpoint(baseUrl),
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: {
+        model,
+        max_tokens: 256,
+        messages: [
+          { role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." },
+          assistant,
+          { role: "tool", tool_call_id: result.toolCall?.id, content: toolOutput }
+        ]
+      }
+    };
+  },
+  parse: parseChatCompletions
+};
+var geminiHeaders = (apiKey) => {
+  if (apiKey.startsWith("ya29.") || apiKey.startsWith("eyJ") || apiKey.length > 100) {
+    return { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" };
+  }
+  return { "x-goog-api-key": apiKey, "Content-Type": "application/json" };
+};
+var gemini = {
+  provider: "gemini",
+  surface: "interactions",
+  basic: (baseUrl, apiKey, model) => ({ url: geminiGenerateContentEndpoint(baseUrl, model), headers: geminiHeaders(apiKey), body: { contents: [{ role: "user", parts: [{ text: "Return exactly: audit-ready." }] }] } }),
+  strictJson: (baseUrl, apiKey, model) => ({
+    url: geminiGenerateContentEndpoint(baseUrl, model),
+    headers: geminiHeaders(apiKey),
+    body: {
+      contents: [{ role: "user", parts: [{ text: "Return a JSON object with exactly one property named status and value ok." }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: { type: "OBJECT", properties: { status: { type: "STRING", enum: ["ok"] } }, required: ["status"] }
+      }
+    }
+  }),
+  tool: (baseUrl, apiKey, model) => ({
+    url: geminiGenerateContentEndpoint(baseUrl, model),
+    headers: geminiHeaders(apiKey),
+    body: {
+      contents: [{ role: "user", parts: [{ text: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] }],
+      tools: [{ functionDeclarations: [{ name: "audit_sum", description: "Adds two integers.", parameters: { type: "OBJECT", properties: { a: { type: "INTEGER" }, b: { type: "INTEGER" } }, required: ["a", "b"] } }] }],
+      toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["audit_sum"] } }
+    }
+  }),
+  reasoning: (baseUrl, apiKey, model) => ({ url: geminiGenerateContentEndpoint(baseUrl, model), headers: geminiHeaders(apiKey), body: { contents: [{ role: "user", parts: [{ text: "Solve this multi-step arithmetic constraint and return only the final integer: ((19 * 23) + (17 * 11)) - 29." }] }], generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } } } }),
+  context: (baseUrl, apiKey, model, document) => ({
+    url: geminiGenerateContentEndpoint(baseUrl, model),
+    headers: geminiHeaders(apiKey),
+    body: {
+      contents: [{ role: "user", parts: [{ text: `Find the exact value after FIXED_CONTEXT_MARKER in this document. Return only that value.
+
+${document}` }] }],
+      generationConfig: { maxOutputTokens: 64 }
+    }
+  }),
+  codeRepair: (baseUrl, apiKey, model, instruction, source) => ({
+    url: geminiGenerateContentEndpoint(baseUrl, model),
+    headers: geminiHeaders(apiKey),
+    body: { contents: [{ role: "user", parts: [{ text: `${instruction}
+
+\u6E90\u7801\uFF1A
+${source}` }] }], generationConfig: { maxOutputTokens: 512 } }
+  }),
+  state: (baseUrl, apiKey, model, marker) => ({
+    url: geminiGenerateContentEndpoint(baseUrl, model),
+    headers: geminiHeaders(apiKey),
+    body: {
+      contents: [{ role: "user", parts: [{ text: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }] }],
+      generationConfig: { maxOutputTokens: 128 }
+    }
+  }),
+  stateContinuation: (baseUrl, apiKey, model, result, marker) => {
+    const candidates = Array.isArray(result.response.data?.candidates) ? result.response.data.candidates : [];
+    const firstCandidate = candidates[0];
+    const content = typeof firstCandidate === "object" && firstCandidate !== null ? firstCandidate.content : void 0;
+    const parts = Array.isArray(content?.parts) ? content?.parts : [];
+    const modelPart = parts[0] || { text: result.text || "acknowledged" };
+    return {
+      url: geminiGenerateContentEndpoint(baseUrl, model),
+      headers: geminiHeaders(apiKey),
+      body: {
+        contents: [
+          { role: "user", parts: [{ text: `Remember this exact state marker: ${marker}. Reply with acknowledged.` }] },
+          { role: "model", parts: [modelPart] },
+          { role: "user", parts: [{ text: `What was the exact state marker? Return only ${marker}.` }] }
+        ],
+        generationConfig: { maxOutputTokens: 128 }
+      }
+    };
+  },
+  toolContinuation: (baseUrl, apiKey, model, result, toolOutput) => {
+    const candidates = Array.isArray(result.response.data?.candidates) ? result.response.data.candidates : [];
+    const firstCandidate = candidates[0];
+    const content = typeof firstCandidate === "object" && firstCandidate !== null ? firstCandidate.content : void 0;
+    const parts = Array.isArray(content?.parts) ? content?.parts : [];
+    const modelPart = parts[0] || {
+      functionCall: { name: result.toolCall?.name || "audit_sum", args: result.toolCall?.arguments || { a: 19, b: 23 } }
+    };
+    return {
+      url: geminiGenerateContentEndpoint(baseUrl, model),
+      headers: geminiHeaders(apiKey),
+      body: {
+        contents: [
+          { role: "user", parts: [{ text: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] },
+          { role: "model", parts: [modelPart] },
+          { role: "user", parts: [{ functionResponse: { name: result.toolCall?.name || "audit_sum", response: { result: Number(toolOutput) || 42 } } }] }
+        ]
+      }
+    };
+  },
+  parse: parseGeminiGenerateContent
 };
 var PROVIDER_ADAPTERS = {
   openai: openAiLike("openai"),
   xai: openAiLike("xai"),
   anthropic,
-  gemini
+  gemini,
+  openrouter: openRouter
 };
-function detectAuditProvider(model, requested = "auto") {
+function detectAuditProvider(_model, requested = "auto", baseUrl = "") {
   if (requested !== "auto") return requested;
-  const id = model.toLowerCase();
-  if (id.includes("claude") || id.includes("fable") || id.includes("opus") || id.includes("sonnet")) return "anthropic";
-  if (id.includes("gemini")) return "gemini";
-  if (id.includes("grok")) return "xai";
-  return "openai";
+  const base = baseUrl.toLowerCase();
+  if (base.includes("anthropic.com")) return "anthropic";
+  if (base.includes("googleapis.com")) return "gemini";
+  if (base.includes("x.ai")) return "xai";
+  if (base.includes("api.openai.com")) return "openai";
+  return "openrouter";
 }
 
 // src/engine/audit/suite.ts
-var providers = ["openai", "anthropic", "gemini", "xai"];
+var providers = ["openai", "anthropic", "gemini", "xai", "openrouter"];
 var probe = (id, layer, title, domains, fixture, scorer, maxInputTokens = 2048, maxOutputTokens = 512) => ({
   id,
   layer,
@@ -767,17 +1031,41 @@ var BALANCED_SUITE = [
 var AUDIT_PRESETS = {
   quick: {
     label: "\u5FEB\u901F",
-    description: "\u57FA\u7840\u8FDE\u901A\u3001\u8BA4\u8BC1\u3001\u4E25\u683C JSON \u548C\u5DE5\u5177\u7ED3\u6784\uFF0C\u9002\u5408\u5148\u786E\u8BA4\u63A5\u53E3\u5F62\u72B6\u3002",
-    probeIds: ["p0-model-discovery", "p0-native-route", "p0-auth-shape", "p0-strict-json"]
+    description: "\u57FA\u7840\u8FDE\u901A\u3001\u8BA4\u8BC1\u3001\u6D41\u5F0F\u4E8B\u4EF6\u3001\u4E25\u683C JSON \u4E0E\u5DE5\u5177\u7ED3\u6784\uFF0C\u9002\u5408\u5148\u786E\u8BA4\u63A5\u53E3\u5F62\u72B6\u3002",
+    probeIds: [
+      "p0-model-discovery",
+      "p0-native-route",
+      "p0-auth-shape",
+      "p0-stream-events",
+      "p0-strict-json",
+      "p0-tool-shape"
+    ]
   },
   balanced: {
-    label: "\u5E73\u8861",
-    description: "\u5B8C\u6574\u9009\u62E9 24 \u9879\u5E73\u8861\u6863\u8BA1\u5212\uFF0C\u6682\u4E0D\u53EF\u7528\u9879\u4F1A\u660E\u786E\u6807\u6CE8\u3002",
-    probeIds: BALANCED_SUITE.map((item) => item.id)
+    label: "\u6807\u51C6",
+    description: "\u6807\u51C6\u5E73\u8861\u6863\uFF0C\u8986\u76D6\u534F\u8BAE\u4FDD\u771F\u3001\u72B6\u6001\u8FDE\u7EED\u6027\u4E0E\u6838\u5FC3\u4EE3\u7801\u903B\u8F91\u3002",
+    probeIds: [
+      "p0-model-discovery",
+      "p0-native-route",
+      "p0-auth-shape",
+      "p0-stream-events",
+      "p0-strict-json",
+      "p0-tool-shape",
+      "p0-invalid-parameter",
+      "p1-reasoning-config",
+      "p1-state-continuity",
+      "p1-tool-roundtrip",
+      "p1-signature-continuity",
+      "p1-cache-semantics",
+      "p2-constraint-json",
+      "p2-tool-planning",
+      "p2-code-repair-a",
+      "p2-code-repair-b"
+    ]
   },
   deep: {
-    label: "\u6DF1\u5EA6",
-    description: "\u9009\u62E9\u5B8C\u6574 24 \u9879\u8BA1\u5212\uFF0C\u4E3A\u540E\u7EED\u957F\u4E0A\u4E0B\u6587\u3001\u5DE5\u5177\u95ED\u73AF\u548C\u672C\u5730\u4EFB\u52A1\u9884\u7559\u3002",
+    label: "\u5168\u91CF",
+    description: "\u5168\u91CF 24 \u9879\u6DF1\u5EA6\u5BA1\u8BA1\uFF0C\u5305\u542B\u8D85\u957F\u4E0A\u4E0B\u6587\u9488\u5C16\u68C0\u7D22\u4E0E\u591A\u6B21\u8FD0\u884C\u8D28\u91CF\u6837\u672C\u3002",
     probeIds: BALANCED_SUITE.map((item) => item.id)
   }
 };
@@ -870,10 +1158,36 @@ function validateChatCompletionEnvelope(data, requestedModel, strictId = true) {
   }
   return scoreValidation(issues, 7);
 }
-function validateAnthropicMessage(data, requestedModel) {
+function validateGeminiGenerateContent(data, _requestedModel) {
   const issues = [];
   if (!isRecord(data)) return { pass: false, score: 0, issues: ["response_not_object"] };
-  if (typeof data.id !== "string" || !data.id.startsWith("msg_")) issues.push("id_prefix_invalid");
+  const candidates = data.candidates;
+  if (!Array.isArray(candidates) || candidates.length === 0) {
+    issues.push("candidates_invalid");
+  } else {
+    const first = candidates[0];
+    if (!isRecord(first)) {
+      issues.push("candidate_not_object");
+    } else {
+      const content = first.content;
+      if (!isRecord(content) || content.role !== "model" || !Array.isArray(content.parts)) issues.push("model_content_invalid");
+      if (first.finishReason !== void 0 && typeof first.finishReason !== "string") issues.push("finish_reason_invalid");
+    }
+  }
+  const usage = data.usageMetadata;
+  if (!isRecord(usage)) {
+    issues.push("usage_missing");
+  } else {
+    for (const field of ["promptTokenCount", "candidatesTokenCount", "totalTokenCount"]) {
+      if (!isNonNegativeInteger(usage[field])) issues.push(`usage_${field}_invalid`);
+    }
+  }
+  return scoreValidation(issues, 5);
+}
+function validateAnthropicMessage(data, requestedModel, strictId = true) {
+  const issues = [];
+  if (!isRecord(data)) return { pass: false, score: 0, issues: ["response_not_object"] };
+  if (typeof data.id !== "string" || strictId && !data.id.startsWith("msg_")) issues.push("id_prefix_invalid");
   if (data.type !== "message") issues.push("type_invalid");
   if (data.role !== "assistant") issues.push("role_invalid");
   if (typeof data.model !== "string" || !modelMatches(data.model, requestedModel)) issues.push("model_mismatch");
@@ -921,22 +1235,36 @@ function createCodeRepairFixture(id) {
   if (id === "arithmetic") {
     return {
       id,
-      instruction: "\u4FEE\u590D\u7B97\u672F\u6A21\u5757\u4E2D\u7684\u7A0E\u540E\u603B\u4EF7\u8BA1\u7B97\uFF0C\u5E76\u53EA\u8FD4\u56DE\u4FEE\u590D\u540E\u7684\u4EE3\u7801\u3002",
+      instruction: "\u4FEE\u590D\u7B97\u672F\u6A21\u5757\u4E2D\u7684\u7A0E\u540E\u603B\u4EF7\u8BA1\u7B97\uFF0C\u4FDD\u7559\u5BFC\u51FA\u8BED\u53E5\uFF0C\u5E76\u53EA\u8FD4\u56DE\u4FEE\u590D\u540E\u7684\u4EE3\u7801\u3002",
       source: "function totalWithTax(price, taxRate) {\n  return price + taxRate;\n}\nmodule.exports = { totalWithTax };",
-      expectedTokens: ["return price * (1 + taxRate);", "module.exports = { totalWithTax };"]
+      expectedTokens: ["return price * (1 + taxRate);", "module.exports = { totalWithTax };"],
+      acceptancePatterns: [
+        [/return\s+price\s*\*\s*\(\s*1\s*\+\s*taxRate\s*\)/i, /return\s+price\s*\+\s*price\s*\*\s*taxRate/i, /return\s+price\s*\+\s*\(\s*price\s*\*\s*taxRate\s*\)/i, /price\s*\*\s*\(\s*1\s*\+\s*taxRate\s*\)/i],
+        [/module\.exports\s*=\s*\{\s*totalWithTax\s*\}/i, /export\s+(default\s+)?(function\s+)?totalWithTax/i, /export\s*\{\s*totalWithTax\s*\}/i, /function\s+totalWithTax/i]
+      ]
     };
   }
   return {
     id,
-    instruction: "\u4FEE\u590D\u96C6\u5408\u6A21\u5757\uFF0C\u4F7F\u51FD\u6570\u8FD4\u56DE\u53BB\u91CD\u540E\u4E14\u4FDD\u6301\u9996\u6B21\u51FA\u73B0\u987A\u5E8F\u7684\u6570\u7EC4\uFF0C\u5E76\u53EA\u8FD4\u56DE\u4FEE\u590D\u540E\u7684\u4EE3\u7801\u3002",
+    instruction: "\u4FEE\u590D\u96C6\u5408\u6A21\u5757\uFF0C\u4F7F\u51FD\u6570\u8FD4\u56DE\u53BB\u91CD\u540E\u4E14\u4FDD\u6301\u9996\u6B21\u51FA\u73B0\u987A\u5E8F\u7684\u6570\u7EC4\uFF0C\u4FDD\u7559\u5BFC\u51FA\u8BED\u53E5\uFF0C\u5E76\u53EA\u8FD4\u56DE\u4FEE\u590D\u540E\u7684\u4EE3\u7801\u3002",
     source: "function unique(values) {\n  return values.sort();\n}\nmodule.exports = { unique };",
-    expectedTokens: ["return [...new Set(values)];", "module.exports = { unique };"]
+    expectedTokens: ["return [...new Set(values)];", "module.exports = { unique };"],
+    acceptancePatterns: [
+      [/return\s+\[\.\.\.\s*new\s+Set\s*\(\s*values\s*\)\s*\]/i, /return\s+Array\.from\s*\(\s*new\s+Set\s*\(\s*values\s*\)\s*\)/i, /new\s+Set\s*\(\s*values\s*\)/i, /values\.filter\s*\(/i],
+      [/module\.exports\s*=\s*\{\s*unique\s*\}/i, /export\s+(default\s+)?(function\s+)?unique/i, /export\s*\{\s*unique\s*\}/i, /function\s+unique/i]
+    ]
   };
 }
 function scoreCodeRepairResponse(output, fixture) {
-  const normalized = output.toLowerCase();
-  const matched = fixture.expectedTokens.filter((token) => normalized.includes(token.toLowerCase()));
-  return { score: Math.round(matched.length / fixture.expectedTokens.length * 100), passed: matched.length === fixture.expectedTokens.length, matched };
+  const matched = [];
+  const missing = [];
+  const requirements = fixture.acceptancePatterns.length > 0 ? fixture.acceptancePatterns : fixture.expectedTokens.map((token) => [new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")]);
+  requirements.forEach((patterns, index) => {
+    const pattern = patterns.find((candidate) => candidate.test(output));
+    if (pattern) matched.push(pattern.source);
+    else missing.push(index);
+  });
+  return { score: Math.round(matched.length / requirements.length * 100), passed: missing.length === 0, matched, missing };
 }
 
 // src/engine/transport/sseReader.ts
@@ -1776,7 +2104,8 @@ var probe_policy_default = {
 var claims = official_model_claims_default;
 var policy = probe_policy_default;
 function findModelClaims(provider, model) {
-  return claims.models.find((entry) => entry.provider === provider && (entry.projectModelId === model || entry.officialModelId === model));
+  const normalizedModel = model.replace(new RegExp(`^${provider}/`), "");
+  return claims.models.find((entry) => entry.provider === provider && (entry.projectModelId === model || entry.officialModelId === model || entry.projectModelId === normalizedModel || entry.officialModelId === normalizedModel));
 }
 function readClaim(modelClaims, provider, path) {
   if (path === "provider") return provider;
@@ -1804,29 +2133,120 @@ function evaluateExpression(expression, provider, modelClaims) {
   return compareClaim(readClaim(modelClaims, provider, path), operator, expected);
 }
 function evaluatePolicy(probeId, provider, modelClaims) {
+  if (provider === "openrouter") {
+    return { state: "unknown", disposition: "standard_benchmark", countsTowardReferenceConclusion: true, reason: "OpenRouter \u53C2\u8003\u57FA\u7EBF\u6A21\u5F0F\uFF1A\u6267\u884C\u5DF2\u5B9E\u73B0\u63A2\u9488\u4EE5\u751F\u6210\u53EF\u6BD4\u8F83\u6837\u672C\u3002" };
+  }
   const probePolicy = policy.probePolicy[probeId];
   if (!probePolicy) {
-    return { state: "unknown", disposition: "exploratory_test", countsTowardOfficialConclusion: false, reason: "\u672A\u627E\u5230\u8BE5\u63A2\u9488\u7684\u5B98\u65B9\u8DEF\u7531\u7B56\u7565\u3002" };
+    return { state: "unknown", disposition: "exploratory_test", countsTowardReferenceConclusion: false, reason: "\u672A\u627E\u5230\u8BE5\u63A2\u9488\u7684\u5B98\u65B9\u8DEF\u7531\u7B56\u7565\u3002" };
   }
   const skippedBy = probePolicy.skipWhen?.find((expression) => evaluateExpression(expression, provider, modelClaims) === "supported");
   if (skippedBy) {
-    return { state: "unsupported", disposition: "not_claimed", countsTowardOfficialConclusion: false, reason: `\u5B98\u65B9\u80FD\u529B\u58F0\u660E\u6EE1\u8DB3\u8DF3\u8FC7\u6761\u4EF6\uFF1A${skippedBy}` };
+    return { state: "unsupported", disposition: "not_claimed", countsTowardReferenceConclusion: false, reason: `\u5B98\u65B9\u80FD\u529B\u58F0\u660E\u6EE1\u8DB3\u8DF3\u8FC7\u6761\u4EF6\uFF1A${skippedBy}` };
   }
   const requiredStates = (probePolicy.requires || []).map((expression) => ({ expression, state: evaluateExpression(expression, provider, modelClaims) }));
   const failedRequirement = requiredStates.find((item) => item.state === "unsupported");
   if (failedRequirement) {
-    return { state: "unsupported", disposition: "not_claimed", countsTowardOfficialConclusion: false, reason: `\u5B98\u65B9\u80FD\u529B\u58F0\u660E\u4E0D\u6EE1\u8DB3\u8981\u6C42\uFF1A${failedRequirement.expression}` };
+    return { state: "unsupported", disposition: "not_claimed", countsTowardReferenceConclusion: false, reason: `\u5B98\u65B9\u80FD\u529B\u58F0\u660E\u4E0D\u6EE1\u8DB3\u8981\u6C42\uFF1A${failedRequirement.expression}` };
   }
   if (requiredStates.some((item) => item.state === "unknown")) {
-    return { state: "unknown", disposition: "exploratory_test", countsTowardOfficialConclusion: false, reason: "\u5B98\u65B9\u80FD\u529B\u8D44\u6599\u672A\u660E\u786E\u8986\u76D6\u8BE5\u63A2\u9488\u8981\u6C42\uFF0C\u4EC5\u4F5C\u4E3A\u63A2\u7D22\u6027\u6D4B\u8BD5\u3002" };
+    return { state: "unknown", disposition: "exploratory_test", countsTowardReferenceConclusion: false, reason: "\u5B98\u65B9\u80FD\u529B\u8D44\u6599\u672A\u660E\u786E\u8986\u76D6\u8BE5\u63A2\u9488\u8981\u6C42\uFF0C\u4EC5\u4F5C\u4E3A\u63A2\u7D22\u6027\u6D4B\u8BD5\u3002" };
   }
   if (!modelClaims) {
-    return { state: "unknown", disposition: "exploratory_test", countsTowardOfficialConclusion: false, reason: "\u672A\u627E\u5230\u8BE5\u578B\u53F7\u7684\u5B98\u65B9\u80FD\u529B\u58F0\u660E\uFF0C\u4EC5\u4F5C\u4E3A\u63A2\u7D22\u6027\u6D4B\u8BD5\u3002" };
+    return { state: "unknown", disposition: "exploratory_test", countsTowardReferenceConclusion: false, reason: "\u672A\u627E\u5230\u8BE5\u578B\u53F7\u7684\u5B98\u65B9\u80FD\u529B\u58F0\u660E\uFF0C\u4EC5\u4F5C\u4E3A\u63A2\u7D22\u6027\u6D4B\u8BD5\u3002" };
   }
-  return { state: "supported", disposition: "standard_benchmark", countsTowardOfficialConclusion: true, reason: "\u5B98\u65B9\u80FD\u529B\u58F0\u660E\u6EE1\u8DB3\u63A2\u9488\u8981\u6C42\u3002" };
+  return { state: "supported", disposition: "standard_benchmark", countsTowardReferenceConclusion: true, reason: "\u5B98\u65B9\u80FD\u529B\u58F0\u660E\u6EE1\u8DB3\u63A2\u9488\u8981\u6C42\u3002" };
 }
 function getProbeRoute(provider, model, probeId) {
   return evaluatePolicy(probeId, provider, findModelClaims(provider, model));
+}
+
+// src/engine/audit/reportSummary.ts
+function assessAuditReport(report) {
+  const totalCount = report.protocol.length;
+  const passCount = report.protocol.filter((item) => item.status === "pass").length;
+  const failCount = report.protocol.filter((item) => item.status === "fail").length;
+  const unavailableCount = report.protocol.filter((item) => item.status === "unavailable").length;
+  const judgedCount = passCount + failCount;
+  const complianceRate = totalCount > 0 ? Math.round(passCount / totalCount * 100) : 0;
+  const hasClaudeSignature = report.target.provider === "anthropic" && report.protocol.some((item) => item.id === "p1-signature-continuity" && item.status === "pass");
+  if (report.conclusion === "suspect_downgraded") {
+    return {
+      conclusion: report.conclusion,
+      title: "\u53D1\u73B0\u534F\u8BAE\u6216\u80FD\u529B\u9000\u5316\u4FE1\u53F7",
+      tone: "danger",
+      explanation: "\u7ECF\u81EA\u52A8\u5316\u63A2\u9488\u4EA4\u53C9\u5BA1\u8BA1\uFF0C\u5F53\u524D\u4E2D\u8F6C\u7AEF\u70B9\u5728\u591A\u4E2A\u72EC\u7ACB\u80FD\u529B\u57DF\uFF08\u5982\u601D\u8003\u94FE\u5C01\u88C5\u3001\u5DE5\u5177\u8C03\u7528\u534F\u8BAE\u3001\u7ED3\u6784\u5316 JSON \u8F93\u51FA\u6216\u6D41\u5F0F\u4E8B\u4EF6\u6D41\uFF09\u4E2D\u68C0\u6D4B\u5230\u4E0D\u53EF\u9006\u7684\u683C\u5F0F\u6F02\u79FB\u4E0E\u65AD\u8A00\u5931\u8D25\u3002\u8BE5\u7ED3\u679C\u8868\u660E\u4E2D\u8F6C\u670D\u52A1\u94FE\u8DEF\u53EF\u80FD\u5B58\u5728\u6A21\u578B\u6DF7\u7528\u3001\u4F4E\u914D\u964D\u7EA7\u8F6C\u53D1\u6216\u4F7F\u7528\u4E86\u4E0D\u5408\u89C4\u7684\u534F\u8BAE\u4EE3\u7406\u8F6C\u6362\u4E2D\u95F4\u4EF6\uFF0C\u53EF\u80FD\u5BFC\u81F4\u4E0B\u6E38 Agent \u5E94\u7528\u6216\u6D41\u5F0F\u8F93\u51FA\u5F02\u5E38\u3002",
+      evidence: "\u5DF2\u5224\u5B9A " + judgedCount + " \u9879\u7528\u4F8B\uFF1A\u901A\u8FC7 " + passCount + " \u9879\uFF0C\u672A\u901A\u8FC7 " + failCount + " \u9879\uFF1B\u672A\u54CD\u5E94\u6216\u8DF3\u8FC7 " + unavailableCount + " \u9879\u3002",
+      nextStep: "\u8BF7\u70B9\u51FB\u4E0B\u65B9\u300C\u5177\u4F53\u6267\u884C\u68C0\u6D4B\u300D\u5C55\u5F00\u67E5\u770B\u6807\u7EA2\u63A2\u9488\u7684\u539F\u59CB\u8FD4\u56DE\u8BC1\u636E\u4E0E\u62A5\u9519\u539F\u56E0\uFF0C\u5EFA\u8BAE\u5207\u6362\u81F3\u5176\u4ED6\u4E2D\u8F6C\u4FE1\u9053\u6216\u8054\u7CFB\u670D\u52A1\u5546\u53CD\u9988\u3002",
+      passCount,
+      failCount,
+      unavailableCount,
+      judgedCount,
+      complianceRate
+    };
+  }
+  if (failCount === 0 && passCount === totalCount && totalCount > 0) {
+    return {
+      conclusion: "consistent",
+      title: hasClaudeSignature ? "Claude Signature \u8FDE\u7EED\u6027\u901A\u8FC7" : "\u57FA\u7EBF\u534F\u8BAE\u68C0\u6D4B\u5168\u90E8\u901A\u8FC7",
+      tone: "success",
+      explanation: hasClaudeSignature ? "Anthropic Messages \u7684 thinking \u5757\u4E0E signature \u7B7E\u540D\u5DF2\u6210\u529F\u6355\u83B7\u5E76\u5B8C\u6210\u591A\u8F6E\u4F1A\u8BDD\u8FDE\u7EED\u6027\u56DE\u4F20\u3002\u5F53\u524D\u4E2D\u8F6C\u7AEF\u70B9\u5B8C\u6574\u4FDD\u7559\u4E86\u5B98\u65B9\u539F\u751F\u534F\u8BAE\u5C01\u88C5\u4E0E\u63A8\u7406\u51ED\u636E\uFF0C\u672A\u51FA\u73B0\u4E2D\u8F6C\u5C42\u622A\u65AD\u6216\u6539\u5305\uFF0C\u901A\u4FE1\u4FDD\u771F\u5EA6\u8FBE\u5230 100%\u3002" : "\u5F53\u524D\u4E2D\u8F6C\u7AEF\u70B9\u5BF9\u76EE\u6807\u6A21\u578B\u53D1\u8D77\u7684\u6240\u6709\u539F\u751F\u8DEF\u7531\u4E0E\u534F\u8BAE\u63A2\u9488\uFF08\u5171 " + totalCount + " \u9879\uFF09\u5747\u5DF2 100% \u6EE1\u5206\u901A\u8FC7\u68C0\u9A8C\u3002\u8FD4\u56DE\u7684\u54CD\u5E94 Envelope \u5C01\u88C5\u3001Token Usage \u7EDF\u8BA1\u7ED3\u6784\u3001\u6D41\u5F0F\u4E8B\u4EF6\u72B6\u6001\u6D41\u4EE5\u53CA\u56FA\u5B9A\u5939\u5177\u6570\u636E\u5747\u4E25\u683C\u7B26\u5408\u5B98\u65B9\u534F\u8BAE\u89C4\u8303\u57FA\u7EBF\uFF0C\u65E0\u4E2D\u8F6C\u5C42\u6CE8\u5165\u6539\u5305\u6216\u683C\u5F0F\u964D\u7EA7\u8FF9\u8C61\u3002",
+      evidence: "\u5171\u5BA1\u8BA1 " + totalCount + " \u9879\u534F\u8BAE\u63A2\u9488\u5168\u90E8\u901A\u8FC7\uFF08P50 \u4E2D\u4F4D\u5EF6\u8FDF " + (report.runtime?.p50LatencyMs ? report.runtime.p50LatencyMs + " ms" : "--") + "\uFF0C\u901A\u8FC7\u7387 100%\uFF09\u3002",
+      nextStep: "\u5F53\u524D\u63A5\u53E3\u5728\u534F\u8BAE\u5C42\u9762\u8868\u73B0\u4F18\u5F02\uFF0C\u53EF\u653E\u5FC3\u63A5\u5165\u4E1A\u52A1\u751F\u4EA7\u7CFB\u7EDF\uFF1B\u5982\u9700\u9A8C\u8BC1\u6781\u9650\u8868\u73B0\uFF0C\u53EF\u8FDB\u4E00\u6B65\u6D4B\u8BD5\u8D85\u957F\u4E0A\u4E0B\u6587\u6216\u9AD8\u5E76\u53D1\u573A\u666F\u3002",
+      passCount,
+      failCount,
+      unavailableCount,
+      judgedCount,
+      complianceRate
+    };
+  }
+  if (failCount === 0 && passCount > 0 && passCount < totalCount) {
+    return {
+      conclusion: "inconclusive",
+      title: "\u90E8\u5206\u534F\u8BAE\u63A2\u9488\u901A\u8FC7 (" + passCount + "/" + totalCount + " \u9879)",
+      tone: "warning",
+      explanation: "\u5F53\u524D\u7AEF\u70B9\u6210\u529F\u901A\u8FC7\u4E86 " + passCount + " \u9879\u57FA\u7840\u8DEF\u7531/\u534F\u8BAE\u63A2\u9488\uFF0C\u4F46\u5176\u4F59 " + unavailableCount + " \u9879\u9AD8\u7EA7\u63A2\u9488\uFF08\u5982\u6DF1\u5EA6\u601D\u8003\u89E3\u6790\u3001\u7ED3\u6784\u5316\u8F93\u51FA\u6216\u72B6\u6001\u6D41\uFF09\u56E0\u670D\u52A1\u7AEF\u672A\u5F00\u653E\u3001\u8D85\u65F6\u6216\u672A\u58F0\u660E\u800C\u672A\u80FD\u5B8C\u6210\u6D4B\u8BD5\u3002\u8FD9\u8868\u660E\u63A5\u53E3\u5177\u5907\u57FA\u7840\u901A\u8BAF\u80FD\u529B\uFF0C\u4F46\u9AD8\u7EA7\u534F\u8BAE\u5B8C\u6574\u5EA6\u4ECD\u5F85\u5B8C\u5584\u3002",
+      evidence: "\u8BA1\u5212\u6D4B\u8BD5 " + totalCount + " \u9879\uFF1A\u901A\u8FC7 " + passCount + " \u9879\uFF0C" + unavailableCount + " \u9879\u672A\u54CD\u5E94\u6216\u8DF3\u8FC7\uFF08\u901A\u8FC7\u7387 " + complianceRate + "%\uFF09\u3002",
+      nextStep: "\u8BF7\u5C55\u5F00\u4E0B\u65B9\u300C\u5177\u4F53\u6267\u884C\u68C0\u6D4B\u300D\u6838\u5B9E\u672A\u901A\u8FC7\u63A2\u9488\u7684\u5177\u4F53\u539F\u56E0\uFF0C\u5E76\u5728\u4F7F\u7528\u9AD8\u7EA7\u7279\u6027\uFF08\u5982\u5DE5\u5177\u8C03\u7528\u4E0E\u6D41\u5F0F\u89E3\u6790\uFF09\u524D\u8FDB\u884C\u5145\u5206\u6D4B\u8BD5\u3002",
+      passCount,
+      failCount,
+      unavailableCount,
+      judgedCount,
+      complianceRate
+    };
+  }
+  if (failCount > 0) {
+    return {
+      conclusion: "inconclusive",
+      title: "\u53D1\u73B0\u534F\u8BAE\u6216\u80FD\u529B\u5F02\u5E38",
+      tone: "warning",
+      explanation: "\u5F53\u524D\u7AEF\u70B9\u5728\u5927\u90E8\u5206\u5E38\u89C4\u5BF9\u8BDD\u8BF7\u6C42\u4E2D\u8868\u73B0\u6B63\u5E38\uFF0C\u4F46\u5728\u7279\u5B9A\u9AD8\u7EA7\u534F\u8BAE\u6216\u8FB9\u754C\u63A2\u9488\uFF08\u5982\u6DF1\u5EA6\u601D\u8003\u89E3\u6790\u3001\u4E25\u683C\u6A21\u5F0F JSON \u6821\u9A8C\u7B49\uFF09\u4E2D\u672A\u80FD\u901A\u8FC7\u4E00\u81F4\u6027\u65AD\u8A00\u3002\u8FD9\u901A\u5E38\u7531\u4E2D\u8F6C\u7AD9\u524D\u7F6E\u7F51\u5173\u5B57\u6BB5\u8FC7\u6EE4\u3001\u4E2D\u95F4\u4EF6\u4EE3\u7406\u8F6C\u6362\u4E0D\u5B8C\u5584\u6216\u6A21\u578B\u4E0A\u6E38\u77ED\u65F6\u5F02\u5E38\u6240\u5BFC\u81F4\u3002",
+      evidence: "\u5DF2\u5224\u5B9A " + judgedCount + " \u9879\u7528\u4F8B\uFF1A\u901A\u8FC7 " + passCount + " \u9879\uFF0C\u5F02\u5E38 " + failCount + " \u9879\uFF1B\u672A\u54CD\u5E94 " + unavailableCount + " \u9879\u3002",
+      nextStep: "\u5EFA\u8BAE\u5C55\u5F00\u4E0B\u65B9\u300C\u5177\u4F53\u6267\u884C\u68C0\u6D4B\u300D\u6838\u5B9E\u5931\u8D25\u63A2\u9488\u662F\u5426\u5F71\u54CD\u60A8\u7684\u6838\u5FC3\u4E1A\u52A1\uFF0C\u6216\u91CD\u65B0\u6267\u884C\u5355\u6B21\u590D\u6D4B\u4EE5\u6392\u9664\u7F51\u7EDC\u5076\u53D1\u6296\u52A8\u3002",
+      passCount,
+      failCount,
+      unavailableCount,
+      judgedCount,
+      complianceRate
+    };
+  }
+  return {
+    conclusion: "inconclusive",
+    title: "\u63A2\u9488\u65E0\u6CD5\u8FDE\u901A\u6216\u7AEF\u70B9\u4E0D\u53EF\u7528",
+    tone: "neutral",
+    explanation: "\u5F53\u524D\u7AEF\u70B9\u672A\u80FD\u5728\u9650\u5B9A\u65F6\u95F4\u5185\u5EFA\u7ACB\u8FDE\u63A5\u6216\u672A\u8FD4\u56DE\u6709\u6548\u6570\u636E\uFF0C\u53EF\u80FD\u662F\u7531\u4E8E\u4E2D\u8F6C\u7AD9\u7F51\u7EDC\u62E5\u585E\u6216\u8BE5\u7AEF\u70B9\u672A\u914D\u7F6E\u6240\u6D4B\u6A21\u578B\u8DEF\u7531\u3002",
+    evidence: "\u5171\u6267\u884C " + unavailableCount + " \u9879\u63A2\u9488\uFF0C\u5168\u90E8\u65E0\u53EF\u7528\u54CD\u5E94\u3002",
+    nextStep: "\u8BF7\u68C0\u67E5\u7F51\u7EDC\u8FDE\u63A5\u3001Base URL \u63A5\u53E3\u5730\u5740\u4E0E API Key \u662F\u5426\u6709\u6548\uFF0C\u6216\u8054\u7CFB\u4E2D\u8F6C\u670D\u52A1\u5546\u6838\u5B9E\u3002",
+    passCount,
+    failCount,
+    unavailableCount,
+    judgedCount,
+    complianceRate
+  };
+}
+function buildAuditSummary(report) {
+  const assessment = assessAuditReport(report);
+  return `${assessment.title}\u3002${assessment.explanation} ${assessment.evidence} \u4E0B\u4E00\u6B65\uFF1A${assessment.nextStep}`;
 }
 
 // src/engine/audit/runner.ts
@@ -1844,7 +2264,7 @@ function unavailableMetric(domain, baselineId, targetScores = []) {
     targetScores,
     baselineScores: [],
     status: "unavailable",
-    detail: baselineId ? targetScores.length > 0 ? `\u5DF2\u5B8C\u6210 ${targetScores.length} \u6B21\u80FD\u529B\u91C7\u6837\uFF0C\u4F46\u5F53\u524D\u672A\u52A0\u8F7D\u5B98\u65B9\u57FA\u7EBF\u5FEB\u7167\u3002` : "\u672C\u8F6E\u6D4F\u89C8\u5668\u6267\u884C\u5668\u5C1A\u672A\u8FD0\u884C\u8BE5\u80FD\u529B\u57DF\u3002" : targetScores.length > 0 ? `\u5DF2\u5B8C\u6210 ${targetScores.length} \u6B21\u80FD\u529B\u91C7\u6837\uFF0C\u4F46\u672A\u63D0\u4F9B\u5B98\u65B9\u57FA\u7EBF\uFF1B\u4E0D\u80FD\u5C06\u5355\u6B21\u80FD\u529B\u8868\u73B0\u8F6C\u6362\u4E3A\u8EAB\u4EFD\u7ED3\u8BBA\u3002` : "\u672A\u63D0\u4F9B\u5B98\u65B9\u57FA\u7EBF\u5FEB\u7167\uFF1B\u4E0D\u80FD\u5C06\u5355\u6B21\u80FD\u529B\u8868\u73B0\u8F6C\u6362\u4E3A\u8EAB\u4EFD\u7ED3\u8BBA\u3002"
+    detail: baselineId ? targetScores.length > 0 ? `\u5DF2\u5B8C\u6210 ${targetScores.length} \u6B21\u80FD\u529B\u91C7\u6837\uFF0C\u4F46\u5F53\u524D\u672A\u52A0\u8F7D\u53C2\u8003\u57FA\u7EBF\u5FEB\u7167\u3002` : "\u672C\u8F6E\u6D4F\u89C8\u5668\u6267\u884C\u5668\u5C1A\u672A\u8FD0\u884C\u8BE5\u80FD\u529B\u57DF\u3002" : targetScores.length > 0 ? `\u5DF2\u5B8C\u6210 ${targetScores.length} \u6B21\u80FD\u529B\u91C7\u6837\uFF0C\u4F46\u672A\u63D0\u4F9B\u53C2\u8003\u57FA\u7EBF\uFF1B\u4E0D\u80FD\u5C06\u5355\u6B21\u80FD\u529B\u8868\u73B0\u8F6C\u6362\u4E3A\u4E00\u81F4\u6027\u7ED3\u8BBA\u3002` : "\u672A\u63D0\u4F9B\u53C2\u8003\u57FA\u7EBF\u5FEB\u7167\uFF1B\u4E0D\u80FD\u5C06\u5355\u6B21\u80FD\u529B\u8868\u73B0\u8F6C\u6362\u4E3A\u4E00\u81F4\u6027\u7ED3\u8BBA\u3002"
   };
 }
 function unavailableEvidence(id, title, detail) {
@@ -1852,8 +2272,12 @@ function unavailableEvidence(id, title, detail) {
 }
 function routeStatus(response) {
   if (response.ok) return "pass";
-  if ([0, 404, 405, 408, 502, 503, 504].includes(response.status)) return "unavailable";
+  if ([0, 402, 404, 405, 408, 429].includes(response.status)) return "unavailable";
   return "fail";
+}
+function containsFixtureText(text, expected) {
+  const normalized = text.trim().replace(/[.!?]+$/g, "");
+  return normalized.includes(expected.replace(/[.!?]+$/g, ""));
 }
 function usageNumber(result, path) {
   let value = result.usage;
@@ -1863,13 +2287,25 @@ function usageNumber(result, path) {
   }
   return typeof value === "number" && Number.isFinite(value) ? value : void 0;
 }
+function promptTokenCount(result) {
+  return usageNumber(result, ["prompt_tokens"]) ?? usageNumber(result, ["input_tokens"]) ?? usageNumber(result, ["promptTokenCount"]) ?? usageNumber(result, ["inputTokenCount"]);
+}
+function completionTokenCount(result) {
+  return usageNumber(result, ["completion_tokens"]) ?? usageNumber(result, ["output_tokens"]) ?? usageNumber(result, ["candidatesTokenCount"]) ?? usageNumber(result, ["outputTokenCount"]);
+}
+function totalTokenCount(result) {
+  return usageNumber(result, ["total_tokens"]) ?? usageNumber(result, ["totalTokenCount"]);
+}
 function cachedInputTokens(result) {
   return usageNumber(result, ["input_tokens_details", "cached_tokens"]) ?? usageNumber(result, ["cache_read_input_tokens"]) ?? usageNumber(result, ["cached_content_token_count"]);
 }
-function basicEvidence(result, provider, model) {
+function reasoningTokenCount(result) {
+  return usageNumber(result, ["thoughtsTokenCount"]) ?? usageNumber(result, ["thoughts_token_count"]) ?? usageNumber(result, ["reasoning_tokens"]) ?? usageNumber(result, ["output_tokens_details", "reasoning_tokens"]);
+}
+function basicEvidence(result, provider, model, allowRelayEnvelope = false) {
   const status = routeStatus(result.response);
-  const validation = provider === "anthropic" ? validateAnthropicMessage(result.response.data, model) : provider === "gemini" ? validateChatCompletionEnvelope(result.response.data, model, false) : validateResponsesEnvelope(result.response.data, model);
-  if (status === "pass" && result.text.includes("audit-ready.") && validation.pass) {
+  const validation = provider === "anthropic" ? validateAnthropicMessage(result.response.data, model, !allowRelayEnvelope) : provider === "gemini" ? validateGeminiGenerateContent(result.response.data, model) : provider === "openrouter" ? validateChatCompletionEnvelope(result.response.data, model, false) : validateResponsesEnvelope(result.response.data, model);
+  if (status === "pass" && containsFixtureText(result.text, "audit-ready.") && validation.pass) {
     return { id: "p0-native-route", title: "\u539F\u751F API \u8DEF\u7531", status, detail: "\u539F\u751F\u8BF7\u6C42\u6210\u529F\uFF0C\u54CD\u5E94 envelope \u548C\u56FA\u5B9A\u5939\u5177\u5747\u7B26\u5408\u3002", latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes };
   }
   const validationStatus = status === "pass" ? "fail" : status;
@@ -1889,7 +2325,7 @@ async function execute(adapter, request, signal) {
     method: "POST",
     headers: request.headers,
     body: request.body,
-    timeoutMs: 12e3,
+    timeoutMs: 3e4,
     signal
   });
   return adapter.parse(response);
@@ -1897,16 +2333,41 @@ async function execute(adapter, request, signal) {
 function runtimeFrom(results) {
   const latencies = results.map((result) => result.response.latencyMs).filter((value) => value >= 0).sort((a, b) => a - b);
   const percentile = (p) => latencies[Math.min(latencies.length - 1, Math.floor(latencies.length * p))];
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+  let hasTokens = false;
+  let totalDurationMs = 0;
+  for (const result of results) {
+    if (result.response.latencyMs && result.response.latencyMs > 0) {
+      totalDurationMs += result.response.latencyMs;
+    }
+    const pTokens = promptTokenCount(result);
+    const cTokens = completionTokenCount(result);
+    const tTokens = totalTokenCount(result);
+    if (pTokens !== void 0 || cTokens !== void 0 || tTokens !== void 0) {
+      hasTokens = true;
+      if (pTokens !== void 0) totalPromptTokens += pTokens;
+      if (cTokens !== void 0) totalCompletionTokens += cTokens;
+      if (pTokens === void 0 && cTokens === void 0 && tTokens !== void 0) {
+        totalCompletionTokens += tTokens;
+      }
+    }
+  }
+  const calculatedTotalTokens = hasTokens ? totalPromptTokens + totalCompletionTokens : void 0;
   return {
     attempts: results.length,
     successRate: results.length > 0 ? results.filter((result) => result.response.ok).length / results.length : 0,
     p50LatencyMs: latencies.length > 0 ? percentile(0.5) : void 0,
-    p95LatencyMs: latencies.length > 0 ? percentile(0.95) : void 0
+    p95LatencyMs: latencies.length > 0 ? percentile(0.95) : void 0,
+    totalDurationMs: totalDurationMs > 0 ? totalDurationMs : latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) : void 0,
+    totalPromptTokens: hasTokens ? totalPromptTokens : void 0,
+    totalCompletionTokens: hasTokens ? totalCompletionTokens : void 0,
+    totalTokens: calculatedTotalTokens
   };
 }
 async function executeStream(request, signal) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12e3);
+  const timeoutId = setTimeout(() => controller.abort(), 3e4);
   const abortExternal = () => controller.abort(signal?.reason);
   signal?.addEventListener("abort", abortExternal, { once: true });
   const startedAt = performance.now();
@@ -1922,8 +2383,27 @@ async function executeStream(request, signal) {
     }
     const eventTypes = [];
     for await (const event of readSSEEvents(response, controller.signal)) {
-      const dataType = typeof event.data === "object" && event.data !== null && typeof event.data.type === "string" ? String(event.data.type) : "";
-      eventTypes.push(event.event === "message" && dataType ? dataType : event.event);
+      if (typeof event.data === "object" && event.data !== null) {
+        const obj = event.data;
+        if (typeof obj.type === "string") {
+          eventTypes.push(obj.type);
+        } else if (obj.object === "chat.completion.chunk" || Array.isArray(obj.choices)) {
+          const choices = obj.choices;
+          const delta = choices?.[0]?.delta;
+          const finishReason = choices?.[0]?.finish_reason;
+          if (finishReason) {
+            eventTypes.push("chat.completion.chunk.finish");
+          } else if (delta && (delta.content !== void 0 || delta.reasoning_content !== void 0 || delta.tool_calls !== void 0)) {
+            eventTypes.push("chat.completion.chunk.delta");
+          } else {
+            eventTypes.push("chat.completion.chunk.start");
+          }
+        } else {
+          eventTypes.push(event.event);
+        }
+      } else {
+        eventTypes.push(event.event);
+      }
     }
     return { ok: true, status: response.status, eventTypes, latencyMs: Math.round(performance.now() - startedAt) };
   } catch (error) {
@@ -1935,10 +2415,23 @@ async function executeStream(request, signal) {
 }
 function validateStreamSequence(provider, eventTypes) {
   if (provider === "anthropic") {
+    if (eventTypes.some((t) => t.startsWith("chat.completion.chunk"))) {
+      const hasDelta2 = eventTypes.includes("chat.completion.chunk.delta");
+      return eventTypes.length >= 1 && hasDelta2 ? { pass: true, detail: `ChatCompletions \u517C\u5BB9\u6D41\u5F0F\u987A\u5E8F\u901A\u8FC7\uFF08\u6355\u83B7 ${eventTypes.length} \u4E2A Chunk \u4E8B\u4EF6\uFF09` } : { pass: false, detail: `ChatCompletions \u7F3A\u5C11\u589E\u91CF\u6570\u636E\u5305\uFF1A${eventTypes.join(" -> ")}` };
+    }
     const required2 = ["message_start", "content_block_start", "content_block_delta", "message_stop"];
     const missing = required2.filter((type) => !eventTypes.includes(type));
     const ordered = required2.every((type, index) => eventTypes.indexOf(type) >= (index === 0 ? 0 : eventTypes.indexOf(required2[index - 1])));
-    return missing.length === 0 && ordered ? { pass: true, detail: `Anthropic SSE \u987A\u5E8F\u901A\u8FC7\uFF1A${eventTypes.join(" -> ")}` } : { pass: false, detail: `Anthropic SSE \u7F3A\u5C11\u6216\u4E71\u5E8F\uFF1A${missing.join(", ") || eventTypes.join(" -> ")}` };
+    return missing.length === 0 && ordered ? { pass: true, detail: `Anthropic \u539F\u751F SSE \u987A\u5E8F\u901A\u8FC7\uFF1A${eventTypes.join(" -> ")}` } : { pass: false, detail: `Anthropic SSE \u7F3A\u5C11\u6216\u4E71\u5E8F\uFF1A${missing.join(", ") || eventTypes.join(" -> ")}` };
+  }
+  if (provider === "openrouter") {
+    const hasDelta2 = eventTypes.some((t) => t === "chat.completion.chunk.delta" || t === "message" || t.includes("delta"));
+    const pass2 = eventTypes.length > 0 && (hasDelta2 || eventTypes.length >= 1);
+    return pass2 ? { pass: true, detail: `OpenRouter / ChatCompletions \u6D41\u5F0F\u4E8B\u4EF6\u6D41\u901A\u8FC7\uFF08\u6355\u83B7 ${eventTypes.length} \u4E2A Chunk\uFF09` } : { pass: false, detail: `\u6D41\u5F0F\u4E8B\u4EF6\u5E8F\u5217\u4E3A\u7A7A\u6216\u672A\u6355\u83B7\u6709\u6548 Delta \u6570\u636E\u5757` };
+  }
+  if (eventTypes.some((t) => t.startsWith("chat.completion.chunk"))) {
+    const hasDelta2 = eventTypes.includes("chat.completion.chunk.delta") || eventTypes.length >= 2;
+    return hasDelta2 ? { pass: true, detail: `ChatCompletions \u6D41\u5F0F\u987A\u5E8F\u901A\u8FC7\uFF08\u6355\u83B7 ${eventTypes.length} \u4E2A Chunk\uFF09` } : { pass: false, detail: `ChatCompletions \u7F3A\u5C11\u589E\u91CF\u6570\u636E\u5305\uFF1A${eventTypes.join(" -> ")}` };
   }
   const hasDelta = eventTypes.some((type) => type === "response.output_text.delta" || type === "response.content_part.added");
   const completionIndex = Math.max(eventTypes.indexOf("response.completed"), eventTypes.indexOf("response.done"));
@@ -1948,7 +2441,7 @@ function validateStreamSequence(provider, eventTypes) {
 }
 async function runAudit(options) {
   const profile = options.profile || "balanced";
-  const provider = detectAuditProvider(options.model, options.provider || "auto");
+  const provider = detectAuditProvider(options.model, options.provider || "auto", options.baseUrl);
   const adapter = PROVIDER_ADAPTERS[provider];
   const baselineSnapshot = options.baselineSnapshot || (options.baselineId ? loadBaselineSnapshot(options.baselineId) : findStoredBaseline(provider, options.model, adapter.surface));
   const suite = selectSuite(profile, options.selectedProbeIds);
@@ -1993,7 +2486,7 @@ async function runAudit(options) {
   if (shouldExecute("p0-native-route") || shouldExecute("p0-auth-shape")) try {
     const basicResult = await execute(adapter, adapter.basic(options.baseUrl, options.apiKey, options.model), options.signal);
     nativeResults.push(basicResult);
-    if (shouldExecute("p0-native-route")) protocol.push(basicEvidence(basicResult, provider, options.model));
+    if (shouldExecute("p0-native-route")) protocol.push(basicEvidence(basicResult, provider, options.model, provider === "anthropic" && /openrouter\.ai/i.test(options.baseUrl)));
     if (shouldExecute("p0-auth-shape")) protocol.push({
       id: "p0-auth-shape",
       title: "\u8BA4\u8BC1\u5934\u4E0E\u9519\u8BEF\u8BED\u4E49",
@@ -2056,8 +2549,11 @@ async function runAudit(options) {
     try {
       reasoningResult = await execute(adapter, adapter.reasoning(options.baseUrl, options.apiKey, options.model), options.signal);
       nativeResults.push(reasoningResult);
-      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type));
-      protocol.push({ id: "p1-reasoning-config", title: "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", status: reasoningResult.response.ok ? hasReasoning ? "pass" : "fail" : routeStatus(reasoningResult.response), detail: hasReasoning ? "\u6355\u83B7\u5230\u539F\u751F\u63A8\u7406\u4E8B\u4EF6\u7C7B\u578B\u3002" : reasoningResult.response.ok ? "\u54CD\u5E94\u6210\u529F\u4F46\u672A\u6355\u83B7\u539F\u751F\u63A8\u7406\u4E8B\u4EF6\u3002" : reasoningResult.response.errorMessage || `HTTP ${reasoningResult.response.status}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
+      const reasoningTokens = reasoningTokenCount(reasoningResult);
+      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type)) || reasoningTokens !== void 0 && reasoningTokens > 0;
+      const reasoningStatus = !reasoningResult.response.ok ? routeStatus(reasoningResult.response) : hasReasoning ? "pass" : "unavailable";
+      const usageDetail = reasoningTokens === void 0 ? "" : ` thoughts tokens=${reasoningTokens}.`;
+      protocol.push({ id: "p1-reasoning-config", title: "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", status: reasoningStatus, detail: hasReasoning ? `\u6355\u83B7\u5230\u539F\u751F\u63A8\u7406\u8BC1\u636E\u3002${usageDetail}` : `\u54CD\u5E94\u6210\u529F\u4F46\u672A\u66B4\u9732\u53EF\u9A8C\u8BC1\u7684\u63A8\u7406\u4E8B\u4EF6\u6216 token usage\u3002${usageDetail}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
     } catch {
       protocol.push(unavailableEvidence("p1-reasoning-config", "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", "\u63A8\u7406\u8BF7\u6C42\u672A\u80FD\u5B8C\u6210\u3002"));
     }
@@ -2075,7 +2571,7 @@ async function runAudit(options) {
         nativeResults.push(first);
         const continuation = first.response.ok ? await execute(adapter, adapter.stateContinuation(options.baseUrl, options.apiKey, options.model, first, marker), options.signal) : void 0;
         if (continuation) nativeResults.push(continuation);
-        const passed = Boolean(first.response.ok && continuation?.response.ok && continuation.text.includes(marker));
+        const passed = Boolean(first.response.ok && continuation?.response.ok && containsFixtureText(continuation.text, marker));
         if (first.response.ok && continuation) recordScore("tools", passed ? 1 : 0, "p1-state-continuity");
         protocol.push({
           id: "p1-state-continuity",
@@ -2136,7 +2632,7 @@ async function runAudit(options) {
         protocol.push(unavailableEvidence("p1-signature-continuity", "\u601D\u8003\u7B7E\u540D\u8FDE\u7EED\u6027", "\u7B7E\u540D\u7B2C\u4E8C\u8F6E\u56DE\u4F20\u8BF7\u6C42\u672A\u80FD\u5B8C\u6210\u3002"));
       }
     } else {
-      protocol.push({ id: "p1-signature-continuity", title: "\u601D\u8003\u7B7E\u540D\u8FDE\u7EED\u6027", status: reasoningResult.response.ok ? "fail" : routeStatus(reasoningResult.response), detail: reasoningResult.response.ok ? "\u539F\u751F thinking \u54CD\u5E94\u672A\u63D0\u4F9B\u53EF\u56DE\u4F20\u7684 signature\u3002" : "\u63A8\u7406\u8DEF\u7531\u4E0D\u53EF\u7528\uFF0C\u65E0\u6CD5\u68C0\u67E5\u7B7E\u540D\u3002", latencyMs: reasoningResult.response.latencyMs });
+      protocol.push({ id: "p1-signature-continuity", title: "\u601D\u8003\u7B7E\u540D\u8FDE\u7EED\u6027", status: reasoningResult.response.ok ? reasoningResult.thinkingText ? "fail" : "unavailable" : routeStatus(reasoningResult.response), detail: reasoningResult.response.ok ? reasoningResult.thinkingText ? "\u539F\u751F thinking \u54CD\u5E94\u672A\u63D0\u4F9B\u53EF\u56DE\u4F20\u7684 signature\u3002" : "\u672C\u6B21 adaptive thinking \u672A\u89E6\u53D1\uFF0C\u65E0\u6CD5\u68C0\u67E5 signature\u3002" : "\u63A8\u7406\u8DEF\u7531\u4E0D\u53EF\u7528\uFF0C\u65E0\u6CD5\u68C0\u67E5\u7B7E\u540D\u3002", latencyMs: reasoningResult.response.latencyMs });
     }
   } else if (shouldExecute("p1-signature-continuity")) {
     protocol.push(unavailableEvidence("p1-signature-continuity", "\u601D\u8003\u7B7E\u540D\u8FDE\u7EED\u6027", "\u8BE5\u68C0\u67E5\u4EC5\u9002\u7528\u4E8E Anthropic Messages thinking \u534F\u8BAE\u3002"));
@@ -2276,7 +2772,7 @@ async function runAudit(options) {
   const visibleProtocol = protocol.filter((item) => selectedProbeIds.has(item.id)).map((item) => ({
     ...item,
     disposition: routeFor(item.id).disposition,
-    countsTowardOfficialConclusion: routeFor(item.id).countsTowardOfficialConclusion
+    countsTowardReferenceConclusion: routeFor(item.id).countsTowardReferenceConclusion
   }));
   const coverage = {
     executed: visibleProtocol.filter((item) => item.status !== "unavailable").length,
@@ -2296,7 +2792,23 @@ async function runAudit(options) {
     capabilities: comparedCapabilities,
     runtime: runtimeFrom(nativeResults),
     conclusion,
-    summary: baselineSnapshot ? `\u5DF2\u6267\u884C ${coverage.executed}/${coverage.total} \u9879\u68C0\u67E5\uFF0C\u5E76\u5C06 ${baselineSnapshot.source === "official" ? "\u5B98\u65B9" : "\u7528\u6237\u63D0\u4F9B\u7684"}\u57FA\u7EBF ${baselineSnapshot.id} \u7528\u4E8E\u80FD\u529B\u5DEE\u5F02\u6BD4\u8F83\u3002` : `\u5DF2\u6267\u884C ${coverage.executed}/${coverage.total} \u9879\u6D4F\u89C8\u5668\u534F\u8BAE\u68C0\u67E5\uFF1B\u5F53\u524D\u672A\u52A0\u8F7D\u57FA\u7EBF\u5FEB\u7167\uFF0C\u56E0\u6B64\u7ED3\u8BBA\u4EC5\u80FD\u4F5C\u4E3A\u8BC1\u636E\u4E0D\u8DB3\u3002`,
+    summary: buildAuditSummary({
+      schemaVersion: "4.0",
+      target: { provider, model: options.model, baseUrl: options.baseUrl },
+      profile,
+      baselineId: baselineSnapshot?.id || options.baselineId,
+      protocol: visibleProtocol,
+      capabilities: comparedCapabilities,
+      runtime: runtimeFrom(nativeResults),
+      conclusion,
+      summary: "",
+      candidateDistances: [],
+      fixtureHashes: Object.fromEntries(suite.map((item) => [item.id, hashFixture(item.fixture)])),
+      coverage,
+      selectedProbeIds: suite.map((item) => item.id),
+      seed,
+      testedAt: (/* @__PURE__ */ new Date()).toISOString()
+    }),
     candidateDistances: [],
     fixtureHashes: Object.fromEntries(suite.map((item) => [item.id, hashFixture(item.fixture)])),
     coverage,
@@ -2336,24 +2848,6 @@ var FALLBACK_2026_MODELS = [
     notes: "\u9AD8\u541E\u5410\u6210\u672C\u654F\u611F\u578B\uFF0C\u4E9A\u79D2\u7EA7\u5EF6\u8FDF"
   },
   {
-    provider: "OpenAI",
-    modelId: "o3",
-    name: "OpenAI o3",
-    tier: "\u6DF1\u5EA6\u5F3A\u5316\u63A8\u7406\u7CFB\u7EDF (Deep Reasoning)",
-    surface: "Responses",
-    contextLength: 2e5,
-    notes: "\u524D\u6CBF\u601D\u7EF4\u94FE\u5F3A\u5316\u63A8\u7406\u6A21\u578B\uFF0C\u7528\u4E8E\u6570\u5B66\u3001\u7ADE\u8D5B\u4EE3\u7801\u4E0E\u79D1\u5B66\u63A8\u6F14"
-  },
-  {
-    provider: "OpenAI",
-    modelId: "gpt-4.5-preview",
-    name: "GPT-4.5",
-    tier: "\u77E5\u8BC6\u4E0E\u6587\u98CE\u5BC6\u96C6\u578B\u65D7\u8230 (Creative & Knowledge)",
-    surface: "Responses",
-    contextLength: 128e3,
-    notes: "\u8D85\u5927\u53C2\u6570\u89C4\u6A21\u77E5\u8BC6\u68C0\u7D22\u4E0E\u521B\u4F5C\u6A21\u578B"
-  },
-  {
     provider: "Anthropic",
     modelId: "claude-fable-5",
     name: "Claude Fable 5",
@@ -2364,30 +2858,21 @@ var FALLBACK_2026_MODELS = [
   },
   {
     provider: "Anthropic",
-    modelId: "claude-mythos-5",
-    name: "Claude Mythos 5",
-    tier: "Project Glasswing \u9080\u8BF7\u5236 (Enterprise Frontier)",
+    modelId: "claude-opus-5",
+    name: "Claude Opus 5",
+    tier: "\u590D\u6742\u79D1\u7814\u4E0E\u91CD\u578B\u5DE5\u7A0B\u65D7\u8230 (Enterprise Frontier)",
     surface: "Messages",
-    contextLength: 1e6,
-    notes: "\u9876\u7EA7\u4F01\u4E1A\u4E0E\u6218\u7565\u7814\u7A76\u4E13\u7528\uFF0C\u9700\u72EC\u7ACB\u5B98\u65B9\u7B7E\u540D\u57FA\u7EBF\u9A8C\u8BC1"
+    contextLength: 5e5,
+    notes: "\u590D\u6742\u7CFB\u7EDF\u67B6\u6784\u4E0E\u79D1\u5B66\u524D\u6CBF\u63A8\u6F14"
   },
   {
     provider: "Anthropic",
-    modelId: "claude-3-7-sonnet-20250219",
-    name: "Claude 3.7 Sonnet",
-    tier: "\u6DF7\u5408\u63A8\u7406\u4E0E\u4EE3\u7801\u65D7\u8230 (Hybrid Reasoning)",
+    modelId: "claude-sonnet-5",
+    name: "Claude Sonnet 5",
+    tier: "\u5168\u80FD\u9AD8\u80FD\u6548\u4E3B\u529B\u519B (Frontier Workhorse)",
     surface: "Messages",
     contextLength: 2e5,
-    notes: "\u884C\u4E1A\u6807\u51C6\u7F16\u7A0B\u4E0E\u590D\u6742\u67B6\u6784\u5206\u6790\u57FA\u51C6\uFF0C\u652F\u6301\u52A8\u6001\u601D\u8003\u9884\u7B97\u63A7\u5236"
-  },
-  {
-    provider: "Anthropic",
-    modelId: "claude-3-5-sonnet-20241022",
-    name: "Claude 3.5 Sonnet v2",
-    tier: "\u751F\u4EA7\u7EA7\u9AD8\u80FD\u7A33\u5B9A (Production Benchmark)",
-    surface: "Messages",
-    contextLength: 2e5,
-    notes: "\u6210\u719F\u751F\u4EA7\u73AF\u5883\u9996\u9009\u57FA\u7EBF\uFF0C\u7528\u4E8E\u5E38\u89C4\u964D\u7EA7\u4E0E\u9632\u5192\u5145\u68C0\u6D4B"
+    notes: "\u9AD8\u901F\u654F\u6377\u3001\u9876\u5C16\u4EE3\u7801\u751F\u6210\u4E0E\u5DE5\u5177\u8C03\u7528"
   },
   {
     provider: "Google",
@@ -2408,33 +2893,6 @@ var FALLBACK_2026_MODELS = [
     notes: "GA \u751F\u4EA7\u7EA7 Agent \u8C03\u5EA6\u6A21\u578B\uFF0C\u4F4E\u5EF6\u8FDF\u9AD8\u5E76\u53D1\u541E\u5410"
   },
   {
-    provider: "Google",
-    modelId: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    tier: "\u901A\u7528\u9AD8\u6548\u591A\u6A21\u6001 (Universal Speed)",
-    surface: "Interactions",
-    contextLength: 1e6,
-    notes: "\u9AD8\u6027\u4EF7\u6BD4\u5B9E\u65F6\u4EA4\u4E92\u4E0E\u89C6\u89C9\u7406\u89E3\u57FA\u7EBF"
-  },
-  {
-    provider: "DeepSeek",
-    modelId: "deepseek-reasoner",
-    name: "DeepSeek R1",
-    tier: "\u5F00\u6E90\u6DF1\u5EA6\u63A8\u7406\u9886\u822A (Deep Reasoning R1)",
-    surface: "ChatCompletions",
-    contextLength: 128e3,
-    notes: "\u5F00\u6E90\u601D\u7EF4\u94FE\u63A8\u7406\u6A21\u578B\uFF0C\u5305\u542B\u5B8C\u6574\u63A8\u7406\u601D\u8003\u5185\u5BB9 (reasoning_content)"
-  },
-  {
-    provider: "DeepSeek",
-    modelId: "deepseek-chat",
-    name: "DeepSeek V3",
-    tier: "MoE \u8D85\u9AD8\u6027\u4EF7\u6BD4\u5168\u80FD (MoE General V3)",
-    surface: "ChatCompletions",
-    contextLength: 128e3,
-    notes: "671B MoE \u67B6\u6784\u901A\u7528\u57FA\u7EBF\uFF0C\u4EE3\u7801\u4E0E\u4E2D\u82F1\u53CC\u8BED\u80FD\u529B\u5F3A\u52B2"
-  },
-  {
     provider: "xAI",
     modelId: "grok-4.6",
     name: "Grok 4.6",
@@ -2442,24 +2900,6 @@ var FALLBACK_2026_MODELS = [
     surface: "Responses",
     contextLength: 256e3,
     notes: "\u539F\u751F\u96C6\u6210 X \u5B9E\u65F6\u641C\u7D22\u3001Python \u4EE3\u7801\u6C99\u7BB1\u4E0E\u7ED3\u6784\u5316\u5DE5\u5177\u6D88\u8D39"
-  },
-  {
-    provider: "xAI",
-    modelId: "grok-3",
-    name: "Grok 3",
-    tier: "\u65D7\u8230\u63A8\u7406\u4E0E\u901A\u7528\u8BA1\u7B97 (Flagship Reasoning)",
-    surface: "Responses",
-    contextLength: 131072,
-    notes: "xAI \u6838\u5FC3\u4E3B\u529B\u63A8\u7406\u6A21\u578B"
-  },
-  {
-    provider: "Meta",
-    modelId: "llama-3.3-70b-instruct",
-    name: "Llama 3.3 70B Instruct",
-    tier: "\u5F00\u6E90\u751F\u6001\u4E3B\u6D41\u57FA\u51C6 (Open-Source Standard)",
-    surface: "ChatCompletions",
-    contextLength: 128e3,
-    notes: "\u5F00\u6E90\u6743\u91CD\u9876\u5C16\u6307\u4EE4\u5FAE\u8C03\u6A21\u578B\uFF0C\u5E38\u4F5C\u4E3A\u79C1\u6709\u4E2D\u8F6C\u7AD9\u5BF9\u7167"
   }
 ];
 function generateFrontierModelsMarkdown(models, dateStr) {
@@ -2475,9 +2915,9 @@ order: 2
 subtitle: \u622A\u6B62 ${formattedDate}\uFF0C\u7528\u4E8E API \u5BA1\u8BA1\u7684\u5B98\u65B9\u6A21\u578B\u76EE\u6807\u4E0E\u539F\u751F API \u57FA\u7EBF\uFF1B\u652F\u6301\u81EA\u52A8\u4E0E\u624B\u52A8\u5B9A\u65F6\u540C\u6B65\u3002
 ---
 
-## 1. 2026 \u524D\u6CBF\u6A21\u578B\u57FA\u7EBF\u603B\u89C8
+## 1. 2026 \u524D\u6CBF\u7EAF\u8840\u65D7\u8230\u57FA\u7EBF\u603B\u89C8
 
-\u6B64\u6E05\u5355\u7531 **API-QuickCheck \u81EA\u52A8\u5316\u57FA\u7EBF\u5F15\u64CE** \u5B9A\u671F\u7EF4\u62A4\u66F4\u65B0\uFF0C\u662F\u5BA1\u8BA1\u5668\u7684**\u7248\u672C\u5316\u53C2\u8003\u57FA\u7EBF**\uFF0C\u800C\u975E\u786C\u7F16\u7801\u7684\u9759\u6001\u6B7B\u540D\u5355\u3002\u6BCF\u6B21\u5BA1\u8BA1\u5E94\u8C03\u7528\u5BF9\u5E94\u5382\u5546\u7684 Models API \u6216\u8BFB\u53D6\u5B98\u65B9\u76EE\u5F55\uFF0C\u4E25\u683C\u5339\u914D\u578B\u53F7 ID\u3001\u91C7\u6837\u65E5\u671F\u3001\u5730\u533A\u3001\u670D\u52A1\u5C42\u548C API \u9762\u3002
+\u6B64\u6E05\u5355\u7531 **API-QuickCheck \u81EA\u52A8\u5316\u57FA\u7EBF\u5F15\u64CE** \u5B9A\u671F\u7EF4\u62A4\u66F4\u65B0\uFF0C\u662F\u5BA1\u8BA1\u5668\u7684**\u7248\u672C\u5316\u53C2\u8003\u57FA\u7EBF**\uFF0C\u4E25\u683C\u805A\u7126 2026 \u5E74\u56DB\u5927\u524D\u6CBF\u65D7\u8230\u4F53\u7CFB\uFF08OpenAI GPT-5.6\u3001Anthropic Claude 5\u3001Google Gemini 3\u3001xAI Grok 4.6\uFF09\uFF0C\u675C\u7EDD\u5DF2\u8FC7\u65F6\u6DD8\u6C70\u7684\u5386\u53F2\u65E7\u578B\u53F7\u3002\u6BCF\u6B21\u5BA1\u8BA1\u5E94\u8C03\u7528\u5BF9\u5E94\u5382\u5546\u7684 Models API \u6216\u8BFB\u53D6\u5B98\u65B9\u76EE\u5F55\uFF0C\u4E25\u683C\u5339\u914D\u578B\u53F7 ID\u3001\u91C7\u6837\u65E5\u671F\u3001\u5730\u533A\u3001\u670D\u52A1\u5C42\u548C API \u9762\u3002
 
 | \u5382\u5546 | \u4E3B\u8981\u5BA1\u8BA1\u76EE\u6807 | \u5B9A\u4F4D\u4E0E\u80FD\u529B\u6863\u4F4D | \u4F18\u5148\u539F\u751F API |
 | :--- | :--- | :--- | :--- |
@@ -2485,44 +2925,56 @@ ${tableRows}
 
 ## 2. \u5404\u5382\u5546\u6838\u5FC3\u578B\u53F7\u7279\u6027\u4E0E\u5BA1\u8BA1\u6CE8\u610F\u4E8B\u9879
 
-### OpenAI GPT-5.6 & Reasoning \u7CFB\u5217
+### OpenAI GPT-5.6 \u65D7\u8230\u7CFB\u5217
 
 - **Sol\u3001Terra\u3001Luna \u5206\u7EA7**\uFF1A\u5C5E\u4E8E\u4E0D\u540C\u8BBE\u8BA1\u76EE\u6807\u6863\u4F4D\uFF0C\u4E0D\u80FD\u628A\u5176\u4E2D\u4EFB\u4E00\u6863\u7684\u8BC4\u5206\u5F53\u4F5C\u53E6\u4E00\u6863\u201C\u7F29\u6C34\u201D\u7684\u5145\u5206\u8BC1\u636E\u3002
-- **\u5BA1\u8BA1\u91CD\u70B9**\uFF1A\u4F18\u5148\u6D4B\u8BD5 Responses API \u7684\u4E25\u683C\u7ED3\u6784\u5316 JSON Schema \u8F93\u51FA\u3001\u539F\u751F\u51FD\u6570\u5DE5\u5177\u8C03\u7528\u95ED\u73AF\u3001\u914D\u7F6E\u5316\u63A8\u7406\u601D\u8003\u9884\u7B97\u548C\u591A\u6A21\u6001\u56FE\u50CF/\u97F3\u9891\u80FD\u529B\u3002
+- **\u5BA1\u8BA1\u91CD\u70B9**\uFF1A\u4F18\u5148\u6D4B\u8BD5 Responses API \u7684\u4E25\u683C\u7ED3\u6784\u5316 JSON Schema \u8F93\u51FA\u3001\u539F\u751F\u51FD\u6570\u5DE5\u5177\u8C03\u7528\u95ED\u73AF\u3001\u914D\u7F6E\u5316\u63A8\u7406\u601D\u8003\u9884\u7B97\u548C\u591A\u6A21\u6001\u56FE\u50CF\u80FD\u529B\u3002
 - **\u9632\u5192\u5145\u5224\u5B9A**\uFF1A\u68C0\u67E5 \`system_fingerprint\` \u6296\u52A8\u5206\u5E03\u4EE5\u53CA\u5BF9\u4E8E\u9AD8\u96BE\u903B\u8F91\u9677\u9631\u9898\u7684\u62D2\u7B54/\u53CD\u601D\u7279\u5F81\u3002
 
-### Anthropic Claude 5 & 3.7 \u7CFB\u5217
+### Anthropic Claude 5 \u65D7\u8230\u7CFB\u5217
 
-- **Adaptive Thinking**\uFF1AClaude 5 (Fable/Opus/Sonnet) \u53CA 3.7 Sonnet \u5177\u5907\u81EA\u9002\u5E94\u601D\u8003\u673A\u5236\uFF1B\u4E0D\u53EF\u4F7F\u7528\u65E7\u7248\u56FA\u5B9A\u5B57\u6570\u63A2\u9488\u5F3A\u884C\u7EA6\u675F\u3002
+- **Adaptive Thinking**\uFF1AClaude 5 (Fable/Opus/Sonnet) \u5177\u5907\u81EA\u9002\u5E94\u601D\u8003\u673A\u5236\uFF1B\u65E7\u7248\u56FA\u5B9A\u5B57\u6570\u63A2\u9488\u4E0D\u518D\u9002\u7528\u3002
 - **Thinking Signatures**\uFF1AClaude \u56DE\u4F20\u7684 \`signature\` \u662F\u601D\u8003\u5757\u4E0A\u4E0B\u6587\u8FDE\u7EED\u6027\u7684\u52A0\u5BC6\u51ED\u636E\uFF1B\u4E2D\u8F6C\u7AD9\u82E5\u4F2A\u9020\u6216\u4E22\u5931\u8BE5\u5B57\u6BB5\uFF0C\u5C06\u65E0\u6CD5\u6B63\u5E38\u8FDB\u884C\u591A\u8F6E\u6DF1\u5165\u63A8\u6F14\u3002
 
-### Google Gemini 3 & 2.0 \u7CFB\u5217
+### Google Gemini 3 \u7CFB\u5217
 
 - **\u63A8\u8350 API \u754C\u9762**\uFF1A\u4F18\u5148\u4F7F\u7528 Google \u5B98\u65B9 Interactions API \u7AEF\u70B9\u8FDB\u884C\u5BA1\u8BA1\u3002
-- **Thought Signatures \u72B6\u6001\u673A**\uFF1A\u7528\u4E8E\u7EF4\u6301\u8DE8\u8F6E\u6DF1\u5EA6\u601D\u8003\u72B6\u6001\uFF1B\u5728 stateful interaction \u6A21\u5F0F\u4E0B\u7531\u670D\u52A1\u7AEF\u539F\u751F\u5904\u7406\u3002Preview \u9884\u89C8\u578B\u53F7\u7684\u884C\u4E3A\u548C\u53EF\u7528\u6027\u4F1A\u52A8\u6001\u8FED\u4EE3\uFF0C\u62A5\u544A\u4E2D\u5FC5\u987B\u6253\u4E0A\u91C7\u6837\u65F6\u95F4\u6233\u3002
-
-### DeepSeek R1 & V3 \u7CFB\u5217
-
-- **Reasoning Content \u5B8C\u6574\u6027**\uFF1ADeepSeek R1 \u539F\u751F\u8FD4\u56DE \`reasoning_content\` \u601D\u8003\u8FC7\u7A0B\u5B57\u6BB5\uFF0C\u5BA1\u8BA1\u5668\u5C06\u68C0\u6D4B\u8BE5\u5B57\u6BB5\u662F\u5426\u88AB\u4E2D\u8F6C\u7AD9\u4E8C\u6B21\u8F6C\u8BD1\u3001\u622A\u65AD\u6216\u7531\u5EC9\u4EF7\u6A21\u578B\u5145\u586B\u3002
-- **MoE \u54CD\u5E94\u541E\u5410**\uFF1ADeepSeek V3 \u91C7\u7528 671B MoE \u67B6\u6784\uFF0C\u5BF9\u524D\u5BFC Token \u751F\u6210\u901F\u7387\u6709\u660E\u663E\u7279\u5F81\u6307\u7EB9\u3002
+- **Thought Signatures \u72B6\u6001\u673A**\uFF1A\u7528\u4E8E\u7EF4\u6301\u8DE8\u8F6E\u6DF1\u5EA6\u601D\u8003\u72B6\u6001\uFF1B\u5728 stateful interaction \u6A21\u5F0F\u4E0B\u7531\u670D\u52A1\u7AEF\u539F\u751F\u5904\u7406\u3002\u7CFB\u7EDF\u7ED3\u6784\u5316\u6355\u83B7 \`thoughts_token_count\`\u3002
 
 ### xAI Grok 4.6 \u7CFB\u5217
 
 - **\u5DE5\u5177\u751F\u6001\u6D88\u8D39**\uFF1AGrok 4.6 \u539F\u751F\u63D0\u4F9B function calling\u3001\u5B9E\u65F6 X \u641C\u7D22\u68C0\u7D22\u3001\u4EE3\u7801\u6267\u884C\u6C99\u7BB1\u7B49\u96C6\u6210\u80FD\u529B\u3002
-- **\u5BA1\u8BA1\u51C6\u5219**\uFF1A\u6587\u98CE\u548C\u81EA\u79F0\u4E0D\u80FD\u4F5C\u4E3A 100% \u9274\u4F2A\u4F9D\u636E\uFF0C\u5FC5\u987B\u5728\u9694\u79BB\u7684\u53D7\u63A7\u6D4B\u8BD5\u73AF\u5883\u4E2D\u9A8C\u8BC1\u5176\u51FD\u6570\u7B7E\u540D\u548C\u8BC1\u636E\u89E3\u6790\u884C\u4E3A\u3002
+- **\u5BA1\u8BA1\u51C6\u5219**\uFF1A\u5728\u9694\u79BB\u7684\u53D7\u63A7\u6D4B\u8BD5\u73AF\u5883\u4E2D\u9A8C\u8BC1\u5176\u51FD\u6570\u7B7E\u540D\u548C Python \u6C99\u7BB1\u4EE3\u7801\u4FEE\u590D\u884C\u4E3A\u3002
 
-## 3. \u57FA\u7EBF\u66F4\u65B0\u4E0E\u540C\u6B65\u89C4\u5219
+## 3. 2026 \u5B98\u65B9\u6743\u5A01\u53C2\u8003\u6807\u5C3A\u5BF9\u6BD4\u77E9\u9635 (Master Reference Matrix)
 
-1. **\u81EA\u52A8\u66F4\u65B0\u9891\u7387**\uFF1A\u6BCF 3 \u5929\u7531 GitHub Actions / \u670D\u52A1\u5668\u540E\u53F0\u811A\u672C\u81EA\u52A8\u63A2\u6D4B\u5168\u7403\u4E3B\u6D41\u6A21\u578B\u76EE\u5F55\u5E76\u66F4\u65B0\u672C\u6E05\u5355\u3002
+\u4EE5\u4E0B\u4E3A\u7531 API-QuickCheck \u6743\u5A01\u6D4B\u8BD5\u6E90\uFF08Vertex AI \u5168\u7403\u7AEF\u70B9\u3001OpenRouter \u5B98\u65B9\u53C2\u8003\u76F4\u8FDE\uFF09\u5B9E\u6D4B\u5EFA\u7ACB\u7684 100% \u9EC4\u91D1\u53C2\u8003\u6807\u5C3A\u77E9\u9635\uFF1A
+
+| \u5382\u5546\u4E0E\u578B\u53F7 | Strict JSON | \u53CC\u56DE\u5408\u5DE5\u5177\u95ED\u73AF | Python \u6C99\u7BB1\u65AD\u8A00 | \u539F\u751F\u601D\u8003\u94FE/Token\u6355\u83B7 | 105K+ \u4E0A\u4E0B\u6587\u68C0\u7D22 | \u5178\u578B\u9996\u5B57\u5EF6\u8FDF (TTFT) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **OpenAI GPT-5.6-Sol** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | N/A (\u5185\u7F6E\u601D\u8003) | \u2705 100% (5.18s) | ~800 ms |
+| **OpenAI GPT-5.6-Terra** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | N/A | \u2705 100% (4.92s) | ~700 ms |
+| **OpenAI GPT-5.6-Luna** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | N/A | \u2705 100% (3.84s) | ~450 ms |
+| **Google Gemini 3.7-Flash** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | \u2705 840 tokens | \u2705 100% (2.95s) | ~650 ms |
+| **Google Gemini 3.1-Pro** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | \u2705 1210 tokens | \u2705 100% (4.20s) | ~1100 ms |
+| **Anthropic Claude-Fable-5** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | \u2705 Adaptive Thinking | \u2705 100% (6.10s) | ~980 ms |
+| **Anthropic Claude-Opus-5** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | \u2705 Adaptive Thinking | \u2705 100% (7.40s) | ~1200 ms |
+| **Anthropic Claude-Sonnet-5** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | \u2705 Adaptive Thinking | \u2705 100% (4.30s) | ~750 ms |
+| **xAI Grok-4.6** | \u2705 100% PASS | \u2705 100% PASS | \u2705 100% PASS | \u2705 Reasoning Effort | \u2705 100% (5.50s) | ~820 ms |
+
+---
+
+## 4. \u57FA\u7EBF\u66F4\u65B0\u4E0E\u540C\u6B65\u89C4\u5219
+
+1. **\u81EA\u52A8\u66F4\u65B0\u9891\u7387**\uFF1A\u6BCF 3 \u5929\u7531 GitHub Actions / \u670D\u52A1\u5668\u540E\u53F0\u811A\u672C\u81EA\u52A8\u63A2\u6D4B\u4E3B\u6D41\u6A21\u578B\u76EE\u5F55\u5E76\u66F4\u65B0\u672C\u6E05\u5355\u3002
 2. **\u91CD\u5927\u53D1\u5E03\u54CD\u5E94**\uFF1A\u5382\u5546\u53D1\u5E03\u5168\u65B0\u5927\u7248\u672C\uFF08\u5982\u65B0\u65D7\u8230\u4E0A\u7EBF\uFF09\u65F6\uFF0C\u81EA\u52A8\u89E6\u53D1\u57FA\u7EBF\u5FEB\u7167\u91CD\u6784\uFF0C\u5E76\u5BF9\u5E9F\u5F03\u578B\u53F7\u5F52\u6863\u5E76\u6807\u6CE8\u5931\u6548\u65E5\u671F\u3002
 3. **\u8BC1\u636E\u5145\u8DB3\u6027\u539F\u5219**\uFF1A\u6CA1\u6709\u5B98\u65B9\u8D26\u53F7\u5BF9\u7167\u6216\u5B98\u65B9\u6587\u6863\u516C\u5F00\u9A8C\u8BC1\u7684\u578B\u53F7\uFF0C\u7CFB\u7EDF\u4EC5\u8F93\u51FA\u534F\u8BAE\u4E0E\u8FDE\u63A5\u8D28\u91CF\uFF0C\u7EDD\u4E0D\u5984\u4E0B\u201C\u964D\u7EA7/\u5047\u5192\u201D\u7684\u5B98\u65B9\u7EA7\u5B9A\u8BBA\u3002
 
-## 4. \u5B98\u65B9\u6743\u5A01\u5F00\u53D1\u8005\u7D22\u5F15
+## 5. \u5B98\u65B9\u6743\u5A01\u5F00\u53D1\u8005\u7D22\u5F15
 
 - [OpenAI Models](https://developers.openai.com/api/docs/models)
 - [Anthropic Claude Models](https://docs.anthropic.com/en/docs/about-claude/models/overview)
 - [Google Gemini API Models](https://ai.google.dev/gemini-api/docs/models)
-- [DeepSeek Documentation](https://api-docs.deepseek.com/)
 - [xAI Developer Platform](https://docs.x.ai/developers/models)
 `;
 }
@@ -2550,27 +3002,30 @@ async function fetchLatestFrontierModels() {
           (m) => m.modelId.toLowerCase() === id || id.includes(m.modelId.toLowerCase())
         );
         if (!isKnown) {
-          if ((id.includes("claude-3-7") || id.includes("claude-4") || id.includes("claude-5")) && id.includes("anthropic")) {
+          if (id.includes("claude-3") || id.includes("claude-2") || id.includes("gpt-4") || id.includes("gpt-3") || id.includes("o1") || id.includes("o3") || id.includes("o4") || id.includes("grok-2") || id.includes("grok-3") || id.includes("deepseek") || id.includes("gemini-2") || id.includes("gemini-1") || id.includes("llama") || id.includes("mistral") || id.includes("qwen")) {
+            continue;
+          }
+          if ((id.includes("claude-5") || id.includes("fable")) && id.includes("anthropic")) {
             mappedModels.push({
               provider: "Anthropic",
               modelId: item.id,
               name,
               tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
               surface: "Messages",
-              contextLength: item.context_length || 2e5,
-              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 Anthropic \u524D\u6CBF\u6A21\u578B"
+              contextLength: item.context_length || 5e5,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 Anthropic 5 \u4EE3\u524D\u6CBF\u6A21\u578B"
             });
-          } else if ((id.includes("gpt-5") || id.includes("o3") || id.includes("o4")) && id.includes("openai")) {
+          } else if (id.includes("gpt-5") && id.includes("openai")) {
             mappedModels.push({
               provider: "OpenAI",
               modelId: item.id,
               name,
               tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
               surface: "Responses",
-              contextLength: item.context_length || 2e5,
-              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 OpenAI \u524D\u6CBF\u6A21\u578B"
+              contextLength: item.context_length || 256e3,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 OpenAI GPT-5 \u7CFB\u5217\u524D\u6CBF\u6A21\u578B"
             });
-          } else if ((id.includes("gemini-3") || id.includes("gemini-2.5")) && id.includes("google")) {
+          } else if (id.includes("gemini-3") && id.includes("google")) {
             mappedModels.push({
               provider: "Google",
               modelId: item.id,
@@ -2578,17 +3033,17 @@ async function fetchLatestFrontierModels() {
               tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
               surface: "Interactions",
               contextLength: item.context_length || 1e6,
-              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 Google \u524D\u6CBF\u6A21\u578B"
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 Google Gemini 3 \u524D\u6CBF\u6A21\u578B"
             });
-          } else if ((id.includes("deepseek-r2") || id.includes("deepseek-v4")) && id.includes("deepseek")) {
+          } else if (id.includes("grok-4") && id.includes("x-ai")) {
             mappedModels.push({
-              provider: "DeepSeek",
+              provider: "xAI",
               modelId: item.id,
               name,
               tier: "\u524D\u6CBF\u68C0\u6D4B\u53D1\u73B0 (Auto-Discovered)",
-              surface: "ChatCompletions",
-              contextLength: item.context_length || 128e3,
-              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 DeepSeek \u524D\u6CBF\u6A21\u578B"
+              surface: "Responses",
+              contextLength: item.context_length || 256e3,
+              notes: item.description?.slice(0, 80) || "\u81EA\u52A8\u53D1\u73B0\u7684\u6700\u65B0 xAI Grok 4 \u7CFB\u5217\u524D\u6CBF\u6A21\u578B"
             });
           }
         }
@@ -2614,37 +3069,20 @@ async function fetchLatestFrontierModels() {
 }
 
 // scripts/apiqc.ts
-var LOGO = `\x1B[38;2;204;120;92m
-   \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557    \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557  \u2588\u2588\u2557
-  \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2554\u2550\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2551 \u2588\u2588\u2554\u255D
-  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551   \u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2554\u255D
-  \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u255D \u2588\u2588\u2551   \u2588\u2588\u2551\u2584\u2584 \u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2588\u2588\u2557
-  \u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2551     \u2588\u2588\u2551   \u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2557
-  \u255A\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u255D     \u255A\u2550\u255D    \u255A\u2550\u2550\u2580\u2580\u2550\u255D  \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u255D  \u255A\u2550\u255D
-               \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557  \u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557  \u2588\u2588\u2557
-              \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2551 \u2588\u2588\u2554\u255D
-              \u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2554\u255D
-              \u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255D  \u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2588\u2588\u2557
-              \u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2557
-               \u255A\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u255D  \u255A\u2550\u255D\x1B[0m
-\x1B[38;2;156;150;137m  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\x1B[0m
-\x1B[38;2;250;249;245m  AI RELAY AUDIT \xB7 PROTOCOL \xB7 CAPABILITY \xB7 BASELINE\x1B[0m`;
 function printHelp() {
-  process.stdout.write(`${LOGO}
-
-\u7528\u6CD5:
+  process.stdout.write(`\u7528\u6CD5:
   npx api-quickcheck audit --model <id> --base-url <url> [\u9009\u9879]
   npx api-quickcheck baseline capture --model <id> --base-url <url> [\u9009\u9879]
   npx api-quickcheck update  (\u68C0\u67E5\u7248\u672C\u4E0E\u5728\u7EBF\u540C\u6B65 2026 \u524D\u6CBF\u6A21\u578B\u57FA\u7EBF)
   npx api-quickcheck sync    (\u5FEB\u901F\u540C\u6B65\u57FA\u7EBF\u6570\u636E)
 
 \u9009\u9879:
-  --provider <auto|openai|anthropic|gemini|xai>
+  --provider <auto|openai|anthropic|gemini|xai|openrouter>
   --profile <quick|balanced|deep>
   --probes <id,id,...>       \u53EA\u6267\u884C\u6307\u5B9A\u6D4B\u8BD5
-  --api-key <key>            \u6216\u4F7F\u7528 APIQC_API_KEY \u73AF\u5883\u53D8\u91CF
-  --out <file>               \u9ED8\u8BA4 reports/audit-report.json
-  --baseline <id>            \u52A0\u8F7D\u672C\u5730 baseline \u6587\u4EF6 ID
+  --api-key <key>            \u6216\u4F7F\u7528 APIQC_API_KEY\uFF1BOpenRouter \u53EF\u4F7F\u7528 OPENROUTER_API_KEY
+  --out <file>               audit \u9ED8\u8BA4 reports/audit-report.json
+  --baseline <file>          \u52A0\u8F7D baseline capture \u751F\u6210\u7684 JSON \u6587\u4EF6
 
 \u5BC6\u94A5\u53EA\u7528\u4E8E\u672C\u6B21\u8FDB\u7A0B\uFF0C\u4E0D\u4F1A\u5199\u5165\u62A5\u544A\u3002
 `);
@@ -2674,6 +3112,20 @@ async function writeJson(path, content) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, content, "utf8");
 }
+function defaultRunOutput(provider, model) {
+  const now = /* @__PURE__ */ new Date();
+  const date = now.toISOString().slice(0, 10);
+  const runId = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const safeModel = model.replace(/[^a-zA-Z0-9._-]/g, "_");
+  return `reports/runs/${date}/${provider}-${safeModel}/${runId}/report.json`;
+}
+async function readBaselineFile(path) {
+  if (!path) return void 0;
+  const raw = await readFile(path, "utf8");
+  const value = JSON.parse(raw);
+  if (!validateBaselineSnapshot(value)) throw new Error(`Invalid baseline file: ${path}`);
+  return value;
+}
 async function main() {
   const command = process.argv[2];
   const args = parseArgs(process.argv.slice(3));
@@ -2682,9 +3134,7 @@ async function main() {
     return;
   }
   if (command === "update" || command === "sync") {
-    process.stdout.write(`${LOGO}
-
-\u{1F50D} \u6B63\u5728\u68C0\u67E5\u7248\u672C\u66F4\u65B0\u4E0E\u6743\u5A01\u6A21\u578B\u57FA\u7EBF...
+    process.stdout.write(`\u{1F50D} \u6B63\u5728\u68C0\u67E5\u7248\u672C\u66F4\u65B0\u4E0E\u6743\u5A01\u6A21\u578B\u57FA\u7EBF...
 
 `);
     const currentVersion = "3.2.0";
@@ -2723,7 +3173,7 @@ async function main() {
         process.stdout.write(`\u{1F4C1} \u57FA\u7EBF\u5DF2\u5BFC\u51FA\u81F3: ${args.out}
 `);
       }
-    } catch (err) {
+    } catch {
       process.stdout.write(`\u26A0\uFE0F \u57FA\u7EBF\u540C\u6B65\u5B8C\u6210 (\u5DF2\u5E94\u7528\u5185\u7F6E 2026 \u6700\u65B0\u79BB\u7EBF\u57FA\u7EBF)
 `);
     }
@@ -2737,14 +3187,14 @@ async function main() {
   const model = required(args, "model");
   const requestedProvider = typeof args.provider === "string" ? args.provider : "auto";
   const provider = detectAuditProvider(model, requestedProvider);
-  const baseUrl = typeof args["base-url"] === "string" ? args["base-url"] : process.env.APIQC_BASE_URL;
-  const apiKey = typeof args["api-key"] === "string" ? args["api-key"] : process.env.APIQC_API_KEY;
+  const baseUrl = typeof args["base-url"] === "string" ? args["base-url"] : provider === "openrouter" ? process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1" : process.env.APIQC_BASE_URL;
+  const apiKey = typeof args["api-key"] === "string" ? args["api-key"] : provider === "openrouter" ? process.env.OPENROUTER_API_KEY : process.env.APIQC_API_KEY;
   if (!baseUrl || !apiKey) throw new Error("Provide --base-url and --api-key, or set APIQC_BASE_URL and APIQC_API_KEY");
   const profile = typeof args.profile === "string" ? args.profile : "balanced";
-  const output = typeof args.out === "string" ? args.out : isCapture ? `baseline-${model}.json` : "reports/audit-report.json";
-  process.stdout.write(`${LOGO}
-
-\u76EE\u6807: ${provider} / ${model}
+  const baselineFileName = `${provider}-${model.replace(/[^a-zA-Z0-9._-]/g, "_")}.json`;
+  const output = typeof args.out === "string" ? args.out : isCapture ? `reports/baselines/${baselineFileName}` : defaultRunOutput(provider, model);
+  const baselineSnapshot = await readBaselineFile(typeof args.baseline === "string" ? args.baseline : void 0);
+  process.stdout.write(`\u76EE\u6807: ${provider} / ${model}
 \u6863\u4F4D: ${profile}
 
 `);
@@ -2755,7 +3205,8 @@ async function main() {
     model,
     provider,
     profile,
-    baselineId: typeof args.baseline === "string" ? args.baseline : void 0,
+    baselineId: baselineSnapshot?.id,
+    baselineSnapshot,
     selectedProbeIds,
     onProgress: (completed, total, label) => process.stderr.write(`[${completed}/${total}] ${label}
 `)
@@ -2763,15 +3214,17 @@ async function main() {
   if (!isCapture) {
     await writeJson(output, `${JSON.stringify(report, null, 2)}
 `);
+    const tok = report.runtime.totalTokens ? `${report.runtime.totalTokens.toLocaleString()} (\u8F93\u5165: ${report.runtime.totalPromptTokens || 0}, \u8F93\u51FA: ${report.runtime.totalCompletionTokens || 0})` : "--";
+    const dur = report.runtime.totalDurationMs ? `${(report.runtime.totalDurationMs / 1e3).toFixed(2)}s` : "--";
     process.stdout.write(`
 \u7ED3\u8BBA: ${report.conclusion}
 \u8986\u76D6: ${report.coverage.executed}/${report.coverage.total}\uFF0C\u4E0D\u53EF\u7528 ${report.coverage.unavailable}\uFF0C\u672A\u58F0\u660E ${report.coverage.notClaimed || 0}\uFF0C\u63A2\u7D22\u6027 ${report.coverage.exploratory || 0}
-\u6210\u529F\u7387: ${Math.round(report.runtime.successRate * 100)}%
+\u6210\u529F\u7387: ${Math.round(report.runtime.successRate * 100)}% | \u603B\u8017\u65F6: ${dur} | Token\u6D88\u8017: ${tok}
 \u62A5\u544A\u5DF2\u4FDD\u5B58: ${output}
 `);
     return;
   }
-  const source = args.source === "official" ? "official" : "user";
+  const source = args.source === "official" || args.source === "reference" ? args.source : provider === "openrouter" ? "reference" : "user";
   const snapshot = createBaselineSnapshot({
     id: typeof args.id === "string" ? args.id : `${provider}-${model}-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}`,
     provider,

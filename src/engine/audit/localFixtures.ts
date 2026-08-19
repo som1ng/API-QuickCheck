@@ -21,6 +21,7 @@ export interface CodeRepairFixture {
   instruction: string;
   source: string;
   expectedTokens: string[];
+  acceptancePatterns: RegExp[][];
 }
 
 export interface RepeatSample {
@@ -73,23 +74,41 @@ export function createCodeRepairFixture(id: CodeRepairFixture['id']): CodeRepair
   if (id === 'arithmetic') {
     return {
       id,
-      instruction: '修复算术模块中的税后总价计算，并只返回修复后的代码。',
+      instruction: '修复算术模块中的税后总价计算，保留导出语句，并只返回修复后的代码。',
       source: 'function totalWithTax(price, taxRate) {\n  return price + taxRate;\n}\nmodule.exports = { totalWithTax };',
       expectedTokens: ['return price * (1 + taxRate);', 'module.exports = { totalWithTax };'],
+      acceptancePatterns: [
+        [/return\s+price\s*\*\s*\(\s*1\s*\+\s*taxRate\s*\)/i, /return\s+price\s*\+\s*price\s*\*\s*taxRate/i, /return\s+price\s*\+\s*\(\s*price\s*\*\s*taxRate\s*\)/i, /price\s*\*\s*\(\s*1\s*\+\s*taxRate\s*\)/i],
+        [/module\.exports\s*=\s*\{\s*totalWithTax\s*\}/i, /export\s+(default\s+)?(function\s+)?totalWithTax/i, /export\s*\{\s*totalWithTax\s*\}/i, /function\s+totalWithTax/i],
+      ],
     };
   }
   return {
     id,
-    instruction: '修复集合模块，使函数返回去重后且保持首次出现顺序的数组，并只返回修复后的代码。',
+    instruction: '修复集合模块，使函数返回去重后且保持首次出现顺序的数组，保留导出语句，并只返回修复后的代码。',
     source: 'function unique(values) {\n  return values.sort();\n}\nmodule.exports = { unique };',
     expectedTokens: ['return [...new Set(values)];', 'module.exports = { unique };'],
+    acceptancePatterns: [
+      [/return\s+\[\.\.\.\s*new\s+Set\s*\(\s*values\s*\)\s*\]/i, /return\s+Array\.from\s*\(\s*new\s+Set\s*\(\s*values\s*\)\s*\)/i, /new\s+Set\s*\(\s*values\s*\)/i, /values\.filter\s*\(/i],
+      [/module\.exports\s*=\s*\{\s*unique\s*\}/i, /export\s+(default\s+)?(function\s+)?unique/i, /export\s*\{\s*unique\s*\}/i, /function\s+unique/i],
+    ],
   };
 }
 
-export function scoreCodeRepairResponse(output: string, fixture: CodeRepairFixture): { score: number; passed: boolean; matched: string[] } {
-  const normalized = output.toLowerCase();
-  const matched = fixture.expectedTokens.filter((token) => normalized.includes(token.toLowerCase()));
-  return { score: Math.round((matched.length / fixture.expectedTokens.length) * 100), passed: matched.length === fixture.expectedTokens.length, matched };
+export function scoreCodeRepairResponse(output: string, fixture: CodeRepairFixture): { score: number; passed: boolean; matched: string[]; missing: number[] } {
+  const matched: string[] = [];
+  const missing: number[] = [];
+  const requirements = fixture.acceptancePatterns.length > 0
+    ? fixture.acceptancePatterns
+    : fixture.expectedTokens.map((token) => [new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')]);
+
+  requirements.forEach((patterns, index) => {
+    const pattern = patterns.find((candidate) => candidate.test(output));
+    if (pattern) matched.push(pattern.source);
+    else missing.push(index);
+  });
+
+  return { score: Math.round((matched.length / requirements.length) * 100), passed: missing.length === 0, matched, missing };
 }
 
 export function summarizeRepeatSamples(samples: RepeatSample[]): RepeatSummary {

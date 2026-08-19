@@ -2,7 +2,7 @@
 title: Web 端使用
 category: usage
 categoryTitle: 使用
-order: 11
+order: 1
 subtitle: 现代化响应式 Web 工作台，提供一键式多维质量鉴别、API Key 批量测活与全景文档。
 ---
 

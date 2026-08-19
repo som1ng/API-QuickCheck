@@ -223,7 +223,7 @@ export async function fetchRemoteModels(
             messages: [{ role: 'user', content: 'hi' }],
             max_tokens: 1,
           },
-          timeoutMs: 6000,
+          timeoutMs: 15000,
           signal,
         });
 
@@ -312,7 +312,7 @@ export async function scanSingleModel(
       messages: [{ role: 'user', content: 'hi' }],
       max_tokens: 1,
     },
-    timeoutMs: 5000,
+    timeoutMs: 15000,
     signal,
   });
 

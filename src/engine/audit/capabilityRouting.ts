@@ -29,7 +29,7 @@ interface PolicyDocument {
 export interface ProbeRoute {
   state: ClaimState;
   disposition: ProbeDisposition;
-  countsTowardOfficialConclusion: boolean;
+  countsTowardReferenceConclusion: boolean;
   reason: string;
 }
 
@@ -37,7 +37,8 @@ const claims = claimsDocument as ClaimsDocument;
 const policy = policyDocument as PolicyDocument;
 
 function findModelClaims(provider: AuditProvider, model: string): ModelClaims | undefined {
-  return claims.models.find((entry) => entry.provider === provider && (entry.projectModelId === model || entry.officialModelId === model));
+  const normalizedModel = model.replace(new RegExp(`^${provider}/`), '');
+  return claims.models.find((entry) => entry.provider === provider && (entry.projectModelId === model || entry.officialModelId === model || entry.projectModelId === normalizedModel || entry.officialModelId === normalizedModel));
 }
 
 function readClaim(modelClaims: ModelClaims | undefined, provider: AuditProvider, path: string): unknown {
@@ -69,28 +70,31 @@ function evaluateExpression(expression: string, provider: AuditProvider, modelCl
 }
 
 function evaluatePolicy(probeId: string, provider: AuditProvider, modelClaims?: ModelClaims): ProbeRoute {
+  if (provider === 'openrouter') {
+    return { state: 'unknown', disposition: 'standard_benchmark', countsTowardReferenceConclusion: true, reason: 'OpenRouter 参考基线模式：执行已实现探针以生成可比较样本。' };
+  }
   const probePolicy = policy.probePolicy[probeId];
   if (!probePolicy) {
-    return { state: 'unknown', disposition: 'exploratory_test', countsTowardOfficialConclusion: false, reason: '未找到该探针的官方路由策略。' };
+    return { state: 'unknown', disposition: 'exploratory_test', countsTowardReferenceConclusion: false, reason: '未找到该探针的官方路由策略。' };
   }
 
   const skippedBy = probePolicy.skipWhen?.find((expression) => evaluateExpression(expression, provider, modelClaims) === 'supported');
   if (skippedBy) {
-    return { state: 'unsupported', disposition: 'not_claimed', countsTowardOfficialConclusion: false, reason: `官方能力声明满足跳过条件：${skippedBy}` };
+    return { state: 'unsupported', disposition: 'not_claimed', countsTowardReferenceConclusion: false, reason: `官方能力声明满足跳过条件：${skippedBy}` };
   }
 
   const requiredStates = (probePolicy.requires || []).map((expression) => ({ expression, state: evaluateExpression(expression, provider, modelClaims) }));
   const failedRequirement = requiredStates.find((item) => item.state === 'unsupported');
   if (failedRequirement) {
-    return { state: 'unsupported', disposition: 'not_claimed', countsTowardOfficialConclusion: false, reason: `官方能力声明不满足要求：${failedRequirement.expression}` };
+    return { state: 'unsupported', disposition: 'not_claimed', countsTowardReferenceConclusion: false, reason: `官方能力声明不满足要求：${failedRequirement.expression}` };
   }
   if (requiredStates.some((item) => item.state === 'unknown')) {
-    return { state: 'unknown', disposition: 'exploratory_test', countsTowardOfficialConclusion: false, reason: '官方能力资料未明确覆盖该探针要求，仅作为探索性测试。' };
+    return { state: 'unknown', disposition: 'exploratory_test', countsTowardReferenceConclusion: false, reason: '官方能力资料未明确覆盖该探针要求，仅作为探索性测试。' };
   }
   if (!modelClaims) {
-    return { state: 'unknown', disposition: 'exploratory_test', countsTowardOfficialConclusion: false, reason: '未找到该型号的官方能力声明，仅作为探索性测试。' };
+    return { state: 'unknown', disposition: 'exploratory_test', countsTowardReferenceConclusion: false, reason: '未找到该型号的官方能力声明，仅作为探索性测试。' };
   }
-  return { state: 'supported', disposition: 'standard_benchmark', countsTowardOfficialConclusion: true, reason: '官方能力声明满足探针要求。' };
+  return { state: 'supported', disposition: 'standard_benchmark', countsTowardReferenceConclusion: true, reason: '官方能力声明满足探针要求。' };
 }
 
 export function getProbeRoute(provider: AuditProvider, model: string, probeId: string): ProbeRoute {

@@ -31,7 +31,13 @@
   html, body, #root, * {
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
-    text-rendering: geometricPrecision !important;
+    text-rendering: optimizeLegibility !important;
+  }
+
+  .will-change-transform {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
   }
 
   html, body {

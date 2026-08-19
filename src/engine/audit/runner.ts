@@ -4,12 +4,13 @@ import { AuditProfile, AuditProvider, AuditReportV4, BaselineSnapshot, Capabilit
 import { PROVIDER_ADAPTERS, ProviderAdapter, NativeResult, NativeRequest, detectAuditProvider } from './providerAdapters';
 import { hashFixture, selectSuite } from './suite';
 import { determineConclusion } from './statistics';
-import { validateAnthropicMessage, validateChatCompletionEnvelope, validateResponsesEnvelope } from './protocolValidators';
+import { validateAnthropicMessage, validateChatCompletionEnvelope, validateGeminiGenerateContent, validateResponsesEnvelope } from './protocolValidators';
 import { createCodeRepairFixture, createNeedleFixture, scoreCodeRepairResponse, scoreNeedleResponse } from './localFixtures';
 import { bootstrapDifference } from './statistics';
 import { findStoredBaseline, loadBaselineSnapshot } from './baseline';
 import { readSSEEvents } from '../transport/sseReader';
 import { getProbeRoute, ProbeRoute } from './capabilityRouting';
+import { buildAuditSummary } from './reportSummary';
 
 export interface AuditRunOptions {
   baseUrl: string;
@@ -41,8 +42,8 @@ function unavailableMetric(domain: CapabilityMetric['domain'], baselineId?: stri
     baselineScores: [],
     status: 'unavailable',
     detail: baselineId
-      ? targetScores.length > 0 ? `已完成 ${targetScores.length} 次能力采样，但当前未加载官方基线快照。` : '本轮浏览器执行器尚未运行该能力域。'
-      : targetScores.length > 0 ? `已完成 ${targetScores.length} 次能力采样，但未提供官方基线；不能将单次能力表现转换为身份结论。` : '未提供官方基线快照；不能将单次能力表现转换为身份结论。',
+      ? targetScores.length > 0 ? `已完成 ${targetScores.length} 次能力采样，但当前未加载参考基线快照。` : '本轮浏览器执行器尚未运行该能力域。'
+      : targetScores.length > 0 ? `已完成 ${targetScores.length} 次能力采样，但未提供参考基线；不能将单次能力表现转换为一致性结论。` : '未提供参考基线快照；不能将单次能力表现转换为一致性结论。',
   };
 }
 
@@ -52,8 +53,13 @@ function unavailableEvidence(id: string, title: string, detail: string): Protoco
 
 function routeStatus(response: TransportResponse<unknown>): 'pass' | 'fail' | 'unavailable' {
   if (response.ok) return 'pass';
-  if ([0, 404, 405, 408, 502, 503, 504].includes(response.status)) return 'unavailable';
+  if ([0, 402, 404, 405, 408, 429].includes(response.status)) return 'unavailable';
   return 'fail';
+}
+
+export function containsFixtureText(text: string, expected: string): boolean {
+  const normalized = text.trim().replace(/[.!?]+$/g, '');
+  return normalized.includes(expected.replace(/[.!?]+$/g, ''));
 }
 
 function usageNumber(result: NativeResult, path: string[]): number | undefined {
@@ -65,20 +71,48 @@ function usageNumber(result: NativeResult, path: string[]): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
+function promptTokenCount(result: NativeResult): number | undefined {
+  return usageNumber(result, ['prompt_tokens'])
+    ?? usageNumber(result, ['input_tokens'])
+    ?? usageNumber(result, ['promptTokenCount'])
+    ?? usageNumber(result, ['inputTokenCount']);
+}
+
+function completionTokenCount(result: NativeResult): number | undefined {
+  return usageNumber(result, ['completion_tokens'])
+    ?? usageNumber(result, ['output_tokens'])
+    ?? usageNumber(result, ['candidatesTokenCount'])
+    ?? usageNumber(result, ['outputTokenCount']);
+}
+
+function totalTokenCount(result: NativeResult): number | undefined {
+  return usageNumber(result, ['total_tokens'])
+    ?? usageNumber(result, ['totalTokenCount']);
+}
+
 function cachedInputTokens(result: NativeResult): number | undefined {
   return usageNumber(result, ['input_tokens_details', 'cached_tokens'])
     ?? usageNumber(result, ['cache_read_input_tokens'])
     ?? usageNumber(result, ['cached_content_token_count']);
 }
 
-function basicEvidence(result: NativeResult, provider: AuditProvider, model: string): ProtocolEvidence {
+function reasoningTokenCount(result: NativeResult): number | undefined {
+  return usageNumber(result, ['thoughtsTokenCount'])
+    ?? usageNumber(result, ['thoughts_token_count'])
+    ?? usageNumber(result, ['reasoning_tokens'])
+    ?? usageNumber(result, ['output_tokens_details', 'reasoning_tokens']);
+}
+
+function basicEvidence(result: NativeResult, provider: AuditProvider, model: string, allowRelayEnvelope = false): ProtocolEvidence {
   const status = routeStatus(result.response);
   const validation = provider === 'anthropic'
-    ? validateAnthropicMessage(result.response.data, model)
+    ? validateAnthropicMessage(result.response.data, model, !allowRelayEnvelope)
     : provider === 'gemini'
+    ? validateGeminiGenerateContent(result.response.data, model)
+    : provider === 'openrouter'
     ? validateChatCompletionEnvelope(result.response.data, model, false)
     : validateResponsesEnvelope(result.response.data, model);
-  if (status === 'pass' && result.text.includes('audit-ready.') && validation.pass) {
+  if (status === 'pass' && containsFixtureText(result.text, 'audit-ready.') && validation.pass) {
     return { id: 'p0-native-route', title: '原生 API 路由', status, detail: '原生请求成功，响应 envelope 和固定夹具均符合。', latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes };
   }
   const validationStatus = status === 'pass' ? 'fail' : status;
@@ -107,20 +141,50 @@ async function execute(
     method: 'POST',
     headers: request.headers,
     body: request.body,
-    timeoutMs: 12_000,
+    timeoutMs: 30_000,
     signal,
   });
   return adapter.parse(response);
 }
 
-function runtimeFrom(results: NativeResult[]) {
+export function runtimeFrom(results: NativeResult[]) {
   const latencies = results.map((result) => result.response.latencyMs).filter((value) => value >= 0).sort((a, b) => a - b);
   const percentile = (p: number) => latencies[Math.min(latencies.length - 1, Math.floor(latencies.length * p))];
+
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+  let hasTokens = false;
+  let totalDurationMs = 0;
+
+  for (const result of results) {
+    if (result.response.latencyMs && result.response.latencyMs > 0) {
+      totalDurationMs += result.response.latencyMs;
+    }
+    const pTokens = promptTokenCount(result);
+    const cTokens = completionTokenCount(result);
+    const tTokens = totalTokenCount(result);
+
+    if (pTokens !== undefined || cTokens !== undefined || tTokens !== undefined) {
+      hasTokens = true;
+      if (pTokens !== undefined) totalPromptTokens += pTokens;
+      if (cTokens !== undefined) totalCompletionTokens += cTokens;
+      if (pTokens === undefined && cTokens === undefined && tTokens !== undefined) {
+        totalCompletionTokens += tTokens;
+      }
+    }
+  }
+
+  const calculatedTotalTokens = hasTokens ? (totalPromptTokens + totalCompletionTokens) : undefined;
+
   return {
     attempts: results.length,
     successRate: results.length > 0 ? results.filter((result) => result.response.ok).length / results.length : 0,
     p50LatencyMs: latencies.length > 0 ? percentile(0.5) : undefined,
     p95LatencyMs: latencies.length > 0 ? percentile(0.95) : undefined,
+    totalDurationMs: totalDurationMs > 0 ? totalDurationMs : (latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) : undefined),
+    totalPromptTokens: hasTokens ? totalPromptTokens : undefined,
+    totalCompletionTokens: hasTokens ? totalCompletionTokens : undefined,
+    totalTokens: calculatedTotalTokens,
   };
 }
 
@@ -134,7 +198,7 @@ interface StreamRunResult {
 
 async function executeStream(request: NativeRequest, signal?: AbortSignal): Promise<StreamRunResult> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12_000);
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
   const abortExternal = () => controller.abort(signal?.reason);
   signal?.addEventListener('abort', abortExternal, { once: true });
   const startedAt = performance.now();
@@ -150,10 +214,27 @@ async function executeStream(request: NativeRequest, signal?: AbortSignal): Prom
     }
     const eventTypes: string[] = [];
     for await (const event of readSSEEvents(response, controller.signal)) {
-      const dataType = typeof event.data === 'object' && event.data !== null && typeof (event.data as Record<string, unknown>).type === 'string'
-        ? String((event.data as Record<string, unknown>).type)
-        : '';
-      eventTypes.push(event.event === 'message' && dataType ? dataType : event.event);
+      if (typeof event.data === 'object' && event.data !== null) {
+        const obj = event.data as Record<string, unknown>;
+        if (typeof obj.type === 'string') {
+          eventTypes.push(obj.type);
+        } else if (obj.object === 'chat.completion.chunk' || Array.isArray(obj.choices)) {
+          const choices = obj.choices as Record<string, unknown>[] | undefined;
+          const delta = choices?.[0]?.delta as Record<string, unknown> | undefined;
+          const finishReason = choices?.[0]?.finish_reason;
+          if (finishReason) {
+            eventTypes.push('chat.completion.chunk.finish');
+          } else if (delta && (delta.content !== undefined || delta.reasoning_content !== undefined || delta.tool_calls !== undefined)) {
+            eventTypes.push('chat.completion.chunk.delta');
+          } else {
+            eventTypes.push('chat.completion.chunk.start');
+          }
+        } else {
+          eventTypes.push(event.event);
+        }
+      } else {
+        eventTypes.push(event.event);
+      }
     }
     return { ok: true, status: response.status, eventTypes, latencyMs: Math.round(performance.now() - startedAt) };
   } catch (error: unknown) {
@@ -166,12 +247,35 @@ async function executeStream(request: NativeRequest, signal?: AbortSignal): Prom
 
 export function validateStreamSequence(provider: AuditProvider, eventTypes: string[]): { pass: boolean; detail: string } {
   if (provider === 'anthropic') {
+    // If relayed as ChatCompletions
+    if (eventTypes.some((t) => t.startsWith('chat.completion.chunk'))) {
+      const hasDelta = eventTypes.includes('chat.completion.chunk.delta');
+      return eventTypes.length >= 1 && hasDelta
+        ? { pass: true, detail: `ChatCompletions 兼容流式顺序通过（捕获 ${eventTypes.length} 个 Chunk 事件）` }
+        : { pass: false, detail: `ChatCompletions 缺少增量数据包：${eventTypes.join(' -> ')}` };
+    }
     const required = ['message_start', 'content_block_start', 'content_block_delta', 'message_stop'];
     const missing = required.filter((type) => !eventTypes.includes(type));
     const ordered = required.every((type, index) => eventTypes.indexOf(type) >= (index === 0 ? 0 : eventTypes.indexOf(required[index - 1])));
     return missing.length === 0 && ordered
-      ? { pass: true, detail: `Anthropic SSE 顺序通过：${eventTypes.join(' -> ')}` }
+      ? { pass: true, detail: `Anthropic 原生 SSE 顺序通过：${eventTypes.join(' -> ')}` }
       : { pass: false, detail: `Anthropic SSE 缺少或乱序：${missing.join(', ') || eventTypes.join(' -> ')}` };
+  }
+
+  if (provider === 'openrouter') {
+    const hasDelta = eventTypes.some((t) => t === 'chat.completion.chunk.delta' || t === 'message' || t.includes('delta'));
+    const pass = eventTypes.length > 0 && (hasDelta || eventTypes.length >= 1);
+    return pass
+      ? { pass: true, detail: `OpenRouter / ChatCompletions 流式事件流通过（捕获 ${eventTypes.length} 个 Chunk）` }
+      : { pass: false, detail: `流式事件序列为空或未捕获有效 Delta 数据块` };
+  }
+
+  // OpenAI / xAI surface
+  if (eventTypes.some((t) => t.startsWith('chat.completion.chunk'))) {
+    const hasDelta = eventTypes.includes('chat.completion.chunk.delta') || eventTypes.length >= 2;
+    return hasDelta
+      ? { pass: true, detail: `ChatCompletions 流式顺序通过（捕获 ${eventTypes.length} 个 Chunk）` }
+      : { pass: false, detail: `ChatCompletions 缺少增量数据包：${eventTypes.join(' -> ')}` };
   }
   const hasDelta = eventTypes.some((type) => type === 'response.output_text.delta' || type === 'response.content_part.added');
   const completionIndex = Math.max(eventTypes.indexOf('response.completed'), eventTypes.indexOf('response.done'));
@@ -184,7 +288,7 @@ export function validateStreamSequence(provider: AuditProvider, eventTypes: stri
 
 export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4> {
   const profile = options.profile || 'balanced';
-  const provider = detectAuditProvider(options.model, options.provider || 'auto');
+  const provider = detectAuditProvider(options.model, options.provider || 'auto', options.baseUrl);
   const adapter = PROVIDER_ADAPTERS[provider];
   const baselineSnapshot = options.baselineSnapshot
     || (options.baselineId ? loadBaselineSnapshot(options.baselineId) : findStoredBaseline(provider, options.model, adapter.surface));
@@ -233,7 +337,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
   if (shouldExecute('p0-native-route') || shouldExecute('p0-auth-shape')) try {
     const basicResult = await execute(adapter, adapter.basic(options.baseUrl, options.apiKey, options.model), options.signal);
     nativeResults.push(basicResult);
-    if (shouldExecute('p0-native-route')) protocol.push(basicEvidence(basicResult, provider, options.model));
+    if (shouldExecute('p0-native-route')) protocol.push(basicEvidence(basicResult, provider, options.model, provider === 'anthropic' && /openrouter\.ai/i.test(options.baseUrl)));
     if (shouldExecute('p0-auth-shape')) protocol.push({
         id: 'p0-auth-shape',
         title: '认证头与错误语义',
@@ -292,8 +396,13 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
     try {
       reasoningResult = await execute(adapter, adapter.reasoning(options.baseUrl, options.apiKey, options.model), options.signal);
       nativeResults.push(reasoningResult);
-      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type));
-      protocol.push({ id: 'p1-reasoning-config', title: '推理配置透传', status: reasoningResult.response.ok ? (hasReasoning ? 'pass' : 'fail') : routeStatus(reasoningResult.response), detail: hasReasoning ? '捕获到原生推理事件类型。' : reasoningResult.response.ok ? '响应成功但未捕获原生推理事件。' : reasoningResult.response.errorMessage || `HTTP ${reasoningResult.response.status}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
+      const reasoningTokens = reasoningTokenCount(reasoningResult);
+      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type)) || (reasoningTokens !== undefined && reasoningTokens > 0);
+      const reasoningStatus = !reasoningResult.response.ok
+        ? routeStatus(reasoningResult.response)
+        : hasReasoning ? 'pass' : 'unavailable';
+      const usageDetail = reasoningTokens === undefined ? '' : ` thoughts tokens=${reasoningTokens}.`;
+      protocol.push({ id: 'p1-reasoning-config', title: '推理配置透传', status: reasoningStatus, detail: hasReasoning ? `捕获到原生推理证据。${usageDetail}` : `响应成功但未暴露可验证的推理事件或 token usage。${usageDetail}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
     } catch { protocol.push(unavailableEvidence('p1-reasoning-config', '推理配置透传', '推理请求未能完成。')); }
   } else if (shouldExecute('p1-reasoning-config')) {
     protocol.push(unavailableEvidence('p1-reasoning-config', '推理配置透传', '当前原生适配器没有推理能力声明。'));
@@ -312,7 +421,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
           ? await execute(adapter, adapter.stateContinuation(options.baseUrl, options.apiKey, options.model, first, marker), options.signal)
           : undefined;
         if (continuation) nativeResults.push(continuation);
-        const passed = Boolean(first.response.ok && continuation?.response.ok && continuation.text.includes(marker));
+        const passed = Boolean(first.response.ok && continuation?.response.ok && containsFixtureText(continuation.text, marker));
         if (first.response.ok && continuation) recordScore('tools', passed ? 1 : 0, 'p1-state-continuity');
         protocol.push({
           id: 'p1-state-continuity',
@@ -375,7 +484,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
         protocol.push(unavailableEvidence('p1-signature-continuity', '思考签名连续性', '签名第二轮回传请求未能完成。'));
       }
     } else {
-      protocol.push({ id: 'p1-signature-continuity', title: '思考签名连续性', status: reasoningResult.response.ok ? 'fail' : routeStatus(reasoningResult.response), detail: reasoningResult.response.ok ? '原生 thinking 响应未提供可回传的 signature。' : '推理路由不可用，无法检查签名。', latencyMs: reasoningResult.response.latencyMs });
+      protocol.push({ id: 'p1-signature-continuity', title: '思考签名连续性', status: reasoningResult.response.ok ? (reasoningResult.thinkingText ? 'fail' : 'unavailable') : routeStatus(reasoningResult.response), detail: reasoningResult.response.ok ? (reasoningResult.thinkingText ? '原生 thinking 响应未提供可回传的 signature。' : '本次 adaptive thinking 未触发，无法检查 signature。') : '推理路由不可用，无法检查签名。', latencyMs: reasoningResult.response.latencyMs });
     }
   } else if (shouldExecute('p1-signature-continuity')) {
     protocol.push(unavailableEvidence('p1-signature-continuity', '思考签名连续性', '该检查仅适用于 Anthropic Messages thinking 协议。'));
@@ -516,7 +625,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
   const visibleProtocol = protocol.filter((item) => selectedProbeIds.has(item.id)).map((item) => ({
     ...item,
     disposition: routeFor(item.id).disposition,
-    countsTowardOfficialConclusion: routeFor(item.id).countsTowardOfficialConclusion,
+    countsTowardReferenceConclusion: routeFor(item.id).countsTowardReferenceConclusion,
   }));
   const coverage = {
     executed: visibleProtocol.filter((item) => item.status !== 'unavailable').length,
@@ -537,9 +646,23 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
     capabilities: comparedCapabilities,
     runtime: runtimeFrom(nativeResults),
     conclusion,
-    summary: baselineSnapshot
-      ? `已执行 ${coverage.executed}/${coverage.total} 项检查，并将 ${baselineSnapshot.source === 'official' ? '官方' : '用户提供的'}基线 ${baselineSnapshot.id} 用于能力差异比较。`
-      : `已执行 ${coverage.executed}/${coverage.total} 项浏览器协议检查；当前未加载基线快照，因此结论仅能作为证据不足。`,
+    summary: buildAuditSummary({
+      schemaVersion: '4.0',
+      target: { provider, model: options.model, baseUrl: options.baseUrl },
+      profile,
+      baselineId: baselineSnapshot?.id || options.baselineId,
+      protocol: visibleProtocol,
+      capabilities: comparedCapabilities,
+      runtime: runtimeFrom(nativeResults),
+      conclusion,
+      summary: '',
+      candidateDistances: [],
+      fixtureHashes: Object.fromEntries(suite.map((item) => [item.id, hashFixture(item.fixture)])),
+      coverage,
+      selectedProbeIds: suite.map((item) => item.id),
+      seed,
+      testedAt: new Date().toISOString(),
+    }),
     candidateDistances: [],
     fixtureHashes: Object.fromEntries(suite.map((item) => [item.id, hashFixture(item.fixture)])),
     coverage,

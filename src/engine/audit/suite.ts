@@ -1,6 +1,6 @@
 import { AuditProfile, ProbeDefinition } from '../../types/audit';
 
-const providers = ['openai', 'anthropic', 'gemini', 'xai'] as const;
+const providers = ['openai', 'anthropic', 'gemini', 'xai', 'openrouter'] as const;
 
 const probe = (id: string, layer: ProbeDefinition['layer'], title: string, domains: string[], fixture: string, scorer: string, maxInputTokens = 2_048, maxOutputTokens = 512): ProbeDefinition => ({
   id, layer, title, domains, applicableProviders: [...providers], fixture, scorer, maxInputTokens, maxOutputTokens, retries: 1,
@@ -43,17 +43,41 @@ export const BALANCED_SUITE: ProbeDefinition[] = [
 export const AUDIT_PRESETS: Record<AuditProfile, { label: string; description: string; probeIds: string[] }> = {
   quick: {
     label: '快速',
-    description: '基础连通、认证、严格 JSON 和工具结构，适合先确认接口形状。',
-    probeIds: ['p0-model-discovery', 'p0-native-route', 'p0-auth-shape', 'p0-strict-json'],
+    description: '基础连通、认证、流式事件、严格 JSON 与工具结构，适合先确认接口形状。',
+    probeIds: [
+      'p0-model-discovery',
+      'p0-native-route',
+      'p0-auth-shape',
+      'p0-stream-events',
+      'p0-strict-json',
+      'p0-tool-shape',
+    ],
   },
   balanced: {
-    label: '平衡',
-    description: '完整选择 24 项平衡档计划，暂不可用项会明确标注。',
-    probeIds: BALANCED_SUITE.map((item) => item.id),
+    label: '标准',
+    description: '标准平衡档，覆盖协议保真、状态连续性与核心代码逻辑。',
+    probeIds: [
+      'p0-model-discovery',
+      'p0-native-route',
+      'p0-auth-shape',
+      'p0-stream-events',
+      'p0-strict-json',
+      'p0-tool-shape',
+      'p0-invalid-parameter',
+      'p1-reasoning-config',
+      'p1-state-continuity',
+      'p1-tool-roundtrip',
+      'p1-signature-continuity',
+      'p1-cache-semantics',
+      'p2-constraint-json',
+      'p2-tool-planning',
+      'p2-code-repair-a',
+      'p2-code-repair-b',
+    ],
   },
   deep: {
-    label: '深度',
-    description: '选择完整 24 项计划，为后续长上下文、工具闭环和本地任务预留。',
+    label: '全量',
+    description: '全量 24 项深度审计，包含超长上下文针尖检索与多次运行质量样本。',
     probeIds: BALANCED_SUITE.map((item) => item.id),
   },
 };

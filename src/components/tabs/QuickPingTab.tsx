@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { parseRawKeysInput, runBatchKeyTestPool } from '../../engine/batchKeys/keyPoolTester';
+import { parseRawKeysInput, runBatchKeyTestPool, sniffKeyModels } from '../../engine/batchKeys/keyPoolTester';
 import { BatchKeySummary, KeyCheckResult } from '../../types/batchKeys';
 import {
   exportKeysToTxt,
@@ -35,9 +35,10 @@ import {
   FileText,
   Trash2,
   Sparkles,
-  Layers,
   X,
 } from 'lucide-react';
+
+export type AntiBanMode = 'safe' | 'balanced' | 'turbo' | 'custom';
 
 interface ProviderPreset {
   id: string;
@@ -49,14 +50,14 @@ interface ProviderPreset {
 
 const PROVIDER_PRESETS: ProviderPreset[] = [
   { id: 'custom', name: '中转站 / 代理 (智能自适应探针)', baseUrl: '', defaultModel: 'auto', category: '中转/自适应' },
-  { id: 'openai', name: 'OpenAI (官方/兼容端点)', baseUrl: 'https://api.openai.com/v1', defaultModel: 'gpt-4o-mini', category: '官方' },
-  { id: 'anthropic', name: 'Anthropic (Claude 官方)', baseUrl: 'https://api.anthropic.com/v1', defaultModel: 'claude-3-7-sonnet-20250219', category: '官方' },
-  { id: 'deepseek', name: 'DeepSeek (官方)', baseUrl: 'https://api.deepseek.com', defaultModel: 'deepseek-chat', category: '官方' },
-  { id: 'grok', name: 'xAI (Grok 官方)', baseUrl: 'https://api.x.ai/v1', defaultModel: 'grok-2-latest', category: '官方' },
-  { id: 'gemini', name: 'Google Gemini (官方)', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', defaultModel: 'gemini-2.0-flash', category: '官方' },
-  { id: 'siliconflow', name: '硅基流动 (SiliconFlow)', baseUrl: 'https://api.siliconflow.cn/v1', defaultModel: 'deepseek-ai/DeepSeek-V3', category: '国内' },
-  { id: 'openrouter', name: 'OpenRouter (全球聚合)', baseUrl: 'https://openrouter.ai/api/v1', defaultModel: 'openai/gpt-4o-mini', category: '聚合' },
-  { id: 'cerebras', name: 'Cerebras (超高速推理)', baseUrl: 'https://api.cerebras.ai/v1', defaultModel: 'llama3.1-70b', category: '聚合加速' },
+  { id: 'openai', name: 'OpenAI (官方/兼容端点)', baseUrl: 'https://api.openai.com/v1', defaultModel: 'auto', category: '官方' },
+  { id: 'anthropic', name: 'Anthropic (Claude 官方)', baseUrl: 'https://api.anthropic.com/v1', defaultModel: 'auto', category: '官方' },
+  { id: 'deepseek', name: 'DeepSeek (官方)', baseUrl: 'https://api.deepseek.com', defaultModel: 'auto', category: '官方' },
+  { id: 'grok', name: 'xAI (Grok 官方)', baseUrl: 'https://api.x.ai/v1', defaultModel: 'auto', category: '官方' },
+  { id: 'gemini', name: 'Google Gemini (官方)', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', defaultModel: 'auto', category: '官方' },
+  { id: 'siliconflow', name: '硅基流动 (SiliconFlow)', baseUrl: 'https://api.siliconflow.cn/v1', defaultModel: 'auto', category: '国内' },
+  { id: 'openrouter', name: 'OpenRouter (全球聚合)', baseUrl: 'https://openrouter.ai/api/v1', defaultModel: 'auto', category: '聚合' },
+  { id: 'cerebras', name: 'Cerebras (超高速推理)', baseUrl: 'https://api.cerebras.ai/v1', defaultModel: 'auto', category: '聚合加速' },
 ];
 
 type FilterTabId = 'active' | 'quota_exhausted' | 'rate_limited' | 'invalid' | 'duplicate';
@@ -166,10 +167,10 @@ export const QuickPingTab: React.FC = () => {
     return 5;
   });
 
-  const [antiBanMode, setAntiBanMode] = useState<'safe' | 'balanced' | 'turbo'>(() => {
+  const [antiBanMode, setAntiBanMode] = useState<AntiBanMode>(() => {
     try {
       const saved = localStorage.getItem('aqc_batch_antiban_mode');
-      if (saved === 'safe' || saved === 'balanced' || saved === 'turbo') return saved;
+      if (saved === 'safe' || saved === 'balanced' || saved === 'turbo' || saved === 'custom') return saved;
     } catch {}
     return 'balanced';
   });
@@ -198,19 +199,33 @@ export const QuickPingTab: React.FC = () => {
     return true;
   });
 
-  const [checkModels, setCheckModels] = useState<boolean>(() => {
+  // Model Probing & Picker State (in settings modal)
+  const [isProbingModels, setIsProbingModels] = useState<boolean>(false);
+  const [discoveredModels, setDiscoveredModels] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('aqc_batch_check_models');
-      if (saved !== null) return saved === 'true';
+      const saved = localStorage.getItem('aqc_batch_discovered_models');
+      if (saved) return JSON.parse(saved) as string[];
     } catch {}
-    return false;
+    return [];
   });
+  const [modelSearchQuery, setModelSearchQuery] = useState<string>('');
+  const [probeMessage, setProbeMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const [isDraggingFile, setIsDraggingFile] = useState<boolean>(false);
 
   const providerDropdownRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Slider Dragging State (controls CSS transition vs instant response)
+  const [isDraggingSlider, setIsDraggingSlider] = useState<boolean>(false);
+
+  // Direct State Setter for Strategy Presets (Hardware-accelerated CSS handles track animation)
+  const handleSelectAntiBanMode = (mode: AntiBanMode, targetConcurrency: number, targetDelay: number) => {
+    setAntiBanMode(mode);
+    setConcurrency(targetConcurrency);
+    setRequestDelayMs(targetDelay);
+  };
 
   // Raw Input & Testing State (with auto draft & summary restore)
   const [rawKeysText, setRawKeysText] = useState<string>(() => {
@@ -252,7 +267,6 @@ export const QuickPingTab: React.FC = () => {
       localStorage.setItem('aqc_batch_request_delay', String(requestDelayMs));
       localStorage.setItem('aqc_batch_stream_check', String(isStreamCheck));
       localStorage.setItem('aqc_batch_check_balance', String(checkBalance));
-      localStorage.setItem('aqc_batch_check_models', String(checkModels));
       localStorage.setItem('aqc_batch_provider_id', selectedProvider.id);
       if (summary) {
         localStorage.setItem('aqc_batch_last_summary', JSON.stringify(summary));
@@ -271,7 +285,6 @@ export const QuickPingTab: React.FC = () => {
     antiBanMode,
     requestDelayMs,
     checkBalance,
-    checkModels,
     selectedProvider.id,
     summary,
   ]);
@@ -364,6 +377,51 @@ export const QuickPingTab: React.FC = () => {
     }
   };
 
+  const handleProbeModels = async () => {
+    const { uniqueKeys } = parseRawKeysInput(rawKeysText);
+    if (uniqueKeys.length === 0) {
+      setProbeMessage({
+        type: 'error',
+        text: '请先在「API Key 列表」中粘贴至少 1 个待测试的 API Key，系统将使用该密钥向端点发起 /v1/models 探测。',
+      });
+      return;
+    }
+
+    const effectiveBaseUrl = selectedProvider.id === 'custom'
+      ? (customBaseUrl.trim() || 'https://api.openai.com/v1')
+      : selectedProvider.baseUrl;
+
+    const sampleKey = uniqueKeys[0];
+    setIsProbingModels(true);
+    setProbeMessage({ type: 'info', text: '正在向中转端点请求 /v1/models 获取可用模型列表...' });
+
+    try {
+      const res = await sniffKeyModels(effectiveBaseUrl, sampleKey);
+      if (res.models && res.models.length > 0) {
+        setDiscoveredModels(res.models);
+        try {
+          localStorage.setItem('aqc_batch_discovered_models', JSON.stringify(res.models));
+        } catch {}
+        setProbeMessage({
+          type: 'success',
+          text: `成功探测到 ${res.models.length} 个可用模型！可直接在下方模型列表中点击选用。`,
+        });
+      } else {
+        setProbeMessage({
+          type: 'error',
+          text: '未探测到可用模型列表。该中转站可能关闭了 /v1/models 接口，你可以直接在参数设置中手动指定模型名。',
+        });
+      }
+    } catch (err: unknown) {
+      setProbeMessage({
+        type: 'error',
+        text: `探测模型失败: ${err instanceof Error ? err.message : '网络连接异常'}`,
+      });
+    } finally {
+      setIsProbingModels(false);
+    }
+  };
+
   const handleStartTesting = async () => {
     const { uniqueKeys, duplicates } = parseRawKeysInput(rawKeysText);
     const totalCount = uniqueKeys.length + duplicates.length;
@@ -404,7 +462,6 @@ export const QuickPingTab: React.FC = () => {
         abortRef.current.signal,
         {
           checkBalance,
-          checkModels,
           providerId: selectedProvider.id,
           providerName: selectedProvider.name,
           requestDelayMs,
@@ -548,7 +605,7 @@ export const QuickPingTab: React.FC = () => {
                 </button>
               </div>
 
-              {/* Provider Combobox Dropdown with Official SVG Logos */}
+              {/* Provider Combobox Dropdown with Official SVG Logos & Silky Downward Grid Transition */}
               <div className="relative" ref={providerDropdownRef}>
                 <button
                   type="button"
@@ -559,44 +616,63 @@ export const QuickPingTab: React.FC = () => {
                     <ProviderIcon providerId={selectedProvider.id} className="w-5 h-5" />
                     <span className="font-semibold text-[#faf9f5]">{selectedProvider.name}</span>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-[#a09d96] transition-transform duration-200 ${showProviderDropdown ? 'rotate-180 text-[#cc785c]' : ''}`} />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      showProviderDropdown ? 'rotate-180 text-[#cc785c]' : 'text-[#a09d96]'
+                    }`}
+                  />
                 </button>
 
-                {showProviderDropdown && (
-                  <div className="absolute left-0 right-0 mt-2 rounded-xl border border-[#2e2b27] bg-[#181715] p-2.5 shadow-2xl z-50 max-h-80 overflow-y-auto space-y-2 animate-in fade-in duration-150">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="搜索提供商..."
-                        value={providerSearchQuery}
-                        onChange={(e) => setProviderSearchQuery(e.target.value)}
-                        className="w-full rounded-lg border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-[#6c6a64] focus:outline-none focus:border-[#cc785c] smooth-input"
-                      />
-                      <Search className="w-4 h-4 text-[#a09d96] absolute left-3 top-2.5" />
-                    </div>
+                {/* Silky Smooth Downward Grid Dropdown Menu (No Transform = Razor Sharp Text) */}
+                <div
+                  className={`absolute left-0 right-0 mt-2 rounded-xl border border-[#2e2b27] bg-[#181715] shadow-2xl shadow-black/60 overflow-hidden z-50 transition-[opacity,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    showProviderDropdown
+                      ? 'opacity-100 pointer-events-auto border-[#cc785c]/40 ring-1 ring-[#cc785c]/20'
+                      : 'opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      showProviderDropdown ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="p-2.5 max-h-80 overflow-y-auto space-y-2">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="搜索提供商..."
+                            value={providerSearchQuery}
+                            onChange={(e) => setProviderSearchQuery(e.target.value)}
+                            className="w-full rounded-lg border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-[#6c6a64] focus:outline-none focus:border-[#cc785c] smooth-input"
+                          />
+                          <Search className="w-4 h-4 text-[#a09d96] absolute left-3 top-2.5" />
+                        </div>
 
-                    <div className="space-y-1 pt-1">
-                      {filteredProviders.map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => handleSelectProvider(p)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm transition flex items-center justify-between cursor-pointer ${
-                            selectedProvider.id === p.id
-                              ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
-                              : 'text-[#faf9f5] hover:bg-[#252320] hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <ProviderIcon providerId={p.id} className="w-5 h-5 shrink-0" />
-                            <span className="font-medium">{p.name}</span>
-                          </div>
-                          <span className="text-xs font-mono opacity-80">{p.category}</span>
-                        </button>
-                      ))}
+                        <div className="space-y-1 pt-1">
+                          {filteredProviders.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => handleSelectProvider(p)}
+                              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm transition flex items-center justify-between cursor-pointer ${
+                                selectedProvider.id === p.id
+                                  ? 'bg-[#cc785c] text-white font-semibold shadow-sm'
+                                  : 'text-[#faf9f5] hover:bg-[#252320] hover:text-white'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <ProviderIcon providerId={p.id} className="w-5 h-5 shrink-0" />
+                                <span className="font-medium">{p.name}</span>
+                              </div>
+                              <span className="text-xs font-mono opacity-80">{p.category}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Custom Base URL input */}
@@ -814,7 +890,7 @@ export const QuickPingTab: React.FC = () => {
                   </button>
                 )}
 
-                {/* Export Dropdown Menu */}
+                {/* Export Dropdown Menu with Silky Downward Grid Transition */}
                 <div className="relative" ref={exportMenuRef}>
                   <button
                     type="button"
@@ -823,50 +899,68 @@ export const QuickPingTab: React.FC = () => {
                   >
                     <Download className="w-3.5 h-3.5 text-[#cc785c]" />
                     <span>导出报表</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-[#a09d96] transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                        showExportMenu ? 'rotate-180 text-[#cc785c]' : 'text-[#a09d96]'
+                      }`}
+                    />
                   </button>
 
-                  {showExportMenu && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-xl border border-[#2e2b27] bg-[#181715] p-1.5 shadow-2xl z-50 animate-in fade-in duration-150 space-y-0.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          exportKeysToTxt(getFilteredItems().map((i) => i.key), `api-keys-${activeFilterTab}`);
-                          setShowExportMenu(false);
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left text-[#faf9f5] hover:bg-[#252320] rounded-lg transition cursor-pointer"
-                      >
-                        <FileText className="w-4 h-4 text-[#cc785c] shrink-0" />
-                        <span>导出当前分类 Key (.txt)</span>
-                      </button>
-                      {summary && (
-                        <>
+                  <div
+                    className={`absolute right-0 mt-2 w-56 rounded-xl border border-[#2e2b27] bg-[#181715] shadow-2xl shadow-black/60 overflow-hidden z-50 transition-[opacity,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      showExportMenu
+                        ? 'opacity-100 pointer-events-auto border-[#cc785c]/40 ring-1 ring-[#cc785c]/20'
+                        : 'opacity-0 pointer-events-none'
+                    }`}
+                  >
+                    <div
+                      className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                        showExportMenu ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="p-1.5 space-y-0.5">
                           <button
                             type="button"
                             onClick={() => {
-                              exportResultsToCsv(summary.results, summary);
+                              exportKeysToTxt(getFilteredItems().map((i) => i.key), `api-keys-${activeFilterTab}`);
                               setShowExportMenu(false);
                             }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left text-[#faf9f5] hover:bg-[#252320] rounded-lg transition cursor-pointer"
                           >
-                            <FileSpreadsheet className="w-4 h-4 text-[#5db872] shrink-0" />
-                            <span>导出完整检测报表 (.csv)</span>
+                            <FileText className="w-4 h-4 text-[#cc785c] shrink-0" />
+                            <span>导出当前分类 Key (.txt)</span>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              exportResultsToJson(summary);
-                              setShowExportMenu(false);
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left text-[#faf9f5] hover:bg-[#252320] rounded-lg transition cursor-pointer"
-                          >
-                            <FileCode className="w-4 h-4 text-[#e8a55a] shrink-0" />
-                            <span>导出结构化数据 (.json)</span>
-                          </button>
-                        </>
-                      )}
+                          {summary && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  exportResultsToCsv(summary.results, summary);
+                                  setShowExportMenu(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left text-[#faf9f5] hover:bg-[#252320] rounded-lg transition cursor-pointer"
+                              >
+                                <FileSpreadsheet className="w-4 h-4 text-[#5db872] shrink-0" />
+                                <span>导出完整检测报表 (.csv)</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  exportResultsToJson(summary);
+                                  setShowExportMenu(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left text-[#faf9f5] hover:bg-[#252320] rounded-lg transition cursor-pointer"
+                              >
+                                <FileCode className="w-4 h-4 text-[#e8a55a] shrink-0" />
+                                <span>导出结构化数据 (.json)</span>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -962,29 +1056,6 @@ export const QuickPingTab: React.FC = () => {
                           </button>
                         </div>
                       </div>
-
-                      {/* Available models preview (if any) */}
-                      {'availableModels' in item && item.availableModels && item.availableModels.length > 0 && (
-                        <div className="pt-1.5 border-t border-[#2e2b27]/60 flex items-center gap-2 flex-wrap text-xs text-[#a09d96]">
-                          <span className="flex items-center gap-1 text-[#a09d96] font-medium">
-                            <Layers className="w-3 h-3 text-[#cc785c]" />
-                            <span>模型 ({item.availableModels.length}):</span>
-                          </span>
-                          {item.availableModels.slice(0, 5).map((m, mIdx) => (
-                            <span
-                              key={mIdx}
-                              className="px-1.5 py-0.5 rounded bg-[#252320] border border-[#2e2b27] text-[11px] font-mono text-[#d5d1c8]"
-                            >
-                              {m}
-                            </span>
-                          ))}
-                          {item.availableModels.length > 5 && (
-                            <span className="text-[11px] font-mono text-[#6c6a64]">
-                              +{item.availableModels.length - 5} 更多
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   ))
                 )}
@@ -1026,169 +1097,419 @@ export const QuickPingTab: React.FC = () => {
             </div>
 
             <div className="space-y-6">
-              {/* 1. Target Probe Model */}
-              <div className="space-y-2">
+              {/* 1. Target Probe Model & Sniffing Section */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-semibold text-[#faf9f5]">
-                    测试探针模型 (Target Model)
-                  </label>
-                  <span className="text-xs text-[#a09d96]">自适应探测或手动指定</span>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#faf9f5]">
+                      测试探针模型 (Target Model)
+                    </label>
+                    <p className="text-xs text-[#a09d96] mt-0.5">
+                      手动输入或点击探测中转站 /v1/models 开放的模型列表
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleProbeModels}
+                    disabled={isProbingModels}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#252320] hover:bg-[#2e2b27] border border-[#2e2b27] hover:border-[#cc785c]/40 text-xs font-semibold text-[#cc785c] transition smooth-btn shadow-sm cursor-pointer disabled:opacity-50"
+                    title="使用当前 Key 探测中转站 /v1/models 接口"
+                  >
+                    {isProbingModels ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>正在探测...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>探测可用模型</span>
+                      </>
+                    )}
+                  </button>
                 </div>
+
+                {/* Model Input */}
                 <input
                   type="text"
                   value={testModel}
                   onChange={(e) => setTestModel(e.target.value)}
-                  placeholder="auto / gpt-4o-mini / deepseek-chat"
+                  placeholder="auto (自适应探针) / 填入目标模型 ID"
                   className="w-full rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-2.5 text-sm text-[#faf9f5] focus:outline-none focus:border-[#cc785c] smooth-input font-mono shadow-inner"
                 />
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {[
-                    { id: 'auto', label: 'auto (自适应)' },
-                    { id: 'gpt-4o-mini', label: 'gpt-4o-mini' },
-                    { id: 'deepseek-chat', label: 'deepseek-chat' },
-                    { id: 'claude-3-7-sonnet-20250219', label: 'claude-3-7-sonnet' },
-                    { id: 'gemini-2.0-flash', label: 'gemini-2.0-flash' },
-                  ].map((chip) => (
+
+                {/* Probe Feedback Banner */}
+                {probeMessage && (
+                  <div
+                    className={`p-3 rounded-xl text-xs flex items-center justify-between gap-2 animate-in fade-in ${
+                      probeMessage.type === 'success'
+                        ? 'bg-[#5db872]/15 text-[#5db872] border border-[#5db872]/30'
+                        : probeMessage.type === 'error'
+                        ? 'bg-[#c64545]/15 text-[#c64545] border border-[#c64545]/30'
+                        : 'bg-[#252320] text-[#a09d96] border border-[#2e2b27]'
+                    }`}
+                  >
+                    <span>{probeMessage.text}</span>
                     <button
-                      key={chip.id}
                       type="button"
-                      onClick={() => setTestModel(chip.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-mono border transition cursor-pointer ${
-                        testModel === chip.id
-                          ? 'bg-[#cc785c] text-white border-[#cc785c] font-semibold shadow-sm'
-                          : 'bg-[#252320] text-[#a09d96] border-[#2e2b27] hover:text-[#faf9f5] hover:border-[#cc785c]/40'
-                      }`}
+                      onClick={() => setProbeMessage(null)}
+                      className="text-[#a09d96] hover:text-white shrink-0 cursor-pointer p-0.5"
                     >
-                      {chip.label}
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* Discovered Models In-Modal Selector */}
+                {discoveredModels.length > 0 ? (
+                  <div className="p-3.5 rounded-xl bg-[#141413] border border-[#2e2b27] space-y-2.5 animate-in fade-in">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-[#faf9f5]">
+                        已探测到 {discoveredModels.length} 个模型 (点击直接选用):
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setTestModel('auto')}
+                          className={`px-2 py-0.5 rounded text-xs font-mono border transition cursor-pointer ${
+                            testModel === 'auto'
+                              ? 'bg-[#cc785c] text-white border-[#cc785c] font-semibold shadow-sm'
+                              : 'bg-[#252320] text-[#a09d96] border-[#2e2b27] hover:text-[#faf9f5]'
+                          }`}
+                        >
+                          auto (自适应)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDiscoveredModels([])}
+                          className="text-xs text-[#a09d96] hover:text-[#c64545] cursor-pointer"
+                        >
+                          清空
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Filter search bar inside modal */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="过滤已发现模型（如 claude, gpt, deepseek, qwen...）"
+                        value={modelSearchQuery}
+                        onChange={(e) => setModelSearchQuery(e.target.value)}
+                        className="w-full rounded-lg border border-[#2e2b27] bg-[#181715] pl-8 pr-3 py-1.5 text-xs text-[#faf9f5] placeholder-[#6c6a64] focus:outline-none focus:border-[#cc785c] font-mono"
+                      />
+                      <Search className="w-3.5 h-3.5 text-[#a09d96] absolute left-2.5 top-2" />
+                    </div>
+
+                    {/* Scrollable Model Chips Grid */}
+                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
+                      {discoveredModels
+                        .filter((m) => !modelSearchQuery || m.toLowerCase().includes(modelSearchQuery.trim().toLowerCase()))
+                        .map((m) => (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => setTestModel(m)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-mono border transition cursor-pointer ${
+                              testModel === m
+                                ? 'bg-[#cc785c] text-white border-[#cc785c] font-semibold shadow-sm ring-1 ring-[#cc785c]/40'
+                                : 'bg-[#252320] text-[#a09d96] border-[#2e2b27] hover:text-[#faf9f5] hover:border-[#cc785c]/40'
+                            }`}
+                          >
+                            {m}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
-              {/* 2. Frequency & Anti-Ban Strategy */}
+              {/* 2. Frequency & Anti-Ban Strategy with Independent Sliding Indicator (Anti-Blur) */}
               <div className="space-y-3 pt-4 border-t border-[#2e2b27]">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-[#faf9f5]">
                     频率与防封策略
                   </label>
-                  <span className="text-xs font-mono text-[#cc785c] font-medium">
-                    {antiBanMode === 'safe'
-                      ? '安全防封 (2 线程 + 250ms 延时)'
-                      : antiBanMode === 'turbo'
-                      ? '极速清洗 (10+ 线程 + 0ms 延时)'
-                      : '标准平衡 (5 线程 + 50ms 延时)'}
+                  <span className="text-xs font-medium text-amber-400 tracking-normal select-none">
+                    {antiBanMode === 'safe' ? (
+                      <>安全防封 (<span className="font-mono">2</span> 线程 + <span className="font-mono">250ms</span> 延时)</>
+                    ) : antiBanMode === 'turbo' ? (
+                      <>极速清洗 (<span className="font-mono">10</span> 线程 + <span className="font-mono">0ms</span> 延时)</>
+                    ) : antiBanMode === 'custom' ? (
+                      <>自定义 (<span className="font-mono">{concurrency}</span> 线程 + <span className="font-mono">{requestDelayMs}ms</span> 延时)</>
+                    ) : (
+                      <>标准平衡 (<span className="font-mono">5</span> 线程 + <span className="font-mono">50ms</span> 延时)</>
+                    )}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAntiBanMode('safe');
-                      setConcurrency(2);
-                      setRequestDelayMs(250);
-                    }}
-                    className={`p-3.5 rounded-xl border transition text-left cursor-pointer ${
-                      antiBanMode === 'safe'
-                        ? 'bg-[#cc785c]/15 border-[#cc785c] ring-1 ring-[#cc785c]/30'
-                        : 'bg-[#141413] border-[#2e2b27] hover:bg-[#252320]'
-                    }`}
-                  >
-                    <div className="text-[#5db872] font-bold text-sm mb-1">安全防封</div>
-                    <div className="text-xs text-[#a09d96]">慢速温和 · 避开 WAF</div>
-                    <div className="text-xs text-[#6c6a64] font-mono mt-1">2 线程 · 250ms 延时</div>
-                  </button>
+                {/* Independent Sliding Indicator Grid Container */}
+                <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3 p-1.5 rounded-2xl bg-[#141413] border border-[#2e2b27] overflow-hidden [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
+                  {/* Independent Sliding Highlight Layer (No scale, pure position glide) */}
+                  {(() => {
+                    const activeIndex =
+                      antiBanMode === 'safe' ? 0 : antiBanMode === 'balanced' ? 1 : antiBanMode === 'turbo' ? 2 : -1;
+                    if (activeIndex === -1) return null;
+                    return (
+                      <div
+                        className="hidden sm:block absolute top-1.5 bottom-1.5 rounded-xl border border-[#cc785c]/80 bg-[#252320] shadow-[0_0_15px_rgba(204,120,92,0.12)] z-0 pointer-events-none transition-transform duration-250 ease-[cubic-bezier(0.4,0,0.2,1)] [transform:translateZ(0)] [backface-visibility:hidden]"
+                        style={{
+                          left: '6px',
+                          width: 'calc((100% - 12px - 24px) / 3)',
+                          transform: `translateX(calc(${activeIndex} * (100% + 12px))) translateZ(0)`,
+                        }}
+                      />
+                    );
+                  })()}
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAntiBanMode('balanced');
-                      setConcurrency(5);
-                      setRequestDelayMs(50);
-                    }}
-                    className={`p-3.5 rounded-xl border transition text-left cursor-pointer ${
-                      antiBanMode === 'balanced'
-                        ? 'bg-[#cc785c]/15 border-[#cc785c] ring-1 ring-[#cc785c]/30'
-                        : 'bg-[#141413] border-[#2e2b27] hover:bg-[#252320]'
-                    }`}
-                  >
-                    <div className="text-[#e8a55a] font-bold text-sm mb-1">标准平衡</div>
-                    <div className="text-xs text-[#a09d96]">默认推荐 · 速度与稳</div>
-                    <div className="text-xs text-[#6c6a64] font-mono mt-1">5 线程 · 50ms 延时</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAntiBanMode('turbo');
-                      setConcurrency(10);
-                      setRequestDelayMs(0);
-                    }}
-                    className={`p-3.5 rounded-xl border transition text-left cursor-pointer ${
-                      antiBanMode === 'turbo'
-                        ? 'bg-[#cc785c]/15 border-[#cc785c] ring-1 ring-[#cc785c]/30'
-                        : 'bg-[#141413] border-[#2e2b27] hover:bg-[#252320]'
-                    }`}
-                  >
-                    <div className="text-[#cc785c] font-bold text-sm mb-1">极速清洗</div>
-                    <div className="text-xs text-[#a09d96]">私有节点 · 满速狂飙</div>
-                    <div className="text-xs text-[#6c6a64] font-mono mt-1">10 线程 · 0ms 延时</div>
-                  </button>
+                  {[
+                    {
+                      id: 'safe' as AntiBanMode,
+                      title: '安全防封',
+                      desc: '慢速温和 · 避开 WAF',
+                      badge: '2 线程 · 250ms 延时',
+                      color: '#5db872',
+                      targetConc: 2,
+                      targetDelay: 250,
+                    },
+                    {
+                      id: 'balanced' as AntiBanMode,
+                      title: '标准平衡',
+                      desc: '默认推荐 · 速度与稳',
+                      badge: '5 线程 · 50ms 延时',
+                      color: '#e8a55a',
+                      targetConc: 5,
+                      targetDelay: 50,
+                    },
+                    {
+                      id: 'turbo' as AntiBanMode,
+                      title: '极速清洗',
+                      desc: '私有节点 · 满速狂飙',
+                      badge: '10 线程 · 0ms 延时',
+                      color: '#cc785c',
+                      targetConc: 10,
+                      targetDelay: 0,
+                    },
+                  ].map((preset) => {
+                    const isSelected = antiBanMode === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => handleSelectAntiBanMode(preset.id, preset.targetConc, preset.targetDelay)}
+                        className={`relative z-10 w-full p-3.5 rounded-xl text-left cursor-pointer transition-colors duration-200 focus:outline-none ${
+                          isSelected
+                            ? 'sm:bg-transparent bg-[#252320] border sm:border-transparent border-[#cc785c]'
+                            : 'bg-transparent border border-transparent hover:bg-[#1f1e1c]/60'
+                        }`}
+                      >
+                        {/* Static Crisp Text Layer (Absolute zero scale/transform jitter) */}
+                        <div className="relative z-10 select-none [transform:translateZ(0)] [backface-visibility:hidden]">
+                          <div className="flex items-center justify-between mb-1">
+                            <span
+                              className="font-bold text-sm transition-colors duration-200"
+                              style={{ color: isSelected ? preset.color : '#faf9f5' }}
+                            >
+                              {preset.title}
+                            </span>
+                            {isSelected && (
+                              <span
+                                className="w-2 h-2 rounded-full animate-pulse"
+                                style={{ backgroundColor: preset.color }}
+                              />
+                            )}
+                          </div>
+                          <div className="text-xs text-[#a09d96]">{preset.desc}</div>
+                          <div className="text-[11px] text-[#6c6a64] font-mono mt-1.5">{preset.badge}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* 3. Concurrency Thread Count (1-50) */}
+              {/* 3. Concurrency Thread Count (1-50, step=1) with Smooth Animated Visual Indicator */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-[#faf9f5]">
                     并发请求线程数
                   </label>
-                  <span className="text-sm font-mono text-[#cc785c] font-bold">
+                  <span className="text-xs font-mono font-semibold text-slate-100">
                     {concurrency} 线程
                   </span>
                 </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={50}
-                  value={concurrency}
-                  onChange={(e) => setConcurrency(Number(e.target.value))}
-                  className="w-full accent-[#cc785c] h-2 bg-[#252320] rounded-lg cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-[#a09d96] font-mono">
-                  <span>1 线程 (极度安全)</span>
-                  <span>10 线程 (标准并发)</span>
-                  <span>50 线程 (满速极速)</span>
+
+                {/* Custom Smooth Animated Slider Track */}
+                <div className="relative flex items-center h-6 w-full group select-none">
+                  {/* Base Background Track */}
+                  <div className="absolute inset-x-0 h-2 bg-[#252320] rounded-full overflow-hidden border border-[#2e2b27]" />
+
+                  {/* Active Colored Fill Bar */}
+                  <div
+                    className="absolute left-0 h-2 bg-gradient-to-r from-[#cc785c] to-amber-500 rounded-full pointer-events-none"
+                    style={{
+                      width: `${((concurrency - 1) / 49) * 100}%`,
+                      transition: isDraggingSlider ? 'none' : 'width 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  />
+
+                  {/* Animated Thumb Indicator */}
+                  <div
+                    className="absolute w-4 h-4 rounded-full bg-white border-2 border-[#cc785c] shadow-md pointer-events-none -translate-x-1/2"
+                    style={{
+                      left: `${((concurrency - 1) / 49) * 100}%`,
+                      transition: isDraggingSlider ? 'none' : 'left 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  />
+
+                  {/* Transparent Native Range Input Overlay for 100% Native Zero-Latency Drag */}
+                  <input
+                    type="range"
+                    min={1}
+                    max={50}
+                    step={1}
+                    value={concurrency}
+                    onPointerDown={() => setIsDraggingSlider(true)}
+                    onPointerUp={() => setIsDraggingSlider(false)}
+                    onTouchStart={() => setIsDraggingSlider(true)}
+                    onTouchEnd={() => setIsDraggingSlider(false)}
+                    onChange={(e) => {
+                      setConcurrency(Number(e.target.value));
+                      setAntiBanMode('custom');
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-xs select-none [transform:translateZ(0)] antialiased pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConcurrency(1);
+                      setAntiBanMode('custom');
+                    }}
+                    className="flex items-center gap-1.5 cursor-pointer text-left hover:text-[#faf9f5] transition-colors group"
+                  >
+                    <span className="font-mono font-semibold text-slate-200 group-hover:text-amber-400">1 线程</span>
+                    <span className="text-[#a09d96] text-[11px] group-hover:text-[#d4d1cb]">(极度安全)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConcurrency(10);
+                      setAntiBanMode('custom');
+                    }}
+                    className="flex items-center gap-1.5 cursor-pointer text-center hover:text-[#faf9f5] transition-colors group"
+                  >
+                    <span className="font-mono font-semibold text-slate-200 group-hover:text-amber-400">10 线程</span>
+                    <span className="text-[#a09d96] text-[11px] group-hover:text-[#d4d1cb]">(标准并发)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConcurrency(50);
+                      setAntiBanMode('custom');
+                    }}
+                    className="flex items-center gap-1.5 cursor-pointer text-right hover:text-[#faf9f5] transition-colors group"
+                  >
+                    <span className="font-mono font-semibold text-slate-200 group-hover:text-amber-400">50 线程</span>
+                    <span className="text-[#a09d96] text-[11px] group-hover:text-[#d4d1cb]">(满速极速)</span>
+                  </button>
                 </div>
               </div>
 
-              {/* 4. Request Delay & Jitter Delay */}
+              {/* 4. Request Delay & Jitter Delay (0-1000ms, step=5) with Smooth Animated Visual Indicator */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-[#faf9f5]">
                     请求防封间隔与随机抖动 (Jitter Delay)
                   </label>
-                  <span className="text-sm font-mono text-[#cc785c] font-bold">
+                  <span className="text-xs font-mono font-semibold text-slate-100">
                     {requestDelayMs} ms (±25% 随机)
                   </span>
                 </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={1000}
-                  step={25}
-                  value={requestDelayMs}
-                  onChange={(e) => setRequestDelayMs(Number(e.target.value))}
-                  className="w-full accent-[#cc785c] h-2 bg-[#252320] rounded-lg cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-[#a09d96] font-mono">
-                  <span>0 ms (无间隔)</span>
-                  <span>150 ms (防突发)</span>
-                  <span>1000 ms (人类节奏)</span>
+
+                {/* Custom Smooth Animated Slider Track */}
+                <div className="relative flex items-center h-6 w-full group select-none">
+                  {/* Base Background Track */}
+                  <div className="absolute inset-x-0 h-2 bg-[#252320] rounded-full overflow-hidden border border-[#2e2b27]" />
+
+                  {/* Active Colored Fill Bar */}
+                  <div
+                    className="absolute left-0 h-2 bg-gradient-to-r from-[#cc785c] to-amber-500 rounded-full pointer-events-none"
+                    style={{
+                      width: `${(requestDelayMs / 1000) * 100}%`,
+                      transition: isDraggingSlider ? 'none' : 'width 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  />
+
+                  {/* Animated Thumb Indicator */}
+                  <div
+                    className="absolute w-4 h-4 rounded-full bg-white border-2 border-[#cc785c] shadow-md pointer-events-none -translate-x-1/2"
+                    style={{
+                      left: `${(requestDelayMs / 1000) * 100}%`,
+                      transition: isDraggingSlider ? 'none' : 'left 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  />
+
+                  {/* Transparent Native Range Input Overlay for 100% Native Zero-Latency Drag */}
+                  <input
+                    type="range"
+                    min={0}
+                    max={1000}
+                    step={5}
+                    value={requestDelayMs}
+                    onPointerDown={() => setIsDraggingSlider(true)}
+                    onPointerUp={() => setIsDraggingSlider(false)}
+                    onTouchStart={() => setIsDraggingSlider(true)}
+                    onTouchEnd={() => setIsDraggingSlider(false)}
+                    onChange={(e) => {
+                      setRequestDelayMs(Number(e.target.value));
+                      setAntiBanMode('custom');
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-xs select-none [transform:translateZ(0)] antialiased pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequestDelayMs(0);
+                      setAntiBanMode('custom');
+                    }}
+                    className="flex items-center gap-1.5 cursor-pointer text-left hover:text-[#faf9f5] transition-colors group"
+                  >
+                    <span className="font-mono font-semibold text-slate-200 group-hover:text-amber-400">0 ms</span>
+                    <span className="text-[#a09d96] text-[11px] group-hover:text-[#d4d1cb]">(无间隔)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequestDelayMs(150);
+                      setAntiBanMode('custom');
+                    }}
+                    className="flex items-center gap-1.5 cursor-pointer text-center hover:text-[#faf9f5] transition-colors group"
+                  >
+                    <span className="font-mono font-semibold text-slate-200 group-hover:text-amber-400">150 ms</span>
+                    <span className="text-[#a09d96] text-[11px] group-hover:text-[#d4d1cb]">(防突发)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequestDelayMs(1000);
+                      setAntiBanMode('custom');
+                    }}
+                    className="flex items-center gap-1.5 cursor-pointer text-right hover:text-[#faf9f5] transition-colors group"
+                  >
+                    <span className="font-mono font-semibold text-slate-200 group-hover:text-amber-400">1000 ms</span>
+                    <span className="text-[#a09d96] text-[11px] group-hover:text-[#d4d1cb]">(人类节奏)</span>
+                  </button>
                 </div>
               </div>
 
-              {/* 5. Feature Toggles (Stream Check, Quota Sniff, Model Discovery) */}
+              {/* 5. Feature Toggles (Stream Check, Quota Sniff) */}
               <div className="pt-4 border-t border-[#2e2b27] space-y-4">
                 {/* Stream Check */}
                 <div className="flex items-center justify-between gap-4 p-3.5 rounded-xl bg-[#141413] border border-[#2e2b27]">
@@ -1227,27 +1548,6 @@ export const QuickPingTab: React.FC = () => {
                     <span
                       className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
                         checkBalance ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Sniff Models */}
-                <div className="flex items-center justify-between gap-4 p-3.5 rounded-xl bg-[#141413] border border-[#2e2b27]">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-semibold text-[#faf9f5]">嗅探可用模型列表</p>
-                    <p className="text-xs text-[#a09d96]">穿透探测 /v1/models 接口获取该 Key 授权的所有可用模型清单</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCheckModels(!checkModels)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      checkModels ? 'bg-[#cc785c]' : 'bg-[#252320]'
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        checkModels ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
                   </button>

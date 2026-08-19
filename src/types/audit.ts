@@ -1,5 +1,5 @@
-export type AuditProvider = 'openai' | 'anthropic' | 'gemini' | 'xai';
-export type AuditSurface = 'responses' | 'messages' | 'interactions';
+export type AuditProvider = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'openrouter';
+export type AuditSurface = 'responses' | 'messages' | 'interactions' | 'chat_completions';
 export type EvidenceStatus = 'pass' | 'fail' | 'unavailable';
 export type AuditConclusion = 'consistent' | 'suspect_downgraded' | 'inconclusive';
 export type AuditProfile = 'quick' | 'balanced' | 'deep';
@@ -37,7 +37,7 @@ export interface ProtocolEvidence {
   latencyMs?: number;
   rawEventTypes?: string[];
   disposition?: ProbeDisposition;
-  countsTowardOfficialConclusion?: boolean;
+  countsTowardReferenceConclusion?: boolean;
 }
 
 export interface CapabilityMetric {
@@ -58,6 +58,10 @@ export interface RuntimeQuality {
   p95LatencyMs?: number;
   acceptedInputTokens?: number;
   usageConsistent?: boolean;
+  totalDurationMs?: number;
+  totalPromptTokens?: number;
+  totalCompletionTokens?: number;
+  totalTokens?: number;
 }
 
 export interface AuditReportV4 {
@@ -92,6 +96,6 @@ export interface BaselineSnapshot {
   capabilityDistributions: Record<CapabilityMetric['domain'], number[]>;
   runtime: { p50LatencyMs?: number; p95LatencyMs?: number; successRate: number };
   estimatedCostUsd: number;
-  source: 'official' | 'user' | 'unknown';
+  source: 'official' | 'reference' | 'user' | 'unknown';
   coverage: { executed: number; total: number; unavailable: number };
 }

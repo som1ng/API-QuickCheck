@@ -1,55 +1,191 @@
 ---
-title: Anthropic Claude 鉴别算法
+title: Anthropic Claude 5 鉴别算法
 category: algorithms
 categoryTitle: 鉴别算法
-order: 2
-subtitle: 以 Messages API、adaptive thinking、工具/缓存连续性和差分能力基线评估 Claude Fable 5、Opus 5、Sonnet 5。
+order: 4
+subtitle: Messages envelope、adaptive thinking 的 signature 回传、SSE 事件顺序，以及 tool_use_id 字节级闭环。
 ---
 
-## 1. 目标与前提
+## 1. 目标型号
 
-当前优先目标是 `claude-fable-5`、`claude-opus-5`、`claude-sonnet-5`。Fable 5 是广泛可用的最高能力型号；Mythos 5 仅限受邀计划，不能在没有该计划官方基线时作型号结论。
+Claude 5 三个 ID 共用 Messages surface，思考控件声明为 `adaptive_thinking` + `effort`，窗口 1M / 最大输出 128k，prompt cache 和 stateful conversation 均为 supported。
 
-Claude 5 系列使用 **adaptive thinking**。对于 Fable 5、Opus 5、Sonnet 5，旧式 `thinking: { type: "enabled", budget_tokens: N }` 不可作为探针；它会导致 400，而不是证明目标端点降级。
-
-## 2. Claude 原生协议探针
-
-使用 `/v1/messages` 与 `anthropic-version`，而不是仅使用 OpenAI 兼容端点。每项记录请求、SSE 原始事件、响应头与错误体。
-
-| 探针 | 验证内容 | 失败含义 |
+| 型号 ID | 档位 | 审计时不要做的事 |
 | :--- | :--- | :--- |
-| Adaptive thinking | `thinking: {type:"adaptive"}` 与 `output_config.effort` 的接受和语义 | 可能是旧模型、兼容层或参数未透传 |
-| 工具事件 | `tool_use`、`input_json_delta`、工具回传后的下一轮行为 | 工具协议损耗，不直接证明换模型 |
-| 思考签名连续性 | 将原样保留的 thinking block 与 opaque `signature` 回传下一轮 | 签名/会话被网关破坏；不是公钥身份验真 |
-| Prompt cache | 受支持的 cache control 与 usage 的缓存字段、跨轮一致性 | 缓存不可用、服务层限制或转换损耗 |
-| 模型元数据 | `/v1/models` 的 ID、能力和上下文声明 | 仅为声明证据，不能单独认证 |
+| `claude-fable-5` | 叙事与长程建模旗舰 | 不要用代码修复单项去给它打「假货」；参考套件上它在代码域呈领域特化 |
+| `claude-opus-5` | 重型工程与科研 | 不要拿 Sonnet 的 TTFT 当 Opus 的降级证据 |
+| `claude-sonnet-5` | 高能效主力 | 不要因为比 Opus 快就推断「一定被换成小模型」 |
 
-> `signature` 是服务端用于验证回传 thinking block 的不透明值。审计器不得解析、伪造或把它的存在等同于“官方身份已验证”。
+认证头与 OpenAI 不同：`x-api-key` + `anthropic-version: 2023-06-01`。只转了 Bearer、没改版本头的网关，P0 会先在认证形状上失败。
 
-## 3. 能力一致性实验
+---
 
-对每个声明型号与同日官方基线做成对测试，至少覆盖：
+## 2. P0：Messages envelope 与 SSE
 
-- 动态工具链：模型必须选择工具、参数通过 schema、消费工具结果并修正最终答案；
-- 代码修复：在固定小型仓库中提交补丁并通过隐藏测试；
-- 长上下文：多位置、多轮 needle 检索与冲突消解，长度不超过已声明上限；
-- 图像/文档：OCR、图表字段提取与跨模态约束；
-- 长程任务：由审计器实际提供文件、工具和检查点；仅要求模型“先规划”不构成 Agent 能力证据。
+连通体：
 
-每个任务随机化内容与工具结果，并与 Fable、Opus、Sonnet 候选基线分别比较。报告的是候选分布与置信区间，例如“更接近 Sonnet 5 基线”，而不是单题判定。
-
-## 4. 推荐结论
-
-```text
-声明：claude-fable-5
-协议保真：Messages / adaptive thinking / 工具回传通过
-能力一致性：与 Fable 5 官方基线相比，代码任务 -18pp（95% CI: -27, -8）
-运行质量：1M 上下文实测未覆盖，结论不足证据
-结论：疑似能力降级；不能仅凭 signature 确认来源
+```json
+{
+  "model": "claude-sonnet-5",
+  "max_tokens": 128,
+  "messages": [{ "role": "user", "content": "Return exactly: audit-ready." }]
+}
 ```
 
-## 5. 官方依据
+`validateAnthropicMessage` 检查：
 
-- [Claude 模型总览](https://docs.anthropic.com/en/docs/about-claude/models/overview)
-- [Thinking 与 signature 处理](https://platform.claude.com/docs/en/build-with-claude/thinking)
-- [从手动 thinking 迁移到 adaptive thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
+- `id` 以 `msg_` 开头（OpenRouter 通道放宽前缀）
+- `type === "message"`，`role === "assistant"`
+- `model` 匹配请求
+- `content` 为数组
+- `stop_reason` ∈ `end_turn` / `max_tokens` / `stop_sequence` / `tool_use` / `null`
+- `usage.input_tokens` / `usage.output_tokens` 为非负整数
+
+流式是 Claude 中转最容易露馅的一层。合法顺序：
+
+```text
+message_start → content_block_start → content_block_delta → message_stop
+```
+
+四类事件都要出现，且下标单调。常见作弊/损坏：
+
+- 把完整 JSON 缓冲完再伪装成一条 SSE
+- 丢掉 `content_block_start`，只推 delta
+- 把 Anthropic 事件翻译成 OpenAI `data: {"choices":[{"delta":...}]}` 却仍声称原生 Messages
+
+网页引擎按事件名做包含与顺序检查，不看文风。
+
+---
+
+## 3. P0 / P2：结构化输出
+
+Claude 5 走 `output_config.format`，不是 `response_format`：
+
+```json
+{
+  "output_config": {
+    "format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": { "status": { "type": "string", "enum": ["ok"] } },
+        "required": ["status"],
+        "additionalProperties": false
+      }
+    }
+  }
+}
+```
+
+解析的是 `content[]` 里 `type === "text"` 的拼接结果。模型若把 JSON 包进 thinking 块而不在 text 块里给出，P0 会失败。协议探针不要开高 effort，免得 thinking 把 `max_tokens` 吃光。
+
+---
+
+## 4. P1：Adaptive Thinking 与 signature
+
+Claude 5 的思考不是可选的「让模型写步骤」，而是带服务端签名的 content block。
+
+第一轮推理请求：
+
+```json
+{
+  "thinking": { "type": "adaptive" },
+  "output_config": { "effort": "high" },
+  "messages": [{
+    "role": "user",
+    "content": "Solve this multi-step arithmetic constraint and return only the final integer: ((19 * 23) + (17 * 11)) - 29."
+  }]
+}
+```
+
+解析器在 `content[]` 里找 `type === "thinking"`，抽出 `thinking` 文本和 `signature`。网页 `p1-reasoning-config` **只对 Anthropic 计正式分**：有 thinking 事件或可验证签名即 PASS；响应成功但既没有 thinking 块也没有签名，若声明要求思考，记 FAIL，否则 `unavailable`。
+
+第二轮必须把同一对 `(thinking, signature)` 原样塞回 assistant content，再问后续问题：
+
+```json
+{
+  "role": "assistant",
+  "content": [
+    { "type": "thinking", "thinking": "<原文>", "signature": "<原文>" },
+    { "type": "text", "text": "595" }
+  ]
+}
+```
+
+```mermaid
+sequenceDiagram
+    participant A as 审计器
+    participant C as Messages 端点
+    A->>C: thinking.type = adaptive
+    C-->>A: content.thinking + signature
+    A->>C: 原样回传 thinking 块后追问 +10
+    C-->>A: 200 且继续作答 → signature 被接受
+```
+
+中转一旦重写、截断或伪造 `signature`，官方端会 400。廉价模型不可能签发合法思考签名。反过来：第一轮没触发 adaptive thinking（空 thinking），检查记 `unavailable`，不要写成「不会思考所以是假的」——题目太短时官方也会跳过 thinking 块。
+
+---
+
+## 5. P1：tool_use 闭环与 cache
+
+工具声明用 `input_schema`，并用 `tool_choice` 钉死函数名，减少模型直接口算：
+
+```json
+{
+  "tools": [{
+    "name": "audit_sum",
+    "input_schema": {
+      "type": "object",
+      "properties": { "a": { "type": "integer" }, "b": { "type": "integer" } },
+      "required": ["a", "b"],
+      "additionalProperties": false
+    }
+  }],
+  "tool_choice": { "type": "tool", "name": "audit_sum" }
+}
+```
+
+第一轮 `content[]` 中 `type === "tool_use"`，读取 `id`、`name`、`input`。第二轮：
+
+```json
+{
+  "role": "user",
+  "content": [{
+    "type": "tool_result",
+    "tool_use_id": "<第一轮 id 原样>",
+    "content": "42"
+  }]
+}
+```
+
+`tool_use_id` 必须与第一轮 `id` **字节一致**。这是和 Gemini 最大的协议差：Gemini 按 function 名关联，Claude / OpenAI 按 ID 关联。网关如果按 OpenAI 的 `tool_call_id` 字段名转发却没映射到 `tool_use_id`，第二轮会直接被官方拒绝。
+
+跨轮状态不靠 `previous_response_id`，而是客户端回放 `assistant` content 原数组，再追加新的 user 消息问 marker。
+
+缓存：user content 里一段超长 `cache_control: { type: "ephemeral" }` 前缀打两轮，读 `usage.cache_read_input_tokens`。第二次应上升。字段缺失记 `unavailable`。
+
+---
+
+## 6. P2 代码域：Fable 不能当假货证据
+
+三款在 OpenRouter 官方源上跑同一套 6 项参考夹具（envelope、JSON、工具闭环、reasoning 文本、算术修复、集合修复）时：
+
+| 型号 | 登记符合率 | 说明 |
+| :--- | :--- | :--- |
+| Claude Opus 5 | 6/6 | 代码两题沙箱断言通过 |
+| Claude Sonnet 5 | 6/6 | 同上 |
+| Claude Fable 5 | 4/6 | 协议与工具通过；代码修复呈创意特化，不作为「被换成小模型」的充分统计 |
+
+清单写得很死：不用更多难题给模型排名；Fable 代码失败要记在 code 域，不要单独升级成整站 `suspect_downgraded`。降级结论仍然需要两个独立能力域的稳定差距。
+
+针尖：网页 64K 三位置。参考侧对 Claude 5 有过 128K 加测记录，属于独立 evidence。没有出现可复现的 P0/P1 差距时，不为 Claude/Grok 追加极限长上下文。
+
+---
+
+## 7. 中转对照时先看这几处
+
+1. 头是不是 `x-api-key` + `anthropic-version`。只接受 Bearer 的「Claude 兼容」往往是 Chat Completions 套壳。
+2. SSE 四事件顺序。这比看回复文风便宜且硬。
+3. thinking `signature` 能否原样过第二轮。丢签名几乎可以确定网关动过 thinking 块。
+4. `tool_use_id` 有没有在翻译成 OpenAI 再翻译回来的过程中被换掉。
+5. `msg_` 前缀在 OpenRouter 上会放宽；直连 Anthropic 不放宽。surface 写错会误报 envelope。

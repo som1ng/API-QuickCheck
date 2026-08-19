@@ -3,18 +3,20 @@ import assert from 'node:assert/strict';
 import { BALANCED_SUITE, hashFixture, selectSuite } from '../src/engine/audit/suite';
 import { bootstrapDifference, determineConclusion } from '../src/engine/audit/statistics';
 import { CapabilityMetric } from '../src/types/audit';
-import { validateAnthropicMessage, validateChatCompletionEnvelope, validateResponsesEnvelope } from '../src/engine/audit/protocolValidators';
+import { validateAnthropicMessage, validateChatCompletionEnvelope, validateGeminiGenerateContent, validateResponsesEnvelope } from '../src/engine/audit/protocolValidators';
 import { createCodeRepairFixture, createNeedleFixture, scoreCodeRepairResponse, scoreNeedleResponse, summarizeRepeatSamples } from '../src/engine/audit/localFixtures';
 import { PROVIDER_ADAPTERS } from '../src/engine/audit/providerAdapters';
 import { validateBaselineSnapshot } from '../src/engine/audit/baseline';
 import { readSSEEvents } from '../src/engine/transport/sseReader';
-import { validateStreamSequence } from '../src/engine/audit/runner';
+import { containsFixtureText, runtimeFrom, validateStreamSequence } from '../src/engine/audit/runner';
 import { getModelClaims, getProbeRoute } from '../src/engine/audit/capabilityRouting';
+import { assessAuditReport } from '../src/engine/audit/reportSummary';
 
 test('balanced audit suite contains the planned 24 logical cases', () => {
   assert.equal(BALANCED_SUITE.length, 24);
-  assert.equal(selectSuite('quick').length, 4);
-  assert.equal(selectSuite('balanced').length, 24);
+  assert.equal(selectSuite('quick').length, 6);
+  assert.equal(selectSuite('balanced').length, 16);
+  assert.equal(selectSuite('deep').length, 24);
   assert.deepEqual(selectSuite('quick', ['p2-code-repair-a', 'p0-native-route']).map((item) => item.id), ['p0-native-route', 'p2-code-repair-a']);
 });
 
@@ -67,6 +69,12 @@ test('protocol validators distinguish standard envelopes from relayed field drif
   }, 'gemini-3.7-flash', false);
   assert.equal(chat.pass, true);
 
+  const gemini = validateGeminiGenerateContent({
+    candidates: [{ content: { role: 'model', parts: [{ text: 'audit-ready.' }] }, finishReason: 'STOP' }],
+    usageMetadata: { promptTokenCount: 2, candidatesTokenCount: 1, totalTokenCount: 3 },
+  }, 'gemini-3.7-flash');
+  assert.equal(gemini.pass, true);
+
   const anthropic = validateAnthropicMessage({
     id: 'msg_test',
     type: 'message',
@@ -77,6 +85,15 @@ test('protocol validators distinguish standard envelopes from relayed field drif
     usage: { input_tokens: 2, output_tokens: 4 },
   }, 'claude-sonnet-5');
   assert.equal(anthropic.pass, true);
+  assert.equal(validateAnthropicMessage({
+    id: 'gen-relay',
+    type: 'message',
+    role: 'assistant',
+    model: 'claude-sonnet-5',
+    content: [{ type: 'text', text: 'ok' }],
+    stop_reason: 'end_turn',
+    usage: { input_tokens: 2, output_tokens: 1 },
+  }, 'claude-sonnet-5', false).pass, true);
 
   const drifted = validateChatCompletionEnvelope({
     id: 'uuid',
@@ -101,6 +118,7 @@ test('local needle fixtures are deterministic and score only the expected marker
 test('code repair fixtures use deterministic hidden assertions', () => {
   const fixture = createCodeRepairFixture('arithmetic');
   assert.equal(scoreCodeRepairResponse(`${fixture.expectedTokens[0]}\n${fixture.expectedTokens[1]}`, fixture).passed, true);
+  assert.equal(scoreCodeRepairResponse('function totalWithTax(price, taxRate) { return price + price * taxRate; }\nmodule.exports = { totalWithTax };', fixture).passed, true);
   assert.equal(scoreCodeRepairResponse('return price + taxRate;', fixture).passed, false);
 });
 
@@ -161,6 +179,53 @@ test('provider adapters expose state and cache probe requests with usage parsing
   assert.equal(getProbeRoute('openai', 'gpt-5.6-sol', 'p2-code-repair-a').disposition, 'standard_benchmark');
 });
 
+test('openrouter adapter uses Chat Completions and parses tool calls', () => {
+  const request = PROVIDER_ADAPTERS.openrouter.tool?.('https://openrouter.ai/api/v1', 'key', 'openai/test');
+  assert.equal(request?.url, 'https://openrouter.ai/api/v1/chat/completions');
+  assert.equal(request?.body.max_tokens, 256);
+  const result = PROVIDER_ADAPTERS.openrouter.parse({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    data: { choices: [{ message: { role: 'assistant', tool_calls: [{ id: 'call_123', function: { name: 'audit_sum', arguments: '{"a":19,"b":23}' } }] } }] },
+    rawText: '',
+    latencyMs: 5,
+    headers: new Headers(),
+  });
+  assert.deepEqual(result.toolCall, { id: 'call_123', name: 'audit_sum', arguments: { a: 19, b: 23 } });
+  assert.equal(getProbeRoute('openrouter', 'openai/test', 'p2-code-repair-a').disposition, 'standard_benchmark');
+  assert.equal(getProbeRoute('anthropic', 'anthropic/claude-fable-5', 'p1-signature-continuity').disposition, 'standard_benchmark');
+});
+
+test('gemini adapter parses native generateContent usage and finish reason', () => {
+  const result = PROVIDER_ADAPTERS.gemini.parse({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    data: {
+      candidates: [{ content: { role: 'model', parts: [{ text: 'audit-ready.' }] }, finishReason: 'STOP' }],
+      usageMetadata: { promptTokenCount: 7, candidatesTokenCount: 3, totalTokenCount: 10, thoughtsTokenCount: 5 },
+    },
+    rawText: '',
+    latencyMs: 5,
+    headers: new Headers(),
+  });
+  assert.equal(result.finishReason, 'STOP');
+  assert.equal(result.usage?.thoughtsTokenCount, 5);
+  assert.equal(result.text, 'audit-ready.');
+});
+
+test('anthropic tool probe forces the deterministic fixture tool', () => {
+  const request = PROVIDER_ADAPTERS.anthropic.tool?.('https://openrouter.ai/api/v1', 'key', 'claude-test');
+  assert.deepEqual(request?.body.tool_choice, { type: 'tool', name: 'audit_sum' });
+});
+
+test('anthropic adapter exposes native structured output format', () => {
+  const request = PROVIDER_ADAPTERS.anthropic.strictJson?.('https://openrouter.ai/api/v1', 'key', 'claude-test');
+  const outputConfig = request?.body.output_config as { format?: { type?: string } };
+  assert.equal(outputConfig.format?.type, 'json_schema');
+});
+
 test('anthropic adapter builds the standard Messages endpoint from a root URL', () => {
   const basic = PROVIDER_ADAPTERS.anthropic.basic;
   assert.equal(basic('https://relay.example', 'key', 'claude-test').url, 'https://relay.example/v1/messages');
@@ -187,6 +252,7 @@ test('baseline validation rejects malformed capability distributions', () => {
     coverage: { executed: 2, total: 2, unavailable: 0 },
   };
   assert.equal(validateBaselineSnapshot(valid), true);
+  assert.equal(validateBaselineSnapshot({ ...valid, source: 'reference' }), true);
   assert.equal(validateBaselineSnapshot({ ...valid, capabilityDistributions: { tools: ['0.9'] } }), false);
 });
 
@@ -206,12 +272,18 @@ test('SSE wire reader preserves event names and sequence validation rejects miss
   assert.equal(validateStreamSequence('openai', ['response.created', 'response.output_text.delta']).pass, false);
 });
 
+test('fixture text validation ignores harmless trailing punctuation', () => {
+  assert.equal(containsFixtureText('audit-ready', 'audit-ready.'), true);
+  assert.equal(containsFixtureText('audit-ready!', 'audit-ready.'), true);
+  assert.equal(containsFixtureText('not-ready', 'audit-ready.'), false);
+});
+
 test('official claims route supported, unknown, and unsupported probes separately', () => {
   assert.equal(getModelClaims('gemini', 'gemini-3.7-flash')?.claims.contextWindowTokens, 1048576);
   assert.deepEqual(getProbeRoute('gemini', 'gemini-3.7-flash', 'p2-context-start'), {
     state: 'supported',
     disposition: 'standard_benchmark',
-    countsTowardOfficialConclusion: true,
+     countsTowardReferenceConclusion: true,
     reason: '官方能力声明满足探针要求。',
   });
   assert.equal(getProbeRoute('gemini', 'gemini-3.7-flash', 'p0-stream-events').disposition, 'exploratory_test');
@@ -219,3 +291,88 @@ test('official claims route supported, unknown, and unsupported probes separatel
   assert.equal(getProbeRoute('openai', 'unknown-model', 'p0-native-route').disposition, 'exploratory_test');
   assert.equal(getProbeRoute('openai', 'unknown-model', 'p2-context-start').disposition, 'not_claimed');
 });
+
+test('audit report distinguishes protocol evidence from fidelity conclusions', () => {
+  const base = {
+    schemaVersion: '4.0' as const,
+    target: { provider: 'openrouter' as const, model: 'test-model', baseUrl: 'https://relay.example/v1' },
+    profile: 'quick' as const,
+    capabilities: [],
+    runtime: { attempts: 1, successRate: 1 },
+    candidateDistances: [],
+    fixtureHashes: {},
+    coverage: { executed: 1, total: 2, unavailable: 1 },
+    selectedProbeIds: ['p0-native-route', 'p0-strict-json'],
+    seed: 'test',
+    testedAt: '2026-08-18T00:00:00.000Z',
+  };
+
+  const noBaseline = assessAuditReport({
+    ...base,
+    protocol: [
+      { id: 'p0-native-route', title: 'Native route', status: 'pass', detail: '' },
+      { id: 'p0-strict-json', title: 'Strict JSON', status: 'unavailable', detail: '' },
+    ],
+    conclusion: 'inconclusive',
+    summary: '',
+  });
+  assert.equal(noBaseline.title, '部分协议探针通过 (1/2 项)');
+  assert.equal(noBaseline.complianceRate, 50);
+
+  const withFailure = assessAuditReport({
+    ...base,
+    baselineId: 'reference-test',
+    protocol: [
+      { id: 'p0-native-route', title: 'Native route', status: 'pass', detail: '' },
+      { id: 'p0-strict-json', title: 'Strict JSON', status: 'fail', detail: '' },
+    ],
+    conclusion: 'inconclusive',
+    summary: '',
+  });
+  assert.equal(withFailure.title, '发现协议或能力异常');
+  assert.equal(withFailure.complianceRate, 50);
+});
+
+test('runtimeFrom computes total duration, percentiles, and multi-format token statistics', () => {
+  const dummyHeaders = new Headers();
+  const results = [
+    {
+      response: { ok: true, status: 200, statusText: 'OK', data: {}, rawText: '', latencyMs: 150, headers: dummyHeaders },
+      text: 'resp1',
+      eventTypes: ['message'],
+      usage: { prompt_tokens: 100, completion_tokens: 50, total_tokens: 150 },
+      toolCalled: false,
+    },
+    {
+      response: { ok: true, status: 200, statusText: 'OK', data: {}, rawText: '', latencyMs: 350, headers: dummyHeaders },
+      text: 'resp2',
+      eventTypes: ['message'],
+      usage: { input_tokens: 200, output_tokens: 80 },
+      toolCalled: false,
+    },
+    {
+      response: { ok: true, status: 200, statusText: 'OK', data: {}, rawText: '', latencyMs: 500, headers: dummyHeaders },
+      text: 'resp3',
+      eventTypes: ['message'],
+      usage: { promptTokenCount: 300, candidatesTokenCount: 120, totalTokenCount: 420 },
+      toolCalled: false,
+    },
+    {
+      response: { ok: false, status: 500, statusText: 'Error', data: {}, rawText: '', latencyMs: 200, headers: dummyHeaders },
+      text: '',
+      eventTypes: [],
+      toolCalled: false,
+    },
+  ];
+
+  const quality = runtimeFrom(results);
+  assert.equal(quality.attempts, 4);
+  assert.equal(quality.successRate, 0.75);
+  assert.equal(quality.totalDurationMs, 1200); // 150 + 350 + 500 + 200
+  assert.equal(quality.totalPromptTokens, 600); // 100 + 200 + 300
+  assert.equal(quality.totalCompletionTokens, 250); // 50 + 80 + 120
+  assert.equal(quality.totalTokens, 850); // 600 + 250
+  assert.ok(quality.p50LatencyMs !== undefined);
+  assert.ok(quality.p95LatencyMs !== undefined);
+});
+

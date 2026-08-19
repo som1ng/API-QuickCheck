@@ -4,15 +4,18 @@ import { runBenchmarkRound, aggregateBenchmarkSummary } from '../../engine/bench
 import { BenchmarkRoundResult, BenchmarkSummary } from '../../types/benchmark';
 import { MetricCard } from '../common/MetricCard';
 import { Play, Loader2, Gauge, Activity, Radio, CheckCircle2, XCircle, Terminal, Layers, ChevronDown, Search } from 'lucide-react';
+import { ProviderIcon } from '../common/ProviderLogos';
 
 const POPULAR_MODEL_PRESETS = [
-  'claude-3-7-sonnet-20250219',
-  'claude-3-5-sonnet-20241022',
-  'deepseek-reasoner',
-  'deepseek-chat',
-  'gpt-4o',
-  'o1',
-  'gemini-2.5-flash',
+  'openai/gpt-5.6-sol',
+  'openai/gpt-5.6-terra',
+  'openai/gpt-5.6-luna',
+  'anthropic/claude-fable-5',
+  'anthropic/claude-opus-5',
+  'anthropic/claude-sonnet-5',
+  'google/gemini-3.7-flash',
+  'google/gemini-3.1-pro-preview',
+  'x-ai/grok-4.6',
 ];
 
 export const BenchmarkTab: React.FC = () => {
@@ -172,67 +175,94 @@ export const BenchmarkTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowModelDropdown(!showModelDropdown)}
-                className="px-3.5 text-[#9c9689] hover:text-[#faf9f5] transition border-l border-[#2e2b27]"
+                className="px-3.5 text-[#9c9689] hover:text-[#faf9f5] transition border-l border-[#2e2b27] cursor-pointer"
+                title="展开/收起模型选择"
               >
-                <ChevronDown className="w-5 h-5" />
+                <ChevronDown
+                  className={`w-4 h-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    showModelDropdown ? 'rotate-180 text-[#cc785c]' : 'text-[#9c9689]'
+                  }`}
+                />
               </button>
             </div>
 
-            {/* Dropdown */}
-            {showModelDropdown && (
-              <div className="absolute left-0 right-0 mt-1.5 rounded-xl border border-[#2e2b27] bg-[#23211e] p-2.5 shadow-2xl z-50 max-h-80 overflow-y-auto space-y-2">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="快速搜索模型..."
-                    value={modelSearchQuery}
-                    onChange={(e) => setModelSearchQuery(e.target.value)}
-                    className="w-full rounded-lg border border-[#2e2b27] bg-[#1b1a18] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-[#9c9689] focus:outline-none focus:border-[#cc785c]"
-                  />
-                  <Search className="w-4 h-4 text-[#9c9689] absolute left-3 top-2.5" />
-                </div>
-
-                <div>
-                  <div className="text-xs uppercase font-semibold text-[#9c9689] px-2.5 py-1.5">
-                    常用热门模型
-                  </div>
-                  {POPULAR_MODEL_PRESETS.map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => {
-                        dispatch({ type: 'SET_SELECTED_MODEL', payload: m });
-                        setShowModelDropdown(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#faf9f5] transition font-mono truncate"
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-
-                {availableModels.length > 0 && (
-                  <div>
-                    <div className="text-xs uppercase font-semibold text-[#5db872] px-2.5 py-1.5 border-t border-[#2e2b27] mt-1 pt-2">
-                      中转站可用模型 ({availableModels.length})
+            {/* Silky Smooth Downward Grid Dropdown Menu (Razor Sharp Text) */}
+            <div
+              className={`absolute left-0 right-0 mt-1.5 rounded-xl border border-[#2e2b27] bg-[#23211e] shadow-2xl shadow-black/60 overflow-hidden z-50 transition-[opacity,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                showModelDropdown
+                  ? 'opacity-100 pointer-events-auto border-[#cc785c]/40 ring-1 ring-[#cc785c]/20'
+                  : 'opacity-0 pointer-events-none'
+              }`}
+            >
+              <div
+                className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  showModelDropdown ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="p-2.5 max-h-80 overflow-y-auto space-y-2">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="快速搜索模型..."
+                        value={modelSearchQuery}
+                        onChange={(e) => setModelSearchQuery(e.target.value)}
+                        className="w-full rounded-lg border border-[#2e2b27] bg-[#1b1a18] pl-9 pr-3 py-2 text-sm text-[#faf9f5] placeholder-[#9c9689] focus:outline-none focus:border-[#cc785c]"
+                      />
+                      <Search className="w-4 h-4 text-[#9c9689] absolute left-3 top-2.5" />
                     </div>
-                    {filteredRemoteModels.slice(0, 40).map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => {
-                          dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id });
-                          setShowModelDropdown(false);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#d4cebe] transition font-mono truncate"
-                      >
-                        {m.id}
-                      </button>
-                    ))}
+
+                    <div>
+                      <div className="text-xs uppercase font-semibold text-[#9c9689] px-2.5 py-1.5">
+                        常用热门模型
+                      </div>
+                      {POPULAR_MODEL_PRESETS.map((m) => {
+                        let pId = 'openai';
+                        if (m.includes('anthropic') || m.includes('claude')) pId = 'anthropic';
+                        else if (m.includes('google') || m.includes('gemini')) pId = 'google';
+                        else if (m.includes('x-ai') || m.includes('grok')) pId = 'xai';
+
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => {
+                              dispatch({ type: 'SET_SELECTED_MODEL', payload: m });
+                              setShowModelDropdown(false);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#faf9f5] transition font-mono truncate cursor-pointer flex items-center gap-2"
+                          >
+                            <ProviderIcon providerId={pId} className="w-4 h-4 flex-shrink-0" size={16} />
+                            <span className="truncate">{m}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {availableModels.length > 0 && (
+                      <div>
+                        <div className="text-xs uppercase font-semibold text-[#5db872] px-2.5 py-1.5 border-t border-[#2e2b27] mt-1 pt-2">
+                          中转站可用模型 ({availableModels.length})
+                        </div>
+                        {filteredRemoteModels.slice(0, 40).map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => {
+                              dispatch({ type: 'SET_SELECTED_MODEL', payload: m.id });
+                              setShowModelDropdown(false);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#d4cebe] transition font-mono truncate cursor-pointer"
+                          >
+                            {m.id}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

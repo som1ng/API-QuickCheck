@@ -31,15 +31,18 @@ import {
   Shield,
   Terminal,
 } from 'lucide-react';
+import { ProviderIcon } from '../common/ProviderLogos';
 
 const COMMON_PRESET_MODELS = [
-  { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet (Thinking)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
-  { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet (New)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
-  { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (原生思维链)', tag: 'DeepSeek', family: 'deepseek' as ModelVerificationProfile },
-  { id: 'deepseek-chat', label: 'DeepSeek-V3', tag: 'DeepSeek', family: 'deepseek' as ModelVerificationProfile },
-  { id: 'gpt-4o', label: 'GPT-4o (Omni)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
-  { id: 'o1', label: 'OpenAI o1 (Full Reasoning)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
-  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', tag: 'Google', family: 'gemini' as ModelVerificationProfile },
+  { id: 'openai/gpt-5.6-sol', label: 'GPT-5.6 Sol (旗舰复杂推理与自主代码)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
+  { id: 'openai/gpt-5.6-terra', label: 'GPT-5.6 Terra (全能工作马)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
+  { id: 'openai/gpt-5.6-luna', label: 'GPT-5.6 Luna (极速高吞吐轻量级)', tag: 'OpenAI', family: 'openai' as ModelVerificationProfile },
+  { id: 'anthropic/claude-fable-5', label: 'Claude Fable 5 (叙事与高难算法)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
+  { id: 'anthropic/claude-opus-5', label: 'Claude Opus 5 (复杂科研与重型工程)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
+  { id: 'anthropic/claude-sonnet-5', label: 'Claude Sonnet 5 (自适应思考工作马)', tag: 'Anthropic', family: 'claude' as ModelVerificationProfile },
+  { id: 'google/gemini-3.7-flash', label: 'Gemini 3.7 Flash (极速原生思考)', tag: 'Google', family: 'gemini' as ModelVerificationProfile },
+  { id: 'google/gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (超长窗口旗舰)', tag: 'Google', family: 'gemini' as ModelVerificationProfile },
+  { id: 'x-ai/grok-4.6', label: 'Grok 4.6 (全模态实时 Agent)', tag: 'xAI', family: 'universal' as ModelVerificationProfile },
 ];
 
 export const FidelityTab: React.FC = () => {
@@ -213,66 +216,88 @@ ${p.actualOutput ? `\`\`\`\n${p.actualOutput.trim()}\n\`\`\`` : ''}
                 <button
                   type="button"
                   onClick={() => setShowModelDropdown(!showModelDropdown)}
-                  className="px-3.5 py-3 rounded-xl border border-[#2e2b27] bg-[#23211e] hover:bg-[#2b2926] text-[#9c9689] hover:text-[#faf9f5] transition flex items-center gap-1 shrink-0"
+                  className="px-3.5 py-3 rounded-xl border border-[#2e2b27] bg-[#23211e] hover:bg-[#2b2926] text-[#9c9689] hover:text-[#faf9f5] transition flex items-center gap-1 shrink-0 cursor-pointer"
+                  title="展开/收起模型选择"
                 >
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      showModelDropdown ? 'rotate-180 text-[#cc785c]' : 'text-[#9c9689]'
+                    }`}
+                  />
                 </button>
               </div>
 
-              {/* Dropdown Menu */}
-              {showModelDropdown && (
-                <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-2 shadow-2xl space-y-2 max-h-80 overflow-y-auto">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#9c9689]" />
-                    <input
-                      type="text"
-                      placeholder="搜索模型..."
-                      value={modelSearchQuery}
-                      onChange={(e) => setModelSearchQuery(e.target.value)}
-                      className="w-full rounded-lg border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-xs font-mono text-[#faf9f5] focus:border-[#cc785c] focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="text-xs uppercase font-semibold text-[#9c9689] px-2.5 py-1">
-                      主流旗舰模型快捷选择
-                    </div>
-                    {COMMON_PRESET_MODELS.map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => handleSelectModel(m.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition flex items-center justify-between ${
-                          config.selectedModel === m.id
-                            ? 'bg-[#cc785c]/15 text-[#faf9f5] font-semibold'
-                            : 'text-[#d4cebe] hover:bg-[#2b2926] hover:text-[#faf9f5]'
-                        }`}
-                      >
-                        <span className="font-mono">{m.label}</span>
-                        <span className="text-xs text-[#9c9689] font-mono">{m.tag}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {availableModels.length > 0 && (
-                    <div>
-                      <div className="text-xs uppercase font-semibold text-[#5db872] px-2.5 py-1.5 border-t border-[#2e2b27] mt-1 pt-2">
-                        中转站已探明模型 ({availableModels.length})
+              {/* Silky Smooth Downward Grid Dropdown Menu (Razor Sharp Text) */}
+              <div
+                className={`absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-[#2e2b27] bg-[#1b1a18] shadow-2xl shadow-black/60 overflow-hidden transition-[opacity,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  showModelDropdown
+                    ? 'opacity-100 pointer-events-auto border-[#cc785c]/40 ring-1 ring-[#cc785c]/20'
+                    : 'opacity-0 pointer-events-none'
+                }`}
+              >
+                <div
+                  className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    showModelDropdown ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="p-2 space-y-2 max-h-80 overflow-y-auto">
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#9c9689]" />
+                        <input
+                          type="text"
+                          placeholder="搜索模型..."
+                          value={modelSearchQuery}
+                          onChange={(e) => setModelSearchQuery(e.target.value)}
+                          className="w-full rounded-lg border border-[#2e2b27] bg-[#141413] pl-9 pr-3 py-2 text-xs font-mono text-[#faf9f5] focus:border-[#cc785c] focus:outline-none"
+                        />
                       </div>
-                      {filteredRemoteModels.slice(0, 30).map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => handleSelectModel(m.id)}
-                          className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#d4cebe] transition font-mono truncate"
-                        >
-                          {m.id}
-                        </button>
-                      ))}
+
+                      <div className="space-y-1">
+                        <div className="text-xs uppercase font-semibold text-[#9c9689] px-2.5 py-1">
+                          主流旗舰模型快捷选择
+                        </div>
+                        {COMMON_PRESET_MODELS.map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => handleSelectModel(m.id)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition flex items-center justify-between cursor-pointer ${
+                              config.selectedModel === m.id
+                                ? 'bg-[#cc785c]/15 text-[#faf9f5] font-semibold'
+                                : 'text-[#d4cebe] hover:bg-[#2b2926] hover:text-[#faf9f5]'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 font-mono">
+                              <ProviderIcon providerId={m.tag} className="w-4 h-4 flex-shrink-0" size={16} />
+                              <span>{m.label}</span>
+                            </span>
+                            <span className="text-xs text-[#9c9689] font-mono">{m.tag}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {availableModels.length > 0 && (
+                        <div>
+                          <div className="text-xs uppercase font-semibold text-[#5db872] px-2.5 py-1.5 border-t border-[#2e2b27] mt-1 pt-2">
+                            中转站已探明模型 ({availableModels.length})
+                          </div>
+                          {filteredRemoteModels.slice(0, 30).map((m) => (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => handleSelectModel(m.id)}
+                              className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#2b2926] text-[#d4cebe] transition font-mono truncate cursor-pointer"
+                            >
+                              {m.id}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 

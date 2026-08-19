@@ -60,7 +60,7 @@ const initialState: AppState = {
     baseUrl: initialPlatform?.defaultBaseUrl || 'https://api.openai.com/v1',
     apiKey: '',
     selectedModel: 'gpt-4o',
-    timeoutMs: 8000,
+    timeoutMs: 25000,
   },
   activeTab: getInitialActiveTab(),
   availableModels: [],
@@ -149,8 +149,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [state, dispatch] = useReducer(appReducer, initialState, () => {
     try {
       const savedBaseUrl = localStorage.getItem('aqc_baseUrl');
+      const savedApiKey = localStorage.getItem('aqc_apiKey');
       const savedPlatformId = localStorage.getItem('aqc_platformId') || initialPlatformId;
       const savedModel = localStorage.getItem('aqc_model');
+      const savedModelsStr = localStorage.getItem('aqc_available_models');
+      const savedAvailableModels = savedModelsStr ? JSON.parse(savedModelsStr) : [];
       const initialTab = getInitialActiveTab();
 
       const platform = PLATFORMS[savedPlatformId] || initialPlatform;
@@ -158,10 +161,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return {
         ...initialState,
         activeTab: initialTab,
+        availableModels: Array.isArray(savedAvailableModels) ? savedAvailableModels : [],
         config: {
           ...initialState.config,
           platformId: savedPlatformId,
           baseUrl: savedBaseUrl || platform.defaultBaseUrl,
+          apiKey: savedApiKey || '',
           selectedModel: savedModel || 'gpt-4o',
         },
       };
@@ -174,6 +179,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       localStorage.setItem('aqc_baseUrl', state.config.baseUrl);
+      if (state.config.apiKey) {
+        localStorage.setItem('aqc_apiKey', state.config.apiKey);
+      }
       localStorage.setItem('aqc_platformId', state.config.platformId);
       localStorage.setItem('aqc_activeTab', state.activeTab);
       if (typeof window !== 'undefined' && window.location.hash !== `#${state.activeTab}`) {
@@ -182,10 +190,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (state.config.selectedModel) {
         localStorage.setItem('aqc_model', state.config.selectedModel);
       }
+      if (state.availableModels.length > 0) {
+        localStorage.setItem('aqc_available_models', JSON.stringify(state.availableModels));
+      }
     } catch {
       // ignore
     }
-  }, [state.config.baseUrl, state.config.platformId, state.config.selectedModel, state.activeTab]);
+  }, [state.config.baseUrl, state.config.apiKey, state.config.platformId, state.config.selectedModel, state.activeTab, state.availableModels]);
 
   // Sync hashchange from browser back/forward or manual hash change
   useEffect(() => {

@@ -830,7 +830,7 @@ export interface BatchKeyTestPoolOptions {
   providerName?: string;
   customHeaders?: Record<string, string>;
   requestDelayMs?: number;
-  antiBanMode?: 'safe' | 'balanced' | 'turbo';
+  antiBanMode?: 'safe' | 'balanced' | 'turbo' | 'custom';
 }
 
 /**

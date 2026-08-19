@@ -46,10 +46,39 @@ export function validateChatCompletionEnvelope(data: unknown, requestedModel: st
   return scoreValidation(issues, 7);
 }
 
-export function validateAnthropicMessage(data: unknown, requestedModel: string): ProtocolValidation {
+export function validateGeminiGenerateContent(data: unknown, _requestedModel: string): ProtocolValidation {
   const issues: string[] = [];
   if (!isRecord(data)) return { pass: false, score: 0, issues: ['response_not_object'] };
-  if (typeof data.id !== 'string' || !data.id.startsWith('msg_')) issues.push('id_prefix_invalid');
+
+  const candidates = data.candidates;
+  if (!Array.isArray(candidates) || candidates.length === 0) {
+    issues.push('candidates_invalid');
+  } else {
+    const first = candidates[0];
+    if (!isRecord(first)) {
+      issues.push('candidate_not_object');
+    } else {
+      const content = first.content;
+      if (!isRecord(content) || content.role !== 'model' || !Array.isArray(content.parts)) issues.push('model_content_invalid');
+      if (first.finishReason !== undefined && typeof first.finishReason !== 'string') issues.push('finish_reason_invalid');
+    }
+  }
+
+  const usage = data.usageMetadata;
+  if (!isRecord(usage)) {
+    issues.push('usage_missing');
+  } else {
+    for (const field of ['promptTokenCount', 'candidatesTokenCount', 'totalTokenCount']) {
+      if (!isNonNegativeInteger(usage[field])) issues.push(`usage_${field}_invalid`);
+    }
+  }
+  return scoreValidation(issues, 5);
+}
+
+export function validateAnthropicMessage(data: unknown, requestedModel: string, strictId = true): ProtocolValidation {
+  const issues: string[] = [];
+  if (!isRecord(data)) return { pass: false, score: 0, issues: ['response_not_object'] };
+  if (typeof data.id !== 'string' || (strictId && !data.id.startsWith('msg_'))) issues.push('id_prefix_invalid');
   if (data.type !== 'message') issues.push('type_invalid');
   if (data.role !== 'assistant') issues.push('role_invalid');
   if (typeof data.model !== 'string' || !modelMatches(data.model, requestedModel)) issues.push('model_mismatch');

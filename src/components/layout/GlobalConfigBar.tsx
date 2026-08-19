@@ -4,13 +4,13 @@ import { fetchRemoteModels } from '../../engine/scanner/batchScanner';
 import { Eye, EyeOff, RefreshCw, Globe, KeyRound, Layers } from 'lucide-react';
 
 const COMMON_PRESETS = [
-  { label: 'OpenAI 官方', url: 'https://api.openai.com/v1', model: 'gpt-4o' },
-  { label: 'Claude 官方', url: 'https://api.anthropic.com/v1', model: 'claude-3-7-sonnet-20250219' },
-  { label: 'DeepSeek 官方', url: 'https://api.deepseek.com', model: 'deepseek-chat' },
-  { label: 'xAI (Grok)', url: 'https://api.x.ai/v1', model: 'grok-2-latest' },
-  { label: 'Gemini 官方', url: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-2.5-flash' },
-  { label: 'OpenRouter', url: 'https://openrouter.ai/api/v1', model: 'openai/gpt-4o' },
-  { label: '硅基流动', url: 'https://api.siliconflow.cn/v1', model: 'deepseek-ai/DeepSeek-V3' },
+  { label: 'OpenAI 官方', url: 'https://api.openai.com/v1', model: 'auto' },
+  { label: 'Claude 官方', url: 'https://api.anthropic.com/v1', model: 'auto' },
+  { label: 'DeepSeek 官方', url: 'https://api.deepseek.com', model: 'auto' },
+  { label: 'xAI (Grok)', url: 'https://api.x.ai/v1', model: 'auto' },
+  { label: 'Gemini 官方', url: 'https://generativelanguage.googleapis.com/v1beta', model: 'auto' },
+  { label: 'OpenRouter', url: 'https://openrouter.ai/api/v1', model: 'auto' },
+  { label: '硅基流动', url: 'https://api.siliconflow.cn/v1', model: 'auto' },
 ];
 
 export const GlobalConfigBar: React.FC = () => {
@@ -27,7 +27,7 @@ export const GlobalConfigBar: React.FC = () => {
         const models = await fetchRemoteModels(config.baseUrl, config.apiKey);
         if (models.length > 0) {
           dispatch({ type: 'SET_AVAILABLE_MODELS', payload: models });
-          if (!models.some((m) => m.id === config.selectedModel)) {
+          if (!config.selectedModel) {
             dispatch({ type: 'SET_SELECTED_MODEL', payload: models[0].id });
           }
         }
@@ -47,7 +47,7 @@ export const GlobalConfigBar: React.FC = () => {
     try {
       const models = await fetchRemoteModels(config.baseUrl, config.apiKey);
       dispatch({ type: 'SET_AVAILABLE_MODELS', payload: models });
-      if (models.length > 0 && !models.some((m) => m.id === config.selectedModel)) {
+      if (models.length > 0 && !config.selectedModel) {
         dispatch({ type: 'SET_SELECTED_MODEL', payload: models[0].id });
       }
     } catch (err: unknown) {
@@ -168,7 +168,7 @@ export const GlobalConfigBar: React.FC = () => {
               type="text"
               value={config.selectedModel}
               onChange={(e) => dispatch({ type: 'SET_SELECTED_MODEL', payload: e.target.value })}
-              placeholder="例如: gpt-4o / claude-3-7-sonnet"
+              placeholder="auto (自适应) / 填入目标模型 ID"
               className="flex-1 rounded-xl border border-[#2e2b27] bg-[#141413] px-4 py-3 font-mono text-sm text-[#faf9f5] placeholder-[#9c9689]/40 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]/30 transition"
             />
             <button

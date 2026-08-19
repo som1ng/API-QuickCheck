@@ -35,10 +35,10 @@ export interface DocCategoryGroup {
   docs: MarkdownDoc[];
 }
 
-const CATEGORY_TAG_MAP: Record<string, { tag: string; title: string }> = {
-  intro: { tag: '简介', title: '简介' },
-  usage: { tag: '使用', title: '使用' },
-  algorithms: { tag: '鉴别算法', title: '鉴别算法' },
+const CATEGORY_ORDER_MAP: Record<string, { tag: string; title: string; order: number }> = {
+  intro: { tag: '简介', title: '简介', order: 1 },
+  algorithms: { tag: '鉴别算法', title: '鉴别算法', order: 2 },
+  usage: { tag: '使用', title: '使用', order: 3 },
 };
 
 // Simple and robust YAML Frontmatter parser
@@ -85,6 +85,14 @@ function cleanHeadingText(raw: string): string {
     .trim();
 }
 
+export function slugifyHeading(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fa5\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 // Extract H2 and H3 headings for the right-hand TOC
 function extractHeadings(content: string): DocHeading[] {
   const headings: DocHeading[] = [];
@@ -115,14 +123,6 @@ function extractHeadings(content: string): DocHeading[] {
   return headings;
 }
 
-export function slugifyHeading(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 // Direct Vite Glob Loader for all Markdown docs in src/content/docs/
 const rawDocsModules = import.meta.glob('./docs/**/*.md', {
   query: '?raw',
@@ -131,7 +131,7 @@ const rawDocsModules = import.meta.glob('./docs/**/*.md', {
 }) as Record<string, string>;
 
 export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGroup[] } {
-  const docs: MarkdownDoc[] = [];
+  const rawDocList: MarkdownDoc[] = [];
   const seenSlugs = new Set<string>();
 
   for (const [filePath, rawContent] of Object.entries(rawDocsModules)) {
@@ -148,9 +148,11 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
     seenSlugs.add(fileName);
 
     const folderName = parts.length >= 2 ? parts[parts.length - 2] : 'general';
+    const folderNumMatch = folderName.match(/^(\d+)-(.*)$/);
+    const folderOrder = folderNumMatch ? parseInt(folderNumMatch[1], 10) : 99;
 
-    const categoryId = frontmatter.category || folderName.replace(/^\d+-/, '');
-    const preset = CATEGORY_TAG_MAP[categoryId] || { tag: categoryId.toUpperCase(), title: categoryId };
+    const categoryId = frontmatter.category || (folderNumMatch ? folderNumMatch[2] : folderName);
+    const preset = CATEGORY_ORDER_MAP[categoryId] || { tag: categoryId.toUpperCase(), title: categoryId, order: folderOrder };
     const categoryTitle = frontmatter.categoryTitle || preset.title;
     const categoryTag = frontmatter.categoryTag || preset.tag;
     const title = frontmatter.title || fileName;
@@ -158,7 +160,7 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
 
     const headings = extractHeadings(content);
 
-    docs.push({
+    rawDocList.push({
       slug: fileName,
       filePath,
       frontmatter: {
@@ -176,33 +178,35 @@ export function loadAllDocs(): { docs: MarkdownDoc[]; categories: DocCategoryGro
     });
   }
 
-  // Sort docs by order
-  docs.sort((a, b) => (a.frontmatter.order || 99) - (b.frontmatter.order || 99));
-
-  // Group by category
+  // Group docs by category
   const categoryMap = new Map<string, DocCategoryGroup>();
 
-  for (const doc of docs) {
+  for (const doc of rawDocList) {
     const catId = doc.frontmatter.category;
     if (!categoryMap.has(catId)) {
-      const preset = CATEGORY_TAG_MAP[catId] || { tag: catId.toUpperCase(), title: catId };
+      const preset = CATEGORY_ORDER_MAP[catId] || { tag: catId.toUpperCase(), title: catId, order: 99 };
       categoryMap.set(catId, {
         id: catId,
         tag: doc.frontmatter.categoryTag || preset.tag,
         title: doc.frontmatter.categoryTitle || preset.title,
-        order: doc.frontmatter.order || 99,
+        order: preset.order,
         docs: [],
       });
     }
     categoryMap.get(catId)!.docs.push(doc);
   }
 
+  // Sort docs inside each category by order
+  for (const group of categoryMap.values()) {
+    group.docs.sort((a, b) => (a.frontmatter.order || 99) - (b.frontmatter.order || 99));
+  }
+
+  // Sort categories by category order
   const categories = Array.from(categoryMap.values());
-  categories.sort((a, b) => {
-    const minOrderA = Math.min(...a.docs.map((d) => d.frontmatter.order || 99));
-    const minOrderB = Math.min(...b.docs.map((d) => d.frontmatter.order || 99));
-    return minOrderA - minOrderB;
-  });
+  categories.sort((a, b) => (a.order || 99) - (b.order || 99));
+
+  // Flatten sequentially for previous / next pagination matching sidebar order
+  const docs: MarkdownDoc[] = categories.flatMap((cat) => cat.docs);
 
   return { docs, categories };
 }
@@ -214,7 +218,7 @@ export function interpolateDocVariables(
 ): string {
   const cleanUrl = (variables.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
   const key = variables.apiKey || 'sk-your-api-key-here';
-  const mdl = variables.model || 'claude-3-7-sonnet-20250219';
+  const mdl = variables.model || 'gpt-5.6-sol';
 
   return rawMarkdown
     .replace(/\{\{BASE_URL\}\}/g, cleanUrl)

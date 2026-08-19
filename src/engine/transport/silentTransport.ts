@@ -33,7 +33,7 @@ export async function silentFetch<T = unknown>(
     method = 'POST',
     headers = {},
     body,
-    timeoutMs = 6000,
+    timeoutMs = 25000,
     signal: userSignal,
     disableFallback = false,
   } = options;
