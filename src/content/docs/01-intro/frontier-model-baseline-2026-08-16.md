@@ -3,12 +3,12 @@ title: 2026 前沿模型基线清单
 category: intro
 categoryTitle: 简介
 order: 2
-subtitle: 截止 2026-08-18，用于 API 审计的官方模型目标与原生 API 基线；支持自动与手动定时同步。
+subtitle: 截止 2026-08-27，用于 API 审计的官方模型目标与原生 API 基线；支持自动与手动定时同步。
 ---
 
 ## 1. 2026 前沿纯血旗舰基线总览
 
-此清单由 **API-QuickCheck 自动化基线引擎** 定期维护更新，是审计器的**版本化参考基线**，严格聚焦 2026 年四大前沿旗舰体系（**OpenAI GPT-5.6、Anthropic Claude 5、Google Gemini 3、xAI Grok 4.6**），杜绝已过时淘汰的历史旧型号。每次审计应调用对应厂商的 Models API 或读取官方目录，严格匹配型号 ID、采样日期、地区、服务层和 API 面。
+此清单由 **API-QuickCheck 自动化基线引擎** 定期维护更新，是审计器的**版本化参考基线**，严格聚焦 2026 年四大前沿旗舰体系（OpenAI GPT-5.6、Anthropic Claude 5、Google Gemini 3、xAI Grok 4.6），杜绝已过时淘汰的历史旧型号。每次审计应调用对应厂商的 Models API 或读取官方目录，严格匹配型号 ID、采样日期、地区、服务层和 API 面。
 
 | 厂商 | 主要审计目标 | 定位与能力档位 | 优先原生 API |
 | :--- | :--- | :--- | :--- |
@@ -21,8 +21,6 @@ subtitle: 截止 2026-08-18，用于 API 审计的官方模型目标与原生 AP
 | Google | `gemini-3.1-pro-preview` | 多模态与长上下文旗舰 (Multimodal Frontier) | Interactions |
 | Google | `gemini-3.7-flash` | 极速代码与 Agent 工作马 (Ultra Fast) | Interactions |
 | xAI | `grok-4.6` | 全模态实时推理与代码 (Realtime Agent) | Responses |
-
----
 
 ## 2. 各厂商核心型号特性与审计注意事项
 
@@ -46,8 +44,6 @@ subtitle: 截止 2026-08-18，用于 API 审计的官方模型目标与原生 AP
 
 - **工具生态消费**：Grok 4.6 原生提供 function calling、实时 X 搜索检索、代码执行沙箱等集成能力。
 - **审计准则**：在隔离的受控测试环境中验证其函数签名和 Python 沙箱代码修复行为。
-
----
 
 ## 3. 2026 官方权威参考标尺对比矩阵 (Master Reference Matrix)
 
