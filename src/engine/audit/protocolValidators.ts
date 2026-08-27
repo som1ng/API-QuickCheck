@@ -46,7 +46,8 @@ export function validateChatCompletionEnvelope(data: unknown, requestedModel: st
   return scoreValidation(issues, 7);
 }
 
-export function validateGeminiGenerateContent(data: unknown, _requestedModel: string): ProtocolValidation {
+export function validateGeminiGenerateContent(data: unknown, requestedModel: string): ProtocolValidation {
+  void requestedModel;
   const issues: string[] = [];
   if (!isRecord(data)) return { pass: false, score: 0, issues: ['response_not_object'] };
 

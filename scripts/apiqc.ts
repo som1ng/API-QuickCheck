@@ -34,7 +34,7 @@ function printHelp(): void {
   npx api-quickcheck sync    (快速同步基线数据)
 
 选项:
-  --provider <auto|openai|anthropic|gemini|xai|openrouter>
+  --provider <openai|anthropic|gemini|xai|openrouter>
   --profile <quick|balanced|deep>
   --probes <id,id,...>       只执行指定测试
   --api-key <key>            或使用 APIQC_API_KEY；OpenRouter 可使用 OPENROUTER_API_KEY
@@ -138,7 +138,7 @@ async function main(): Promise<void> {
   if (isCapture && process.argv[3] !== 'capture') throw new Error('Usage: apiqc baseline capture ...');
 
   const model = required(args, 'model');
-  const requestedProvider = (typeof args.provider === 'string' ? args.provider : 'auto') as AuditProvider | 'auto';
+  const requestedProvider = (typeof args.provider === 'string' ? args.provider : 'openrouter') as AuditProvider;
   const provider = detectAuditProvider(model, requestedProvider);
   const baseUrl = typeof args['base-url'] === 'string'
     ? args['base-url']

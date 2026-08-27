@@ -116,16 +116,26 @@ function basicEvidence(result: NativeResult, provider: AuditProvider, model: str
     return { id: 'p0-native-route', title: '原生 API 路由', status, detail: '原生请求成功，响应 envelope 和固定夹具均符合。', latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes };
   }
   const validationStatus = status === 'pass' ? 'fail' : status;
-  const responseShape = validation.issues.includes('response_not_object')
-    ? `（响应数据非 JSON 对象，rawText ${result.response.rawText.length} 字符，Content-Type ${result.response.headers.get('content-type') || 'unknown'}）`
-    : '';
+  let detailMessage = '';
+  if ([404, 405, 502].includes(result.response.status)) {
+    detailMessage = provider === 'anthropic'
+      ? `中转站未开放 Anthropic 原生 /v1/messages 接口 (HTTP ${result.response.status})。当前中转可能仅支持通用转译接口，无法提供官方密码学防伪签名。`
+      : provider === 'gemini'
+      ? `中转站未开放 Google Gemini 原生 :generateContent 接口 (HTTP ${result.response.status})。`
+      : `端点未开放原生路由 (HTTP ${result.response.status})。`;
+  } else if (status === 'unavailable') {
+    detailMessage = result.response.errorMessage || '原生路由未开放或代理链路不可用。';
+  } else {
+    const responseShape = validation.issues.includes('response_not_object')
+      ? `（响应数据非 JSON 对象，rawText ${result.response.rawText.length} 字符，Content-Type ${result.response.headers.get('content-type') || 'unknown'}）`
+      : '';
+    detailMessage = `响应未通过协议或固定夹具校验：${validation.issues.join(', ') || result.text.slice(0, 120)}${responseShape}`;
+  }
   return {
     id: 'p0-native-route',
     title: '原生 API 路由',
     status: validationStatus,
-    detail: status === 'unavailable'
-      ? result.response.errorMessage || '原生路由未开放或代理链路不可用。'
-      : `响应未通过协议或固定夹具校验：${validation.issues.join(', ') || result.text.slice(0, 120)}${responseShape}`,
+    detail: detailMessage,
     latencyMs: result.response.latencyMs,
     rawEventTypes: result.eventTypes,
   };
@@ -288,7 +298,7 @@ export function validateStreamSequence(provider: AuditProvider, eventTypes: stri
 
 export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4> {
   const profile = options.profile || 'balanced';
-  const provider = detectAuditProvider(options.model, options.provider || 'auto', options.baseUrl);
+  const provider = detectAuditProvider(options.model, options.provider || 'auto');
   const adapter = PROVIDER_ADAPTERS[provider];
   const baselineSnapshot = options.baselineSnapshot
     || (options.baselineId ? loadBaselineSnapshot(options.baselineId) : findStoredBaseline(provider, options.model, adapter.surface));
@@ -397,7 +407,9 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
       reasoningResult = await execute(adapter, adapter.reasoning(options.baseUrl, options.apiKey, options.model), options.signal);
       nativeResults.push(reasoningResult);
       const reasoningTokens = reasoningTokenCount(reasoningResult);
-      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type)) || (reasoningTokens !== undefined && reasoningTokens > 0);
+      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking|redacted/i.test(type))
+        || Boolean(reasoningResult.signature)
+        || (reasoningTokens !== undefined && reasoningTokens > 0);
       const reasoningStatus = !reasoningResult.response.ok
         ? routeStatus(reasoningResult.response)
         : hasReasoning ? 'pass' : 'unavailable';
@@ -470,7 +482,7 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
     const thinkingText = reasoningResult.thinkingText || '';
     if (signature && thinkingText && adapter.signatureContinuation) {
       try {
-        const continuation = await execute(adapter, adapter.signatureContinuation(options.baseUrl, options.apiKey, options.model, thinkingText, signature), options.signal);
+        const continuation = await execute(adapter, adapter.signatureContinuation(options.baseUrl, options.apiKey, options.model, thinkingText, signature, reasoningResult.text), options.signal);
         nativeResults.push(continuation);
         protocol.push({
           id: 'p1-signature-continuity',

@@ -34,7 +34,7 @@ export interface ProviderAdapter {
   stateContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, marker: string) => NativeRequest) | undefined;
   cache?: ((baseUrl: string, apiKey: string, model: string, prefix: string) => NativeRequest) | undefined;
   toolContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, toolOutput: string) => NativeRequest) | undefined;
-  signatureContinuation?: ((baseUrl: string, apiKey: string, model: string, thinkingText: string, signature: string) => NativeRequest) | undefined;
+  signatureContinuation?: ((baseUrl: string, apiKey: string, model: string, thinkingText: string, signature: string, assistantText?: string) => NativeRequest) | undefined;
   parse(response: TransportResponse<Record<string, unknown>>): NativeResult;
 }
 
@@ -93,7 +93,7 @@ const parseResponses = (response: TransportResponse<Record<string, unknown>>): N
 
 const parseMessages = (response: TransportResponse<Record<string, unknown>>): NativeResult => {
   const content = Array.isArray(response.data?.content) ? response.data.content as Record<string, unknown>[] : [];
-  const thinking = content.find((item) => item.type === 'thinking');
+  const thinking = content.find((item) => item.type === 'thinking' || item.type === 'redacted_thinking');
   const toolCall = content.find((item) => item.type === 'tool_use');
   return {
     response,
@@ -102,7 +102,7 @@ const parseMessages = (response: TransportResponse<Record<string, unknown>>): Na
     usage: usageFromResponse(response),
     finishReason: typeof response.data?.stop_reason === 'string' ? response.data.stop_reason : undefined,
     signature: typeof thinking?.signature === 'string' ? thinking.signature : undefined,
-    thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : undefined,
+    thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : typeof thinking?.data === 'string' ? thinking.data : undefined,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: toolCall.input } : undefined,
   };
@@ -252,7 +252,19 @@ const anthropic: ProviderAdapter = {
     },
   }),
   tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, tools: [{ name: 'audit_sum', description: 'Adds two integers.', input_schema: { type: 'object', properties: { a: { type: 'integer' }, b: { type: 'integer' } }, required: ['a', 'b'], additionalProperties: false } }], tool_choice: { type: 'tool', name: 'audit_sum' }, messages: [{ role: 'user', content: 'Call audit_sum with a=19 and b=23. Do not answer in prose.' }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, thinking: { type: 'adaptive' }, output_config: { effort: 'high' }, messages: [{ role: 'user', content: 'Solve this multi-step arithmetic constraint and return only the final integer: ((19 * 23) + (17 * 11)) - 29.' }] } }),
+  reasoning: (baseUrl, apiKey, model) => ({
+    url: anthropicEndpoint(baseUrl),
+    headers: anthropicHeaders(apiKey),
+    body: {
+      model,
+      // Anthropic counts thinking and final output against max_tokens. A small
+      // cap can make adaptive thinking silently disappear.
+      max_tokens: 16_000,
+      thinking: { type: 'adaptive', display: 'summarized' },
+      output_config: { effort: 'high' },
+      messages: [{ role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' }],
+    },
+  }),
   context: (baseUrl, apiKey, model, document) => ({
     url: anthropicEndpoint(baseUrl),
     headers: anthropicHeaders(apiKey),
@@ -300,22 +312,22 @@ const anthropic: ProviderAdapter = {
       ],
     },
   }),
-  signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature) => ({
+  signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature, assistantText) => ({
     url: anthropicEndpoint(baseUrl),
     headers: anthropicHeaders(apiKey),
     body: {
       model,
       max_tokens: 256,
       messages: [
-        { role: 'user', content: 'What is 19 multiplied by 23? Return only the number.' },
+        { role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' },
         {
           role: 'assistant',
           content: [
             { type: 'thinking', thinking: thinkingText, signature },
-            { type: 'text', text: '595' },
+            { type: 'text', text: assistantText || 'The greatest common divisor is 1.' },
           ],
         },
-        { role: 'user', content: 'Now add 10 to that result.' },
+        { role: 'user', content: 'Now return only the final gcd.' },
       ],
     },
   }),
@@ -515,24 +527,17 @@ export const PROVIDER_ADAPTERS: Record<AuditProvider, ProviderAdapter> = {
   openai: openAiLike('openai'), xai: openAiLike('xai'), anthropic, gemini, openrouter: openRouter,
 };
 
-export function detectAuditProvider(_model: string, requested: AuditProvider | 'auto' = 'auto', baseUrl = ''): AuditProvider {
-  if (requested !== 'auto') return requested;
-  const base = baseUrl.toLowerCase();
-
-  // 1. Official Anthropic endpoint
-  if (base.includes('anthropic.com')) return 'anthropic';
-
-  // 2. Official Google Gemini / Vertex AI endpoint
-  if (base.includes('googleapis.com')) return 'gemini';
-
-  // 3. Official xAI endpoint
-  if (base.includes('x.ai')) return 'xai';
-
-  // 4. Official OpenAI endpoint
-  if (base.includes('api.openai.com')) return 'openai';
-
-  // 5. Third-party Relay Stations (OneAPI, NewAPI, OpenRouter, SiliconFlow, AiHubMix, YiYun, etc.)
-  // All third-party relays speak standard OpenAI /v1/chat/completions for all models (Claude, Gemini, GPT, DeepSeek, etc.)
+export function detectAuditProvider(model: string, requested?: AuditProvider | 'auto'): AuditProvider {
+  if (requested && requested !== 'auto') return requested;
+  const id = model.toLowerCase();
+  if (id.includes('claude') || id.includes('fable') || id.includes('opus') || id.includes('sonnet') || id.includes('haiku')) {
+    return 'anthropic';
+  }
+  if (id.includes('gemini')) return 'gemini';
+  if (id.includes('grok')) return 'xai';
+  if (id.includes('gpt') || id.includes('o1') || id.includes('o3') || id.includes('o4') || id.includes('chatgpt')) {
+    return 'openai';
+  }
   return 'openrouter';
 }
 

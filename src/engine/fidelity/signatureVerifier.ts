@@ -6,7 +6,6 @@
 
 import { SignatureVerificationResult } from '../../types/fidelity';
 import { silentFetch } from '../transport/silentTransport';
-import { readSSEStream } from '../transport/sseReader';
 import { normalizeBaseUrl } from '../transport/urlNormalizer';
 
 export async function verifyClaudeThinkingSignature(
@@ -33,14 +32,16 @@ export async function verifyClaudeThinkingSignature(
       },
       body: JSON.stringify({
         model: model.includes('claude') ? model : 'claude-3-7-sonnet-20250219',
-        max_tokens: 1024,
+        // Anthropic counts thinking and final output together. A small cap can
+        // make adaptive thinking silently disappear before a signature exists.
+        max_tokens: 16_000,
         thinking: {
-          type: 'enabled',
-          budget_tokens: 512,
+          type: 'adaptive',
+          display: 'summarized',
         },
-        stream: true,
+        output_config: { effort: 'high' },
         messages: [
-          { role: 'user', content: 'What is 19 * 23? Think step by step.' }
+          { role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' }
         ],
       }),
       signal,
@@ -65,28 +66,22 @@ export async function verifyClaudeThinkingSignature(
       };
     }
 
-    // Step 2: Stream and extract signature
-    let thinkingText = '';
-    let signature = '';
-
-    for await (const chunk of readSSEStream(fetchResponse, signal)) {
-      if (chunk.reasoningDelta) {
-        thinkingText += chunk.reasoningDelta;
-      }
-      if (chunk.signatureDelta) {
-        signature += chunk.signatureDelta;
-      }
-      if (chunk.fullSignature) {
-        signature = chunk.fullSignature;
-      }
-    }
+    // Step 2: Use the non-streaming content blocks. Some Anthropic adaptive
+    // thinking models silently omit thinking/signature blocks in SSE mode.
+    const responseData = await fetchResponse.json() as Record<string, unknown>;
+    const content = Array.isArray(responseData.content) ? responseData.content as Record<string, unknown>[] : [];
+    const thinkingBlock = content.find((block) => block.type === 'thinking' || block.type === 'redacted_thinking');
+    const thinkingText = typeof thinkingBlock?.thinking === 'string'
+      ? thinkingBlock.thinking
+      : typeof thinkingBlock?.data === 'string' ? thinkingBlock.data : '';
+    const signature = typeof thinkingBlock?.signature === 'string' ? thinkingBlock.signature : '';
 
     if (!signature) {
       return {
         isApplicable: true,
         passed: false,
         stage: 'extract',
-        details: '模型产生了文本但未返回 Anthropic 服务端加密 Signature（可能为逆向/剥离签名的渠道）。',
+        details: '模型返回了原生 Messages 响应，但未返回 thinking/redacted_thinking 的 signature 字段。可能是模型未触发 thinking，或中转剥离了签名。',
       };
     }
 
@@ -103,22 +98,22 @@ export async function verifyClaudeThinkingSignature(
         model: model.includes('claude') ? model : 'claude-3-7-sonnet-20250219',
         max_tokens: 256,
         messages: [
-          { role: 'user', content: 'What is 19 * 23? Think step by step.' },
+          { role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' },
           {
             role: 'assistant',
             content: [
               {
                 type: 'thinking',
-                thinking: thinkingText || 'Calculating 19 * 23 = 437.',
+                thinking: thinkingText || 'Calculating the Euclidean algorithm steps.',
                 signature: signature,
               },
               {
                 type: 'text',
-                text: '19 * 23 = 437.',
+                text: 'The greatest common divisor is 1.',
               },
             ],
           },
-          { role: 'user', content: 'Now add 10 to that result.' },
+          { role: 'user', content: 'Now return only the final gcd.' },
         ],
       },
       timeoutMs: 8000,

@@ -5,7 +5,7 @@ import { bootstrapDifference, determineConclusion } from '../src/engine/audit/st
 import { CapabilityMetric } from '../src/types/audit';
 import { validateAnthropicMessage, validateChatCompletionEnvelope, validateGeminiGenerateContent, validateResponsesEnvelope } from '../src/engine/audit/protocolValidators';
 import { createCodeRepairFixture, createNeedleFixture, scoreCodeRepairResponse, scoreNeedleResponse, summarizeRepeatSamples } from '../src/engine/audit/localFixtures';
-import { PROVIDER_ADAPTERS } from '../src/engine/audit/providerAdapters';
+import { detectAuditProvider, PROVIDER_ADAPTERS } from '../src/engine/audit/providerAdapters';
 import { validateBaselineSnapshot } from '../src/engine/audit/baseline';
 import { readSSEEvents } from '../src/engine/transport/sseReader';
 import { containsFixtureText, runtimeFrom, validateStreamSequence } from '../src/engine/audit/runner';
@@ -197,6 +197,16 @@ test('openrouter adapter uses Chat Completions and parses tool calls', () => {
   assert.equal(getProbeRoute('anthropic', 'anthropic/claude-fable-5', 'p1-signature-continuity').disposition, 'standard_benchmark');
 });
 
+test('provider selection infers protocol from model family or respects explicit selection', () => {
+  assert.equal(detectAuditProvider('anthropic/claude-sonnet-5'), 'anthropic');
+  assert.equal(detectAuditProvider('claude-3-7-sonnet'), 'anthropic');
+  assert.equal(detectAuditProvider('gemini-2.5-pro'), 'gemini');
+  assert.equal(detectAuditProvider('grok-3'), 'xai');
+  assert.equal(detectAuditProvider('gpt-4o'), 'openai');
+  assert.equal(detectAuditProvider('anthropic/claude-sonnet-5', 'openrouter'), 'openrouter');
+  assert.equal(detectAuditProvider('anthropic/claude-sonnet-5', 'anthropic'), 'anthropic');
+});
+
 test('gemini adapter parses native generateContent usage and finish reason', () => {
   const result = PROVIDER_ADAPTERS.gemini.parse({
     ok: true,
@@ -224,6 +234,28 @@ test('anthropic adapter exposes native structured output format', () => {
   const request = PROVIDER_ADAPTERS.anthropic.strictJson?.('https://openrouter.ai/api/v1', 'key', 'claude-test');
   const outputConfig = request?.body.output_config as { format?: { type?: string } };
   assert.equal(outputConfig.format?.type, 'json_schema');
+});
+
+test('anthropic reasoning probe leaves enough budget for signed thinking', () => {
+  const request = PROVIDER_ADAPTERS.anthropic.reasoning?.('https://api.anthropic.com/v1', 'key', 'claude-sonnet-5');
+  assert.equal(request?.body.max_tokens, 16000);
+  assert.deepEqual(request?.body.thinking, { type: 'adaptive', display: 'summarized' });
+  assert.deepEqual(request?.body.output_config, { effort: 'high' });
+  assert.equal(request?.body.stream, undefined);
+});
+
+test('anthropic signature continuation preserves the original assistant answer', () => {
+  const request = PROVIDER_ADAPTERS.anthropic.signatureContinuation?.(
+    'https://api.anthropic.com/v1',
+    'key',
+    'claude-sonnet-5',
+    'signed thinking',
+    'signature-value',
+    'The greatest common divisor is 1.',
+  );
+  const messages = request?.body.messages as Array<{ role: string; content: unknown }>;
+  const assistant = messages?.find((message) => message.role === 'assistant');
+  assert.equal((assistant?.content as Array<{ type: string; text?: string }>)[1]?.text, 'The greatest common divisor is 1.');
 });
 
 test('anthropic adapter builds the standard Messages endpoint from a root URL', () => {
@@ -375,4 +407,3 @@ test('runtimeFrom computes total duration, percentiles, and multi-format token s
   assert.ok(quality.p50LatencyMs !== undefined);
   assert.ok(quality.p95LatencyMs !== undefined);
 });
-

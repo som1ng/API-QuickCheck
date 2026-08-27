@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { fetchRemoteModels, runBatchScanPool } from '../../engine/scanner/batchScanner';
 import { runAudit } from '../../engine/audit/runner';
+import { detectAuditProvider } from '../../engine/audit/providerAdapters';
 import { AUDIT_PRESETS, BALANCED_SUITE } from '../../engine/audit/suite';
 import { ModelCheckItem } from '../../types/scanner';
 import { AuditProfile, AuditProvider, AuditReportV4 } from '../../types/audit';
@@ -30,11 +31,12 @@ import {
 } from 'lucide-react';
 
 const AUDIT_PROVIDER_OPTIONS: { id: AuditProvider | 'auto'; label: string; sub: string; iconKey: string }[] = [
-  { id: 'auto', label: '自动识别协议', sub: '根据所选目标模型 ID 自动适配协议与端点', iconKey: 'auto' },
-  { id: 'openai', label: 'OpenAI 协议', sub: '原生 Responses / ChatCompletions 接口规范', iconKey: 'openai' },
-  { id: 'anthropic', label: 'Anthropic 协议', sub: '原生 Messages API 消息规范与自适应思考', iconKey: 'anthropic' },
-  { id: 'gemini', label: 'Google Gemini 协议', sub: '原生 generateContent 多模态与状态机规范', iconKey: 'gemini' },
-  { id: 'xai', label: 'xAI (Grok) 协议', sub: '原生 Responses 规范与工具沙箱规范', iconKey: 'xai' },
+  { id: 'auto', label: '智能模型识别 (推荐)', sub: '根据当前测试的模型名称自动匹配最优协议与测评套件', iconKey: 'auto' },
+  { id: 'anthropic', label: 'Anthropic Claude', sub: 'Claude 原生 Messages 检测，包含 Thinking Signature 密码学防伪', iconKey: 'anthropic' },
+  { id: 'openai', label: 'OpenAI GPT', sub: 'GPT 原生 Responses 与工具调用、严格 JSON Schema 检测', iconKey: 'openai' },
+  { id: 'gemini', label: 'Google Gemini', sub: 'Gemini 原生 generateContent 状态机与多模态能力检测', iconKey: 'gemini' },
+  { id: 'xai', label: 'xAI Grok', sub: 'Grok 原生 Responses 与工具沙箱能力检测', iconKey: 'xai' },
+  { id: 'openrouter', label: '通用 ChatCompletions', sub: '标准 OpenAI 格式，适用于通用聚合网关与第三方中转', iconKey: 'openai' },
 ];
 
 export const HomeRelayTab: React.FC = () => {
@@ -537,18 +539,32 @@ export const HomeRelayTab: React.FC = () => {
 
                 {/* Row B.2: Dynamic Provider Adapter Dropdown (Under Target Model, Above Test Parameters) */}
                 {(() => {
+                  const resolvedProvider = auditProvider === 'auto'
+                    ? detectAuditProvider(config.selectedModel, 'auto')
+                    : auditProvider;
                   const currentProviderOpt = AUDIT_PROVIDER_OPTIONS.find((o) => o.id === auditProvider) || AUDIT_PROVIDER_OPTIONS[0];
+                  const resolvedOpt = AUDIT_PROVIDER_OPTIONS.find((o) => o.id === resolvedProvider) || currentProviderOpt;
+                  const displayLabel = auditProvider === 'auto'
+                    ? `智能识别 (${resolvedOpt.label})`
+                    : currentProviderOpt.label;
+                  const displaySub = auditProvider === 'auto'
+                    ? `已根据模型名称「${config.selectedModel || '未选择'}」自动匹配 ${resolvedOpt.label} 测评套件`
+                    : currentProviderOpt.sub;
+                  const displayIconKey = auditProvider === 'auto'
+                    ? resolvedOpt.iconKey
+                    : currentProviderOpt.iconKey;
+
                   return (
                     <div className="space-y-2 pt-4 border-t border-[#2e2b27]">
                       <div className="flex items-center justify-between gap-3">
                         <label className="text-sm sm:text-[15px] font-bold text-[#faf9f5] flex items-center gap-2">
                           <Globe className="w-4 h-4 text-[#cc785c]" />
-                          <span>供应商适配器</span>
+                           <span>模型厂商与测评规范</span>
                         </label>
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#3e3b35] bg-[#22201d] text-xs font-medium text-[#faf9f5] shadow-sm">
-                            <span className="text-neutral-400">当前协议：</span>
-                            <span className="text-[#faf9f5] font-semibold">{currentProviderOpt.label}</span>
+                           <span className="text-neutral-400">检测规范：</span>
+                            <span className="text-[#faf9f5] font-semibold">{displayLabel}</span>
                           </span>
                         </div>
                       </div>
@@ -561,14 +577,14 @@ export const HomeRelayTab: React.FC = () => {
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-7 h-7 rounded-lg bg-[#22201d] border border-[#3e3b35] flex items-center justify-center shrink-0">
-                              <ProviderIcon providerId={currentProviderOpt.iconKey} size={16} />
+                              <ProviderIcon providerId={displayIconKey} size={16} />
                             </div>
                             <div className="flex flex-col items-start text-left min-w-0">
                               <span className="text-sm font-semibold text-[#faf9f5]">
-                                {currentProviderOpt.label}
+                                {displayLabel}
                               </span>
                               <span className="text-xs text-neutral-400 truncate">
-                                {currentProviderOpt.sub}
+                                {displaySub}
                               </span>
                             </div>
                           </div>
@@ -596,7 +612,7 @@ export const HomeRelayTab: React.FC = () => {
                             <div className="overflow-hidden">
                               <div className="p-1.5 space-y-1 max-h-72 overflow-y-auto">
                                 <div className="px-3 py-1.5 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider flex items-center justify-between border-b border-[#2e2b27]/60 pb-1 mb-1 font-mono">
-                                  <span>选择协议解析规范</span>
+                                   <span>选择模型厂商</span>
                                   <span className="text-[10px] text-neutral-500 font-normal">点击切换</span>
                                 </div>
                                 {AUDIT_PROVIDER_OPTIONS.map((opt) => {

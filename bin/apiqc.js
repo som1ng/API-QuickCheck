@@ -504,7 +504,7 @@ var parseResponses = (response) => {
 };
 var parseMessages = (response) => {
   const content = Array.isArray(response.data?.content) ? response.data.content : [];
-  const thinking = content.find((item) => item.type === "thinking");
+  const thinking = content.find((item) => item.type === "thinking" || item.type === "redacted_thinking");
   const toolCall = content.find((item) => item.type === "tool_use");
   return {
     response,
@@ -513,7 +513,7 @@ var parseMessages = (response) => {
     usage: usageFromResponse(response),
     finishReason: typeof response.data?.stop_reason === "string" ? response.data.stop_reason : void 0,
     signature: typeof thinking?.signature === "string" ? thinking.signature : void 0,
-    thinkingText: typeof thinking?.thinking === "string" ? thinking.thinking : void 0,
+    thinkingText: typeof thinking?.thinking === "string" ? thinking.thinking : typeof thinking?.data === "string" ? thinking.data : void 0,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.id ?? ""), name: String(toolCall.name ?? ""), arguments: toolCall.input } : void 0
   };
@@ -666,7 +666,19 @@ var anthropic = {
     }
   }),
   tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, tools: [{ name: "audit_sum", description: "Adds two integers.", input_schema: { type: "object", properties: { a: { type: "integer" }, b: { type: "integer" } }, required: ["a", "b"], additionalProperties: false } }], tool_choice: { type: "tool", name: "audit_sum" }, messages: [{ role: "user", content: "Call audit_sum with a=19 and b=23. Do not answer in prose." }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, thinking: { type: "adaptive" }, output_config: { effort: "high" }, messages: [{ role: "user", content: "Solve this multi-step arithmetic constraint and return only the final integer: ((19 * 23) + (17 * 11)) - 29." }] } }),
+  reasoning: (baseUrl, apiKey, model) => ({
+    url: anthropicEndpoint(baseUrl),
+    headers: anthropicHeaders(apiKey),
+    body: {
+      model,
+      // Anthropic counts thinking and final output against max_tokens. A small
+      // cap can make adaptive thinking silently disappear.
+      max_tokens: 16e3,
+      thinking: { type: "adaptive", display: "summarized" },
+      output_config: { effort: "high" },
+      messages: [{ role: "user", content: "Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm." }]
+    }
+  }),
   context: (baseUrl, apiKey, model, document) => ({
     url: anthropicEndpoint(baseUrl),
     headers: anthropicHeaders(apiKey),
@@ -719,22 +731,22 @@ ${source}` }] }
       ]
     }
   }),
-  signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature) => ({
+  signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature, assistantText) => ({
     url: anthropicEndpoint(baseUrl),
     headers: anthropicHeaders(apiKey),
     body: {
       model,
       max_tokens: 256,
       messages: [
-        { role: "user", content: "What is 19 multiplied by 23? Return only the number." },
+        { role: "user", content: "Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm." },
         {
           role: "assistant",
           content: [
             { type: "thinking", thinking: thinkingText, signature },
-            { type: "text", text: "595" }
+            { type: "text", text: assistantText || "The greatest common divisor is 1." }
           ]
         },
-        { role: "user", content: "Now add 10 to that result." }
+        { role: "user", content: "Now return only the final gcd." }
       ]
     }
   }),
@@ -978,13 +990,17 @@ var PROVIDER_ADAPTERS = {
   gemini,
   openrouter: openRouter
 };
-function detectAuditProvider(_model, requested = "auto", baseUrl = "") {
-  if (requested !== "auto") return requested;
-  const base = baseUrl.toLowerCase();
-  if (base.includes("anthropic.com")) return "anthropic";
-  if (base.includes("googleapis.com")) return "gemini";
-  if (base.includes("x.ai")) return "xai";
-  if (base.includes("api.openai.com")) return "openai";
+function detectAuditProvider(model, requested) {
+  if (requested && requested !== "auto") return requested;
+  const id = model.toLowerCase();
+  if (id.includes("claude") || id.includes("fable") || id.includes("opus") || id.includes("sonnet") || id.includes("haiku")) {
+    return "anthropic";
+  }
+  if (id.includes("gemini")) return "gemini";
+  if (id.includes("grok")) return "xai";
+  if (id.includes("gpt") || id.includes("o1") || id.includes("o3") || id.includes("o4") || id.includes("chatgpt")) {
+    return "openai";
+  }
   return "openrouter";
 }
 
@@ -1158,7 +1174,7 @@ function validateChatCompletionEnvelope(data, requestedModel, strictId = true) {
   }
   return scoreValidation(issues, 7);
 }
-function validateGeminiGenerateContent(data, _requestedModel) {
+function validateGeminiGenerateContent(data, requestedModel) {
   const issues = [];
   if (!isRecord(data)) return { pass: false, score: 0, issues: ["response_not_object"] };
   const candidates = data.candidates;
@@ -2309,12 +2325,20 @@ function basicEvidence(result, provider, model, allowRelayEnvelope = false) {
     return { id: "p0-native-route", title: "\u539F\u751F API \u8DEF\u7531", status, detail: "\u539F\u751F\u8BF7\u6C42\u6210\u529F\uFF0C\u54CD\u5E94 envelope \u548C\u56FA\u5B9A\u5939\u5177\u5747\u7B26\u5408\u3002", latencyMs: result.response.latencyMs, rawEventTypes: result.eventTypes };
   }
   const validationStatus = status === "pass" ? "fail" : status;
-  const responseShape = validation.issues.includes("response_not_object") ? `\uFF08\u54CD\u5E94\u6570\u636E\u975E JSON \u5BF9\u8C61\uFF0CrawText ${result.response.rawText.length} \u5B57\u7B26\uFF0CContent-Type ${result.response.headers.get("content-type") || "unknown"}\uFF09` : "";
+  let detailMessage = "";
+  if ([404, 405, 502].includes(result.response.status)) {
+    detailMessage = provider === "anthropic" ? `\u4E2D\u8F6C\u7AD9\u672A\u5F00\u653E Anthropic \u539F\u751F /v1/messages \u63A5\u53E3 (HTTP ${result.response.status})\u3002\u5F53\u524D\u4E2D\u8F6C\u53EF\u80FD\u4EC5\u652F\u6301\u901A\u7528\u8F6C\u8BD1\u63A5\u53E3\uFF0C\u65E0\u6CD5\u63D0\u4F9B\u5B98\u65B9\u5BC6\u7801\u5B66\u9632\u4F2A\u7B7E\u540D\u3002` : provider === "gemini" ? `\u4E2D\u8F6C\u7AD9\u672A\u5F00\u653E Google Gemini \u539F\u751F :generateContent \u63A5\u53E3 (HTTP ${result.response.status})\u3002` : `\u7AEF\u70B9\u672A\u5F00\u653E\u539F\u751F\u8DEF\u7531 (HTTP ${result.response.status})\u3002`;
+  } else if (status === "unavailable") {
+    detailMessage = result.response.errorMessage || "\u539F\u751F\u8DEF\u7531\u672A\u5F00\u653E\u6216\u4EE3\u7406\u94FE\u8DEF\u4E0D\u53EF\u7528\u3002";
+  } else {
+    const responseShape = validation.issues.includes("response_not_object") ? `\uFF08\u54CD\u5E94\u6570\u636E\u975E JSON \u5BF9\u8C61\uFF0CrawText ${result.response.rawText.length} \u5B57\u7B26\uFF0CContent-Type ${result.response.headers.get("content-type") || "unknown"}\uFF09` : "";
+    detailMessage = `\u54CD\u5E94\u672A\u901A\u8FC7\u534F\u8BAE\u6216\u56FA\u5B9A\u5939\u5177\u6821\u9A8C\uFF1A${validation.issues.join(", ") || result.text.slice(0, 120)}${responseShape}`;
+  }
   return {
     id: "p0-native-route",
     title: "\u539F\u751F API \u8DEF\u7531",
     status: validationStatus,
-    detail: status === "unavailable" ? result.response.errorMessage || "\u539F\u751F\u8DEF\u7531\u672A\u5F00\u653E\u6216\u4EE3\u7406\u94FE\u8DEF\u4E0D\u53EF\u7528\u3002" : `\u54CD\u5E94\u672A\u901A\u8FC7\u534F\u8BAE\u6216\u56FA\u5B9A\u5939\u5177\u6821\u9A8C\uFF1A${validation.issues.join(", ") || result.text.slice(0, 120)}${responseShape}`,
+    detail: detailMessage,
     latencyMs: result.response.latencyMs,
     rawEventTypes: result.eventTypes
   };
@@ -2441,7 +2465,7 @@ function validateStreamSequence(provider, eventTypes) {
 }
 async function runAudit(options) {
   const profile = options.profile || "balanced";
-  const provider = detectAuditProvider(options.model, options.provider || "auto", options.baseUrl);
+  const provider = detectAuditProvider(options.model, options.provider || "auto");
   const adapter = PROVIDER_ADAPTERS[provider];
   const baselineSnapshot = options.baselineSnapshot || (options.baselineId ? loadBaselineSnapshot(options.baselineId) : findStoredBaseline(provider, options.model, adapter.surface));
   const suite = selectSuite(profile, options.selectedProbeIds);
@@ -2550,7 +2574,7 @@ async function runAudit(options) {
       reasoningResult = await execute(adapter, adapter.reasoning(options.baseUrl, options.apiKey, options.model), options.signal);
       nativeResults.push(reasoningResult);
       const reasoningTokens = reasoningTokenCount(reasoningResult);
-      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking/i.test(type)) || reasoningTokens !== void 0 && reasoningTokens > 0;
+      const hasReasoning = reasoningResult.eventTypes.some((type) => /reason|thinking|redacted/i.test(type)) || Boolean(reasoningResult.signature) || reasoningTokens !== void 0 && reasoningTokens > 0;
       const reasoningStatus = !reasoningResult.response.ok ? routeStatus(reasoningResult.response) : hasReasoning ? "pass" : "unavailable";
       const usageDetail = reasoningTokens === void 0 ? "" : ` thoughts tokens=${reasoningTokens}.`;
       protocol.push({ id: "p1-reasoning-config", title: "\u63A8\u7406\u914D\u7F6E\u900F\u4F20", status: reasoningStatus, detail: hasReasoning ? `\u6355\u83B7\u5230\u539F\u751F\u63A8\u7406\u8BC1\u636E\u3002${usageDetail}` : `\u54CD\u5E94\u6210\u529F\u4F46\u672A\u66B4\u9732\u53EF\u9A8C\u8BC1\u7684\u63A8\u7406\u4E8B\u4EF6\u6216 token usage\u3002${usageDetail}`, latencyMs: reasoningResult.response.latencyMs, rawEventTypes: reasoningResult.eventTypes });
@@ -2618,7 +2642,7 @@ async function runAudit(options) {
     const thinkingText = reasoningResult.thinkingText || "";
     if (signature && thinkingText && adapter.signatureContinuation) {
       try {
-        const continuation = await execute(adapter, adapter.signatureContinuation(options.baseUrl, options.apiKey, options.model, thinkingText, signature), options.signal);
+        const continuation = await execute(adapter, adapter.signatureContinuation(options.baseUrl, options.apiKey, options.model, thinkingText, signature, reasoningResult.text), options.signal);
         nativeResults.push(continuation);
         protocol.push({
           id: "p1-signature-continuity",
@@ -3077,7 +3101,7 @@ function printHelp() {
   npx api-quickcheck sync    (\u5FEB\u901F\u540C\u6B65\u57FA\u7EBF\u6570\u636E)
 
 \u9009\u9879:
-  --provider <auto|openai|anthropic|gemini|xai|openrouter>
+  --provider <openai|anthropic|gemini|xai|openrouter>
   --profile <quick|balanced|deep>
   --probes <id,id,...>       \u53EA\u6267\u884C\u6307\u5B9A\u6D4B\u8BD5
   --api-key <key>            \u6216\u4F7F\u7528 APIQC_API_KEY\uFF1BOpenRouter \u53EF\u4F7F\u7528 OPENROUTER_API_KEY
@@ -3185,7 +3209,7 @@ async function main() {
   const isCapture = command === "baseline";
   if (isCapture && process.argv[3] !== "capture") throw new Error("Usage: apiqc baseline capture ...");
   const model = required(args, "model");
-  const requestedProvider = typeof args.provider === "string" ? args.provider : "auto";
+  const requestedProvider = typeof args.provider === "string" ? args.provider : "openrouter";
   const provider = detectAuditProvider(model, requestedProvider);
   const baseUrl = typeof args["base-url"] === "string" ? args["base-url"] : provider === "openrouter" ? process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1" : process.env.APIQC_BASE_URL;
   const apiKey = typeof args["api-key"] === "string" ? args["api-key"] : provider === "openrouter" ? process.env.OPENROUTER_API_KEY : process.env.APIQC_API_KEY;
