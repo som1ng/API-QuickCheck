@@ -41,7 +41,8 @@
     "apiqc": "tsx scripts/apiqc.ts",
     "sync:audit-baselines": "tsx scripts/sync-audit-baselines.ts",
     "sync:models": "tsx scripts/sync-model-baselines.ts",
-    "test": "tsx --test tests/audit.test.ts",
+    "test": "tsx --test tests/audit.test.ts tests/leaderboard.test.ts",
+    "sync:leaderboards": "tsx scripts/sync-leaderboards.ts",
     "preview": "vite preview"
   },
   "dependencies": {
