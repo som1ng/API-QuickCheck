@@ -8,11 +8,24 @@ import { QuickPingTab } from './components/tabs/QuickPingTab';
 import { ClientExportTab } from './components/tabs/ClientExportTab';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
+const LeaderboardTab = React.lazy(() =>
+  import('./components/leaderboard/LeaderboardTab').then((m) => ({ default: m.LeaderboardTab }))
+);
+
+const LeaderboardSkeleton: React.FC = () => (
+  <div className="space-y-8 animate-pulse">
+    <div className="h-48 rounded-2xl bg-[#181715] border border-[#2e2b27]" />
+    <div className="h-14 rounded-xl bg-[#181715] border border-[#2e2b27]" />
+    <div className="h-96 rounded-xl bg-[#181715] border border-[#2e2b27]" />
+  </div>
+);
+
 const MainContent: React.FC = () => {
   const { state } = useApp();
   const { activeTab } = state;
 
   const isBatchKeys = activeTab === 'quickping';
+  const isLeaderboard = activeTab === 'leaderboard';
   const isDocs = activeTab === 'docs' || activeTab === 'export';
 
   return (
@@ -35,6 +48,18 @@ const MainContent: React.FC = () => {
             <div className="mt-28 mb-16">
               <FaqSection />
             </div>
+          </main>
+
+          <Footer />
+        </>
+      ) : isLeaderboard ? (
+        <>
+          <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+            <ErrorBoundary fallbackTitle="大模型天梯榜模块异常">
+              <React.Suspense fallback={<LeaderboardSkeleton />}>
+                <LeaderboardTab />
+              </React.Suspense>
+            </ErrorBoundary>
           </main>
 
           <Footer />

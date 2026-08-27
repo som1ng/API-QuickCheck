@@ -20,6 +20,7 @@ export const Footer: React.FC = () => {
             <div className="flex flex-col gap-2">
               <button onClick={() => nav('home')} className="text-left text-[#a09d96] hover:text-[#faf9f5] transition-colors cursor-pointer">中转站检测</button>
               <button onClick={() => nav('quickping')} className="text-left text-[#a09d96] hover:text-[#faf9f5] transition-colors cursor-pointer">API Key 批量检测</button>
+              <button onClick={() => nav('leaderboard')} className="text-left text-[#a09d96] hover:text-[#faf9f5] transition-colors cursor-pointer">大模型天梯榜</button>
               <button onClick={() => nav('docs')} className="text-left text-[#a09d96] hover:text-[#faf9f5] transition-colors cursor-pointer">文档</button>
             </div>
           </div>

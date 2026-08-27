@@ -28,6 +28,7 @@ const initialPlatform = PLATFORMS[initialPlatformId] || PLATFORMS.openai;
 const VALID_TABS: ActiveTabId[] = [
   'home',
   'quickping',
+  'leaderboard',
   'docs',
   'fidelity',
   'benchmark',

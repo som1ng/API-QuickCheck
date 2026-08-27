@@ -1,26 +1,43 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ActiveTabId } from '../../types/config';
-import { ShieldCheck, KeyRound, BookOpen } from 'lucide-react';
+import { ShieldCheck, KeyRound, Trophy, BookOpen } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { state, dispatch } = useApp();
   const { activeTab } = state;
 
-  const handleSwitchTab = (tabId: ActiveTabId) => {
-    dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+  const handleSwitchTab = (tabId: ActiveTabId, targetEl?: HTMLElement | null) => {
+    if (targetEl) {
+      setPillStyle({
+        left: targetEl.offsetLeft,
+        width: targetEl.offsetWidth,
+        opacity: 1,
+      });
+    }
+    React.startTransition(() => {
+      dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const isHome = activeTab === 'home' || activeTab === 'fidelity' || activeTab === 'benchmark' || activeTab === 'scanner';
   const isKeys = activeTab === 'quickping';
+  const isLeaderboard = activeTab === 'leaderboard';
   const isDocs = activeTab === 'docs' || activeTab === 'export';
 
-  const currentActiveGroupId: ActiveTabId = isHome ? 'home' : isKeys ? 'quickping' : 'docs';
+  const currentActiveGroupId: ActiveTabId = isHome
+    ? 'home'
+    : isKeys
+    ? 'quickping'
+    : isLeaderboard
+    ? 'leaderboard'
+    : 'docs';
 
   const navItems: { id: ActiveTabId; label: string; active: boolean; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'home', label: '中转站检测', active: isHome, icon: ShieldCheck },
     { id: 'quickping', label: 'API Key 批量', active: isKeys, icon: KeyRound },
+    { id: 'leaderboard', label: '大模型天梯榜', active: isLeaderboard, icon: Trophy },
     { id: 'docs', label: '文档', active: isDocs, icon: BookOpen },
   ];
 
@@ -102,7 +119,7 @@ export const Header: React.FC = () => {
                 key={item.id}
                 ref={(el) => { tabRefs.current[item.id] = el; }}
                 type="button"
-                onClick={() => handleSwitchTab(item.id)}
+                onClick={(e) => handleSwitchTab(item.id, e.currentTarget)}
                 className={`relative z-10 px-4 py-1.5 rounded-lg text-[13px] font-sans transition-colors duration-200 flex items-center gap-2 cursor-pointer ${
                   isActive
                     ? 'text-[#faf9f5] font-semibold'
