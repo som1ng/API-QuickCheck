@@ -93,14 +93,15 @@ export const AaModelsTable: React.FC<AaModelsTableProps> = ({
 
   return (
     <div className="space-y-3.5">
-      <div className="w-full overflow-x-auto rounded-xl border border-[#2e2b27] bg-[#1b1a18]">
+      <div className="w-full overflow-auto max-h-[calc(100vh-280px)] min-h-[440px] rounded-xl border border-[#2e2b27] bg-[#1b1a18] relative shadow-inner">
         <table className="w-full text-left text-sm border-collapse">
           {/* Table Header */}
-          <thead>
-            <tr className="border-b border-[#2e2b27] bg-[#23211e] text-xs text-[#9c9689] uppercase tracking-wider select-none">
+          <thead className="sticky top-0 z-20 bg-[#23211e] shadow-sm">
+            <tr className="border-b border-[#2e2b27] text-xs text-[#9c9689] uppercase tracking-wider select-none">
+              {/* Sticky Rank */}
               <th
                 onClick={() => onSort('rank')}
-                className="py-3.5 px-4 cursor-pointer hover:text-[#faf9f5] transition group w-20 min-w-[75px] text-center whitespace-nowrap font-medium"
+                className="py-3.5 px-4 cursor-pointer hover:text-[#faf9f5] transition group w-18 min-w-[70px] text-center whitespace-nowrap font-medium sticky left-0 z-30 bg-[#23211e]"
               >
                 <div className="flex items-center justify-center gap-1.5">
                   <span>排名</span>
@@ -108,13 +109,14 @@ export const AaModelsTable: React.FC<AaModelsTableProps> = ({
                 </div>
               </th>
 
-              <th className="py-3.5 px-4 min-w-[240px] whitespace-nowrap font-medium">
+              {/* Sticky Model Name & Creator */}
+              <th className="py-3.5 px-4 min-w-[220px] whitespace-nowrap font-medium sticky left-[70px] z-30 bg-[#23211e] border-r border-[#2e2b27] shadow-[4px_0_12px_rgba(0,0,0,0.4)]">
                 <span>模型与开发厂商</span>
               </th>
 
               <th
                 onClick={() => onSort('intelligence')}
-                className="py-3.5 px-4 cursor-pointer hover:text-[#faf9f5] transition group min-w-[150px] whitespace-nowrap font-medium"
+                className="py-3.5 px-4 cursor-pointer hover:text-[#faf9f5] transition group min-w-[140px] whitespace-nowrap font-medium"
               >
                 <div className="flex items-center gap-1.5">
                   <span>综合智力指数</span>
@@ -172,7 +174,7 @@ export const AaModelsTable: React.FC<AaModelsTableProps> = ({
                 </div>
               </th>
 
-              <th className="py-3.5 px-4 text-center min-w-[160px] whitespace-nowrap font-medium">
+              <th className="py-3.5 px-4 text-center min-w-[150px] whitespace-nowrap font-medium sticky right-0 z-20 bg-[#23211e]">
                 <span>操作</span>
               </th>
             </tr>
@@ -182,7 +184,7 @@ export const AaModelsTable: React.FC<AaModelsTableProps> = ({
           <tbody className="divide-y divide-[#2e2b27] font-mono text-xs">
             {displayedRows.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-[#9c9689] text-sm">
+                <td colSpan={9} className="py-12 text-center text-[#9c9689] text-sm font-sans">
                   未找到匹配的模型，请尝试调整筛选条件或搜索关键词
                 </td>
               </tr>
@@ -195,10 +197,10 @@ export const AaModelsTable: React.FC<AaModelsTableProps> = ({
                 return (
                   <tr
                     key={`${row.rank}-${row.name}`}
-                    className="hover:bg-[#23211e]/50 transition duration-150 group"
+                    className="hover:bg-[#23211e]/60 transition duration-150 group"
                   >
-                    {/* Rank */}
-                    <td className="py-3.5 px-4 text-center font-mono whitespace-nowrap">
+                    {/* Sticky Rank */}
+                    <td className="py-3.5 px-4 text-center font-mono whitespace-nowrap sticky left-0 z-10 bg-[#1b1a18] group-hover:bg-[#23211e] transition-colors">
                       {isTop1 ? (
                         <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#cc785c]/15 text-[#cc785c] border border-[#cc785c]/40 text-sm font-semibold">
                           1
@@ -216,8 +218,8 @@ export const AaModelsTable: React.FC<AaModelsTableProps> = ({
                       )}
                     </td>
 
-                    {/* Model & Creator */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    {/* Sticky Model & Creator */}
+                    <td className="py-3.5 px-4 whitespace-nowrap sticky left-[70px] z-10 bg-[#1b1a18] group-hover:bg-[#23211e] border-r border-[#2e2b27] shadow-[4px_0_12px_rgba(0,0,0,0.4)] transition-colors">
                       <div className="flex items-center gap-3">
                         {(() => {
                           const logoKey = resolveProviderLogoKey(row.creator);
