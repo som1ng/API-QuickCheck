@@ -96,7 +96,13 @@ export async function runFidelityAudit(
     const progressPercent = 40 + Math.round(((i + 1) / (selectedProbes.length || 1)) * 55);
     onProgress?.(`正在运行探针 [${i + 1}/${selectedProbes.length}]: ${probe.title}...`, progressPercent);
 
-    const probeRes = await silentFetch<any>({
+    interface ChatProbeResponse {
+      choices?: Array<{ message?: { content?: string } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+      system_fingerprint?: string;
+    }
+
+    const probeRes = await silentFetch<ChatProbeResponse>({
       url: chatUrl,
       method: 'POST',
       headers: {
@@ -151,8 +157,11 @@ export async function runFidelityAudit(
   let weights = 0;
 
   if (signatureResult && signatureResult.isApplicable) {
-    weights += 45;
-    totalScore += signatureResult.passed ? 45 : 0;
+    // Veridrop-aligned: signature carries 25% weight, graded 0-100
+    // (100 plausible + replay-verified / 70 shape-suspicious / 30 no signature / 0 no block or rejected).
+    const signatureScore = signatureResult.score ?? (signatureResult.passed ? 100 : 0);
+    weights += 25;
+    totalScore += (signatureScore / 100) * 25;
   }
 
   if (isReasoning) {
@@ -175,7 +184,11 @@ export async function runFidelityAudit(
   let level: FidelityLevel = 'genuine';
   let summary = '';
 
-  if (signatureResult?.passed) {
+  const signatureGrade = signatureResult?.isApplicable
+    ? (signatureResult.score ?? (signatureResult.passed ? 100 : 0))
+    : null;
+
+  if (signatureResult?.passed && signatureGrade === 100) {
     level = 'genuine';
     summary = '经 Anthropic 官方服务端私钥密码学验签，100% 确认为官方正品 Claude 模型。';
   } else if (isReasoning && !reasoningResult.passed) {

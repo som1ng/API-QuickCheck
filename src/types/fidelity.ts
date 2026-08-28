@@ -48,6 +48,7 @@ export interface ProbeExecutionResult {
 export interface SignatureVerificationResult {
   isApplicable: boolean; // 是否支持 Anthropic 原生 messages 端点
   passed: boolean;
+  score?: number; // Veridrop 式分级评分: 100 签名可信 / 70 签名形态可疑 / 30 有思考块无签名 / 0 无思考块或验签被拒
   signature?: string;
   stage: 'extract' | 'reverify' | 'failed' | 'not_supported';
   details: string;

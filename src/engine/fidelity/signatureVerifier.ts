@@ -8,6 +8,30 @@ import { SignatureVerificationResult } from '../../types/fidelity';
 import { silentFetch } from '../transport/silentTransport';
 import { normalizeBaseUrl } from '../transport/urlNormalizer';
 
+// Different Claude generations accept different thinking modes: adaptive-only
+// (Opus 4.7 / Claude 5 family) vs extended-only (Haiku 4.5 and earlier Haiku).
+// A wrong mode is rejected with 400 before any signature exists.
+function buildThinkingConfig(model: string): {
+  thinking: Record<string, unknown>;
+  outputConfig?: Record<string, unknown>;
+} {
+  if (/haiku/i.test(model)) {
+    return { thinking: { type: 'enabled', budget_tokens: 4000 } };
+  }
+  return {
+    thinking: { type: 'adaptive', display: 'summarized' },
+    outputConfig: { effort: 'high' },
+  };
+}
+
+// Veridrop-style plausibility grade for a signature-like payload: the official
+// signature is >100 chars of base64-ish data, but Anthropic never published a
+// spec, so length/shape is only a reference threshold, not a hard rule.
+function gradeSignaturePayload(payload: string): number {
+  const isBase64Like = /^[A-Za-z0-9+/=_-]+$/.test(payload);
+  return isBase64Like && payload.length >= 100 ? 100 : 70;
+}
+
 export async function verifyClaudeThinkingSignature(
   baseUrl: string,
   apiKey: string,
@@ -21,8 +45,25 @@ export async function verifyClaudeThinkingSignature(
     ? `${cleanBaseUrl}/messages` 
     : `${cleanBaseUrl}/v1/messages`;
 
+  const resolvedModel = model.includes('claude') ? model : 'claude-3-7-sonnet-20250219';
+  const { thinking, outputConfig } = buildThinkingConfig(resolvedModel);
+
   // Step 1: Probe if the endpoint supports Anthropic native messages protocol with thinking
   try {
+    const firstBody: Record<string, unknown> = {
+      model: resolvedModel,
+      // Anthropic counts thinking and final output together. A small cap can
+      // make adaptive thinking silently disappear before a signature exists.
+      max_tokens: 16_000,
+      thinking,
+      messages: [
+        { role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' }
+      ],
+    };
+    if (outputConfig) {
+      firstBody.output_config = outputConfig;
+    }
+
     const fetchResponse = await fetch(messagesUrl, {
       method: 'POST',
       headers: {
@@ -30,20 +71,7 @@ export async function verifyClaudeThinkingSignature(
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
       },
-      body: JSON.stringify({
-        model: model.includes('claude') ? model : 'claude-3-7-sonnet-20250219',
-        // Anthropic counts thinking and final output together. A small cap can
-        // make adaptive thinking silently disappear before a signature exists.
-        max_tokens: 16_000,
-        thinking: {
-          type: 'adaptive',
-          display: 'summarized',
-        },
-        output_config: { effort: 'high' },
-        messages: [
-          { role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' }
-        ],
-      }),
+      body: JSON.stringify(firstBody),
       signal,
     });
 
@@ -71,21 +99,55 @@ export async function verifyClaudeThinkingSignature(
     const responseData = await fetchResponse.json() as Record<string, unknown>;
     const content = Array.isArray(responseData.content) ? responseData.content as Record<string, unknown>[] : [];
     const thinkingBlock = content.find((block) => block.type === 'thinking' || block.type === 'redacted_thinking');
-    const thinkingText = typeof thinkingBlock?.thinking === 'string'
-      ? thinkingBlock.thinking
-      : typeof thinkingBlock?.data === 'string' ? thinkingBlock.data : '';
+    const isRedacted = thinkingBlock?.type === 'redacted_thinking';
+    const thinkingText = typeof thinkingBlock?.thinking === 'string' ? thinkingBlock.thinking : '';
     const signature = typeof thinkingBlock?.signature === 'string' ? thinkingBlock.signature : '';
+    const redactedData = isRedacted && typeof thinkingBlock?.data === 'string' ? thinkingBlock.data : '';
 
-    if (!signature) {
+    if (!thinkingBlock) {
       return {
         isApplicable: true,
         passed: false,
+        score: 0,
         stage: 'extract',
-        details: '模型返回了原生 Messages 响应，但未返回 thinking/redacted_thinking 的 signature 字段。可能是模型未触发 thinking，或中转剥离了签名。',
+        details: '模型返回了原生 Messages 响应，但没有 thinking/redacted_thinking 块。可能是模型未触发 thinking，或中转剥离了思考块。',
       };
     }
 
-    // Step 3: Multi-turn signature re-verification (Anthropic server-side verification)
+    if (!isRedacted && !signature) {
+      return {
+        isApplicable: true,
+        passed: false,
+        score: 30,
+        stage: 'extract',
+        details: '模型返回了 thinking 块，但缺少 signature 字段。可能是中转重写或剥离了签名。',
+      };
+    }
+
+    if (isRedacted && !redactedData) {
+      return {
+        isApplicable: true,
+        passed: false,
+        score: 30,
+        stage: 'extract',
+        details: '模型返回了 redacted_thinking 块，但缺少加密 data 字段，无法回传官方验签。',
+      };
+    }
+
+    // Signature (or redacted data) captured: grade its plausibility before replay.
+    const extractScore = gradeSignaturePayload(signature || redactedData);
+
+    // Step 3: Multi-turn signature re-verification (Anthropic server-side verification).
+    // The first-turn block must be replayed in its original shape: a thinking
+    // block as (thinking, signature), a redacted_thinking block as (data).
+    const replayedThinkingBlock = isRedacted
+      ? { type: 'redacted_thinking', data: redactedData }
+      : {
+          type: 'thinking',
+          thinking: thinkingText || 'Calculating the Euclidean algorithm steps.',
+          signature: signature,
+        };
+
     const reverifyResponse = await silentFetch({
       url: messagesUrl,
       method: 'POST',
@@ -95,18 +157,14 @@ export async function verifyClaudeThinkingSignature(
         'content-type': 'application/json',
       },
       body: {
-        model: model.includes('claude') ? model : 'claude-3-7-sonnet-20250219',
+        model: resolvedModel,
         max_tokens: 256,
         messages: [
           { role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' },
           {
             role: 'assistant',
             content: [
-              {
-                type: 'thinking',
-                thinking: thinkingText || 'Calculating the Euclidean algorithm steps.',
-                signature: signature,
-              },
+              replayedThinkingBlock,
               {
                 type: 'text',
                 text: 'The greatest common divisor is 1.',
@@ -120,30 +178,39 @@ export async function verifyClaudeThinkingSignature(
       signal,
     });
 
+    const signaturePreview = signature ? signature.slice(0, 24) + '...' : redactedData.slice(0, 24) + '...';
+
     if (reverifyResponse.ok) {
       return {
         isApplicable: true,
         passed: true,
-        signature: signature.slice(0, 24) + '...',
+        score: 100,
+        signature: signaturePreview,
         stage: 'reverify',
-        details: '成功提取官方服务端私钥签名，并通过第二轮 Anthropic 官方验签闭环。已确认官方满血正品。',
+        details: isRedacted
+          ? '成功捕获官方 redacted_thinking 加密块，并按原形状回传通过第二轮 Anthropic 官方验签闭环。已确认官方满血正品。'
+          : '成功提取官方服务端私钥签名，并通过第二轮 Anthropic 官方验签闭环。已确认官方满血正品。',
       };
     }
 
-    if (reverifyResponse.rawText.toLowerCase().includes('signature')) {
+    const errText = reverifyResponse.rawText.toLowerCase();
+    const isBlockRejection = errText.includes('signature') || errText.includes('redacted') || errText.includes('thinking');
+    if (isBlockRejection) {
       return {
         isApplicable: true,
         passed: false,
-        signature: signature.slice(0, 24) + '...',
+        score: 0,
+        signature: signaturePreview,
         stage: 'failed',
-        details: `签名校验被官方拦截 (${reverifyResponse.errorMessage || 'Invalid Signature'})：疑似假冒伪造签名。`,
+        details: `验签被官方拦截 (${reverifyResponse.errorMessage || 'Invalid thinking block'})：疑似假冒伪造思考块。`,
       };
     }
 
     return {
       isApplicable: true,
       passed: true,
-      signature: signature.slice(0, 24) + '...',
+      score: extractScore,
+      signature: signaturePreview,
       stage: 'extract',
       details: '成功捕获官方 Thinking Signature 签名块。',
     };

@@ -304,6 +304,32 @@ test('SSE wire reader preserves event names and sequence validation rejects miss
   assert.equal(validateStreamSequence('openai', ['response.created', 'response.output_text.delta']).pass, false);
 });
 
+test('anthropic SSE reader yields message_stop so the stream-order probe can pass', async () => {
+  const response = new Response([
+    'event: message_start\n',
+    'data: {"type":"message_start"}\n\n',
+    'event: content_block_start\n',
+    'data: {"type":"content_block_start"}\n\n',
+    'event: content_block_delta\n',
+    'data: {"type":"content_block_delta"}\n\n',
+    'event: message_stop\n',
+    'data: {"type":"message_stop"}\n\n',
+  ].join(''), { headers: { 'Content-Type': 'text/event-stream' } });
+  const events = [];
+  for await (const event of readSSEEvents(response)) events.push(event.event);
+  assert.deepEqual(events, [
+    'message_start',
+    'content_block_start',
+    'content_block_delta',
+    'message_stop',
+  ]);
+  assert.equal(validateStreamSequence('anthropic', events).pass, true);
+  assert.equal(
+    validateStreamSequence('anthropic', ['message_start', 'content_block_start', 'content_block_delta']).pass,
+    false
+  );
+});
+
 test('fixture text validation ignores harmless trailing punctuation', () => {
   assert.equal(containsFixtureText('audit-ready', 'audit-ready.'), true);
   assert.equal(containsFixtureText('audit-ready!', 'audit-ready.'), true);

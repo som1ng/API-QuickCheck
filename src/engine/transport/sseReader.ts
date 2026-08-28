@@ -41,7 +41,9 @@ export async function* readSSEEvents(
     dataLines = [];
     const currentEvent = eventName || 'message';
     eventName = '';
-    if (rawData === '[DONE]' || currentEvent === 'message_stop') return null;
+    // Drop the OpenAI [DONE] sentinel only. message_stop must still be yielded:
+    // the Anthropic stream-order probe requires it in the event sequence.
+    if (rawData === '[DONE]') return null;
     try {
       return { event: currentEvent, data: JSON.parse(rawData) };
     } catch {
