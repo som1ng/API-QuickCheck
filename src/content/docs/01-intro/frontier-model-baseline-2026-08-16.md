@@ -3,7 +3,7 @@ title: 2026 前沿模型基线清单
 category: intro
 categoryTitle: 简介
 order: 2
-subtitle: 截止 2026-08-27，用于 API 审计的官方模型目标与原生 API 基线；支持自动与手动定时同步。
+subtitle: 截止 2026-08-28，用于 API 审计的官方模型目标与原生 API 基线；支持自动与手动定时同步。
 ---
 
 ## 1. 2026 前沿纯血旗舰基线总览
@@ -21,6 +21,37 @@ subtitle: 截止 2026-08-27，用于 API 审计的官方模型目标与原生 AP
 | Google | `gemini-3.1-pro-preview` | 多模态与长上下文旗舰 (Multimodal Frontier) | Interactions |
 | Google | `gemini-3.7-flash` | 极速代码与 Agent 工作马 (Ultra Fast) | Interactions |
 | xAI | `grok-4.6` | 全模态实时推理与代码 (Realtime Agent) | Responses |
+| Google | `google/gemini-3.6-flash` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| Google | `google/gemini-3.5-flash-lite` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| xAI | `x-ai/grok-4.5` | 前沿检测发现 (Auto-Discovered) | Responses |
+| Google | `google/gemini-3.1-flash-lite-image` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| Google | `google/gemini-3.1-flash-image` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| Google | `google/gemini-3-pro-image` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| Anthropic | `~anthropic/claude-fable-latest` | 前沿检测发现 (Auto-Discovered) | Messages |
+| Google | `google/gemini-3.5-flash` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| Google | `google/gemini-3.1-flash-lite` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| xAI | `x-ai/grok-4.3` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.5-pro` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.5` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.4-image-2` | 前沿检测发现 (Auto-Discovered) | Responses |
+| xAI | `x-ai/grok-4.20-multi-agent` | 前沿检测发现 (Auto-Discovered) | Responses |
+| xAI | `x-ai/grok-4.20` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.4-nano` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.4-mini` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.4-pro` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.4` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.3-codex` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.2-codex` | 前沿检测发现 (Auto-Discovered) | Responses |
+| Google | `google/gemini-3-flash-preview` | 前沿检测发现 (Auto-Discovered) | Interactions |
+| OpenAI | `openai/gpt-5.2-chat` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.2-pro` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.2` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.1-codex-max` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5.1` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5-image-mini` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5-image` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5-pro` | 前沿检测发现 (Auto-Discovered) | Responses |
+| OpenAI | `openai/gpt-5` | 前沿检测发现 (Auto-Discovered) | Responses |
 
 ## 2. 各厂商核心型号特性与审计注意事项
 
