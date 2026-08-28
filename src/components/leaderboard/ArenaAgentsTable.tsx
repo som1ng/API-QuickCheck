@@ -528,7 +528,7 @@ export const ArenaAgentsTable: React.FC<ArenaAgentsTableProps> = ({
                     )}
 
                     {/* Actions & Links */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap sticky right-0 z-10 bg-[#1b1a18] group-hover:bg-[#23211e] transition-colors">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"

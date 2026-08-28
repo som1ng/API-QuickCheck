@@ -96,13 +96,11 @@ export async function runFidelityAudit(
     const progressPercent = 40 + Math.round(((i + 1) / (selectedProbes.length || 1)) * 55);
     onProgress?.(`正在运行探针 [${i + 1}/${selectedProbes.length}]: ${probe.title}...`, progressPercent);
 
-    interface ChatProbeResponse {
+    const probeRes = await silentFetch<{
       choices?: Array<{ message?: { content?: string } }>;
       usage?: { prompt_tokens?: number; completion_tokens?: number };
       system_fingerprint?: string;
-    }
-
-    const probeRes = await silentFetch<ChatProbeResponse>({
+    }>({
       url: chatUrl,
       method: 'POST',
       headers: {
