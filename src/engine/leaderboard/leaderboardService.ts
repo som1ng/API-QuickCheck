@@ -354,3 +354,42 @@ export function mapModelToApiId(rawName: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9.]+/g, '-');
 }
+
+/**
+ * Resolves creator/lab name to a standard ProviderIcon key
+ */
+export function resolveProviderLogoKey(creatorOrLab: string): string {
+  const c = (creatorOrLab || '').toLowerCase().trim();
+  if (!c) return 'custom';
+
+  if (c.includes('anthropic') || c.includes('claude')) return 'claude';
+  if (c.includes('openai') || c.includes('chatgpt')) return 'openai';
+  if (c.includes('google') || c.includes('gemini')) return 'google';
+  if (c.includes('deepseek')) return 'deepseek';
+  if (c.includes('spacexai') || c.includes('xai') || c.includes('x.ai') || c.includes('grok')) return 'xai';
+  if (c.includes('kimi') || c.includes('moonshot')) return 'kimi';
+  if (c.includes('alibaba') || c.includes('qwen') || c.includes('aliyun') || c.includes('tongyi')) return 'qwen';
+  if (c.includes('z ai') || c.includes('z.ai') || c.includes('zai') || c.includes('zhipu') || c.includes('glm') || c.includes('智谱')) return 'zhipu';
+  if (c.includes('meta') || c.includes('llama') || c.includes('facebook')) return 'meta';
+  if (c.includes('xiaomi') || c.includes('miai') || c.includes('小米')) return 'xiaomi';
+  if (c.includes('tencent') || c.includes('hunyuan') || c.includes('腾讯')) return 'tencent';
+  if (c.includes('minimax') || c.includes('hailuo') || c.includes('名之梦')) return 'minimax';
+  if (c.includes('mistral') || c.includes('mixtral') || c.includes('codestral') || c.includes('pixtral')) return 'mistral';
+  if (c.includes('upstage') || c.includes('solar')) return 'upstage';
+  if (c.includes('nvidia') || c.includes('nemotron')) return 'nvidia';
+  if (c.includes('thinking machines') || c.includes('thinky')) return 'thinky';
+  if (c.includes('bytedance') || c.includes('doubao') || c.includes('seed') || c.includes('字节')) return 'bytedance';
+  if (c.includes('baidu') || c.includes('ernie') || c.includes('wenxin') || c.includes('百度')) return 'baidu';
+  if (c.includes('stepfun') || c.includes('step') || c.includes('阶跃')) return 'stepfun';
+  if (c.includes('kwai') || c.includes('kling') || c.includes('kwaikat') || c.includes('快手')) return 'kwai';
+  if (c.includes('cohere') || c.includes('command')) return 'cohere';
+  if (c.includes('microsoft') || c.includes('msft') || c.includes('phi')) return 'microsoft';
+  if (c.includes('amazon') || c.includes('aws') || c.includes('bedrock') || c.includes('nova')) return 'amazon';
+  if (c.includes('perplexity')) return 'perplexity';
+  if (c.includes('ai21') || c.includes('jamba')) return 'ai21';
+  if (c.includes('cerebras')) return 'cerebras';
+  if (c.includes('siliconflow') || c.includes('siliconcloud')) return 'siliconflow';
+  if (c.includes('openrouter')) return 'openrouter';
+
+  return 'custom';
+}

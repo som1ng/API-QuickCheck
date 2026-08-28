@@ -151,28 +151,28 @@ export const LeaderboardTab: React.FC = () => {
     return [
       {
         icon: Brain,
-        tone: 'text-amber-400',
+        tone: 'text-[#cc785c]',
         title: '智力最强',
         model: intelligence?.name ?? '--',
         detail: intelligence?.intelligenceIndex != null ? `智力指数 ${intelligence.intelligenceIndex}` : '--',
       },
       {
         icon: Zap,
-        tone: 'text-amber-400',
+        tone: 'text-[#5db872]',
         title: '生成最快',
         model: speed?.name ?? '--',
         detail: speed?.medianTokensPerSec != null ? `${speed.medianTokensPerSec.toLocaleString()} tokens/s` : '--',
       },
       {
         icon: Clock,
-        tone: 'text-cyan-400',
+        tone: 'text-[#5db8a6]',
         title: '首字最快',
         model: latency?.name ?? '--',
         detail: latency?.latencyFirstChunkSec != null ? `TTFT ${latency.latencyFirstChunkSec.toFixed(2)}s` : '--',
       },
       {
         icon: Layers,
-        tone: 'text-purple-400',
+        tone: 'text-[#e8a55a]',
         title: '上下文最长',
         model: context?.name ?? '--',
         detail: context?.contextWindow != null ? formatContextWindow(context.contextWindow) : '--',
@@ -188,28 +188,28 @@ export const LeaderboardTab: React.FC = () => {
     return [
       {
         icon: TrendingUp,
-        tone: 'text-emerald-400',
+        tone: 'text-[#5db872]',
         title: '净提升最高',
         model: net?.name ?? '--',
         detail: net?.netImprovementPct != null ? `+${net.netImprovementPct.toFixed(2)}% 净提升` : '--',
       },
       {
         icon: CheckCircle,
-        tone: 'text-cyan-400',
+        tone: 'text-[#5db8a6]',
         title: '完工确认最多',
         model: confirmed?.name ?? '--',
         detail: confirmed?.confirmedSuccessPct != null ? `${confirmed.confirmedSuccessPct.toFixed(2)}% 确认完工` : '--',
       },
       {
         icon: Bot,
-        tone: 'text-amber-400',
+        tone: 'text-[#e8a55a]',
         title: '好评最多',
         model: praise?.name ?? '--',
         detail: praise?.praiseVsComplaintPct != null ? `${praise.praiseVsComplaintPct.toFixed(2)}% 好评比` : '--',
       },
       {
         icon: Terminal,
-        tone: 'text-emerald-400',
+        tone: 'text-[#cc785c]',
         title: '报错恢复最快',
         model: recovery?.name ?? '--',
         detail: recovery?.bashRecoveryPct != null ? `${recovery.bashRecoveryPct.toFixed(2)}% 恢复率` : '--',
@@ -266,29 +266,26 @@ export const LeaderboardTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8">
       {/* 1. Header Banner */}
-      <div className="rounded-2xl border border-[#2e2b27] bg-[#181715] p-6 sm:p-8 relative overflow-hidden shadow-2xl">
-        <div className="absolute -right-16 -top-16 w-80 h-80 bg-[#cc785c]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute right-1/4 -bottom-20 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2.5">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#cc785c]/20 border border-[#cc785c]/40 flex items-center justify-center text-[#cc785c] shadow-sm">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#cc785c]/15 border border-[#cc785c]/30 flex items-center justify-center text-[#cc785c]">
                 <Trophy className="w-5 h-5" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight font-sans">
-                全球大模型天梯排行榜
+              <h2 className="font-serif-display text-2xl sm:text-3xl font-medium text-[#faf9f5] tracking-tight">
+                AI 编程 / Agent 天梯榜
               </h2>
-              <span className="px-2.5 py-1 rounded-full bg-[#252320] border border-[#36332e] text-xs font-mono text-[#cc785c] font-bold">
-                权威双榜快照
+              <span className="px-2.5 py-1 rounded-full bg-[#cc785c]/15 border border-[#cc785c]/30 text-xs font-mono text-[#cc785c]">
+                双榜快照
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed font-normal">
-              两份榜单，两种视角：<strong className="text-slate-100 font-semibold">Artificial Analysis</strong> 用标准化基准测试给模型打分（智力、速度、成本）；{' '}
-              <strong className="text-slate-100 font-semibold">Arena (LMArena)</strong> 汇总真实用户的盲测会话，统计 Agent 实际干活时的完工率、纠错与工具使用表现。数据为定期快照，指标含义见各列标题。
+            <p className="text-xs sm:text-sm text-[#9c9689] max-w-3xl leading-relaxed">
+              两份榜单，两种视角：<strong className="text-[#d4cebe] font-medium">Artificial Analysis</strong> 用标准化基准测试给模型打分（智力、速度、成本）；{' '}
+              <strong className="text-[#d4cebe] font-medium">Arena (LMArena)</strong> 汇总真实用户的盲测会话，统计 Agent 实际干活时的完工率、纠错与工具使用表现。数据为定期快照，指标含义见各列标题。
             </p>
           </div>
 
@@ -298,38 +295,38 @@ export const LeaderboardTab: React.FC = () => {
               href="https://artificialanalysis.ai/leaderboards/models"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#201f1c] hover:bg-[#282723] text-slate-200 hover:text-slate-100 border border-[#2e2b27] text-xs sm:text-sm font-mono font-bold transition cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#2e2b27] bg-[#23211e] hover:border-[#cc785c]/40 px-3.5 py-2 text-xs font-mono text-[#d4cebe] hover:text-[#faf9f5] transition"
             >
               <span>Artificial Analysis</span>
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              <ExternalLink className="w-3.5 h-3.5 text-[#9c9689]" />
             </a>
 
             <a
               href="https://arena.ai/leaderboard/agent"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#201f1c] hover:bg-[#282723] text-slate-200 hover:text-slate-100 border border-[#2e2b27] text-xs sm:text-sm font-mono font-bold transition cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#2e2b27] bg-[#23211e] hover:border-[#cc785c]/40 px-3.5 py-2 text-xs font-mono text-[#d4cebe] hover:text-[#faf9f5] transition"
             >
               <span>Arena Agent</span>
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              <ExternalLink className="w-3.5 h-3.5 text-[#9c9689]" />
             </a>
           </div>
         </div>
 
         {/* 2. Highlights: derived from snapshot data, no hardcoded numbers */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mt-6 pt-6 border-t border-[#272522]">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mt-6 pt-6 border-t border-[#2e2b27]">
           {highlightCards.map((card) => {
             const Icon = card.icon;
             return (
-              <div key={card.title} className="p-4 rounded-xl bg-[#1d1c1a] border border-[#2e2b27] hover:border-[#36332e] transition shadow-sm">
-                <div className={`flex items-center gap-2 text-xs sm:text-sm font-bold tracking-normal ${card.tone}`}>
+              <div key={card.title} className="p-4 rounded-xl border border-[#2e2b27] bg-[#23211e] hover:border-[#cc785c]/30 transition">
+                <div className="flex items-center gap-2 text-xs text-[#9c9689]">
                   <Icon className={`w-4 h-4 ${card.tone}`} />
                   <span>{card.title}</span>
                 </div>
-                <div className="mt-1.5 text-base sm:text-lg font-black text-slate-100 font-sans tracking-tight">
+                <div className="mt-1.5 text-sm sm:text-base font-medium text-[#faf9f5] tracking-tight truncate" title={card.model}>
                   {card.model}
                 </div>
-                <div className={`text-xs sm:text-sm font-mono font-bold mt-1 ${card.tone}`}>
+                <div className={`mt-1 text-xs sm:text-sm font-mono ${card.tone}`}>
                   {card.detail}
                 </div>
               </div>
@@ -342,32 +339,35 @@ export const LeaderboardTab: React.FC = () => {
       <div className="space-y-4">
         {/* Dual Tab Switcher with Dynamic Sliding Indicator */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="relative inline-flex p-1.5 rounded-2xl bg-[#181715] border border-[#2e2b27] shadow-inner select-none">
+          <div className="relative inline-flex p-1.5 rounded-xl bg-[#1b1a18] border border-[#2e2b27] select-none">
             {/* Smooth Sliding Pill */}
             <span
-              className="absolute top-1.5 bottom-1.5 rounded-xl bg-[#252320] border border-[#36332e] shadow-[0_2px_12px_rgba(0,0,0,0.6)] pointer-events-none transition-all duration-300 ease-out"
+              className="absolute top-1.5 bottom-1.5 rounded-lg bg-[#cc785c] shadow-sm pointer-events-none transition-all duration-300"
               style={{
                 transform: `translateX(${boardPill.left}px)`,
                 width: `${boardPill.width}px`,
                 opacity: boardPill.opacity,
                 transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
               }}
-            >
-              {/* Accent Underglow */}
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[2.5px] bg-[#cc785c] rounded-full shadow-[0_0_10px_#cc785c]" />
-            </span>
+            />
 
             <button
               ref={(el) => { boardRefs.current['aa'] = el; }}
               type="button"
               onClick={(e) => handleBoardClick('aa', e.currentTarget)}
-              className={`relative z-10 flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm sm:text-base font-bold transition-colors duration-200 cursor-pointer ${
-                activeBoard === 'aa' ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
+              className={`relative z-10 flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 cursor-pointer ${
+                activeBoard === 'aa' ? 'text-[#faf9f5]' : 'text-[#9c9689] hover:text-[#faf9f5]'
               }`}
             >
-              <Brain className={`w-4 h-4 transition-colors ${activeBoard === 'aa' ? 'text-[#cc785c]' : 'text-slate-500'}`} />
+              <Brain className="w-4 h-4" />
               <span>全球模型综合性能榜</span>
-              <span className="px-2 py-0.5 text-xs font-mono font-bold rounded-md bg-[#181715] border border-[#36332e] text-amber-400">
+              <span
+                className={`px-2 py-0.5 text-xs font-mono rounded-md border transition-colors ${
+                  activeBoard === 'aa'
+                    ? 'bg-white/15 border-white/20 text-[#faf9f5]'
+                    : 'bg-[#cc785c]/15 border-[#cc785c]/30 text-[#cc785c]'
+                }`}
+              >
                 {aaSnapshot.rowCount}
               </span>
             </button>
@@ -376,46 +376,52 @@ export const LeaderboardTab: React.FC = () => {
               ref={(el) => { boardRefs.current['arena'] = el; }}
               type="button"
               onClick={(e) => handleBoardClick('arena', e.currentTarget)}
-              className={`relative z-10 flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm sm:text-base font-bold transition-colors duration-200 cursor-pointer ${
-                activeBoard === 'arena' ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
+              className={`relative z-10 flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 cursor-pointer ${
+                activeBoard === 'arena' ? 'text-[#faf9f5]' : 'text-[#9c9689] hover:text-[#faf9f5]'
               }`}
             >
-              <Bot className={`w-4 h-4 transition-colors ${activeBoard === 'arena' ? 'text-[#cc785c]' : 'text-slate-500'}`} />
+              <Bot className="w-4 h-4" />
               <span>Agent 智能体实战榜</span>
-              <span className="px-2 py-0.5 text-xs font-mono font-bold rounded-md bg-[#181715] border border-[#36332e] text-amber-400">
+              <span
+                className={`px-2 py-0.5 text-xs font-mono rounded-md border transition-colors ${
+                  activeBoard === 'arena'
+                    ? 'bg-white/15 border-white/20 text-[#faf9f5]'
+                    : 'bg-[#cc785c]/15 border-[#cc785c]/30 text-[#cc785c]'
+                }`}
+              >
                 {arenaSnapshot.rowCount}
               </span>
             </button>
           </div>
 
           {/* Quick Stats / Info */}
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-mono font-bold text-slate-300">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#9c9689]">
             <Calendar className="w-4 h-4 text-[#cc785c]" />
             <span>基准: {activeBoard === 'aa' ? aaSnapshot.asOf : arenaSnapshot.asOf}</span>
             <span>·</span>
             <span>
-              已筛选 <strong className="text-slate-100 font-extrabold">{activeBoard === 'aa' ? filteredAaModels.length : filteredArenaAgents.length}</strong> 款
+              已筛选 <span className="text-[#faf9f5]">{activeBoard === 'aa' ? filteredAaModels.length : filteredArenaAgents.length}</span> 款
             </span>
           </div>
         </div>
 
         {/* Search & Vendor Filter Pills */}
-        <div className="p-4 sm:p-5 rounded-2xl border border-[#2e2b27] bg-[#181715] space-y-3.5 shadow-md">
+        <div className="p-4 sm:p-5 rounded-xl border border-[#2e2b27] bg-[#1b1a18] space-y-3.5">
           {/* Top Search Line */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#9c9689] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="搜索模型名称、厂商、版本（如 claude-opus, gpt-5, kimi, deepseek, 1M 等）..."
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#201f1c] border border-[#2e2b27] focus:border-[#cc785c] text-slate-100 placeholder-[#7a776e] text-sm sm:text-base font-sans focus:outline-none transition shadow-inner font-medium"
+              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-[#23211e] border border-[#2e2b27] focus:border-[#cc785c] text-sm text-[#faf9f5] placeholder-[#9c9689]/60 focus:outline-none transition"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-100 cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9c9689] hover:text-[#faf9f5] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -424,12 +430,12 @@ export const LeaderboardTab: React.FC = () => {
 
           {/* Vendor Chips with Dynamic Sliding Capsule */}
           <div className="flex items-center gap-2.5 overflow-x-auto pb-1 no-scrollbar select-none">
-            <span className="text-xs sm:text-sm font-bold text-slate-300 shrink-0 font-mono">厂商筛选:</span>
+            <span className="text-xs font-medium text-[#9c9689] shrink-0">厂商筛选:</span>
 
-            <div className="relative inline-flex items-center p-1 rounded-xl bg-[#201f1c] border border-[#2e2b27] shadow-inner">
+            <div className="relative inline-flex items-center p-1 rounded-lg bg-[#23211e] border border-[#2e2b27]">
               {/* Dynamic Sliding Capsule Indicator */}
               <span
-                className="absolute top-1 bottom-1 rounded-lg bg-[#36332e] border border-[#4a463f] shadow-sm pointer-events-none transition-all duration-300 ease-out"
+                className="absolute top-1 bottom-1 rounded-md bg-[#cc785c]/15 border border-[#cc785c]/30 pointer-events-none transition-all duration-300"
                 style={{
                   transform: `translateX(${vendorPill.left}px)`,
                   width: `${vendorPill.width}px`,
@@ -446,8 +452,8 @@ export const LeaderboardTab: React.FC = () => {
                     ref={(el) => { vendorRefs.current[opt.id] = el; }}
                     type="button"
                     onClick={(e) => handleVendorClick(opt.id, e.currentTarget)}
-                    className={`relative z-10 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer shrink-0 font-sans ${
-                      isSelected ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
+                    className={`relative z-10 px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 cursor-pointer shrink-0 ${
+                      isSelected ? 'text-[#cc785c]' : 'text-[#9c9689] hover:text-[#faf9f5]'
                     }`}
                   >
                     {opt.label}
@@ -479,13 +485,13 @@ export const LeaderboardTab: React.FC = () => {
       )}
 
       {/* 5. Bottom Guide */}
-      <div className="rounded-2xl border border-[#2e2b27] bg-[#181715]/60 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="rounded-xl border border-[#2e2b27] bg-[#1b1a18] p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="text-sm sm:text-base font-bold text-slate-100 flex items-center gap-2">
+          <div className="text-sm sm:text-base font-medium text-[#faf9f5] flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#cc785c]" />
             <span>怀疑中转站偷换模型？</span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+          <p className="text-xs sm:text-sm text-[#9c9689] leading-relaxed">
             点任意行的「一键测真」，模型名会自动填入检测模块，随后执行签名校验、推理深度与性能全套审计，判断上游是不是真货。
           </p>
         </div>
@@ -496,7 +502,7 @@ export const LeaderboardTab: React.FC = () => {
             dispatch({ type: 'SET_ACTIVE_TAB', payload: 'home' });
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="px-4.5 py-2.5 rounded-xl bg-[#252320] hover:bg-[#36332e] text-slate-100 border border-[#36332e] hover:border-[#cc785c]/50 text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition cursor-pointer shadow-sm"
+          className="px-5 py-2.5 rounded-lg bg-[#23211e] hover:bg-[#2e2b27] text-[#d4cebe] hover:text-[#faf9f5] border border-[#2e2b27] hover:border-[#cc785c]/50 text-xs sm:text-sm font-medium flex items-center gap-2 shrink-0 transition cursor-pointer"
         >
           <span>前往中转站检测</span>
           <ArrowRight className="w-4 h-4 text-[#cc785c]" />
@@ -505,5 +511,3 @@ export const LeaderboardTab: React.FC = () => {
     </div>
   );
 };
-
-
