@@ -6,7 +6,6 @@ import {
   mapConcurrent,
   exportValidEnv,
   exportCsvReport,
-  runBatchAudit,
 } from '../src/engine/audit/batchRunner';
 import { BatchAuditReport } from '../src/types/batch';
 
@@ -203,3 +202,4 @@ test('exportValidEnv and exportCsvReport generate structured outputs', () => {
   assert.ok(csvStr.includes('"Dead Relay"'));
   assert.ok(csvStr.includes('"invalid_key"'));
 });
+
