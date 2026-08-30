@@ -4,44 +4,48 @@ import { createBaselineSnapshot, serializeBaselineSnapshot, validateBaselineSnap
 import { runAudit } from '../src/engine/audit/runner';
 import { PROVIDER_ADAPTERS, detectAuditProvider } from '../src/engine/audit/providerAdapters';
 import { AuditProfile, AuditProvider } from '../src/types/audit';
-
 import { fetchLatestFrontierModels } from '../src/engine/baselines/modelSyncService';
+import {
+  parseBatchInput,
+  runBatchAudit,
+  exportValidEnv,
+  exportCsvReport,
+} from '../src/engine/audit/batchRunner';
+import { BatchKeyInputItem } from '../src/types/batch';
 
 type ParsedArgs = Record<string, string | boolean>;
 
-/* const LOGO = `\x1b[38;2;204;120;92m
-   █████╗ ██████╗ ██╗    ██████╗ ██╗   ██╗██╗ ██████╗██╗  ██╗
-  ██╔══██╗██╔══██╗██║   ██╔═══██╗██║   ██║██║██╔════╝██║ ██╔╝
-  ███████║██████╔╝██║   ██║   ██║██║   ██║██║██║     █████╔╝
-  ██╔══██║██╔═══╝ ██║   ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗
-  ██║  ██║██║     ██║   ╚██████╔╝╚██████╔╝██║╚██████╗██║  ██╗
-  ╚═╝  ╚═╝╚═╝     ╚═╝    ╚══▀▀═╝  ╚═════╝ ╚═╝ ╚═════╝╚═╝  ╚═╝
-               ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
-              ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
-              ██║     ███████║█████╗  ██║     █████╔╝
-              ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗
-              ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
-               ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝\x1b[0m
-\x1b[38;2;156;150;137m  ─────────────────────────────────────────────────────────────\x1b[0m
- \x1b[38;2;250;249;245m  AI RELAY AUDIT · PROTOCOL · CAPABILITY · BASELINE\x1b[0m`;
-*/
-
 function printHelp(): void {
-  process.stdout.write(`用法:
-  npx api-quickcheck audit --model <id> --base-url <url> [选项]
-  npx api-quickcheck baseline capture --model <id> --base-url <url> [选项]
-  npx api-quickcheck update  (检查版本与在线同步 2026 前沿模型基线)
-  npx api-quickcheck sync    (快速同步基线数据)
+  process.stdout.write(`API-QuickCheck CLI (v3.2.0) - 工业级 AI API 质量审计与批量质检引擎
 
-选项:
+用法:
+  npx api-quickcheck batch [选项]                                (批量检测待处理 API-Key 资产池)
+  npx api-quickcheck audit --model <id> --base-url <url> [选项]  (单端点深度审计与测真)
+  npx api-quickcheck baseline capture --model <id> [选项]        (捕获官方基线快照)
+  npx api-quickcheck update                                      (检查版本与同步 2026 前沿模型清单)
+  npx api-quickcheck sync                                        (快速同步模型基线)
+
+batch 批量检测选项:
+  --input <file>             待检文件路径 (支持 .json, .csv, .env, .txt，传 - 表示从 stdin 读取)
+  --keys <str>               命令行直接传入单/多个 Key 字符串 (逗号分隔或 JSON)
+  --base-url <url>           默认 API Base URL (当输入项未指定时回退，默认 https://api.openai.com/v1)
+  --models <m1,m2,...>       指定需测试的模型列表 (默认 claude-3-7-sonnet,gpt-4o,deepseek-r1)
+  --concurrency <N>          并发数控制 (默认 5)
+  --profile <quick|balanced> 探测深度 (默认 quick 极速探活，balanced 全面测真)
+  --json                     纯 JSON 输出模式至 stdout (所有进度走 stderr，专为 Agent 设计)
+  --out <file.json>          保存完整批处理 JSON 审计报告
+  --export-valid <file>      导出有效/健康 Key 清单 (支持 .json, .env, .csv)
+  --export-csv <file.csv>    导出 CSV 统计表格
+
+audit 单项审计选项:
   --provider <openai|anthropic|gemini|xai|openrouter>
   --profile <quick|balanced|deep>
-  --probes <id,id,...>       只执行指定测试
-  --api-key <key>            或使用 APIQC_API_KEY；OpenRouter 可使用 OPENROUTER_API_KEY
+  --probes <id,id,...>       只执行指定探针
+  --api-key <key>            或使用 APIQC_API_KEY；OpenRouter 可用 OPENROUTER_API_KEY
   --out <file>               audit 默认 reports/audit-report.json
   --baseline <file>          加载 baseline capture 生成的 JSON 文件
 
-密钥只用于本次进程，不会写入报告。\n`);
+密钥仅在当前进程内存中使用，绝不会向外泄露或上传。\n`);
 }
 
 function parseArgs(values: string[]): ParsedArgs {
@@ -88,11 +92,151 @@ async function readBaselineFile(path: string | undefined) {
   return value;
 }
 
+async function readStdin(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk) => {
+      data += chunk;
+    });
+    process.stdin.on('end', () => resolve(data));
+    process.stdin.on('error', (err) => reject(err));
+  });
+}
+
+async function handleBatchCommand(args: ParsedArgs): Promise<void> {
+  const isJsonMode = args.json === true;
+  const defaultBaseUrl = typeof args['base-url'] === 'string' ? args['base-url'] : 'https://api.openai.com/v1';
+  const models = typeof args.models === 'string'
+    ? args.models.split(/[\s,]+/).map((m) => m.trim()).filter(Boolean)
+    : ['claude-3-7-sonnet', 'gpt-4o', 'deepseek-r1'];
+  const concurrency = typeof args.concurrency === 'string' ? Math.max(1, parseInt(args.concurrency, 10) || 5) : 5;
+  const profile = (typeof args.profile === 'string' ? args.profile : 'quick') as AuditProfile;
+
+  let rawContent = '';
+
+  if (typeof args.input === 'string') {
+    if (args.input === '-') {
+      rawContent = await readStdin();
+    } else {
+      rawContent = await readFile(args.input, 'utf8');
+    }
+  } else if (typeof args.keys === 'string') {
+    rawContent = args.keys;
+  } else if (!process.stdin.isTTY) {
+    rawContent = await readStdin();
+  }
+
+  if (!rawContent.trim()) {
+    throw new Error('未提供任何待检测的 API-Key 内容。请通过 --input <file>、--keys <str> 或 stdin 管道输入。');
+  }
+
+  const items: BatchKeyInputItem[] = parseBatchInput(rawContent, defaultBaseUrl, models);
+  if (items.length === 0) {
+    throw new Error('未能从输入中解析出有效的 API-Key。请检查格式（支持 JSON, CSV, .env 或逐行 sk-xxx）。');
+  }
+
+  const log = (msg: string) => {
+    if (isJsonMode) {
+      process.stderr.write(`${msg}\n`);
+    } else {
+      process.stdout.write(`${msg}\n`);
+    }
+  };
+
+  log(`\n🚀 启动 API-Key 批量质检引擎 (共 ${items.length} 个 Key, 并发度: ${concurrency}, 探测档位: ${profile})`);
+  log(`🎯 目标测试模型: ${models.join(', ')}\n`);
+
+  const report = await runBatchAudit({
+    items,
+    defaultModels: models,
+    concurrency,
+    profile: profile === 'deep' ? 'deep' : profile === 'balanced' ? 'balanced' : 'quick',
+    onItemProgress: (completed, total, cur) => {
+      const pct = Math.round((completed / total) * 100);
+      log(`[${completed}/${total}] (${pct}%) 正在检测: ${cur.name} (${cur.baseUrl})...`);
+    },
+  });
+
+  // Save report if requested
+  if (typeof args.out === 'string') {
+    await writeJson(args.out, JSON.stringify(report, null, 2));
+    log(`\n📁 完整审计报告已导出: ${args.out}`);
+  }
+
+  // Export valid keys if requested
+  if (typeof args['export-valid'] === 'string') {
+    const exportPath = args['export-valid'];
+    if (exportPath.endsWith('.env')) {
+      const envContent = exportValidEnv(report);
+      await writeJson(exportPath, envContent);
+    } else if (exportPath.endsWith('.csv')) {
+      const csvContent = exportCsvReport(report);
+      await writeJson(exportPath, csvContent);
+    } else {
+      await writeJson(exportPath, JSON.stringify(report.validKeys, null, 2));
+    }
+    log(`💾 有效 Key 清单已导出 (${report.validKeys.length} 个): ${exportPath}`);
+  }
+
+  // Export CSV if requested
+  if (typeof args['export-csv'] === 'string') {
+    const csvContent = exportCsvReport(report);
+    await writeJson(args['export-csv'], csvContent);
+    log(`📊 CSV 报表已导出: ${args['export-csv']}`);
+  }
+
+  // If in pure JSON mode, output full report JSON to stdout
+  if (isJsonMode) {
+    process.stdout.write(JSON.stringify(report, null, 2) + '\n');
+    return;
+  }
+
+  // Terminal Pretty Table Output
+  process.stdout.write(`\n${'='.repeat(80)}\n`);
+  process.stdout.write(`               📊 API-Key 批量质检与真伪审计结果汇总\n`);
+  process.stdout.write(`${'='.repeat(80)}\n\n`);
+
+  for (let i = 0; i < report.results.length; i++) {
+    const r = report.results[i];
+    const statusIcon = r.overallStatus === 'healthy' ? '🟢 正常/真品' : r.overallStatus === 'degraded' ? '🟡 降级/部分可用' : '🔴 异常/失效';
+    process.stdout.write(`[#${i + 1}] ${r.name} | 端点: ${r.baseUrl} | Key: ${r.maskedKey}\n`);
+    process.stdout.write(`     综合状态: ${statusIcon} (通过: ${r.successCount}/${r.testedModels.length})\n`);
+
+    for (const m of r.testedModels) {
+      const mStatus = m.status === 'alive' ? '✅ 可用' : `❌ ${m.status}`;
+      const scoreStr = m.genuineScore !== undefined ? `真伪分: ${m.genuineScore}` : '';
+      const latencyStr = m.latencyMs !== undefined ? `延迟: ${m.latencyMs}ms` : '';
+      const tpsStr = m.tps ? `TPS: ${m.tps}t/s` : '';
+      const sigStr = m.signatureVerified === true ? '🔏已验签' : m.signatureVerified === false ? '⚠️无签名' : '';
+      const reasonStr = m.reasoningStream === true ? '🧠思维流' : '';
+
+      const tags = [scoreStr, latencyStr, tpsStr, sigStr, reasonStr].filter(Boolean).join(' | ');
+      const errStr = m.error ? ` -> 错误: ${m.error}` : '';
+
+      process.stdout.write(`       - 模型 [${m.model}]: ${mStatus} ${tags ? `(${tags})` : ''}${errStr}\n`);
+    }
+    process.stdout.write('\n');
+  }
+
+  const durSec = (report.summary.durationMs / 1000).toFixed(2);
+  process.stdout.write(`${'-'.repeat(80)}\n`);
+  process.stdout.write(`总检测 Key 数: ${report.summary.totalKeys} | 🟢 正常: ${report.summary.healthyKeys} | 🟡 降级: ${report.summary.degradedKeys} | 🔴 失效: ${report.summary.deadKeys}\n`);
+  process.stdout.write(`总模型探针数: ${report.summary.totalModelProbes} (通过: ${report.summary.passedModelProbes}, 失败: ${report.summary.failedModelProbes}) | 总耗时: ${durSec}s\n`);
+  process.stdout.write(`${'='.repeat(80)}\n\n`);
+}
+
 async function main(): Promise<void> {
   const command = process.argv[2];
   const args = parseArgs(process.argv.slice(3));
+
   if (!command || command === '--help' || args.help === true) {
     printHelp();
+    return;
+  }
+
+  if (command === 'batch') {
+    await handleBatchCommand(args);
     return;
   }
 
@@ -131,7 +275,7 @@ async function main(): Promise<void> {
   }
 
   if (command !== 'audit' && command !== 'baseline') {
-    throw new Error('Usage: apiqc audit|baseline capture|update|sync --provider <provider> --model <id> --profile <profile>');
+    throw new Error('Usage: apiqc batch|audit|baseline capture|update|sync ...');
   }
 
   const isCapture = command === 'baseline';
