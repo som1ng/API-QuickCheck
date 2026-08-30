@@ -16,7 +16,7 @@ import { BatchKeyInputItem } from '../src/types/batch';
 type ParsedArgs = Record<string, string | boolean>;
 
 function printHelp(): void {
-  process.stdout.write(`API-QuickCheck CLI (v3.2.0) - 工业级 AI API 质量审计与批量质检引擎
+  process.stdout.write(`API-QuickCheck CLI (v3.3.0) - 工业级 AI API 质量审计与批量质检引擎
 
 用法:
   npx api-quickcheck batch [选项]                                (批量检测待处理 API-Key 资产池)
@@ -242,7 +242,7 @@ async function main(): Promise<void> {
 
   if (command === 'update' || command === 'sync') {
     process.stdout.write(`🔍 正在检查版本更新与权威模型基线...\n\n`);
-    const currentVersion = '3.2.0';
+    const currentVersion = '3.3.0';
     try {
       const res = await fetch('https://registry.npmjs.org/api-quickcheck/latest', {
         signal: AbortSignal.timeout(4000),

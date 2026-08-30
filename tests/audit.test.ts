@@ -249,13 +249,35 @@ test('anthropic signature continuation preserves the original assistant answer',
     'https://api.anthropic.com/v1',
     'key',
     'claude-sonnet-5',
-    'signed thinking',
-    'signature-value',
+    { type: 'thinking', thinking: 'signed thinking', signature: 'signature-value' },
     'The greatest common divisor is 1.',
   );
   const messages = request?.body.messages as Array<{ role: string; content: unknown }>;
   const assistant = messages?.find((message) => message.role === 'assistant');
   assert.equal((assistant?.content as Array<{ type: string; text?: string }>)[1]?.text, 'The greatest common divisor is 1.');
+});
+
+test('anthropic signature continuation replays redacted_thinking blocks in their original shape', () => {
+  const request = PROVIDER_ADAPTERS.anthropic.signatureContinuation?.(
+    'https://api.anthropic.com/v1',
+    'key',
+    'claude-opus-5',
+    { type: 'redacted_thinking', data: 'encrypted-blob' },
+  );
+  const messages = request?.body.messages as Array<{ role: string; content: unknown }>;
+  const assistant = messages?.find((message) => message.role === 'assistant');
+  const replayed = (assistant?.content as Array<Record<string, unknown>>)[0];
+  assert.deepEqual(replayed, { type: 'redacted_thinking', data: 'encrypted-blob' });
+});
+
+test('anthropic reasoning probe switches Haiku to extended thinking', () => {
+  const haiku = PROVIDER_ADAPTERS.anthropic.reasoning?.('https://api.anthropic.com/v1', 'key', 'claude-haiku-4-5');
+  assert.deepEqual(haiku?.body.thinking, { type: 'enabled', budget_tokens: 4000 });
+  assert.equal(haiku?.body.output_config, undefined);
+
+  const opus = PROVIDER_ADAPTERS.anthropic.reasoning?.('https://api.anthropic.com/v1', 'key', 'claude-opus-5');
+  assert.deepEqual(opus?.body.thinking, { type: 'adaptive', display: 'summarized' });
+  assert.deepEqual(opus?.body.output_config, { effort: 'high' });
 });
 
 test('anthropic adapter builds the standard Messages endpoint from a root URL', () => {

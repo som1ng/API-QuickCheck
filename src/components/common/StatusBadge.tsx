@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, XCircle, Clock, HelpCircle, ShieldCheck } from 'lucide-react';
 import { ModelStatus } from '../../types/scanner';
-import { FidelityLevel } from '../../types/fidelity';
+import { FidelityLevel } from '../../types/batch';
 import { KeyHealthStatus } from '../../types/batchKeys';
 
 type BadgeVariant = ModelStatus | FidelityLevel | KeyHealthStatus | 'supported' | 'unsupported';

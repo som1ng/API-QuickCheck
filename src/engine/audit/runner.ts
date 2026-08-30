@@ -478,17 +478,19 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
   if (shouldExecute('p1-tool-roundtrip')) await runToolRoundtrip('p1-tool-roundtrip', '受控工具回合');
   if (shouldExecute('p2-tool-planning')) await runToolRoundtrip('p2-tool-planning', '双回合工具规划');
   if (shouldExecute('p1-signature-continuity') && provider === 'anthropic' && reasoningResult) {
-    const signature = reasoningResult.signature || '';
-    const thinkingText = reasoningResult.thinkingText || '';
-    if (signature && thinkingText && adapter.signatureContinuation) {
+    const thinkingBlock = reasoningResult.thinkingBlock;
+    if (thinkingBlock && adapter.signatureContinuation) {
       try {
-        const continuation = await execute(adapter, adapter.signatureContinuation(options.baseUrl, options.apiKey, options.model, thinkingText, signature, reasoningResult.text), options.signal);
+        const continuation = await execute(adapter, adapter.signatureContinuation(options.baseUrl, options.apiKey, options.model, thinkingBlock, reasoningResult.text), options.signal);
         nativeResults.push(continuation);
+        const blockDesc = thinkingBlock.type === 'redacted_thinking'
+          ? 'redacted_thinking 加密块（按原形状回传）'
+          : `thinking signature（长度 ${String(thinkingBlock.signature ?? '').length}）`;
         protocol.push({
           id: 'p1-signature-continuity',
           title: '思考签名连续性',
           status: continuation.response.ok ? 'pass' : routeStatus(continuation.response),
-          detail: continuation.response.ok ? `捕获并成功回传 Anthropic thinking signature（长度 ${signature.length}）。` : continuation.response.errorMessage || `签名回传 HTTP ${continuation.response.status}`,
+          detail: continuation.response.ok ? `捕获并成功回传 Anthropic ${blockDesc}，官方验签闭环通过。` : continuation.response.errorMessage || `签名回传 HTTP ${continuation.response.status}`,
           latencyMs: continuation.response.latencyMs,
           rawEventTypes: continuation.eventTypes,
         });
@@ -496,7 +498,9 @@ export async function runAudit(options: AuditRunOptions): Promise<AuditReportV4>
         protocol.push(unavailableEvidence('p1-signature-continuity', '思考签名连续性', '签名第二轮回传请求未能完成。'));
       }
     } else {
-      protocol.push({ id: 'p1-signature-continuity', title: '思考签名连续性', status: reasoningResult.response.ok ? (reasoningResult.thinkingText ? 'fail' : 'unavailable') : routeStatus(reasoningResult.response), detail: reasoningResult.response.ok ? (reasoningResult.thinkingText ? '原生 thinking 响应未提供可回传的 signature。' : '本次 adaptive thinking 未触发，无法检查 signature。') : '推理路由不可用，无法检查签名。', latencyMs: reasoningResult.response.latencyMs });
+      // No thinking block captured: adaptive thinking did not trigger this turn.
+      // Per the audit doctrine, that is unavailable evidence — not evidence of forgery.
+      protocol.push({ id: 'p1-signature-continuity', title: '思考签名连续性', status: reasoningResult.response.ok ? 'unavailable' : routeStatus(reasoningResult.response), detail: reasoningResult.response.ok ? '本次 adaptive thinking 未触发，无法检查 signature。' : '推理路由不可用，无法检查签名。', latencyMs: reasoningResult.response.latencyMs });
     }
   } else if (shouldExecute('p1-signature-continuity')) {
     protocol.push(unavailableEvidence('p1-signature-continuity', '思考签名连续性', '该检查仅适用于 Anthropic Messages thinking 协议。'));

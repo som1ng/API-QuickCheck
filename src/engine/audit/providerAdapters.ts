@@ -15,6 +15,7 @@ export interface NativeResult {
   usage?: Record<string, unknown>;
   signature?: string;
   thinkingText?: string;
+  thinkingBlock?: Record<string, unknown>;
   finishReason?: string;
   toolCalled: boolean;
   toolCall?: { id: string; name: string; arguments: unknown };
@@ -34,7 +35,7 @@ export interface ProviderAdapter {
   stateContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, marker: string) => NativeRequest) | undefined;
   cache?: ((baseUrl: string, apiKey: string, model: string, prefix: string) => NativeRequest) | undefined;
   toolContinuation?: ((baseUrl: string, apiKey: string, model: string, result: NativeResult, toolOutput: string) => NativeRequest) | undefined;
-  signatureContinuation?: ((baseUrl: string, apiKey: string, model: string, thinkingText: string, signature: string, assistantText?: string) => NativeRequest) | undefined;
+  signatureContinuation?: ((baseUrl: string, apiKey: string, model: string, thinkingBlock: Record<string, unknown>, assistantText?: string) => NativeRequest) | undefined;
   parse(response: TransportResponse<Record<string, unknown>>): NativeResult;
 }
 
@@ -102,7 +103,10 @@ const parseMessages = (response: TransportResponse<Record<string, unknown>>): Na
     usage: usageFromResponse(response),
     finishReason: typeof response.data?.stop_reason === 'string' ? response.data.stop_reason : undefined,
     signature: typeof thinking?.signature === 'string' ? thinking.signature : undefined,
-    thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : typeof thinking?.data === 'string' ? thinking.data : undefined,
+    thinkingText: typeof thinking?.thinking === 'string' ? thinking.thinking : undefined,
+    // Keep the raw block: redacted_thinking must be replayed in its original
+    // shape (data field, no signature) or the official endpoint rejects it.
+    thinkingBlock: thinking ? { ...thinking } : undefined,
     toolCalled: Boolean(toolCall),
     toolCall: toolCall ? { id: String(toolCall.id ?? ''), name: String(toolCall.name ?? ''), arguments: toolCall.input } : undefined,
   };
@@ -252,19 +256,22 @@ const anthropic: ProviderAdapter = {
     },
   }),
   tool: (baseUrl, apiKey, model) => ({ url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body: { model, max_tokens: 256, tools: [{ name: 'audit_sum', description: 'Adds two integers.', input_schema: { type: 'object', properties: { a: { type: 'integer' }, b: { type: 'integer' } }, required: ['a', 'b'], additionalProperties: false } }], tool_choice: { type: 'tool', name: 'audit_sum' }, messages: [{ role: 'user', content: 'Call audit_sum with a=19 and b=23. Do not answer in prose.' }] } }),
-  reasoning: (baseUrl, apiKey, model) => ({
-    url: anthropicEndpoint(baseUrl),
-    headers: anthropicHeaders(apiKey),
-    body: {
+  reasoning: (baseUrl, apiKey, model) => {
+    // Different Claude generations accept different thinking modes: adaptive-only
+    // (Opus 4.7 / Claude 5 family) vs extended-only (Haiku). A wrong mode is
+    // rejected with 400 before any signature exists.
+    const isHaiku = /haiku/i.test(model);
+    const body: Record<string, unknown> = {
       model,
       // Anthropic counts thinking and final output against max_tokens. A small
       // cap can make adaptive thinking silently disappear.
       max_tokens: 16_000,
-      thinking: { type: 'adaptive', display: 'summarized' },
-      output_config: { effort: 'high' },
+      thinking: isHaiku ? { type: 'enabled', budget_tokens: 4000 } : { type: 'adaptive', display: 'summarized' },
       messages: [{ role: 'user', content: 'Find the greatest common divisor of 2378 and 1547 using the Euclidean algorithm.' }],
-    },
-  }),
+    };
+    if (!isHaiku) body.output_config = { effort: 'high' };
+    return { url: anthropicEndpoint(baseUrl), headers: anthropicHeaders(apiKey), body };
+  },
   context: (baseUrl, apiKey, model, document) => ({
     url: anthropicEndpoint(baseUrl),
     headers: anthropicHeaders(apiKey),
@@ -312,7 +319,7 @@ const anthropic: ProviderAdapter = {
       ],
     },
   }),
-  signatureContinuation: (baseUrl, apiKey, model, thinkingText, signature, assistantText) => ({
+  signatureContinuation: (baseUrl, apiKey, model, thinkingBlock, assistantText) => ({
     url: anthropicEndpoint(baseUrl),
     headers: anthropicHeaders(apiKey),
     body: {
@@ -323,7 +330,9 @@ const anthropic: ProviderAdapter = {
         {
           role: 'assistant',
           content: [
-            { type: 'thinking', thinking: thinkingText, signature },
+            // Replay the first-turn block verbatim: (thinking, signature) for a
+            // plain thinking block, (data) for a redacted_thinking block.
+            { ...thinkingBlock },
             { type: 'text', text: assistantText || 'The greatest common divisor is 1.' },
           ],
         },

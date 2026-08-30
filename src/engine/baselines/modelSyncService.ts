@@ -210,7 +210,7 @@ export async function fetchLatestFrontierModels(): Promise<ModelSyncResult> {
     clearTimeout(timeout);
 
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json() as { data?: Array<{ id?: string; name?: string; description?: string; context_length?: number; pricing?: { prompt?: string; completion?: string } }> };
       const openRouterModels = Array.isArray(data.data) ? data.data : [];
 
       const mappedModels: FrontierModelEntry[] = [...FALLBACK_2026_MODELS];
@@ -253,7 +253,7 @@ export async function fetchLatestFrontierModels(): Promise<ModelSyncResult> {
           ) {
             mappedModels.push({
               provider: 'Anthropic',
-              modelId: item.id,
+              modelId: id,
               name,
               tier: '前沿检测发现 (Auto-Discovered)',
               surface: 'Messages',
@@ -266,7 +266,7 @@ export async function fetchLatestFrontierModels(): Promise<ModelSyncResult> {
           ) {
             mappedModels.push({
               provider: 'OpenAI',
-              modelId: item.id,
+              modelId: id,
               name,
               tier: '前沿检测发现 (Auto-Discovered)',
               surface: 'Responses',
@@ -279,7 +279,7 @@ export async function fetchLatestFrontierModels(): Promise<ModelSyncResult> {
           ) {
             mappedModels.push({
               provider: 'Google',
-              modelId: item.id,
+              modelId: id,
               name,
               tier: '前沿检测发现 (Auto-Discovered)',
               surface: 'Interactions',
@@ -292,7 +292,7 @@ export async function fetchLatestFrontierModels(): Promise<ModelSyncResult> {
           ) {
             mappedModels.push({
               provider: 'xAI',
-              modelId: item.id,
+              modelId: id,
               name,
               tier: '前沿检测发现 (Auto-Discovered)',
               surface: 'Responses',

@@ -5,7 +5,7 @@
     <td width="28%" align="center" style="border:none; background: transparent; vertical-align: middle;">
       <img src="./public/logo.png" width="130" height="130" alt="API-QuickCheck Logo" style="border-radius: 26px; box-shadow: 0 12px 36px rgba(204,120,92,0.35);" />
       <br />
-      <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: bold; color: #cc785c; letter-spacing: 0.5px;">API-QUICKCHECK 3.2</span>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: bold; color: #cc785c; letter-spacing: 0.5px;">API-QUICKCHECK 3.3</span>
     </td>
     <td width="72%" align="left" style="border:none; background: transparent; vertical-align: middle;">
       <pre lang="text">
@@ -58,13 +58,6 @@
 在日益繁荣的大语言模型（LLM）中转代理市场中，服务商质量参差不齐，开发者与 AI Agent 构建者常常面临极为隐蔽的“**黑盒陷阱**”：
 
 - **李代桃僵与暗中降配**：用经过低比特量化的开源小模型冒充顶级旗舰（如用 Qwen 冒充 Claude 3.7 / GPT-5），或将高难度请求路由到低成本小模型；
-- **假思维流欺骗**：在非思考模型输出正文中硬编码注入 `<think>` 标签，伪造思考链假象；
-- **协议改包与凭据剥离**：网关中间件肆意丢弃 Claude 私钥 Thinking Signature 签名、抹平 Token Usage 真实计费字段，导致下游 Agent 上下文连续性断裂；
-- **静默截断上下文**：声称支持 128K/200K 上下文，实际在 16K 处即静默截断前端内容，导致复杂任务推理完全崩溃；
-- **不透明限流与偷跑额度**：缺乏合规的错误回显与余额审计机制。
-
-### 2. API-QuickCheck 的四大核心哲学
-
 1. **密码学与协议确定性验真 (Deterministic Protocol Forensics)**：
    不依赖主观打分或模糊文字匹配，通过 **Anthropic 官方私钥签名二次回传验证**、**原生 SSE Wire 事件流状态机**、**严格 JSON Schema 夹具** 等密码学与协议硬断言，实现 100% 确定性的真伪定论。
 2. **端到端极速高并发批量清洗 (Industrial High-Throughput Key Scrubbing)**：
@@ -127,8 +120,22 @@
 
 API-QuickCheck 内置零外部侵入、完美适配 CI/CD 流水线与 AI Agent 调用的无头 CLI 工具（`apiqc`）。
 
-### 1. 专为 AI Agent（Claude Code / Cursor / Cline / AutoGPT）打造
-AI Agent 在调用第三方中转站前，可自主执行 CLI 探针，快速获取端点保真度、真实模型归属、流式事件响应与 Token 消耗，若发现欺瞒或降级可自动熔断并切换备份渠道：
+### 1. 批量 API-Key 资产质检与清洗（`batch` 命令，v3.3 新增）
+
+支持直接传入 `.json`, `.csv`, `.env`, `.txt` 或管道输入，自动多模型并发探测并导出可用 Key：
+
+```bash
+# 1. 批量检测文件中的 API-Key 并输出纯净 JSON（专为 Agent 消费设计）
+npx api-quickcheck batch --input ./keys.json --models "claude-3-7-sonnet,gpt-4o,deepseek-r1" --json
+
+# 2. 批量检测并自动导出仅包含有效 Key 的 .env 文件
+npx apiqc batch --input ./keys.csv --export-valid ./valid_keys.env
+
+# 3. 管道流直接传入检测
+cat keys.txt | npx apiqc batch --base-url https://api.relay.com/v1 --models "gpt-4o"
+```
+
+### 2. 单端点深度审计与测真（`audit` 命令）
 
 ```bash
 # 方式 1：免安装 npx 零配置秒开（最推荐）
@@ -136,7 +143,7 @@ npx api-quickcheck audit \
   --model anthropic/claude-3.7-sonnet \
   --base-url https://openrouter.ai/api/v1 \
   --api-key sk-or-v1-xxxxxx \
-  --json > audit-result.json
+  --profile balanced
 
 # 方式 2：全局安装为系统命令行工具
 npm install -g api-quickcheck
@@ -148,18 +155,27 @@ apiqc audit \
   --profile quick
 ```
 
-### 2. CLI 核心参数一览
+### 3. CLI 核心参数一览
 
-| 参数 | 类型 | 说明 | 默认值 |
+| 参数 | 类型 | 说明 | 适用命令 |
 | :--- | :--- | :--- | :--- |
-| `--model` | `string` | **必填**。待审计目标模型 ID（如 `gpt-5.6-sol`, `claude-3-7-sonnet`） | - |
-| `--base-url` | `string` | **必填**（或注入 `APIQC_BASE_URL` 环境变量）。中转站或官方 Base URL | - |
-| `--api-key` | `string` | **必填**（或注入 `APIQC_API_KEY` 环境变量）。进程内存使用，绝不落盘 | - |
-| `--provider` | `string` | 指定协议适配器：`auto`, `openai`, `anthropic`, `gemini`, `xai`, `openrouter` | `auto` |
-| `--profile` | `string` | 审计档位：`quick`（快速 ~15s）, `balanced`（标准 ~30s）, `deep`（全量 ~50s） | `balanced` |
-| `--probes` | `string` | 逗号分隔的指定探针 ID（如 `p0-stream-events,p0-strict-json,p1-signature-continuity`） | 档位默认探针 |
-| `--out` | `string` | 结构化 JSON 审计报告输出路径 | `audit-report.json` |
-| `--json` | `boolean` | 启用纯净 JSON 输出，适合 Agent 与脚本解析管道 | `false` |
+| `--input` | `string` | 待测文件路径（支持 `.json`, `.csv`, `.env`, `.txt`，传 `-` 为 stdin） | `batch` |
+| `--models` | `string` | 逗号分隔的待测模型列表（默认 `claude-3-7-sonnet,gpt-4o,deepseek-r1`） | `batch` |
+| `--concurrency` | `number` | 并发限制（默认 `5`），防止单 IP 触发中转站限流 | `batch` |
+| `--export-valid` | `string` | 自动导出有效/健康 Key 清单路径（支持 `.env`, `.json`, `.csv`） | `batch` |
+| `--model` | `string` | 待审计目标模型 ID（如 `gpt-5.6-sol`, `claude-3-7-sonnet`） | `audit` |
+| `--base-url` | `string` | 中转站或官方 Base URL | `audit`, `batch` |
+| `--api-key` | `string` | 待测 API Key（进程内存使用，绝不落盘上传） | `audit` |
+| `--profile` | `string` | 探测档位：`quick`（极速探活）, `balanced`（标准测真）, `deep`（全量深度） | `audit`, `batch` |
+| `--json` | `boolean` | 启用纯净 JSON 输出，所有日志进度走 stderr，标准输出直接输出 JSON | 全部 |
+| `--out` | `string` | 保存完整结构化 JSON 报告的路径 | 全部 |
+
+---
+
+### 4. 专属 Agent Skill 集成（`skills/batch-api-audit`）
+
+本项目内置了符合智能体标准的 **Agent Skill**（见 [`skills/batch-api-audit/SKILL.md`](./skills/batch-api-audit/SKILL.md)）。
+当用户在与 Claude Code, Antigravity, Cursor 等智能体对话中提供了一批 API Key 时，Agent 会自动加载该技能，调用 `npx apiqc batch` 自动化清洗并向用户汇报分类结论。
 
 ---
 

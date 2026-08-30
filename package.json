@@ -1,6 +1,6 @@
 {
   "name": "api-quickcheck",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Industrial-grade Headless AI API Quality Audit & Anti-Counterfeiting Platform (CPU-Z + Geekbench for AI APIs)",
   "type": "module",
   "author": "som1ng",

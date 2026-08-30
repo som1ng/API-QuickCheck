@@ -25,15 +25,6 @@ export type ArenaSortKey =
 
 export type SortDirection = 'asc' | 'desc';
 
-export type CapabilityDimension =
-  | 'all'
-  | 'reasoning'
-  | 'longContext'
-  | 'highSpeed'
-  | 'lowLatency'
-  | 'costEfficient'
-  | 'lowHallucination';
-
 export const aaSnapshot: LeaderboardSnapshot<AaModelRow> = aaSnapshotRaw as LeaderboardSnapshot<AaModelRow>;
 export const arenaSnapshot: LeaderboardSnapshot<ArenaAgentRow> = arenaSnapshotRaw as LeaderboardSnapshot<ArenaAgentRow>;
 
@@ -46,14 +37,6 @@ export function getArenaAgentsSnapshot(): LeaderboardSnapshot<ArenaAgentRow> {
 }
 
 /**
- * Extracts reasoning level tag from model name if present
- */
-export function extractReasoningLevel(name: string): string | null {
-  const match = name.match(/\((max|xhigh|high|medium|low|thinking|with fallback)\)/i);
-  return match ? match[1].toLowerCase() : null;
-}
-
-/**
  * Filter and sort Artificial Analysis models
  */
 export function filterAndSortAaModels(
@@ -61,8 +44,7 @@ export function filterAndSortAaModels(
   query: string,
   selectedCreator: string,
   sortKey: AaSortKey,
-  sortDir: SortDirection = 'desc',
-  dimension: CapabilityDimension = 'all'
+  sortDir: SortDirection = 'desc'
 ): AaModelRow[] {
   let result = [...rows];
 
@@ -81,29 +63,7 @@ export function filterAndSortAaModels(
     });
   }
 
-  // 2. Filter by Capability Dimension
-  if (dimension && dimension !== 'all') {
-    result = result.filter((row) => {
-      switch (dimension) {
-        case 'reasoning': {
-          const lvl = extractReasoningLevel(row.name);
-          return lvl === 'max' || lvl === 'xhigh' || lvl === 'high' || lvl === 'thinking' || row.name.toLowerCase().includes('reasoning');
-        }
-        case 'longContext':
-          return (row.contextWindow || 0) >= 1000000;
-        case 'highSpeed':
-          return (row.medianTokensPerSec || 0) >= 100;
-        case 'lowLatency':
-          return row.latencyFirstChunkSec !== null && row.latencyFirstChunkSec <= 1.0;
-        case 'costEfficient':
-          return row.costPerTaskUsd !== null && row.costPerTaskUsd <= 0.10;
-        default:
-          return true;
-      }
-    });
-  }
-
-  // 3. Filter by search query
+  // 2. Filter by search query
   if (query && query.trim()) {
     const q = query.trim().toLowerCase();
     result = result.filter(
@@ -114,7 +74,7 @@ export function filterAndSortAaModels(
     );
   }
 
-  // 4. Sort
+  // 3. Sort
   result.sort((a, b) => {
     let valA: number | null = null;
     let valB: number | null = null;
@@ -168,8 +128,7 @@ export function filterAndSortArenaAgents(
   query: string,
   selectedLab: string,
   sortKey: ArenaSortKey,
-  sortDir: SortDirection = 'desc',
-  dimension: CapabilityDimension = 'all'
+  sortDir: SortDirection = 'desc'
 ): ArenaAgentRow[] {
   let result = [...rows];
 
@@ -188,25 +147,7 @@ export function filterAndSortArenaAgents(
     });
   }
 
-  // 2. Filter by Capability Dimension
-  if (dimension && dimension !== 'all') {
-    result = result.filter((row) => {
-      switch (dimension) {
-        case 'reasoning': {
-          const lvl = extractReasoningLevel(row.name);
-          return lvl === 'max' || lvl === 'xhigh' || lvl === 'high' || row.name.toLowerCase().includes('reasoning');
-        }
-        case 'lowHallucination':
-          return row.toolHallucinationPct !== null && row.toolHallucinationPct <= 0.8;
-        case 'costEfficient':
-          return row.costPerTaskP50Usd !== null && row.costPerTaskP50Usd <= 0.10;
-        default:
-          return true;
-      }
-    });
-  }
-
-  // 3. Filter by search query
+  // 2. Filter by search query
   if (query && query.trim()) {
     const q = query.trim().toLowerCase();
     result = result.filter(
@@ -217,7 +158,7 @@ export function filterAndSortArenaAgents(
     );
   }
 
-  // 4. Sort
+  // 3. Sort
   result.sort((a, b) => {
     let valA: number | null = null;
     let valB: number | null = null;

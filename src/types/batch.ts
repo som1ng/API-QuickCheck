@@ -2,8 +2,9 @@
  * Types for Batch API-Key Auditing & Matrix Testing
  */
 
-import { FidelityLevel } from './fidelity';
 import { AuditProfile, AuditProvider } from './audit';
+
+export type FidelityLevel = 'genuine' | 'suspect_downgraded' | 'fake_imposter' | 'inconclusive' | 'error';
 
 export type KeyHealthStatus =
   | 'alive'
@@ -89,3 +90,4 @@ export interface BatchAuditOptions {
   signal?: AbortSignal;
   onItemProgress?: (completed: number, total: number, currentItem: BatchKeyInputItem) => void;
 }
+

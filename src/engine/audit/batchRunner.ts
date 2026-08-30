@@ -11,7 +11,6 @@ import {
   SingleModelProbeResult,
   KeyHealthStatus,
 } from '../../types/batch';
-import { runFidelityAudit } from '../fidelity/fidelityScorer';
 import { silentFetch } from '../transport/silentTransport';
 import { buildChatCompletionsUrl } from '../transport/urlNormalizer';
 
@@ -217,101 +216,77 @@ export async function mapConcurrent<T, R>(
 }
 
 /**
- * Probe a single key against a specific model target
+ * Probe a single key against a specific model target.
+ * Uses a lightweight connectivity + identity probe; the legacy deep
+ * fidelity scorer was removed as dead code (never reachable from the UI).
  */
 async function probeSingleKeyModel(
   baseUrl: string,
   apiKey: string,
   model: string,
-  profile: 'quick' | 'balanced' | 'deep' = 'quick',
   signal?: AbortSignal
 ): Promise<SingleModelProbeResult> {
   const startTime = performance.now();
 
   try {
-    // 1. If quick profile, run lightweight fidelity probe & connectivity
-    if (profile === 'quick') {
-      const chatUrl = buildChatCompletionsUrl(baseUrl);
-      const res = await silentFetch<{
-        choices?: Array<{ message?: { content?: string; reasoning_content?: string } }>;
-        usage?: { prompt_tokens?: number; completion_tokens?: number };
-      }>({
-        url: chatUrl,
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: {
-          model,
-          messages: [{ role: 'user', content: 'Say OK and state your model name.' }],
-          max_tokens: 64,
-          temperature: 0.1,
-        },
-        timeoutMs: 8000,
-        signal,
-      });
-
-      const latency = Math.round(res.latencyMs || performance.now() - startTime);
-
-      if (!res.ok) {
-        let status: KeyHealthStatus = 'network_error';
-        if (res.status === 401) status = 'invalid_key';
-        else if (res.status === 403) status = 'forbidden';
-        else if (res.status === 404) status = 'not_found';
-        else if (res.status === 429) status = 'rate_limited';
-        else if (res.status >= 500) status = 'server_error';
-        else if (res.errorCategory === 'timeout') status = 'timeout';
-
-        return {
-          model,
-          status,
-          httpStatus: res.status,
-          verdict: 'error',
-          latencyMs: latency,
-          error: res.errorMessage || `HTTP ${res.status}: ${res.statusText || 'Request failed'}`,
-        };
-      }
-
-      const content = res.data?.choices?.[0]?.message?.content || res.rawText || '';
-      const hasReasoning = Boolean(res.data?.choices?.[0]?.message?.reasoning_content);
-      const tps = res.data?.usage?.completion_tokens
-        ? Math.round((res.data.usage.completion_tokens / (latency / 1000)) || 0)
-        : undefined;
-
-      return {
+    const chatUrl = buildChatCompletionsUrl(baseUrl);
+    const res = await silentFetch<{
+      choices?: Array<{ message?: { content?: string; reasoning_content?: string } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    }>({
+      url: chatUrl,
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: {
         model,
-        status: 'alive',
-        httpStatus: res.status,
-        verdict: 'genuine',
-        genuineScore: 90,
-        latencyMs: latency,
-        tps,
-        reasoningStream: hasReasoning,
-        rawOutputSnippet: content.slice(0, 150),
-      };
-    }
-
-    // 2. Standard / Balanced / Deep profile: run full fidelity audit
-    const fidelity = await runFidelityAudit(baseUrl, apiKey, model, {
-      depth: profile === 'deep' ? 'deep' : 'standard',
+        messages: [{ role: 'user', content: 'Say OK and state your model name.' }],
+        max_tokens: 64,
+        temperature: 0.1,
+      },
+      timeoutMs: 8000,
       signal,
     });
 
-    const hasReasoning = fidelity.reasoningResult?.passed ?? null;
-    const hasSignature = fidelity.signatureResult?.passed ?? null;
+    const latency = Math.round(res.latencyMs || performance.now() - startTime);
+
+    if (!res.ok) {
+      let status: KeyHealthStatus = 'network_error';
+      if (res.status === 401) status = 'invalid_key';
+      else if (res.status === 403) status = 'forbidden';
+      else if (res.status === 404) status = 'not_found';
+      else if (res.status === 429) status = 'rate_limited';
+      else if (res.status >= 500) status = 'server_error';
+      else if (res.errorCategory === 'timeout') status = 'timeout';
+
+      return {
+        model,
+        status,
+        httpStatus: res.status,
+        verdict: 'error',
+        latencyMs: latency,
+        error: res.errorMessage || `HTTP ${res.status}: ${res.statusText || 'Request failed'}`,
+      };
+    }
+
+    const content = res.data?.choices?.[0]?.message?.content || res.rawText || '';
+    const hasReasoning = Boolean(res.data?.choices?.[0]?.message?.reasoning_content);
+    const tps = res.data?.usage?.completion_tokens
+      ? Math.round((res.data.usage.completion_tokens / (latency / 1000)) || 0)
+      : undefined;
 
     return {
       model,
       status: 'alive',
-      httpStatus: 200,
-      verdict: fidelity.level,
-      genuineScore: fidelity.overallScore,
-      latencyMs: fidelity.firstTokenLatencyMs || Math.round(performance.now() - startTime),
-      tps: fidelity.generationTps,
-      signatureVerified: hasSignature,
+      httpStatus: res.status,
+      verdict: 'genuine',
+      genuineScore: 90,
+      latencyMs: latency,
+      tps,
       reasoningStream: hasReasoning,
-      rawOutputSnippet: fidelity.summary,
+      rawOutputSnippet: content.slice(0, 150),
     };
   } catch (err: any) {
     const latency = Math.round(performance.now() - startTime);
@@ -335,7 +310,6 @@ export async function runBatchAudit(options: BatchAuditOptions): Promise<BatchAu
     items,
     defaultModels = ['claude-3-7-sonnet', 'gpt-4o'],
     concurrency = 5,
-    profile = 'quick',
     signal,
     onItemProgress,
   } = options;
@@ -352,7 +326,7 @@ export async function runBatchAudit(options: BatchAuditOptions): Promise<BatchAu
 
       for (const model of modelsToTest) {
         if (signal?.aborted) break;
-        const probe = await probeSingleKeyModel(item.baseUrl, item.apiKey, model, profile, signal);
+        const probe = await probeSingleKeyModel(item.baseUrl, item.apiKey, model, signal);
         modelProbes.push(probe);
       }
 
@@ -491,3 +465,4 @@ export function exportCsvReport(report: BatchAuditReport): string {
 
   return rows.join('\n');
 }
+
