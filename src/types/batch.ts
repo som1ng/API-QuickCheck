@@ -2,7 +2,7 @@
  * Types for Batch API-Key Auditing & Matrix Testing
  */
 
-import { AuditProfile, AuditProvider } from './audit';
+import { AuditProvider } from './audit';
 
 export type FidelityLevel = 'genuine' | 'suspect_downgraded' | 'fake_imposter' | 'inconclusive' | 'error';
 
@@ -85,7 +85,6 @@ export interface BatchAuditOptions {
   items: BatchKeyInputItem[];
   defaultModels?: string[];
   concurrency?: number;
-  profile?: AuditProfile;
   timeoutMs?: number;
   signal?: AbortSignal;
   onItemProgress?: (completed: number, total: number, currentItem: BatchKeyInputItem) => void;

@@ -3456,7 +3456,6 @@ batch \u6279\u91CF\u68C0\u6D4B\u9009\u9879:
   --base-url <url>           \u9ED8\u8BA4 API Base URL (\u5F53\u8F93\u5165\u9879\u672A\u6307\u5B9A\u65F6\u56DE\u9000\uFF0C\u9ED8\u8BA4 https://api.openai.com/v1)
   --models <m1,m2,...>       \u6307\u5B9A\u9700\u6D4B\u8BD5\u7684\u6A21\u578B\u5217\u8868 (\u9ED8\u8BA4 claude-3-7-sonnet,gpt-4o,deepseek-r1)
   --concurrency <N>          \u5E76\u53D1\u6570\u63A7\u5236 (\u9ED8\u8BA4 5)
-  --profile <quick|balanced> \u63A2\u6D4B\u6DF1\u5EA6 (\u9ED8\u8BA4 quick \u6781\u901F\u63A2\u6D3B\uFF0Cbalanced \u5168\u9762\u6D4B\u771F)
   --json                     \u7EAF JSON \u8F93\u51FA\u6A21\u5F0F\u81F3 stdout (\u6240\u6709\u8FDB\u5EA6\u8D70 stderr\uFF0C\u4E13\u4E3A Agent \u8BBE\u8BA1)
   --out <file.json>          \u4FDD\u5B58\u5B8C\u6574\u6279\u5904\u7406 JSON \u5BA1\u8BA1\u62A5\u544A
   --export-valid <file>      \u5BFC\u51FA\u6709\u6548/\u5065\u5EB7 Key \u6E05\u5355 (\u652F\u6301 .json, .env, .csv)
@@ -3528,7 +3527,6 @@ async function handleBatchCommand(args) {
   const defaultBaseUrl = typeof args["base-url"] === "string" ? args["base-url"] : "https://api.openai.com/v1";
   const models = typeof args.models === "string" ? args.models.split(/[\s,]+/).map((m) => m.trim()).filter(Boolean) : ["claude-3-7-sonnet", "gpt-4o", "deepseek-r1"];
   const concurrency = typeof args.concurrency === "string" ? Math.max(1, parseInt(args.concurrency, 10) || 5) : 5;
-  const profile = typeof args.profile === "string" ? args.profile : "quick";
   let rawContent = "";
   if (typeof args.input === "string") {
     if (args.input === "-") {
@@ -3558,14 +3556,13 @@ async function handleBatchCommand(args) {
     }
   };
   log(`
-\u{1F680} \u542F\u52A8 API-Key \u6279\u91CF\u8D28\u68C0\u5F15\u64CE (\u5171 ${items.length} \u4E2A Key, \u5E76\u53D1\u5EA6: ${concurrency}, \u63A2\u6D4B\u6863\u4F4D: ${profile})`);
+\u{1F680} \u542F\u52A8 API-Key \u6279\u91CF\u8D28\u68C0\u5F15\u64CE (\u5171 ${items.length} \u4E2A Key, \u5E76\u53D1\u5EA6: ${concurrency})`);
   log(`\u{1F3AF} \u76EE\u6807\u6D4B\u8BD5\u6A21\u578B: ${models.join(", ")}
 `);
   const report = await runBatchAudit({
     items,
     defaultModels: models,
     concurrency,
-    profile: profile === "deep" ? "deep" : profile === "balanced" ? "balanced" : "quick",
     onItemProgress: (completed, total, cur) => {
       const pct = Math.round(completed / total * 100);
       log(`[${completed}/${total}] (${pct}%) \u6B63\u5728\u68C0\u6D4B: ${cur.name} (${cur.baseUrl})...`);

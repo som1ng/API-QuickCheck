@@ -11,14 +11,14 @@
       <pre lang="text">
   █████╗ ██████╗ ██╗    ██████╗ ██╗   ██╗██╗ ██████╗██╗  ██╗
  ██╔══██╗██╔══██╗██║   ██╔═══██╗██║   ██║██║██╔════╝██║ ██╔╝
- ███████║██████╔╝██║   ██║   ██║██║   ██║██║██║     █████╔╝ 
- ██╔══██║██╔═══╝ ██║   ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗ 
+ ███████║██████╔╝██║   ██║   ██║██║   ██║██║██║     █████╔╝
+ ██╔══██║██╔═══╝ ██║   ██║▄▄ ██║██║   ██║██║██║     ██╔═██╗
  ██║  ██║██║     ██║   ╚██████╔╝╚██████╔╝██║╚██████╗██║  ██╗
  ╚═╝  ╚═╝╚═╝     ╚═╝    ╚══▀▀═╝  ╚═════╝ ╚═╝ ╚═════╝╚═╝  ╚═╝
                ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
               ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
-              ██║     ███████║█████╗  ██║     █████╔╝ 
-              ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ 
+              ██║     ███████║█████╗  ██║     █████╔╝
+              ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗
               ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
                ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝
  ─────────────────────────────────────────────────────────────
@@ -37,13 +37,12 @@
 </p>
 
 <p>
-  <a href="https://api-quick-check.vercel.app/"><strong>在线体验</strong></a> ·
-  <a href="#一-设计理念与项目愿景"><strong>设计理念</strong></a> ·
-  <a href="#二-核心亮点与项目优势"><strong>核心亮点</strong></a> ·
-  <a href="#三-工业级-api-key-海量批量测活与智能清洗引擎亮点功能"><strong>批量测活</strong></a> ·
-  <a href="#四-无头-cli-引擎与-ai-agent-自动化测试接入亮点功能"><strong>Agent/CLI</strong></a> ·
-  <a href="#五-中转站保真度鉴真与-24-项探针矩阵"><strong>24项探针</strong></a> ·
-  <a href="#六-快速开始"><strong>快速开始</strong></a> ·
+  <a href="#一设计理念"><strong>设计理念</strong></a> ·
+  <a href="#二核心能力"><strong>核心能力</strong></a> ·
+  <a href="#三批量测活"><strong>批量测活</strong></a> ·
+  <a href="#四cli-与-agent-接入"><strong>Agent/CLI</strong></a> ·
+  <a href="#五审计探针"><strong>审计探针</strong></a> ·
+  <a href="#六快速开始"><strong>快速开始</strong></a> ·
   <a href="./README_EN.md"><strong>English Documentation</strong></a>
 </p>
 
@@ -51,101 +50,87 @@
 
 ---
 
-## 一、 设计理念与项目愿景
+## 一、设计理念
 
-### 1. 为什么发起 API-QuickCheck？
+中转站偷换模型,难就难在从回复文本上看不出来。量化小模型也能把话说明白,降智路由对简单问题毫无影响。等你从文风里觉出不对劲,订阅费已经交了一个月。
 
-在日益繁荣的大语言模型（LLM）中转代理市场中，服务商质量参差不齐，开发者与 AI Agent 构建者常常面临极为隐蔽的“**黑盒陷阱**”：
+所以这个项目不看文风,只看协议和证据:
 
-- **李代桃僵与暗中降配**：用经过低比特量化的开源小模型冒充顶级旗舰（如用 Qwen 冒充 Claude 3.7 / GPT-5），或将高难度请求路由到低成本小模型；
-1. **密码学与协议确定性验真 (Deterministic Protocol Forensics)**：
-   不依赖主观打分或模糊文字匹配，通过 **Anthropic 官方私钥签名二次回传验证**、**原生 SSE Wire 事件流状态机**、**严格 JSON Schema 夹具** 等密码学与协议硬断言，实现 100% 确定性的真伪定论。
-2. **端到端极速高并发批量清洗 (Industrial High-Throughput Key Scrubbing)**：
-   面向拥有成百上千 Key 的站长、团队与企业，提供 1~50 线程动态并发池、防封抖动调度、全网计费端点余额穿透嗅探与多格式导出。
-3. **面向 AI Agent 与自动化流水线的无头 CLI (Headless CLI for Autonomous Agents)**：
-   专为 Claude Code、Cursor、Cline、AutoGPT 等新一代自主编码智能体（AI Agent）及 CI/CD 自动化检测设计，支持一键命令注入与标准化 JSON 遥测报表输出。
-4. **零服务端存储与隐私绝对安全 (Client-Only & Zero Data Logging)**：
-   基于纯前端浏览器与本地 CLI 内存运行，API Key 绝不上传至任何第三方服务器或数据库。
+- **签名回传验签**:Claude 的 thinking 块带 Anthropic 服务端签名。第一轮捕获,第二轮原样回传,官方验签通过才算数。签名被重写或伪造,官方端直接 400。这是目前唯一能做加密级定论的检查。
+- **协议硬断言**:SSE 事件顺序、严格 JSON Schema、`tool_use_id` 字节级闭环。错了就是错了,不存在"感觉不太像"。
+- **批量测活**:上百个 Key 的池子,并发可调,随时能停,结果导出成能直接用的格式。
+- **纯本地**:浏览器或 CLI 内存里跑完即走,Key 不经过任何第三方服务器。
 
 ---
 
-## 二、 核心亮点与项目优势
+## 二、核心能力
 
-```text
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                     API-QUICKCHECK 3.2 核心架构                                  │
-├───────────────────────────────┬──────────────────────────────────┬───────────────────────────────┤
-│    🚀 海量并发批量测活与清洗   │    🤖 无头 CLI 与 Agent 自动化   │    🛡️ 中转保真度 24 项深度审计 │
-│  • 1~50 线程动态并发池        │  • 独立 Node.js / TS CLI 引擎    │  • 覆盖 9 大最新前沿旗舰模型  │
-│  • ±25% Jitter 防封随机抖动   │  • npx api-quickcheck 零安装秒开 │  • Claude 私钥签名二次回传验真│
-│  • 智能全格式 Key 正则提取    │  • 标准化 --json 结构化报表      │  • 原生 reasoning_content 鉴伪 │
-│  • 穿透主流面板深度嗅探余额   │  • Agent 自主环境检测与容灾切换  │  • 严格 JSON / 工具调用闭环   │
-│  • TXT / CSV(BOM) / JSON 导出 │  • 完美契合 GitHub Actions CI/CD │  • Token 消耗拆解与总耗时遥测 │
-└───────────────────────────────┴──────────────────────────────────┴───────────────────────────────┘
-```
+| 批量测活 | CLI / Agent | 审计探针 |
+| :--- | :--- | :--- |
+| 1~50 线程并发可调,随时取消 | `npx api-quickcheck` 免安装直接跑 | 覆盖 9 个 2026 前沿旗舰模型 |
+| 请求间加 ±25% 随机抖动,降低触发风控的概率 | `--json` 纯净输出,日志走 stderr | Claude thinking 签名回传验签 |
+| 从文本 / CSV / JSON / .env 混杂内容里正则提取 Key | 独立 Node CLI,可进 GitHub Actions | SSE 事件顺序、严格 JSON、工具调用闭环 |
+| 嗅探 OneAPI / NewAPI / OpenRouter 等面板余额 | 为 Claude Code、Cursor 等 Agent 提供 Skill | Token 拆解与端到端耗时 |
 
 ---
 
-## 三、 工业级 API Key 海量批量测活与智能清洗引擎（亮点功能）
+## 三、批量测活
 
-针对团队采购、中转站聚合与密钥池管理场景，API-QuickCheck 提供了极速并发清洗系统：
+面向手里攥着一堆 Key 需要快速分拣的场景:团队采购、聚合站、密钥池维护。
 
-### 1. 智能杂乱文本一键清洗提取
-无论您的 Key 混杂在纯文本、换行、逗号、分号、CSV 导出表格（提取第一列或特定列）、JSON 数组，甚至带有 `key:`、`sk-` 等复杂前缀与中文注释的混乱文本中，系统均可自动基于高精度正则表达式秒级提取纯净 Key 数组。
+**输入随便喂**。Key 混在纯文本、换行、逗号、分号、CSV 表格、JSON 数组里,带 `key:`、`sk-` 前缀甚至夹着中文注释,都能自动提取成干净的 Key 列表。
 
-### 2. 1~50 线程动态无级并发池与优雅取消
-- 搭载高性能并发调度引擎，支持 1 到 50 线程实时滑动调节；
-- 支持微秒级任务打断与优雅取消（AbortController），随时暂停或终止检测。
+**并发 1~50 实时可调**,基于 AbortController,随时暂停或终止。三档预设:
 
-### 3. 三档频率与 ±25% Jitter 动态防封调度
-- **安全防封档**：单线程平缓请求 + 动态抖动延时，适合风控严格的官方中转；
-- **标准平衡档**：10 线程并发，平衡检测速度与网络稳定性；
-- **极速清洗档**：30~50 线程全力并发，可在 10 秒内完成数百个 Key 的清洗。
+- **防封档**:单线程,每次请求间隔加 ±25% 随机抖动,适合风控严的站;
+- **标准档**:10 线程,速度和稳定性折中;
+- **极速档**:30~50 线程,几百个 Key 十几秒跑完。
 
-### 4. 全网主流中转计费面板余额深度穿透嗅探
-自动穿透嗅探目标 Base URL 绑定的计费后端，精准提取账户总额度、已用额度、剩余余额与货币单位，深度兼容：
-- **OneAPI / NewAPI / DoneAPI / V3 API**（`/dashboard/billing/subscription`、`/api/user/self` 等）
-- **OpenRouter**（`/api/v1/credits`）
-- **DeepSeek / SiliconFlow / 常见聚合中转**（`/v1/user/balance`、`/user/balance`）
+**顺手查余额**。自动探测 Base URL 背后的计费面板,取账户总额度、已用、剩余和币种。兼容:
 
-### 5. 多格式防乱码导出与本地历史持久化
-- **纯文本 TXT 导出**：导出有效 Key 换行纯文本（如 `api-keys-active-20260820.txt`）；
-- **Excel 兼容 CSV 导出**：自动注入 **UTF-8 BOM**，解决 Excel 打开中文与符号乱码问题，包含序号、Key、脱敏 Key、有效状态、网络延迟、账户余额、报错详情等完整字段；
-- **结构化 JSON 导出**：完整保留批次元数据（测试时间、Provider、端点、汇总统计）；
-- **本地历史持久化**：基于 `localStorage` 自动存储最近 20 个批次检测记录，支持一键恢复历史报表。
+- OneAPI / NewAPI / DoneAPI / V3 API(`/dashboard/billing/subscription`、`/api/user/self`)
+- OpenRouter(`/api/v1/credits`)
+- DeepSeek / SiliconFlow 等聚合站(`/v1/user/balance`、`/user/balance`)
+
+**结果能直接用**:
+
+- **TXT**:有效 Key 纯文本列表;
+- **CSV**:自动注入 UTF-8 BOM,Excel 打开不乱码,含脱敏 Key、延迟、余额、报错详情;
+- **JSON**:完整批次元数据(时间、Provider、端点、汇总统计);
+- 最近 20 个批次自动存 localStorage,可回看。
 
 ---
 
-## 四、 无头 CLI 引擎与 AI Agent 自动化测试接入（亮点功能）
+## 四、CLI 与 Agent 接入
 
-API-QuickCheck 内置零外部侵入、完美适配 CI/CD 流水线与 AI Agent 调用的无头 CLI 工具（`apiqc`）。
+CLI 工具叫 `apiqc`,和 Web 端共用同一套审计引擎,Key 只在进程内存中出现。
 
-### 1. 批量 API-Key 资产质检与清洗（`batch` 命令，v3.3 新增）
+### batch 命令(v3.3 新增)
 
-支持直接传入 `.json`, `.csv`, `.env`, `.txt` 或管道输入，自动多模型并发探测并导出可用 Key：
+支持 `.json` / `.csv` / `.env` / `.txt` 文件或管道输入,多模型并发探测:
 
 ```bash
-# 1. 批量检测文件中的 API-Key 并输出纯净 JSON（专为 Agent 消费设计）
+# 批量检测文件中的 API-Key 并输出纯净 JSON(为 Agent 消费设计)
 npx api-quickcheck batch --input ./keys.json --models "claude-3-7-sonnet,gpt-4o,deepseek-r1" --json
 
-# 2. 批量检测并自动导出仅包含有效 Key 的 .env 文件
+# 批量检测并导出仅含有效 Key 的 .env
 npx apiqc batch --input ./keys.csv --export-valid ./valid_keys.env
 
-# 3. 管道流直接传入检测
+# 管道输入
 cat keys.txt | npx apiqc batch --base-url https://api.relay.com/v1 --models "gpt-4o"
 ```
 
-### 2. 单端点深度审计与测真（`audit` 命令）
+### audit 命令
 
 ```bash
-# 方式 1：免安装 npx 零配置秒开（最推荐）
+# 免安装运行(推荐)
 npx api-quickcheck audit \
   --model anthropic/claude-3.7-sonnet \
   --base-url https://openrouter.ai/api/v1 \
   --api-key sk-or-v1-xxxxxx \
   --profile balanced
 
-# 方式 2：全局安装为系统命令行工具
+# 或全局安装
 npm install -g api-quickcheck
 
 apiqc audit \
@@ -155,113 +140,91 @@ apiqc audit \
   --profile quick
 ```
 
-### 3. CLI 核心参数一览
+### 参数一览
 
 | 参数 | 类型 | 说明 | 适用命令 |
 | :--- | :--- | :--- | :--- |
-| `--input` | `string` | 待测文件路径（支持 `.json`, `.csv`, `.env`, `.txt`，传 `-` 为 stdin） | `batch` |
-| `--models` | `string` | 逗号分隔的待测模型列表（默认 `claude-3-7-sonnet,gpt-4o,deepseek-r1`） | `batch` |
-| `--concurrency` | `number` | 并发限制（默认 `5`），防止单 IP 触发中转站限流 | `batch` |
-| `--export-valid` | `string` | 自动导出有效/健康 Key 清单路径（支持 `.env`, `.json`, `.csv`） | `batch` |
-| `--model` | `string` | 待审计目标模型 ID（如 `gpt-5.6-sol`, `claude-3-7-sonnet`） | `audit` |
+| `--input` | `string` | 待测文件路径(支持 `.json`, `.csv`, `.env`, `.txt`,传 `-` 为 stdin) | `batch` |
+| `--models` | `string` | 逗号分隔的待测模型列表(默认 `claude-3-7-sonnet,gpt-4o,deepseek-r1`) | `batch` |
+| `--concurrency` | `number` | 并发限制(默认 `5`),防止单 IP 触发限流 | `batch` |
+| `--export-valid` | `string` | 有效 Key 清单导出路径(支持 `.env`, `.json`, `.csv`) | `batch` |
+| `--model` | `string` | 待审计模型 ID(如 `gpt-5.6-sol`, `claude-3-7-sonnet`) | `audit` |
 | `--base-url` | `string` | 中转站或官方 Base URL | `audit`, `batch` |
-| `--api-key` | `string` | 待测 API Key（进程内存使用，绝不落盘上传） | `audit` |
-| `--profile` | `string` | 探测档位：`quick`（极速探活）, `balanced`（标准测真）, `deep`（全量深度） | `audit`, `batch` |
-| `--json` | `boolean` | 启用纯净 JSON 输出，所有日志进度走 stderr，标准输出直接输出 JSON | 全部 |
-| `--out` | `string` | 保存完整结构化 JSON 报告的路径 | 全部 |
+| `--api-key` | `string` | 待测 API Key(仅在进程内存中使用) | `audit` |
+| `--profile` | `string` | 探测档位:`quick`(探活) / `balanced`(标准) / `deep`(全量) | `audit` |
+| `--json` | `boolean` | 纯 JSON 输出,进度日志走 stderr | 全部 |
+| `--out` | `string` | 结构化 JSON 报告保存路径 | 全部 |
+
+### Agent Skill
+
+内置 [`skills/batch-api-audit/SKILL.md`](./skills/batch-api-audit/SKILL.md)。在 Claude Code、Cursor 这类 Agent 里装上它,之后用户往对话里丢一批 Key,Agent 会自己调用 `npx apiqc batch` 跑检测、汇报分类结论,不需要手把手教。
 
 ---
 
-### 4. 专属 Agent Skill 集成（`skills/batch-api-audit`）
+## 五、审计探针
 
-本项目内置了符合智能体标准的 **Agent Skill**（见 [`skills/batch-api-audit/SKILL.md`](./skills/batch-api-audit/SKILL.md)）。
-当用户在与 Claude Code, Antigravity, Cursor 等智能体对话中提供了一批 API Key 时，Agent 会自动加载该技能，调用 `npx apiqc batch` 自动化清洗并向用户汇报分类结论。
+### 支持的模型
 
----
+| 厂商 | 模型 ID | 定位与鉴伪重点 |
+| :--- | :--- | :--- |
+| OpenAI | `gpt-5.6-sol` | 顶级旗舰:复杂工具规划、自主代码修复、64K 针尖检索 |
+| | `gpt-5.6-terra` | 全能工作马:Responses API、严格 JSON Schema |
+| | `gpt-5.6-luna` | 高吞吐低延迟:Agent 执行 |
+| Anthropic | `claude-fable-5` | 新代旗舰:Adaptive Thinking 签名连续性 |
+| | `claude-opus-5` | 顶尖编程与深度推理:Agent 工具链闭环 |
+| | `claude-sonnet-5` | 均衡主力:Messages 原生路由、Prompt 缓存 |
+| Google | `gemini-3.1-pro-preview` | 200 万上下文:Thought Signature 保持 |
+| | `gemini-3.7-flash` | 极速 Agent 调度:Interactions 协议流 |
+| xAI | `grok-4.6` | 实时推理:受控工具回合、代码沙箱 |
 
-## 五、 中转站保真度鉴真与 24 项探针矩阵
+### 24 项探针分四层
 
-### 1. 支持的 9 大前沿模型矩阵
+- **P0 协议层(7 项)**:模型发现、原生路由、鉴权错误语义、流式事件顺序、严格 JSON、工具结构、非法参数回显
+- **P1 架构层(5 项)**:推理配置透传、跨轮状态连续性、受控工具回合、思考签名连续性、缓存语义
+- **P2 能力层(8 项)**:约束 JSON、工具规划、代码修复(算术/集合)、图表提取、64K 针尖检索(前/中/后)
+- **P3 质量层(4 项)**:运行质量重复样本 A / B / C / D
 
-```text
-┌─────────────────────────┬───────────────────────────────┬─────────────────────────────────────────────────────────────┐
-│ 厂商 (Provider)         │ 模型 ID (Model ID)             │ 前沿定位 (Tier) 与核心鉴伪重点                              │
-├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ OpenAI                  │ gpt-5.6-sol                   │ 顶级旗舰 · 复杂工具规划、自主代码修复、64K 针尖检索        │
-│                         │ gpt-5.6-terra                 │ 通用全能工作马 · Responses API 与严格 JSON Schema 验证      │
-│                         │ gpt-5.6-luna                  │ 极速高吞吐 · 亚秒级低延迟 Agent 执行引擎                   │
-├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ Anthropic               │ claude-fable-5                │ 新代前沿旗舰 · 自适应思考 (Adaptive Thinking) 签名连续性   │
-│                         │ claude-opus-5                 │ 顶尖编程与深度推理 · 复杂 Agent 工具链闭环                  │
-│                         │ claude-sonnet-5               │ 均衡主力工作马 · Messages API 原生路由与 Prompt 缓存       │
-├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ Google                  │ gemini-3.1-pro-preview        │ 200万超长上下文 · Thought Signature 保持与多模态图表提取   │
-│                         │ gemini-3.7-flash              │ 极速 Agent 调度引擎 · 原生 Interactions 协议流             │
-├─────────────────────────┼───────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ xAI                     │ grok-4.6                      │ 实时推理旗舰 · 受控工具回合、实时搜索与代码沙箱验真        │
-└─────────────────────────┴───────────────────────────────┴─────────────────────────────────────────────────────────────┘
-```
+几项值得单独说的:
 
-### 2. 24 项全量审计探针套件
-
-```text
-                                 ┌── [ P0 协议层 (7项) ] ➔ 模型发现、原生路由、鉴权错误、流式事件、严格JSON、工具结构、非法参数
-                                 ├── [ P1 架构层 (5项) ] ➔ 推理配置透传、状态连续性、受控工具回合、思考签名连续性、缓存语义
-API-QuickCheck 3.2 ──────────────┼── [ P2 能力层 (8项) ] ➔ 约束JSON任务、工具规划、代码补丁(算术/集合)、图表提取、64K针尖(前/中/后)
-                                 └── [ P3 质量层 (4项) ] ➔ 运行质量重复样本 A / B / C / D
-```
-
-- **Anthropic 官方私钥签名二次回传验真 (`p1-signature-continuity`)**：捕获 thinking 块中的私钥签名并在第二轮会话中回传验证，任何套壳或中间件改包将在 1 秒内原形毕露；
-- **多协议原生流式事件序列校验 (`p0-stream-events`)**：全面适配 OpenAI Responses、Anthropic Messages、Google Gemini 及 OpenRouter / ChatCompletions 标准流式 Chunk；
-- **清晰直观的遥测卡片**：
-  - **协议覆盖**：展示计划项数与执行覆盖比；
-  - **探针通过率**：实事求是的通过百分比与状态徽标；
-  - **Token 消耗**：精确统计总 Token、输入 Token 与输出 Token；
-  - **总执行用时**：展示全套探针端到端总时间（如 `2.4s`），杜绝难以理解的晦涩术语。
+- **思考签名连续性(`p1-signature-continuity`)**:第一轮捕获 thinking 块的服务端签名(`redacted_thinking` 加密块按原形状回传),第二轮塞回 assistant 消息验签。中转重写、截断或伪造签名,官方端 400。目前全套探针里唯一能做加密级定论的检查。
+- **流式事件顺序(`p0-stream-events`)**:适配 OpenAI Responses、Anthropic Messages、Gemini、OpenRouter / ChatCompletions 四种流式格式,校验事件类型与出现顺序。这比看回复文风便宜且硬。
+- **报告可读**:协议覆盖率、探针通过率、Token 拆解、端到端耗时,每项探针给出证据和耗时,不堆术语。
 
 ---
 
-## 六、 快速开始
+## 六、快速开始
 
-### 方式 1：在线 Web 端开箱即用（免部署）
-直接访问官方部署站点：**[https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/)**
+**在线 Web 端**:直接访问 [https://api-quick-check.vercel.app/](https://api-quick-check.vercel.app/),输入 Base URL 和 Key 就能测。
 
-### 方式 2：免安装 npx 零配置运行 CLI
+**CLI 免安装**:
+
 ```bash
 npx api-quickcheck audit --model gpt-5.6-sol --base-url https://api.your-relay.com/v1 --api-key sk-xxx
 ```
 
-### 方式 3：本地源码克隆运行 & 二次开发
+**本地开发**:
+
 ```bash
-# 1. 克隆代码仓库
 git clone https://github.com/som1ng/API-QuickCheck.git
 cd API-QuickCheck
-
-# 2. 安装依赖
 npm install
-
-# 3. 启动本地开发服务
-npm run dev
-
-# 4. 运行全量单元测试
-npm test
-
-# 5. 全量生产构建
-npm run build
+npm run dev      # 本地开发服务
+npm test         # 单元测试
+npm run build    # 生产构建
 ```
 
 ---
 
-## 七、 技术栈
+## 七、技术栈
 
-- **前端框架**：React 18 + TypeScript + Vite
-- **UI 风格**：TailwindCSS + Anthropic Claude Warm-Dark Editorial System（严格无 Emoji）
-- **图标系统**：Lucide React
-- **网络与解析**：原生 Fetch + 自研高效 SSE Wire Reader + 动态正则提取引擎
-- **自动化构建**：esbuild (CLI Bundle) + Rollup (Web App)
+- React 18 + TypeScript + Vite
+- TailwindCSS + Anthropic Claude Warm-Dark Editorial 视觉体系(无 Emoji)
+- Lucide React 图标
+- 原生 Fetch + 自研 SSE Wire Reader
+- esbuild 打包 CLI,Rollup 打包 Web
 
 ---
 
-## 八、 开源许可证
+## 八、许可证
 
-本项目基于 **MIT License** 开源协议，欢迎提交 Issue 与 Pull Request 共同完善！
+MIT License。Issue 和 PR 都欢迎。

@@ -31,7 +31,6 @@ batch 批量检测选项:
   --base-url <url>           默认 API Base URL (当输入项未指定时回退，默认 https://api.openai.com/v1)
   --models <m1,m2,...>       指定需测试的模型列表 (默认 claude-3-7-sonnet,gpt-4o,deepseek-r1)
   --concurrency <N>          并发数控制 (默认 5)
-  --profile <quick|balanced> 探测深度 (默认 quick 极速探活，balanced 全面测真)
   --json                     纯 JSON 输出模式至 stdout (所有进度走 stderr，专为 Agent 设计)
   --out <file.json>          保存完整批处理 JSON 审计报告
   --export-valid <file>      导出有效/健康 Key 清单 (支持 .json, .env, .csv)
@@ -111,7 +110,6 @@ async function handleBatchCommand(args: ParsedArgs): Promise<void> {
     ? args.models.split(/[\s,]+/).map((m) => m.trim()).filter(Boolean)
     : ['claude-3-7-sonnet', 'gpt-4o', 'deepseek-r1'];
   const concurrency = typeof args.concurrency === 'string' ? Math.max(1, parseInt(args.concurrency, 10) || 5) : 5;
-  const profile = (typeof args.profile === 'string' ? args.profile : 'quick') as AuditProfile;
 
   let rawContent = '';
 
@@ -144,14 +142,13 @@ async function handleBatchCommand(args: ParsedArgs): Promise<void> {
     }
   };
 
-  log(`\n🚀 启动 API-Key 批量质检引擎 (共 ${items.length} 个 Key, 并发度: ${concurrency}, 探测档位: ${profile})`);
+  log(`\n🚀 启动 API-Key 批量质检引擎 (共 ${items.length} 个 Key, 并发度: ${concurrency})`);
   log(`🎯 目标测试模型: ${models.join(', ')}\n`);
 
   const report = await runBatchAudit({
     items,
     defaultModels: models,
     concurrency,
-    profile: profile === 'deep' ? 'deep' : profile === 'balanced' ? 'balanced' : 'quick',
     onItemProgress: (completed, total, cur) => {
       const pct = Math.round((completed / total) * 100);
       log(`[${completed}/${total}] (${pct}%) 正在检测: ${cur.name} (${cur.baseUrl})...`);
