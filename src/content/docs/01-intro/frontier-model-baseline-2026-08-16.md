@@ -3,7 +3,7 @@ title: 2026 前沿模型基线清单
 category: intro
 categoryTitle: 简介
 order: 2
-subtitle: 截止 2026-08-31，用于 API 审计的官方模型目标与原生 API 基线；支持自动与手动定时同步。
+subtitle: 截止 2026-09-01，用于 API 审计的官方模型目标与原生 API 基线；支持自动与手动定时同步。
 ---
 
 ## 1. 2026 前沿纯血旗舰基线总览
