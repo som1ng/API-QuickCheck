@@ -13,16 +13,16 @@ describe('Leaderboard Parsers', () => {
       
       const top = rows[0];
       assert.equal(top.rank, 1);
-      assert.equal(top.name, 'Claude Opus 5 (max)');
+      assert.equal(top.name, 'Claude Fable 5.1 (max with fallback)');
       assert.equal(top.creator, 'Anthropic');
-      assert.equal(top.intelligenceIndex, 63);
-      assert.equal(top.costPerTaskUsd, 2.34);
-      assert.equal(top.medianTokensPerSec, 59);
-      assert.equal(top.latencyFirstChunkSec, 65.29);
-      assert.equal(top.totalResponseSec, 73.75);
+      assert.equal(top.intelligenceIndex, 66);
+      assert.equal(top.costPerTaskUsd, 3.69);
+      assert.equal(top.medianTokensPerSec, 66);
+      assert.equal(top.latencyFirstChunkSec, 285.33);
+      assert.equal(top.totalResponseSec, 292.9);
       assert.equal(top.contextWindow, 1000000);
-      assert.ok(top.modelUrl?.includes('claude-opus-5'));
-      assert.ok(top.providersUrl?.includes('claude-opus-5/providers'));
+      assert.ok(top.modelUrl?.includes('claude-fable-5-1'));
+      assert.ok(top.providersUrl?.includes('claude-fable-5-1/providers'));
     }
   });
 
@@ -36,15 +36,15 @@ describe('Leaderboard Parsers', () => {
       assert.equal(top.rank, 1);
       assert.equal(top.name, 'Claude Opus 5 (High)');
       assert.equal(top.lab, 'Anthropic');
-      assert.equal(top.netImprovementPct, 12.46);
-      assert.equal(top.netImprovementCi, 1.54);
-      assert.equal(top.confirmedSuccessPct, 15.39);
-      assert.equal(top.confirmedSuccessCi, 3.16);
-      assert.equal(top.praiseVsComplaintPct, 20.48);
-      assert.equal(top.toolHallucinationPct, 1.04);
-      assert.equal(top.sessions, 19785);
-      assert.equal(top.costPerTaskP50Usd, 1.71);
-      assert.equal(top.outputTokensP50, 23900);
+      assert.equal(top.netImprovementPct, 13.74);
+      assert.equal(top.netImprovementCi, 1.8);
+      assert.equal(top.confirmedSuccessPct, 14.96);
+      assert.equal(top.confirmedSuccessCi, 3.73);
+      assert.equal(top.praiseVsComplaintPct, 21.82);
+      assert.equal(top.toolHallucinationPct, 0.8);
+      assert.equal(top.sessions, 21688);
+      assert.equal(top.costPerTaskP50Usd, 2.47);
+      assert.equal(top.outputTokensP50, 31800);
       assert.equal(top.pricePerM, '$5 / $25');
     }
   });

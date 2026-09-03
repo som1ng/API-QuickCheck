@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-01",
-  "totalModels": 40,
+  "updatedAt": "2026-09-03",
+  "totalModels": 41,
   "models": [
     {
       "provider": "OpenAI",
@@ -82,6 +82,15 @@
       "surface": "Responses",
       "contextLength": 256000,
       "notes": "原生集成 X 实时搜索、Python 代码沙箱与结构化工具消费"
+    },
+    {
+      "provider": "Google",
+      "modelId": "google/gemini-3.8-flash",
+      "name": "Google: Gemini 3.8 Flash",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Interactions",
+      "contextLength": 1048576,
+      "notes": "Gemini 3.8 Flash is Google's most intelligent Flash model with significant gains"
     },
     {
       "provider": "Google",
