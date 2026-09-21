@@ -8,6 +8,14 @@ const arenaMarkdown = readFileSync('./.firecrawl/arena-agent.md', 'utf-8').trim(
 const aaRows = parseAaModels(aaMarkdown);
 const arenaRows = parseArenaAgents(arenaMarkdown);
 
+// 熔断保护：抓取失败/页面结构变化导致行数过少时，拒绝覆盖线上快照
+if (aaRows.length < 100) {
+  throw new Error(`AA snapshot aborted: only ${aaRows.length} rows parsed (expected >= 100)`);
+}
+if (arenaRows.length < 20) {
+  throw new Error(`Arena snapshot aborted: only ${arenaRows.length} rows parsed (expected >= 20)`);
+}
+
 const snapshot = {
   source: 'aa-models' as const,
   sourceUrl: 'https://artificialanalysis.ai/leaderboards/models',

@@ -287,6 +287,9 @@ export const LeaderboardTab: React.FC = () => {
               两份榜单，两种视角：<strong className="text-[#d4cebe] font-medium">Artificial Analysis</strong> 用标准化基准测试给模型打分（智力、速度、成本）；{' '}
               <strong className="text-[#d4cebe] font-medium">Arena (LMArena)</strong> 汇总真实用户的盲测会话，统计 Agent 实际干活时的完工率、纠错与工具使用表现。数据为定期快照，指标含义见各列标题。
             </p>
+            <p className="text-[11px] sm:text-xs font-mono text-[#6c6a64]">
+              数据快照 · AA 更新于 {aaSnapshot.asOf ?? aaSnapshot.fetchedAt.slice(0, 10)}（{aaSnapshot.rowCount} 行） · Arena 更新于 {arenaSnapshot.asOf ?? arenaSnapshot.fetchedAt.slice(0, 10)}（{arenaSnapshot.rowCount} 行） · 每 3 天自动同步
+            </p>
           </div>
 
           {/* Source Links */}
