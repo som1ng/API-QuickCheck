@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-19",
-  "totalModels": 41,
+  "updatedAt": "2026-09-22",
+  "totalModels": 42,
   "models": [
     {
       "provider": "OpenAI",
@@ -82,6 +82,15 @@
       "surface": "Responses",
       "contextLength": 256000,
       "notes": "原生集成 X 实时搜索、Python 代码沙箱与结构化工具消费"
+    },
+    {
+      "provider": "xAI",
+      "modelId": "x-ai/grok-4.7",
+      "name": "SpaceXAI: Grok 4.7",
+      "tier": "前沿检测发现 (Auto-Discovered)",
+      "surface": "Responses",
+      "contextLength": 500000,
+      "notes": "Grok 4.7 is SpaceXAI's flagship model for coding, agentic tasks, and knowledge w"
     },
     {
       "provider": "Google",
