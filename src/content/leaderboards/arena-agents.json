@@ -2,7 +2,7 @@
   "source": "arena-agent",
   "sourceUrl": "https://arena.ai/leaderboard/agent",
   "sourceName": "Arena Agent Leaderboard",
-  "fetchedAt": "2026-10-25T05:45:22.255Z",
+  "fetchedAt": "2026-10-28T06:40:01.153Z",
   "asOf": "2026-10-23",
   "rowCount": 55,
   "rows": [
@@ -21,10 +21,10 @@
       "bashRecoveryPct": 15.77,
       "toolHallucinationPct": 0.57,
       "sessions": 12057,
-      "costPerTaskP50Usd": 6.3,
-      "outputTokensP50": 17900000,
-      "outputTokensP50Raw": "17.9 min",
-      "pricePerM": "124.2K",
+      "costPerTaskP50Usd": 6.51,
+      "outputTokensP50": 18300000,
+      "outputTokensP50Raw": "18.3 min",
+      "pricePerM": "126.5K",
       "modelUrl": "https://www.anthropic.com/claude-opus-5-5"
     },
     {
@@ -42,10 +42,10 @@
       "bashRecoveryPct": 13.17,
       "toolHallucinationPct": 0.65,
       "sessions": 8097,
-      "costPerTaskP50Usd": 4.49,
-      "outputTokensP50": 18200000,
-      "outputTokensP50Raw": "18.2 min",
-      "pricePerM": "187.2K",
+      "costPerTaskP50Usd": 4.68,
+      "outputTokensP50": 19100000,
+      "outputTokensP50Raw": "19.1 min",
+      "pricePerM": "195.4K",
       "modelUrl": "https://www.anthropic.com/claude-sonnet-5-5"
     },
     {
@@ -63,10 +63,10 @@
       "bashRecoveryPct": 9.29,
       "toolHallucinationPct": 0.71,
       "sessions": 14567,
-      "costPerTaskP50Usd": 4.37,
-      "outputTokensP50": 10700000,
-      "outputTokensP50Raw": "10.7 min",
-      "pricePerM": "33.2K",
+      "costPerTaskP50Usd": 4.95,
+      "outputTokensP50": 10900000,
+      "outputTokensP50Raw": "10.9 min",
+      "pricePerM": "36.3K",
       "modelUrl": "https://openai.com/index/gpt-6-astra/"
     },
     {
@@ -84,10 +84,10 @@
       "bashRecoveryPct": 10.56,
       "toolHallucinationPct": 0.61,
       "sessions": 17062,
-      "costPerTaskP50Usd": 8.07,
-      "outputTokensP50": 12300000,
-      "outputTokensP50Raw": "12.3 min",
-      "pricePerM": "61.9K",
+      "costPerTaskP50Usd": 8,
+      "outputTokensP50": 12400000,
+      "outputTokensP50Raw": "12.4 min",
+      "pricePerM": "61.7K",
       "modelUrl": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
     },
     {
@@ -105,10 +105,10 @@
       "bashRecoveryPct": 3.93,
       "toolHallucinationPct": 0.75,
       "sessions": 16092,
-      "costPerTaskP50Usd": 0.79,
-      "outputTokensP50": 10200000,
-      "outputTokensP50Raw": "10.2 min",
-      "pricePerM": "32.1K",
+      "costPerTaskP50Usd": 0.88,
+      "outputTokensP50": 10000000,
+      "outputTokensP50Raw": "10 min",
+      "pricePerM": "31.8K",
       "modelUrl": "https://openai.com/index/introducing-gpt-6-1-sol/"
     },
     {
@@ -126,10 +126,10 @@
       "bashRecoveryPct": 4.03,
       "toolHallucinationPct": 0.35,
       "sessions": 45840,
-      "costPerTaskP50Usd": 1.08,
-      "outputTokensP50": 7500000,
-      "outputTokensP50Raw": "7.5 min",
-      "pricePerM": "38K",
+      "costPerTaskP50Usd": 1.1,
+      "outputTokensP50": 7600000,
+      "outputTokensP50Raw": "7.6 min",
+      "pricePerM": "37.7K",
       "modelUrl": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/"
     },
     {
@@ -148,9 +148,9 @@
       "toolHallucinationPct": 0.39,
       "sessions": 14474,
       "costPerTaskP50Usd": null,
-      "outputTokensP50": 11100000,
-      "outputTokensP50Raw": "11.1 min",
-      "pricePerM": "33.6K",
+      "outputTokensP50": 11200000,
+      "outputTokensP50Raw": "11.2 min",
+      "pricePerM": "35.8K",
       "modelUrl": "https://dev.meta.ai/models/muse-wonder"
     },
     {
@@ -168,10 +168,10 @@
       "bashRecoveryPct": 11.66,
       "toolHallucinationPct": 0.64,
       "sessions": 10305,
-      "costPerTaskP50Usd": 1.53,
-      "outputTokensP50": 6900000,
-      "outputTokensP50Raw": "6.9 min",
-      "pricePerM": "36.2K",
+      "costPerTaskP50Usd": 1.71,
+      "outputTokensP50": 7200000,
+      "outputTokensP50Raw": "7.2 min",
+      "pricePerM": "38.7K",
       "modelUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
     },
     {
@@ -189,10 +189,10 @@
       "bashRecoveryPct": 11.3,
       "toolHallucinationPct": 0.7,
       "sessions": 24440,
-      "costPerTaskP50Usd": 5.12,
-      "outputTokensP50": 11700000,
-      "outputTokensP50Raw": "11.7 min",
-      "pricePerM": "66.8K",
+      "costPerTaskP50Usd": 5.47,
+      "outputTokensP50": 12400000,
+      "outputTokensP50Raw": "12.4 min",
+      "pricePerM": "70K",
       "modelUrl": "https://www.anthropic.com/news/claude-opus-5"
     },
     {
@@ -210,10 +210,10 @@
       "bashRecoveryPct": 11.89,
       "toolHallucinationPct": 0.64,
       "sessions": 43567,
-      "costPerTaskP50Usd": 3.45,
-      "outputTokensP50": 4400000,
-      "outputTokensP50Raw": "4.4 min",
-      "pricePerM": "23.7K",
+      "costPerTaskP50Usd": 3.63,
+      "outputTokensP50": 4600000,
+      "outputTokensP50Raw": "4.6 min",
+      "pricePerM": "25K",
       "modelUrl": "https://www.anthropic.com/news/claude-fable-5-mythos-5"
     },
     {
@@ -231,10 +231,10 @@
       "bashRecoveryPct": 8.27,
       "toolHallucinationPct": 0.75,
       "sessions": 4071,
-      "costPerTaskP50Usd": 1.17,
+      "costPerTaskP50Usd": 1.46,
       "outputTokensP50": 7000000,
       "outputTokensP50Raw": "7 min",
-      "pricePerM": "39.2K",
+      "pricePerM": "41.2K",
       "modelUrl": "https://platform.kimi.ai/docs/guide/kimi-k3-1-pro-quickstart"
     },
     {
@@ -252,10 +252,10 @@
       "bashRecoveryPct": 11.99,
       "toolHallucinationPct": 0.62,
       "sessions": 37542,
-      "costPerTaskP50Usd": 1.7,
-      "outputTokensP50": 4600000,
-      "outputTokensP50Raw": "4.6 min",
-      "pricePerM": "22.8K",
+      "costPerTaskP50Usd": 1.79,
+      "outputTokensP50": 4500000,
+      "outputTokensP50Raw": "4.5 min",
+      "pricePerM": "22K",
       "modelUrl": "https://openai.com/index/gpt-5-6/"
     },
     {
@@ -273,10 +273,10 @@
       "bashRecoveryPct": 5.13,
       "toolHallucinationPct": 0.42,
       "sessions": 34721,
-      "costPerTaskP50Usd": 0.2,
-      "outputTokensP50": 7100000,
-      "outputTokensP50Raw": "7.1 min",
-      "pricePerM": "84.2K",
+      "costPerTaskP50Usd": 0.19,
+      "outputTokensP50": 7400000,
+      "outputTokensP50Raw": "7.4 min",
+      "pricePerM": "85K",
       "modelUrl": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
     },
     {
@@ -294,10 +294,10 @@
       "bashRecoveryPct": 15.44,
       "toolHallucinationPct": 0.45,
       "sessions": 33991,
-      "costPerTaskP50Usd": 1.29,
-      "outputTokensP50": 5500000,
-      "outputTokensP50Raw": "5.5 min",
-      "pricePerM": "31.8K",
+      "costPerTaskP50Usd": 1.41,
+      "outputTokensP50": 5400000,
+      "outputTokensP50Raw": "5.4 min",
+      "pricePerM": "34.3K",
       "modelUrl": "https://www.anthropic.com/news/claude-sonnet-5"
     },
     {
@@ -315,10 +315,10 @@
       "bashRecoveryPct": 6.47,
       "toolHallucinationPct": 0.84,
       "sessions": 11134,
-      "costPerTaskP50Usd": 1.57,
-      "outputTokensP50": 4500000,
-      "outputTokensP50Raw": "4.5 min",
-      "pricePerM": "26K",
+      "costPerTaskP50Usd": 1.68,
+      "outputTokensP50": 4700000,
+      "outputTokensP50Raw": "4.7 min",
+      "pricePerM": "26.8K",
       "modelUrl": "https://research.meta.ai/blog/muse-wonder"
     },
     {
@@ -336,10 +336,10 @@
       "bashRecoveryPct": 3.68,
       "toolHallucinationPct": 0.06,
       "sessions": 43983,
-      "costPerTaskP50Usd": 0.13,
-      "outputTokensP50": 15500000,
-      "outputTokensP50Raw": "15.5 min",
-      "pricePerM": "43.7K",
+      "costPerTaskP50Usd": 0.14,
+      "outputTokensP50": 15300000,
+      "outputTokensP50Raw": "15.3 min",
+      "pricePerM": "44.3K",
       "modelUrl": "https://mimo.xiaomi.com/mimo-v2-6"
     },
     {
@@ -357,10 +357,10 @@
       "bashRecoveryPct": 10.92,
       "toolHallucinationPct": 0.56,
       "sessions": 39719,
-      "costPerTaskP50Usd": 0.82,
-      "outputTokensP50": 9200000,
-      "outputTokensP50Raw": "9.2 min",
-      "pricePerM": "56.2K",
+      "costPerTaskP50Usd": 0.8,
+      "outputTokensP50": 9000000,
+      "outputTokensP50Raw": "9 min",
+      "pricePerM": "53.2K",
       "modelUrl": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/"
     },
     {
@@ -378,10 +378,10 @@
       "bashRecoveryPct": 2.29,
       "toolHallucinationPct": 0.66,
       "sessions": 78017,
-      "costPerTaskP50Usd": 0.48,
-      "outputTokensP50": 4800000,
-      "outputTokensP50Raw": "4.8 min",
-      "pricePerM": "23.4K",
+      "costPerTaskP50Usd": 0.5,
+      "outputTokensP50": 5000000,
+      "outputTokensP50Raw": "5 min",
+      "pricePerM": "24.9K",
       "modelUrl": "https://developer.meta.com/ai/models/muse-spark/"
     },
     {
@@ -399,10 +399,10 @@
       "bashRecoveryPct": 9.68,
       "toolHallucinationPct": 0.68,
       "sessions": 16639,
-      "costPerTaskP50Usd": 2.48,
-      "outputTokensP50": 14800000,
-      "outputTokensP50Raw": "14.8 min",
-      "pricePerM": "68.9K",
+      "costPerTaskP50Usd": 2.64,
+      "outputTokensP50": 14500000,
+      "outputTokensP50Raw": "14.5 min",
+      "pricePerM": "71.8K",
       "modelUrl": "https://docs.x.ai/developers/models/grok-4.7"
     },
     {
@@ -420,10 +420,10 @@
       "bashRecoveryPct": 10.69,
       "toolHallucinationPct": 0.61,
       "sessions": 194437,
-      "costPerTaskP50Usd": 0.08,
-      "outputTokensP50": 6300000,
-      "outputTokensP50Raw": "6.3 min",
-      "pricePerM": "41.6K",
+      "costPerTaskP50Usd": 0.09,
+      "outputTokensP50": 6500000,
+      "outputTokensP50Raw": "6.5 min",
+      "pricePerM": "41.7K",
       "modelUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
     },
     {
@@ -441,10 +441,10 @@
       "bashRecoveryPct": 0.23,
       "toolHallucinationPct": 0.55,
       "sessions": 259479,
-      "costPerTaskP50Usd": 0.15,
-      "outputTokensP50": 6400000,
-      "outputTokensP50Raw": "6.4 min",
-      "pricePerM": "70.5K",
+      "costPerTaskP50Usd": 0.17,
+      "outputTokensP50": 6600000,
+      "outputTokensP50Raw": "6.6 min",
+      "pricePerM": "72.3K",
       "modelUrl": "https://www.deepseek.com/en/news/deepseek-v4-1-flash/"
     },
     {
@@ -462,10 +462,10 @@
       "bashRecoveryPct": 1.86,
       "toolHallucinationPct": 2.99,
       "sessions": 22895,
-      "costPerTaskP50Usd": 0.06,
-      "outputTokensP50": 14400000,
-      "outputTokensP50Raw": "14.4 min",
-      "pricePerM": "45.9K",
+      "costPerTaskP50Usd": 0.07,
+      "outputTokensP50": 15200000,
+      "outputTokensP50Raw": "15.2 min",
+      "pricePerM": "48.9K",
       "modelUrl": "https://mimo.xiaomi.com/mimo-v2-6"
     },
     {
@@ -483,10 +483,10 @@
       "bashRecoveryPct": 2.22,
       "toolHallucinationPct": 0.09,
       "sessions": 93764,
-      "costPerTaskP50Usd": 0.43,
-      "outputTokensP50": 17000000,
-      "outputTokensP50Raw": "17 min",
-      "pricePerM": "47.4K",
+      "costPerTaskP50Usd": 0.45,
+      "outputTokensP50": 16400000,
+      "outputTokensP50Raw": "16.4 min",
+      "pricePerM": "50.1K",
       "modelUrl": "https://hy.tencent.ai/research/hy4-preview"
     },
     {
@@ -504,10 +504,10 @@
       "bashRecoveryPct": 4.02,
       "toolHallucinationPct": 0.73,
       "sessions": 90051,
-      "costPerTaskP50Usd": 0.96,
-      "outputTokensP50": 13900000,
-      "outputTokensP50Raw": "13.9 min",
-      "pricePerM": "56.3K",
+      "costPerTaskP50Usd": 1.01,
+      "outputTokensP50": 14300000,
+      "outputTokensP50Raw": "14.3 min",
+      "pricePerM": "59.1K",
       "modelUrl": "https://huggingface.co/zai-org/GLM-5.2"
     },
     {
@@ -526,9 +526,9 @@
       "toolHallucinationPct": 0.75,
       "sessions": 139480,
       "costPerTaskP50Usd": 1.19,
-      "outputTokensP50": 13500000,
-      "outputTokensP50Raw": "13.5 min",
-      "pricePerM": "33.5K",
+      "outputTokensP50": 13000000,
+      "outputTokensP50Raw": "13 min",
+      "pricePerM": "32.4K",
       "modelUrl": "https://platform.kimi.ai/docs/guide/kimi-k3-quickstart"
     },
     {
@@ -546,10 +546,10 @@
       "bashRecoveryPct": 4.66,
       "toolHallucinationPct": 0.7,
       "sessions": 88117,
-      "costPerTaskP50Usd": 0.93,
-      "outputTokensP50": 13600000,
-      "outputTokensP50Raw": "13.6 min",
-      "pricePerM": "55.9K",
+      "costPerTaskP50Usd": 1.08,
+      "outputTokensP50": 14300000,
+      "outputTokensP50Raw": "14.3 min",
+      "pricePerM": "58K",
       "modelUrl": "https://z.ai/blog/glm-5.3"
     },
     {
@@ -568,8 +568,8 @@
       "toolHallucinationPct": 0.89,
       "sessions": 27887,
       "costPerTaskP50Usd": 0.1,
-      "outputTokensP50": 2100000,
-      "outputTokensP50Raw": "2.1 min",
+      "outputTokensP50": 2000000,
+      "outputTokensP50Raw": "2 min",
       "pricePerM": "29.4K",
       "modelUrl": "https://www.anthropic.com/claude-haiku-5-5"
     },
@@ -588,10 +588,10 @@
       "bashRecoveryPct": 0.87,
       "toolHallucinationPct": 0.83,
       "sessions": 75307,
-      "costPerTaskP50Usd": 1.03,
-      "outputTokensP50": 12800000,
-      "outputTokensP50Raw": "12.8 min",
-      "pricePerM": "44.6K",
+      "costPerTaskP50Usd": 1.25,
+      "outputTokensP50": 15100000,
+      "outputTokensP50Raw": "15.1 min",
+      "pricePerM": "49.6K",
       "modelUrl": "https://qwen.ai/blog?id=qwen3.8"
     },
     {
@@ -609,10 +609,10 @@
       "bashRecoveryPct": 9.6,
       "toolHallucinationPct": 0.61,
       "sessions": 29832,
-      "costPerTaskP50Usd": 1.35,
-      "outputTokensP50": 9600000,
-      "outputTokensP50Raw": "9.6 min",
-      "pricePerM": "34.6K",
+      "costPerTaskP50Usd": 1.64,
+      "outputTokensP50": 9500000,
+      "outputTokensP50Raw": "9.5 min",
+      "pricePerM": "36.5K",
       "modelUrl": "https://docs.x.ai/developers/models/grok-4.6"
     },
     {
@@ -630,10 +630,10 @@
       "bashRecoveryPct": 1.45,
       "toolHallucinationPct": 0.55,
       "sessions": 25167,
-      "costPerTaskP50Usd": 0.59,
-      "outputTokensP50": 2700000,
-      "outputTokensP50Raw": "2.7 min",
-      "pricePerM": "17.3K",
+      "costPerTaskP50Usd": 0.6,
+      "outputTokensP50": 2600000,
+      "outputTokensP50Raw": "2.6 min",
+      "pricePerM": "16.4K",
       "modelUrl": "https://openai.com/index/gpt-5-6/"
     },
     {
@@ -672,10 +672,10 @@
       "bashRecoveryPct": 6.99,
       "toolHallucinationPct": 0.61,
       "sessions": 28207,
-      "costPerTaskP50Usd": 0.02,
-      "outputTokensP50": 1700000,
-      "outputTokensP50Raw": "1.7 min",
-      "pricePerM": "9.5K",
+      "costPerTaskP50Usd": 0.03,
+      "outputTokensP50": 1800000,
+      "outputTokensP50Raw": "1.8 min",
+      "pricePerM": "9.9K",
       "modelUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
     },
     {
@@ -693,10 +693,10 @@
       "bashRecoveryPct": 6.77,
       "toolHallucinationPct": 0.48,
       "sessions": 56113,
-      "costPerTaskP50Usd": 0.55,
-      "outputTokensP50": 6400000,
-      "outputTokensP50Raw": "6.4 min",
-      "pricePerM": "38.1K",
+      "costPerTaskP50Usd": 0.58,
+      "outputTokensP50": 6200000,
+      "outputTokensP50Raw": "6.2 min",
+      "pricePerM": "37.2K",
       "modelUrl": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-3-7-flash/"
     },
     {
@@ -714,10 +714,10 @@
       "bashRecoveryPct": 9.89,
       "toolHallucinationPct": 0.7,
       "sessions": 92133,
-      "costPerTaskP50Usd": 0.15,
-      "outputTokensP50": 6600000,
-      "outputTokensP50Raw": "6.6 min",
-      "pricePerM": "45.6K",
+      "costPerTaskP50Usd": 0.16,
+      "outputTokensP50": 6500000,
+      "outputTokensP50Raw": "6.5 min",
+      "pricePerM": "46.3K",
       "modelUrl": "https://z.ai/blog/glm-5.3"
     },
     {
@@ -735,10 +735,10 @@
       "bashRecoveryPct": 9.88,
       "toolHallucinationPct": 0.66,
       "sessions": 15412,
-      "costPerTaskP50Usd": 0.52,
-      "outputTokensP50": 9700000,
-      "outputTokensP50Raw": "9.7 min",
-      "pricePerM": "38.2K",
+      "costPerTaskP50Usd": 0.57,
+      "outputTokensP50": 10100000,
+      "outputTokensP50Raw": "10.1 min",
+      "pricePerM": "41.2K",
       "modelUrl": "https://stepfun.ai/"
     },
     {
@@ -756,10 +756,10 @@
       "bashRecoveryPct": 5.48,
       "toolHallucinationPct": 0.21,
       "sessions": 9625,
-      "costPerTaskP50Usd": 0.19,
-      "outputTokensP50": 7300000,
-      "outputTokensP50Raw": "7.3 min",
-      "pricePerM": "66.5K",
+      "costPerTaskP50Usd": 0.22,
+      "outputTokensP50": 7400000,
+      "outputTokensP50Raw": "7.4 min",
+      "pricePerM": "67.1K",
       "modelUrl": "https://www.minimax.io/blog/minimax-m31f"
     },
     {
@@ -780,7 +780,7 @@
       "costPerTaskP50Usd": null,
       "outputTokensP50": 53,
       "outputTokensP50Raw": "53 s",
-      "pricePerM": "15.4K",
+      "pricePerM": "15.5K",
       "modelUrl": "https://reflection.ai/blog/introducing-beam"
     },
     {
@@ -798,10 +798,10 @@
       "bashRecoveryPct": 19.43,
       "toolHallucinationPct": 0.75,
       "sessions": 105281,
-      "costPerTaskP50Usd": 0.21,
+      "costPerTaskP50Usd": 0.23,
       "outputTokensP50": 11200000,
       "outputTokensP50Raw": "11.2 min",
-      "pricePerM": "62.2K",
+      "pricePerM": "64K",
       "modelUrl": "https://qwen.ai/blog?id=qwen3.8-flash-next"
     },
     {
@@ -819,10 +819,10 @@
       "bashRecoveryPct": 11.05,
       "toolHallucinationPct": 0.08,
       "sessions": 62625,
-      "costPerTaskP50Usd": 0.38,
-      "outputTokensP50": 8200000,
-      "outputTokensP50Raw": "8.2 min",
-      "pricePerM": "52.4K",
+      "costPerTaskP50Usd": 0.46,
+      "outputTokensP50": 8300000,
+      "outputTokensP50Raw": "8.3 min",
+      "pricePerM": "52.6K",
       "modelUrl": "https://huggingface.co/Qwen/Qwen3.8-27B"
     },
     {
@@ -840,9 +840,9 @@
       "bashRecoveryPct": 2.25,
       "toolHallucinationPct": 0.09,
       "sessions": 87676,
-      "costPerTaskP50Usd": 0.55,
-      "outputTokensP50": 3100000,
-      "outputTokensP50Raw": "3.1 min",
+      "costPerTaskP50Usd": 0.56,
+      "outputTokensP50": 3000000,
+      "outputTokensP50Raw": "3 min",
       "pricePerM": "13.7K",
       "modelUrl": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-1-pro/"
     },
@@ -862,8 +862,8 @@
       "toolHallucinationPct": 0.69,
       "sessions": 18454,
       "costPerTaskP50Usd": 0.01,
-      "outputTokensP50": 47,
-      "outputTokensP50Raw": "47 s",
+      "outputTokensP50": 48,
+      "outputTokensP50Raw": "48 s",
       "pricePerM": "3.8K",
       "modelUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
     },
@@ -882,10 +882,10 @@
       "bashRecoveryPct": 1.06,
       "toolHallucinationPct": 18,
       "sessions": 14080,
-      "costPerTaskP50Usd": 0.82,
-      "outputTokensP50": 10400000,
-      "outputTokensP50Raw": "10.4 min",
-      "pricePerM": "42.4K",
+      "costPerTaskP50Usd": 0.66,
+      "outputTokensP50": 10800000,
+      "outputTokensP50Raw": "10.8 min",
+      "pricePerM": "44.4K",
       "modelUrl": "https://mistral.ai/news/mistral-large-4/"
     },
     {
@@ -903,10 +903,10 @@
       "bashRecoveryPct": 3.96,
       "toolHallucinationPct": 0.23,
       "sessions": 42729,
-      "costPerTaskP50Usd": 0.32,
-      "outputTokensP50": 2100000,
-      "outputTokensP50Raw": "2.1 min",
-      "pricePerM": "17.1K"
+      "costPerTaskP50Usd": 0.37,
+      "outputTokensP50": 2300000,
+      "outputTokensP50Raw": "2.3 min",
+      "pricePerM": "19.4K"
     },
     {
       "rank": 44,
@@ -926,7 +926,7 @@
       "costPerTaskP50Usd": 0.07,
       "outputTokensP50": 3200000,
       "outputTokensP50Raw": "3.2 min",
-      "pricePerM": "32.6K",
+      "pricePerM": "32.7K",
       "modelUrl": "https://huggingface.co/tencent/Hy3"
     },
     {
@@ -944,10 +944,10 @@
       "bashRecoveryPct": 1.4,
       "toolHallucinationPct": 0.27,
       "sessions": 149239,
-      "costPerTaskP50Usd": 0.45,
+      "costPerTaskP50Usd": 0.44,
       "outputTokensP50": 1600000,
       "outputTokensP50Raw": "1.6 min",
-      "pricePerM": "18.8K",
+      "pricePerM": "18.5K",
       "modelUrl": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/"
     },
     {
@@ -965,10 +965,10 @@
       "bashRecoveryPct": 3.35,
       "toolHallucinationPct": 0.24,
       "sessions": 53539,
-      "costPerTaskP50Usd": 0.49,
-      "outputTokensP50": 2200000,
-      "outputTokensP50Raw": "2.2 min",
-      "pricePerM": "27.5K",
+      "costPerTaskP50Usd": 0.51,
+      "outputTokensP50": 2100000,
+      "outputTokensP50Raw": "2.1 min",
+      "pricePerM": "27.9K",
       "modelUrl": "https://developer.meta.com/ai/models/muse-spark/"
     },
     {
@@ -986,10 +986,10 @@
       "bashRecoveryPct": 1.7,
       "toolHallucinationPct": 3.06,
       "sessions": 23985,
-      "costPerTaskP50Usd": 0.13,
-      "outputTokensP50": 4600000,
-      "outputTokensP50Raw": "4.6 min",
-      "pricePerM": "16.9K",
+      "costPerTaskP50Usd": 0.15,
+      "outputTokensP50": 4400000,
+      "outputTokensP50Raw": "4.4 min",
+      "pricePerM": "17.1K",
       "modelUrl": "https://qwen.ai/blog?id=qwen3.7-plus"
     },
     {
@@ -1007,10 +1007,10 @@
       "bashRecoveryPct": 0.29,
       "toolHallucinationPct": 1.03,
       "sessions": 49530,
-      "costPerTaskP50Usd": 0.07,
-      "outputTokensP50": 5700000,
-      "outputTokensP50Raw": "5.7 min",
-      "pricePerM": "14.3K",
+      "costPerTaskP50Usd": 0.08,
+      "outputTokensP50": 5100000,
+      "outputTokensP50Raw": "5.1 min",
+      "pricePerM": "13.5K",
       "modelUrl": "https://mimo.xiaomi.com/mimo-v2-5-pro/"
     },
     {
@@ -1028,10 +1028,10 @@
       "bashRecoveryPct": 0.12,
       "toolHallucinationPct": 1.85,
       "sessions": 43703,
-      "costPerTaskP50Usd": 0.15,
+      "costPerTaskP50Usd": 0.16,
       "outputTokensP50": 2000000,
       "outputTokensP50Raw": "2 min",
-      "pricePerM": "12.6K",
+      "pricePerM": "12.1K",
       "modelUrl": "https://www.minimax.io/models/text/m3"
     },
     {
@@ -1049,10 +1049,10 @@
       "bashRecoveryPct": 6.67,
       "toolHallucinationPct": 3.46,
       "sessions": 13468,
-      "costPerTaskP50Usd": 0.5,
+      "costPerTaskP50Usd": 0.51,
       "outputTokensP50": 2800000,
       "outputTokensP50Raw": "2.8 min",
-      "pricePerM": "20.1K",
+      "pricePerM": "19.1K",
       "modelUrl": "https://docs.mistral.ai/models/model-cards/mistral-medium-3-5-26-04"
     },
     {
@@ -1071,9 +1071,9 @@
       "toolHallucinationPct": 5.06,
       "sessions": 5172,
       "costPerTaskP50Usd": null,
-      "outputTokensP50": 3800000,
-      "outputTokensP50Raw": "3.8 min",
-      "pricePerM": "12K",
+      "outputTokensP50": 3600000,
+      "outputTokensP50Raw": "3.6 min",
+      "pricePerM": "12.8K",
       "modelUrl": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4"
     },
     {
@@ -1091,10 +1091,10 @@
       "bashRecoveryPct": 18.61,
       "toolHallucinationPct": 0.68,
       "sessions": 13313,
-      "costPerTaskP50Usd": 0.09,
-      "outputTokensP50": 3500000,
-      "outputTokensP50Raw": "3.5 min",
-      "pricePerM": "5.4K",
+      "costPerTaskP50Usd": 0.14,
+      "outputTokensP50": 4300000,
+      "outputTokensP50Raw": "4.3 min",
+      "pricePerM": "9.1K",
       "modelUrl": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4"
     },
     {
@@ -1112,10 +1112,10 @@
       "bashRecoveryPct": 0.3,
       "toolHallucinationPct": 1.03,
       "sessions": 43905,
-      "costPerTaskP50Usd": 0.37,
-      "outputTokensP50": 2000000,
-      "outputTokensP50Raw": "2 min",
-      "pricePerM": "15.4K",
+      "costPerTaskP50Usd": 0.36,
+      "outputTokensP50": 1900000,
+      "outputTokensP50Raw": "1.9 min",
+      "pricePerM": "15.3K",
       "modelUrl": "https://thinkingmachines.ai/news/introducing-inkling/"
     },
     {
@@ -1133,10 +1133,10 @@
       "bashRecoveryPct": 3.06,
       "toolHallucinationPct": 1.65,
       "sessions": 14421,
-      "costPerTaskP50Usd": 0.17,
+      "costPerTaskP50Usd": 0.19,
       "outputTokensP50": 2300000,
       "outputTokensP50Raw": "2.3 min",
-      "pricePerM": "19.5K",
+      "pricePerM": "19.9K",
       "modelUrl": "https://thinkingmachines.ai/news/inkling-small/"
     },
     {
@@ -1155,9 +1155,9 @@
       "toolHallucinationPct": 2.65,
       "sessions": 10622,
       "costPerTaskP50Usd": 0.05,
-      "outputTokensP50": 2800000,
-      "outputTokensP50Raw": "2.8 min",
-      "pricePerM": "16.5K",
+      "outputTokensP50": 3100000,
+      "outputTokensP50Raw": "3.1 min",
+      "pricePerM": "17.6K",
       "modelUrl": "https://www.upstage.ai/blog/en/solar-pro-4"
     }
   ]
