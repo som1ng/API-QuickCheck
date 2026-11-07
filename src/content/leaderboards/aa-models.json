@@ -2,9 +2,9 @@
   "source": "aa-models",
   "sourceUrl": "https://artificialanalysis.ai/leaderboards/models",
   "sourceName": "Artificial Analysis LLM Leaderboard",
-  "fetchedAt": "2026-11-04T07:16:46.948Z",
-  "asOf": "2026-11-04",
-  "rowCount": 279,
+  "fetchedAt": "2026-11-07T06:52:07.061Z",
+  "asOf": "2026-11-07",
+  "rowCount": 282,
   "rows": [
     {
       "rank": 1,
@@ -15,28 +15,24 @@
       "intelligenceIndex": 60,
       "estimated": false,
       "costPerTaskUsd": 7.76,
-      "medianTokensPerSec": 88,
-      "latencyFirstChunkSec": 153.73,
-      "totalResponseSec": 159.4,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-4-carbon",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-4-carbon/providers"
+      "medianTokensPerSec": 30.8,
+      "latencyFirstChunkSec": 68.23,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 2,
-      "name": "Claude Opus 5.5 (max with fallback)",
-      "slug": "claude-opus-5-5-max-with-fallback",
+      "name": "Claude Opus 5.5 (max)",
+      "slug": "claude-opus-5-5-max",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 59,
       "estimated": false,
       "costPerTaskUsd": 10.04,
-      "medianTokensPerSec": 95,
-      "latencyFirstChunkSec": 640.87,
-      "totalResponseSec": 646.16,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-opus-5-5",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-opus-5-5/providers"
+      "medianTokensPerSec": 25,
+      "latencyFirstChunkSec": 362.56,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 3,
@@ -47,28 +43,24 @@
       "intelligenceIndex": 58,
       "estimated": false,
       "costPerTaskUsd": 6.59,
-      "medianTokensPerSec": 92,
-      "latencyFirstChunkSec": 8.71,
-      "totalResponseSec": 14.11,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-4-carbon-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-4-carbon-medium/providers"
+      "medianTokensPerSec": 24.6,
+      "latencyFirstChunkSec": 29.35,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 4,
-      "name": "Claude Opus 5.5 (xhigh with fallback)",
-      "slug": "claude-opus-5-5-xhigh-with-fallback",
+      "name": "Claude Opus 5.5 (xhigh)",
+      "slug": "claude-opus-5-5-xhigh",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 57,
       "estimated": false,
       "costPerTaskUsd": 6.05,
-      "medianTokensPerSec": 80,
-      "latencyFirstChunkSec": 145.85,
-      "totalResponseSec": 152.11,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-xhigh/providers"
+      "medianTokensPerSec": 15.9,
+      "latencyFirstChunkSec": 80.96,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 5,
@@ -79,12 +71,10 @@
       "intelligenceIndex": 57,
       "estimated": false,
       "costPerTaskUsd": 6.24,
-      "medianTokensPerSec": 67,
-      "latencyFirstChunkSec": 348.26,
-      "totalResponseSec": 355.71,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-astra",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-astra/providers"
+      "medianTokensPerSec": 20.9,
+      "latencyFirstChunkSec": 235.46,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 6,
@@ -95,12 +85,10 @@
       "intelligenceIndex": 55,
       "estimated": false,
       "costPerTaskUsd": 3.66,
-      "medianTokensPerSec": 56,
-      "latencyFirstChunkSec": 207.97,
-      "totalResponseSec": 216.83,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-astra-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-astra-xhigh/providers"
+      "medianTokensPerSec": 10.4,
+      "latencyFirstChunkSec": 123.78,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 7,
@@ -111,12 +99,10 @@
       "intelligenceIndex": 55,
       "estimated": false,
       "costPerTaskUsd": 3.24,
-      "medianTokensPerSec": 56,
-      "latencyFirstChunkSec": 122.99,
-      "totalResponseSec": 131.89,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-astra-high",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-astra-high/providers"
+      "medianTokensPerSec": 9.1,
+      "latencyFirstChunkSec": 55.98,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 8,
@@ -127,28 +113,24 @@
       "intelligenceIndex": 55,
       "estimated": false,
       "costPerTaskUsd": 1.27,
-      "medianTokensPerSec": 75,
-      "latencyFirstChunkSec": 335.69,
-      "totalResponseSec": 342.35,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol/providers"
+      "medianTokensPerSec": 21.9,
+      "latencyFirstChunkSec": 204.37,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 9,
-      "name": "Claude Sonnet 5.5 (max with fallback)",
-      "slug": "claude-sonnet-5-5-max-with-fallback",
+      "name": "Claude Sonnet 5.5 (max)",
+      "slug": "claude-sonnet-5-5-max",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 55,
       "estimated": false,
       "costPerTaskUsd": 10.02,
-      "medianTokensPerSec": 139,
-      "latencyFirstChunkSec": 452.18,
-      "totalResponseSec": 455.77,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5/providers"
+      "medianTokensPerSec": 31.4,
+      "latencyFirstChunkSec": 277.83,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 10,
@@ -159,12 +141,10 @@
       "intelligenceIndex": 54,
       "estimated": false,
       "costPerTaskUsd": 7.19,
-      "medianTokensPerSec": 114,
-      "latencyFirstChunkSec": 11.88,
-      "totalResponseSec": 16.28,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-4-carbon-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-4-carbon-low/providers"
+      "medianTokensPerSec": 35.4,
+      "latencyFirstChunkSec": 8,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 11,
@@ -175,28 +155,24 @@
       "intelligenceIndex": 52,
       "estimated": false,
       "costPerTaskUsd": 0.76,
-      "medianTokensPerSec": 73,
-      "latencyFirstChunkSec": 153.3,
-      "totalResponseSec": 160.19,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-xhigh/providers"
+      "medianTokensPerSec": 9.8,
+      "latencyFirstChunkSec": 76.71,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 12,
-      "name": "Claude Opus 5.5 (high with fallback)",
-      "slug": "claude-opus-5-5-high-with-fallback",
+      "name": "Claude Opus 5.5 (high)",
+      "slug": "claude-opus-5-5-high",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 52,
       "estimated": false,
       "costPerTaskUsd": 3.46,
-      "medianTokensPerSec": 78,
-      "latencyFirstChunkSec": 47.5,
-      "totalResponseSec": 53.89,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-high",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-high/providers"
+      "medianTokensPerSec": 9.2,
+      "latencyFirstChunkSec": 35.03,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 13,
@@ -207,12 +183,10 @@
       "intelligenceIndex": 52,
       "estimated": false,
       "costPerTaskUsd": 2.73,
-      "medianTokensPerSec": 51,
-      "latencyFirstChunkSec": 8.04,
-      "totalResponseSec": 17.91,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-astra-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-astra-medium/providers"
+      "medianTokensPerSec": 6.5,
+      "latencyFirstChunkSec": 7.28,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 14,
@@ -223,12 +197,10 @@
       "intelligenceIndex": 51,
       "estimated": false,
       "costPerTaskUsd": 0.96,
-      "medianTokensPerSec": 109,
-      "latencyFirstChunkSec": 289.29,
-      "totalResponseSec": 293.86,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra/providers"
+      "medianTokensPerSec": 13.8,
+      "latencyFirstChunkSec": 170.15,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 15,
@@ -238,13 +210,11 @@
       "creatorLogo": "https://artificialanalysis.ai/img/logos/google.svg",
       "intelligenceIndex": 50,
       "estimated": false,
-      "costPerTaskUsd": 7.68,
-      "medianTokensPerSec": 82,
-      "latencyFirstChunkSec": 44.96,
-      "totalResponseSec": 51.06,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-4-argon",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-4-argon/providers"
+      "costPerTaskUsd": 9.95,
+      "medianTokensPerSec": 27.7,
+      "latencyFirstChunkSec": 38.73,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 16,
@@ -255,12 +225,10 @@
       "intelligenceIndex": 50,
       "estimated": false,
       "costPerTaskUsd": 0.59,
-      "medianTokensPerSec": 65,
-      "latencyFirstChunkSec": 86.97,
-      "totalResponseSec": 94.62,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-high",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-high/providers"
+      "medianTokensPerSec": 7,
+      "latencyFirstChunkSec": 45.21,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 17,
@@ -274,89 +242,77 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/muse-wonder-full",
-      "providersUrl": "https://artificialanalysis.ai/models/muse-wonder-full/providers"
+      "contextWindow": 1000000
     },
     {
       "rank": 18,
-      "name": "Claude Fable 5.1 (xhigh with fallback)",
-      "slug": "claude-fable-5-1-xhigh-with-fallback",
+      "name": "Claude Fable 5.1 (xhigh)",
+      "slug": "claude-fable-5-1-xhigh",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 50,
       "estimated": false,
       "costPerTaskUsd": 10.85,
-      "medianTokensPerSec": 62,
-      "latencyFirstChunkSec": 93.04,
-      "totalResponseSec": 101.1,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-xhigh/providers"
+      "medianTokensPerSec": 18.3,
+      "latencyFirstChunkSec": 68.55,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 19,
-      "name": "Claude Sonnet 5.5 (xhigh with fallback)",
-      "slug": "claude-sonnet-5-5-xhigh-with-fallback",
+      "name": "Claude Sonnet 5.5 (xhigh)",
+      "slug": "claude-sonnet-5-5-xhigh",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 50,
       "estimated": false,
       "costPerTaskUsd": 4.09,
-      "medianTokensPerSec": 107,
-      "latencyFirstChunkSec": 36.85,
-      "totalResponseSec": 41.53,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-xhigh/providers"
+      "medianTokensPerSec": 15.1,
+      "latencyFirstChunkSec": 30.67,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 20,
-      "name": "Claude Fable 5.1 (max with fallback)",
-      "slug": "claude-fable-5-1-max-with-fallback",
+      "name": "Claude Fable 5.1 (max)",
+      "slug": "claude-fable-5-1-max",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 49,
       "estimated": false,
       "costPerTaskUsd": 12.99,
-      "medianTokensPerSec": 70,
-      "latencyFirstChunkSec": 265.4,
-      "totalResponseSec": 272.58,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-fable-5-1",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-fable-5-1/providers"
+      "medianTokensPerSec": 22.2,
+      "latencyFirstChunkSec": 183.27,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 21,
-      "name": "Claude Opus 5.5 (medium with fallback)",
-      "slug": "claude-opus-5-5-medium-with-fallback",
+      "name": "Claude Opus 5.5 (medium)",
+      "slug": "claude-opus-5-5-medium",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 48,
       "estimated": false,
       "costPerTaskUsd": 2.45,
-      "medianTokensPerSec": 78,
-      "latencyFirstChunkSec": 23.49,
-      "totalResponseSec": 29.91,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-medium/providers"
+      "medianTokensPerSec": 6.8,
+      "latencyFirstChunkSec": 19.85,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 22,
-      "name": "Claude Fable 5.1 (high with fallback)",
-      "slug": "claude-fable-5-1-high-with-fallback",
+      "name": "Claude Fable 5.1 (high)",
+      "slug": "claude-fable-5-1-high",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 47,
       "estimated": false,
       "costPerTaskUsd": 7.54,
-      "medianTokensPerSec": 57,
-      "latencyFirstChunkSec": 19.86,
-      "totalResponseSec": 28.61,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-high",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-high/providers"
+      "medianTokensPerSec": 12.5,
+      "latencyFirstChunkSec": 17.26,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 23,
@@ -367,12 +323,10 @@
       "intelligenceIndex": 46,
       "estimated": false,
       "costPerTaskUsd": 3.68,
-      "medianTokensPerSec": 31,
-      "latencyFirstChunkSec": 3.21,
-      "totalResponseSec": 85.02,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/kimi-k3-1-pro",
-      "providersUrl": "https://artificialanalysis.ai/models/kimi-k3-1-pro/providers"
+      "medianTokensPerSec": 36.1,
+      "latencyFirstChunkSec": 172.65,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 24,
@@ -383,12 +337,10 @@
       "intelligenceIndex": 46,
       "estimated": false,
       "costPerTaskUsd": 0.36,
-      "medianTokensPerSec": 56,
-      "latencyFirstChunkSec": 9.35,
-      "totalResponseSec": 18.33,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-medium/providers"
+      "medianTokensPerSec": 4.1,
+      "latencyFirstChunkSec": 6.54,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 25,
@@ -399,12 +351,10 @@
       "intelligenceIndex": 45,
       "estimated": false,
       "costPerTaskUsd": 0.4,
-      "medianTokensPerSec": 102,
-      "latencyFirstChunkSec": 68.41,
-      "totalResponseSec": 73.32,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-xhigh/providers"
+      "medianTokensPerSec": 6.2,
+      "latencyFirstChunkSec": 37.35,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 26,
@@ -415,12 +365,10 @@
       "intelligenceIndex": 44,
       "estimated": false,
       "costPerTaskUsd": 6.95,
-      "medianTokensPerSec": 172,
-      "latencyFirstChunkSec": 33.84,
-      "totalResponseSec": 48.37,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/muse-wonder",
-      "providersUrl": "https://artificialanalysis.ai/models/muse-wonder/providers"
+      "medianTokensPerSec": 12.3,
+      "latencyFirstChunkSec": 23.6,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 27,
@@ -431,28 +379,24 @@
       "intelligenceIndex": 43,
       "estimated": false,
       "costPerTaskUsd": 1.42,
-      "medianTokensPerSec": 50,
-      "latencyFirstChunkSec": 2.74,
-      "totalResponseSec": 12.68,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-astra-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-astra-low/providers"
+      "medianTokensPerSec": 3.5,
+      "latencyFirstChunkSec": 3.95,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 28,
-      "name": "Claude Fable 5.1 (medium with fallback)",
-      "slug": "claude-fable-5-1-medium-with-fallback",
+      "name": "Claude Fable 5.1 (medium)",
+      "slug": "claude-fable-5-1-medium",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 43,
       "estimated": false,
       "costPerTaskUsd": 5.56,
-      "medianTokensPerSec": 55,
-      "latencyFirstChunkSec": 15.84,
-      "totalResponseSec": 24.97,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-medium/providers"
+      "medianTokensPerSec": 9.2,
+      "latencyFirstChunkSec": 10.11,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 29,
@@ -463,47 +407,55 @@
       "intelligenceIndex": 42,
       "estimated": false,
       "costPerTaskUsd": 0.26,
-      "medianTokensPerSec": 91,
-      "latencyFirstChunkSec": 20.7,
-      "totalResponseSec": 26.17,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-high",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-high/providers"
+      "medianTokensPerSec": 4,
+      "latencyFirstChunkSec": 12.71,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 30,
-      "name": "Claude Sonnet 5.5 (high with fallback)",
-      "slug": "claude-sonnet-5-5-high-with-fallback",
+      "name": "Claude Sonnet 5.5 (high)",
+      "slug": "claude-sonnet-5-5-high",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 42,
       "estimated": false,
       "costPerTaskUsd": 1.64,
-      "medianTokensPerSec": 103,
-      "latencyFirstChunkSec": 13.94,
-      "totalResponseSec": 18.77,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-high",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-high/providers"
+      "medianTokensPerSec": 6.9,
+      "latencyFirstChunkSec": 11.84,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
       "rank": 31,
-      "name": "Claude Fable 5.1 (low with fallback)",
-      "slug": "claude-fable-5-1-low-with-fallback",
+      "name": "Muse Wonder (high)",
+      "slug": "muse-wonder-high",
+      "creator": "Meta",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/meta.svg",
+      "intelligenceIndex": 41,
+      "estimated": false,
+      "costPerTaskUsd": 4.56,
+      "medianTokensPerSec": 8.9,
+      "latencyFirstChunkSec": 9.23,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
+    },
+    {
+      "rank": 32,
+      "name": "Claude Fable 5.1 (low)",
+      "slug": "claude-fable-5-1-low",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 39,
       "estimated": false,
       "costPerTaskUsd": 4.47,
-      "medianTokensPerSec": 54,
-      "latencyFirstChunkSec": 3.12,
-      "totalResponseSec": 12.34,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-low",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-fable-5-1-low/providers"
+      "medianTokensPerSec": 7.1,
+      "latencyFirstChunkSec": 9.49,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 32,
+      "rank": 33,
       "name": "GPT-6.1 Terra (medium)",
       "slug": "gpt-6-1-terra-medium",
       "creator": "OpenAI",
@@ -511,15 +463,13 @@
       "intelligenceIndex": 38,
       "estimated": false,
       "costPerTaskUsd": 0.17,
-      "medianTokensPerSec": 90,
-      "latencyFirstChunkSec": 4.24,
-      "totalResponseSec": 9.81,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-medium/providers"
+      "medianTokensPerSec": 2.6,
+      "latencyFirstChunkSec": 5.02,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 33,
+      "rank": 34,
       "name": "Claude Haiku 5.5 (max)",
       "slug": "claude-haiku-5-5-max",
       "creator": "Anthropic",
@@ -527,15 +477,13 @@
       "intelligenceIndex": 36,
       "estimated": false,
       "costPerTaskUsd": 0.41,
-      "medianTokensPerSec": 236,
-      "latencyFirstChunkSec": 315.62,
-      "totalResponseSec": 317.74,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5/providers"
+      "medianTokensPerSec": 16.1,
+      "latencyFirstChunkSec": 173.73,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 34,
+      "rank": 35,
       "name": "Grok 4.7 (xhigh)",
       "slug": "grok-4-7-xhigh",
       "creator": "SpaceXAI",
@@ -543,15 +491,13 @@
       "intelligenceIndex": 35,
       "estimated": false,
       "costPerTaskUsd": 7.77,
-      "medianTokensPerSec": 76,
-      "latencyFirstChunkSec": 108.03,
-      "totalResponseSec": 114.65,
-      "contextWindow": 500000,
-      "modelUrl": "https://artificialanalysis.ai/models/grok-4-7",
-      "providersUrl": "https://artificialanalysis.ai/models/grok-4-7/providers"
+      "medianTokensPerSec": 23.8,
+      "latencyFirstChunkSec": 53.01,
+      "totalResponseSec": null,
+      "contextWindow": 500000
     },
     {
-      "rank": 35,
+      "rank": 36,
       "name": "Grok 4.7 (high)",
       "slug": "grok-4-7-high",
       "creator": "SpaceXAI",
@@ -559,15 +505,13 @@
       "intelligenceIndex": 35,
       "estimated": false,
       "costPerTaskUsd": 6.18,
-      "medianTokensPerSec": 74,
-      "latencyFirstChunkSec": 66.05,
-      "totalResponseSec": 72.78,
-      "contextWindow": 500000,
-      "modelUrl": "https://artificialanalysis.ai/models/grok-4-7-high",
-      "providersUrl": "https://artificialanalysis.ai/models/grok-4-7-high/providers"
+      "medianTokensPerSec": 20.3,
+      "latencyFirstChunkSec": 30.84,
+      "totalResponseSec": null,
+      "contextWindow": 500000
     },
     {
-      "rank": 36,
+      "rank": 37,
       "name": "GPT-6.1 Sol (low)",
       "slug": "gpt-6-1-sol-low",
       "creator": "OpenAI",
@@ -575,31 +519,27 @@
       "intelligenceIndex": 35,
       "estimated": false,
       "costPerTaskUsd": 0.16,
-      "medianTokensPerSec": 61,
-      "latencyFirstChunkSec": 2.58,
-      "totalResponseSec": 10.77,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-sol-low/providers"
+      "medianTokensPerSec": 1.8,
+      "latencyFirstChunkSec": 2.88,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 37,
-      "name": "Claude Opus 5.5 (low with fallback)",
-      "slug": "claude-opus-5-5-low-with-fallback",
+      "rank": 38,
+      "name": "Claude Opus 5.5 (low)",
+      "slug": "claude-opus-5-5-low",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 35,
       "estimated": false,
       "costPerTaskUsd": 0.98,
-      "medianTokensPerSec": 78,
-      "latencyFirstChunkSec": 11.35,
-      "totalResponseSec": 17.78,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-low",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-opus-5-5-low/providers"
+      "medianTokensPerSec": 3,
+      "latencyFirstChunkSec": 6.57,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 38,
+      "rank": 39,
       "name": "Claude Haiku 5.5 (xhigh)",
       "slug": "claude-haiku-5-5-xhigh",
       "creator": "Anthropic",
@@ -607,15 +547,27 @@
       "intelligenceIndex": 35,
       "estimated": false,
       "costPerTaskUsd": 0.25,
-      "medianTokensPerSec": 181,
-      "latencyFirstChunkSec": 64.07,
-      "totalResponseSec": 66.84,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-xhigh/providers"
+      "medianTokensPerSec": 9.7,
+      "latencyFirstChunkSec": 52.3,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 39,
+      "rank": 40,
+      "name": "Tencent Hy4",
+      "slug": "tencent-hy4",
+      "creator": "Tencent",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/tencent-hy.svg",
+      "intelligenceIndex": 35,
+      "estimated": false,
+      "costPerTaskUsd": 1.03,
+      "medianTokensPerSec": 13.9,
+      "latencyFirstChunkSec": 103.27,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
+    },
+    {
+      "rank": 41,
       "name": "Qwen3.8 Max (0902)",
       "slug": "qwen3-8-max-0902",
       "creator": "Alibaba",
@@ -623,15 +575,13 @@
       "intelligenceIndex": 34,
       "estimated": false,
       "costPerTaskUsd": 10.02,
-      "medianTokensPerSec": 38,
-      "latencyFirstChunkSec": 3.07,
-      "totalResponseSec": 69.27,
-      "contextWindow": 984000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-max",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-max/providers"
+      "medianTokensPerSec": 60.2,
+      "latencyFirstChunkSec": 140.52,
+      "totalResponseSec": null,
+      "contextWindow": 984000
     },
     {
-      "rank": 40,
+      "rank": 42,
       "name": "DeepSeek V4.1 Flash 1017 (max)",
       "slug": "deepseek-v4-1-flash-1017-max",
       "creator": "DeepSeek",
@@ -639,15 +589,13 @@
       "intelligenceIndex": 33,
       "estimated": false,
       "costPerTaskUsd": 0.6,
-      "medianTokensPerSec": 165,
-      "latencyFirstChunkSec": 1.24,
-      "totalResponseSec": 16.42,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017",
-      "providersUrl": "https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017/providers"
+      "medianTokensPerSec": 13.6,
+      "latencyFirstChunkSec": 53.56,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 41,
+      "rank": 43,
       "name": "GLM-5.3 (max)",
       "slug": "glm-5-3-max",
       "creator": "Z AI",
@@ -655,15 +603,13 @@
       "intelligenceIndex": 32,
       "estimated": false,
       "costPerTaskUsd": 5.01,
-      "medianTokensPerSec": 86,
-      "latencyFirstChunkSec": 1.55,
-      "totalResponseSec": 30.73,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/glm-5-3",
-      "providersUrl": "https://artificialanalysis.ai/models/glm-5-3/providers"
+      "medianTokensPerSec": 31.5,
+      "latencyFirstChunkSec": 104.81,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 42,
+      "rank": 44,
       "name": "Grok 4.7 (low)",
       "slug": "grok-4-7-low",
       "creator": "SpaceXAI",
@@ -671,15 +617,13 @@
       "intelligenceIndex": 31,
       "estimated": false,
       "costPerTaskUsd": 2.92,
-      "medianTokensPerSec": 60,
-      "latencyFirstChunkSec": 7.33,
-      "totalResponseSec": 15.6,
-      "contextWindow": 500000,
-      "modelUrl": "https://artificialanalysis.ai/models/grok-4-7-low",
-      "providersUrl": "https://artificialanalysis.ai/models/grok-4-7-low/providers"
+      "medianTokensPerSec": 9.9,
+      "latencyFirstChunkSec": 10.54,
+      "totalResponseSec": null,
+      "contextWindow": 500000
     },
     {
-      "rank": 43,
+      "rank": 45,
       "name": "Gemini 3.8 Flash (high)",
       "slug": "gemini-3-8-flash-high",
       "creator": "Google",
@@ -687,31 +631,41 @@
       "intelligenceIndex": 31,
       "estimated": false,
       "costPerTaskUsd": 7.77,
-      "medianTokensPerSec": 130,
-      "latencyFirstChunkSec": 27.2,
-      "totalResponseSec": 31.05,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-3-8-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-3-8-flash/providers"
+      "medianTokensPerSec": 14.6,
+      "latencyFirstChunkSec": 20.65,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 44,
-      "name": "Claude Sonnet 5.5 (medium with fallback)",
-      "slug": "claude-sonnet-5-5-medium-with-fallback",
+      "rank": 46,
+      "name": "Claude Sonnet 5.5 (medium)",
+      "slug": "claude-sonnet-5-5-medium",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 31,
       "estimated": false,
       "costPerTaskUsd": 0.78,
-      "medianTokensPerSec": 97,
-      "latencyFirstChunkSec": 1.46,
-      "totalResponseSec": 6.64,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-medium/providers"
+      "medianTokensPerSec": 3.6,
+      "latencyFirstChunkSec": 5.12,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 45,
+      "rank": 47,
+      "name": "Inkling 2 Small",
+      "slug": "inkling-2-small",
+      "creator": "Thinking Machines",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/thinking-machines.svg",
+      "intelligenceIndex": 31,
+      "estimated": false,
+      "costPerTaskUsd": 1.18,
+      "medianTokensPerSec": 16.5,
+      "latencyFirstChunkSec": 29.45,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
+    },
+    {
+      "rank": 48,
       "name": "GPT-6.1 Terra (non-reasoning)",
       "slug": "gpt-6-1-terra-non-reasoning",
       "creator": "OpenAI",
@@ -719,15 +673,13 @@
       "intelligenceIndex": 31,
       "estimated": false,
       "costPerTaskUsd": 0.23,
-      "medianTokensPerSec": 86,
-      "latencyFirstChunkSec": 0.98,
-      "totalResponseSec": 6.8,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-non-reasoning/providers"
+      "medianTokensPerSec": 2.2,
+      "latencyFirstChunkSec": 1.74,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 46,
+      "rank": 49,
       "name": "Gemini 3.8 Flash (medium)",
       "slug": "gemini-3-8-flash-medium",
       "creator": "Google",
@@ -735,15 +687,13 @@
       "intelligenceIndex": 30,
       "estimated": false,
       "costPerTaskUsd": 6.26,
-      "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "medianTokensPerSec": 13,
+      "latencyFirstChunkSec": 10.19,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-3-8-flash-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-3-8-flash-medium/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 47,
+      "rank": 50,
       "name": "MiMo-V2.6-Pro",
       "slug": "mimo-v2-6-pro",
       "creator": "Xiaomi",
@@ -751,15 +701,13 @@
       "intelligenceIndex": 30,
       "estimated": false,
       "costPerTaskUsd": 0.26,
-      "medianTokensPerSec": 41,
-      "latencyFirstChunkSec": 3.51,
-      "totalResponseSec": 64.37,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/mimo-v2-6-pro",
-      "providersUrl": "https://artificialanalysis.ai/models/mimo-v2-6-pro/providers"
+      "medianTokensPerSec": 43.2,
+      "latencyFirstChunkSec": 47.9,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 48,
+      "rank": 51,
       "name": "Claude Haiku 5.5 (high)",
       "slug": "claude-haiku-5-5-high",
       "creator": "Anthropic",
@@ -767,15 +715,13 @@
       "intelligenceIndex": 30,
       "estimated": false,
       "costPerTaskUsd": 0.16,
-      "medianTokensPerSec": 177,
-      "latencyFirstChunkSec": 31.95,
-      "totalResponseSec": 34.77,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-high",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-high/providers"
+      "medianTokensPerSec": 6.6,
+      "latencyFirstChunkSec": 24.58,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 49,
+      "rank": 52,
       "name": "Ling 3.1 Flash 1019",
       "slug": "ling-3-1-flash-1019",
       "creator": "InclusionAI",
@@ -786,12 +732,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/ling-3-1-flash-1019",
-      "providersUrl": "https://artificialanalysis.ai/models/ling-3-1-flash-1019/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 50,
+      "rank": 53,
       "name": "GPT-6.1 Terra (low)",
       "slug": "gpt-6-1-terra-low",
       "creator": "OpenAI",
@@ -799,15 +743,13 @@
       "intelligenceIndex": 29,
       "estimated": false,
       "costPerTaskUsd": 0.07,
-      "medianTokensPerSec": 91,
-      "latencyFirstChunkSec": 1.51,
-      "totalResponseSec": 7.02,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-1-terra-low/providers"
+      "medianTokensPerSec": 1.1,
+      "latencyFirstChunkSec": 2.4,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 51,
+      "rank": 54,
       "name": "MiniMax-M3.1-Flash",
       "slug": "minimax-m3-1-flash",
       "creator": "MiniMax",
@@ -815,15 +757,13 @@
       "intelligenceIndex": 29,
       "estimated": false,
       "costPerTaskUsd": 0.49,
-      "medianTokensPerSec": 134,
-      "latencyFirstChunkSec": 0.9,
-      "totalResponseSec": 19.6,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/minimax-m3-1-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/minimax-m3-1-flash/providers"
+      "medianTokensPerSec": 17.2,
+      "latencyFirstChunkSec": 70.28,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 52,
+      "rank": 55,
       "name": "DeepSeek V4.1 Flash 1017 (high)",
       "slug": "deepseek-v4-1-flash-1017-high",
       "creator": "DeepSeek",
@@ -831,15 +771,13 @@
       "intelligenceIndex": 29,
       "estimated": false,
       "costPerTaskUsd": 0.46,
-      "medianTokensPerSec": 201,
-      "latencyFirstChunkSec": 0.99,
-      "totalResponseSec": 13.41,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017-high",
-      "providersUrl": "https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017-high/providers"
+      "medianTokensPerSec": 10.6,
+      "latencyFirstChunkSec": 24.15,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 53,
+      "rank": 56,
       "name": "Step 5 Preview",
       "slug": "step-5-preview",
       "creator": "StepFun",
@@ -847,15 +785,13 @@
       "intelligenceIndex": 29,
       "estimated": false,
       "costPerTaskUsd": 2.35,
-      "medianTokensPerSec": 138,
-      "latencyFirstChunkSec": 0.92,
-      "totalResponseSec": 19.02,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/step-5",
-      "providersUrl": "https://artificialanalysis.ai/models/step-5/providers"
+      "medianTokensPerSec": 14,
+      "latencyFirstChunkSec": 25.67,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 54,
+      "rank": 57,
       "name": "GPT-6 Luna (max)",
       "slug": "gpt-6-luna-max",
       "creator": "OpenAI",
@@ -863,15 +799,13 @@
       "intelligenceIndex": 28,
       "estimated": false,
       "costPerTaskUsd": 0.15,
-      "medianTokensPerSec": 111,
-      "latencyFirstChunkSec": 136.07,
-      "totalResponseSec": 140.57,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-luna",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-luna/providers"
+      "medianTokensPerSec": 12.5,
+      "latencyFirstChunkSec": 96.54,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 55,
+      "rank": 58,
       "name": "GLM-5.3-Flash",
       "slug": "glm-5-3-flash",
       "creator": "Z AI",
@@ -879,15 +813,13 @@
       "intelligenceIndex": 28,
       "estimated": false,
       "costPerTaskUsd": 0.58,
-      "medianTokensPerSec": 71,
-      "latencyFirstChunkSec": 1.55,
-      "totalResponseSec": 36.61,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/glm-5-3-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/glm-5-3-flash/providers"
+      "medianTokensPerSec": 39.4,
+      "latencyFirstChunkSec": 91.31,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 56,
+      "rank": 59,
       "name": "MiMo-V2.6-Flash",
       "slug": "mimo-v2-6-flash",
       "creator": "Xiaomi",
@@ -895,15 +827,13 @@
       "intelligenceIndex": 27,
       "estimated": false,
       "costPerTaskUsd": 0.13,
-      "medianTokensPerSec": 33,
-      "latencyFirstChunkSec": 2.71,
-      "totalResponseSec": 77.6,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/mimo-v2-6-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/mimo-v2-6-flash/providers"
+      "medianTokensPerSec": 64,
+      "latencyFirstChunkSec": 55.29,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 57,
+      "rank": 60,
       "name": "Mistral Large 4 (high)",
       "slug": "mistral-large-4-high",
       "creator": "Mistral",
@@ -911,31 +841,27 @@
       "intelligenceIndex": 26,
       "estimated": false,
       "costPerTaskUsd": 2.06,
-      "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "medianTokensPerSec": 14.1,
+      "latencyFirstChunkSec": 33.86,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/mistral-large-4",
-      "providersUrl": "https://artificialanalysis.ai/models/mistral-large-4/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 58,
-      "name": "Claude Sonnet 5.5 (low with fallback)",
-      "slug": "claude-sonnet-5-5-low-with-fallback",
+      "rank": 61,
+      "name": "Claude Sonnet 5.5 (low)",
+      "slug": "claude-sonnet-5-5-low",
       "creator": "Anthropic",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/anthropic.svg",
       "intelligenceIndex": 26,
       "estimated": false,
       "costPerTaskUsd": 0.51,
-      "medianTokensPerSec": 97,
-      "latencyFirstChunkSec": 1.21,
-      "totalResponseSec": 6.39,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-low",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-sonnet-5-5-low/providers"
+      "medianTokensPerSec": 2.6,
+      "latencyFirstChunkSec": 3.42,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 59,
+      "rank": 62,
       "name": "Muse Spark Open (xhigh)",
       "slug": "muse-spark-open-xhigh",
       "creator": "Meta",
@@ -943,15 +869,13 @@
       "intelligenceIndex": 25,
       "estimated": false,
       "costPerTaskUsd": 2.02,
-      "medianTokensPerSec": 173,
-      "latencyFirstChunkSec": 0.81,
-      "totalResponseSec": 15.28,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/muse-spark-open",
-      "providersUrl": "https://artificialanalysis.ai/models/muse-spark-open/providers"
+      "medianTokensPerSec": 7.2,
+      "latencyFirstChunkSec": 14.29,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 60,
+      "rank": 63,
       "name": "Claude Haiku 5.5 (medium)",
       "slug": "claude-haiku-5-5-medium",
       "creator": "Anthropic",
@@ -959,15 +883,13 @@
       "intelligenceIndex": 25,
       "estimated": false,
       "costPerTaskUsd": 0.09,
-      "medianTokensPerSec": 168,
-      "latencyFirstChunkSec": 14.44,
-      "totalResponseSec": 17.41,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-medium/providers"
+      "medianTokensPerSec": 4.1,
+      "latencyFirstChunkSec": 11.23,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 61,
+      "rank": 64,
       "name": "GPT-6 Luna (xhigh)",
       "slug": "gpt-6-luna-xhigh",
       "creator": "OpenAI",
@@ -975,15 +897,13 @@
       "intelligenceIndex": 23,
       "estimated": false,
       "costPerTaskUsd": 0.1,
-      "medianTokensPerSec": 128,
-      "latencyFirstChunkSec": 34.28,
-      "totalResponseSec": 38.18,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-luna-xhigh",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-luna-xhigh/providers"
+      "medianTokensPerSec": 7.5,
+      "latencyFirstChunkSec": 25.91,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 62,
+      "rank": 65,
       "name": "Mistral Large 4 (medium)",
       "slug": "mistral-large-4-medium",
       "creator": "Mistral",
@@ -991,15 +911,13 @@
       "intelligenceIndex": 23,
       "estimated": false,
       "costPerTaskUsd": 1.41,
-      "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "medianTokensPerSec": 10.1,
+      "latencyFirstChunkSec": 20.56,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/mistral-large-4-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/mistral-large-4-medium/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 63,
+      "rank": 66,
       "name": "GLM-5.3 (low)",
       "slug": "glm-5-3-low",
       "creator": "Z AI",
@@ -1007,15 +925,13 @@
       "intelligenceIndex": 23,
       "estimated": false,
       "costPerTaskUsd": 1.57,
-      "medianTokensPerSec": 82,
-      "latencyFirstChunkSec": 1.68,
-      "totalResponseSec": 32.15,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/glm-5-3-low",
-      "providersUrl": "https://artificialanalysis.ai/models/glm-5-3-low/providers"
+      "medianTokensPerSec": 18.1,
+      "latencyFirstChunkSec": 14.12,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 64,
+      "rank": 67,
       "name": "DeepSeek V4 Pro 0813 (max)",
       "slug": "deepseek-v4-pro-0813-max",
       "creator": "DeepSeek",
@@ -1023,15 +939,13 @@
       "intelligenceIndex": 23,
       "estimated": false,
       "costPerTaskUsd": 1.77,
-      "medianTokensPerSec": 82,
-      "latencyFirstChunkSec": 1.68,
-      "totalResponseSec": 32.21,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/deepseek-v4-pro",
-      "providersUrl": "https://artificialanalysis.ai/models/deepseek-v4-pro/providers"
+      "medianTokensPerSec": 22.9,
+      "latencyFirstChunkSec": 86.27,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 65,
+      "rank": 68,
       "name": "Gemini 3.8 Flash (low)",
       "slug": "gemini-3-8-flash-low",
       "creator": "Google",
@@ -1040,14 +954,12 @@
       "estimated": false,
       "costPerTaskUsd": null,
       "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "latencyFirstChunkSec": 2.43,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-3-8-flash-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-3-8-flash-low/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 66,
+      "rank": 69,
       "name": "GPT-6 Luna (high)",
       "slug": "gpt-6-luna-high",
       "creator": "OpenAI",
@@ -1055,15 +967,13 @@
       "intelligenceIndex": 21,
       "estimated": false,
       "costPerTaskUsd": 0.07,
-      "medianTokensPerSec": 117,
-      "latencyFirstChunkSec": 23.9,
-      "totalResponseSec": 28.18,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-luna-high",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-luna-high/providers"
+      "medianTokensPerSec": 5.7,
+      "latencyFirstChunkSec": 13.2,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 67,
+      "rank": 70,
       "name": "Nanbeige4.3-33B",
       "slug": "nanbeige4-3-33b",
       "creator": "Nanbeige",
@@ -1074,12 +984,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 524000,
-      "modelUrl": "https://artificialanalysis.ai/models/nanbeige4-3-33b",
-      "providersUrl": "https://artificialanalysis.ai/models/nanbeige4-3-33b/providers"
+      "contextWindow": 524000
     },
     {
-      "rank": 68,
+      "rank": 71,
       "name": "Qwen3.8 27B (xhigh)",
       "slug": "qwen3-8-27b-xhigh",
       "creator": "Alibaba",
@@ -1087,15 +995,13 @@
       "intelligenceIndex": 20,
       "estimated": false,
       "costPerTaskUsd": 3.53,
-      "medianTokensPerSec": 42,
-      "latencyFirstChunkSec": 3.89,
-      "totalResponseSec": 63.55,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-27b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-27b/providers"
+      "medianTokensPerSec": 43.6,
+      "latencyFirstChunkSec": 121.36,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 69,
+      "rank": 72,
       "name": "MiniMax-M3",
       "slug": "minimax-m3",
       "creator": "MiniMax",
@@ -1103,15 +1009,13 @@
       "intelligenceIndex": 19,
       "estimated": false,
       "costPerTaskUsd": 1.29,
-      "medianTokensPerSec": 98,
-      "latencyFirstChunkSec": 0.96,
-      "totalResponseSec": 26.37,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/minimax-m3",
-      "providersUrl": "https://artificialanalysis.ai/models/minimax-m3/providers"
+      "medianTokensPerSec": 13.1,
+      "latencyFirstChunkSec": 84.22,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 70,
+      "rank": 73,
       "name": "Claude Haiku 5.5 (low)",
       "slug": "claude-haiku-5-5-low",
       "creator": "Anthropic",
@@ -1119,15 +1023,13 @@
       "intelligenceIndex": 19,
       "estimated": false,
       "costPerTaskUsd": 0.04,
-      "medianTokensPerSec": 160,
-      "latencyFirstChunkSec": 9.07,
-      "totalResponseSec": 12.18,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-low",
-      "providersUrl": "https://artificialanalysis.ai/models/claude-haiku-5-5-low/providers"
+      "medianTokensPerSec": 2.1,
+      "latencyFirstChunkSec": 9.16,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 71,
+      "rank": 74,
       "name": "DeepSeek V4.1 Flash 1017 (non-reasoning)",
       "slug": "deepseek-v4-1-flash-1017-non-reasoning",
       "creator": "DeepSeek",
@@ -1135,15 +1037,13 @@
       "intelligenceIndex": 19,
       "estimated": false,
       "costPerTaskUsd": 0.43,
-      "medianTokensPerSec": 172,
-      "latencyFirstChunkSec": 1.24,
-      "totalResponseSec": 4.15,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017-non-reasoning/providers"
+      "medianTokensPerSec": 7.2,
+      "latencyFirstChunkSec": 1.32,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 72,
+      "rank": 75,
       "name": "GPT-6 Luna (medium)",
       "slug": "gpt-6-luna-medium",
       "creator": "OpenAI",
@@ -1151,15 +1051,13 @@
       "intelligenceIndex": 18,
       "estimated": false,
       "costPerTaskUsd": 0.04,
-      "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "medianTokensPerSec": 3.6,
+      "latencyFirstChunkSec": 5.03,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-luna-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-luna-medium/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 73,
+      "rank": 76,
       "name": "K2 Horizon 375B A23B",
       "slug": "k2-horizon-375b-a23b",
       "creator": "Institute of Foundation Models",
@@ -1167,15 +1065,13 @@
       "intelligenceIndex": 18,
       "estimated": false,
       "costPerTaskUsd": 0,
-      "medianTokensPerSec": 120,
-      "latencyFirstChunkSec": 2.51,
-      "totalResponseSec": 23.27,
-      "contextWindow": 524000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-horizon-375b-a23b",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-horizon-375b-a23b/providers"
+      "medianTokensPerSec": 4.9,
+      "latencyFirstChunkSec": 22.62,
+      "totalResponseSec": null,
+      "contextWindow": 524000
     },
     {
-      "rank": 74,
+      "rank": 77,
       "name": "Beam 1.0",
       "slug": "beam-1-0",
       "creator": "Reflection",
@@ -1183,15 +1079,13 @@
       "intelligenceIndex": 18,
       "estimated": false,
       "costPerTaskUsd": 0.28,
-      "medianTokensPerSec": 352,
-      "latencyFirstChunkSec": 0.74,
-      "totalResponseSec": 7.85,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/reflection-beam",
-      "providersUrl": "https://artificialanalysis.ai/models/reflection-beam/providers"
+      "medianTokensPerSec": 2.5,
+      "latencyFirstChunkSec": 8.92,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 75,
+      "rank": 78,
       "name": "Qwen3.8 27B (medium)",
       "slug": "qwen3-8-27b-medium",
       "creator": "Alibaba",
@@ -1199,15 +1093,13 @@
       "intelligenceIndex": 17,
       "estimated": false,
       "costPerTaskUsd": 2.16,
-      "medianTokensPerSec": 47,
-      "latencyFirstChunkSec": 3.87,
-      "totalResponseSec": 56.99,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-27b-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-27b-medium/providers"
+      "medianTokensPerSec": 33.2,
+      "latencyFirstChunkSec": 40.29,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 76,
+      "rank": 79,
       "name": "Qwen3.8 27B (low)",
       "slug": "qwen3-8-27b-low",
       "creator": "Alibaba",
@@ -1215,31 +1107,27 @@
       "intelligenceIndex": 16,
       "estimated": false,
       "costPerTaskUsd": 1.91,
-      "medianTokensPerSec": 46,
-      "latencyFirstChunkSec": 3.98,
-      "totalResponseSec": 58.66,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-27b-low",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-27b-low/providers"
+      "medianTokensPerSec": 29.2,
+      "latencyFirstChunkSec": 20.66,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 77,
+      "rank": 80,
       "name": "Nemotron 3.5 Super VL",
       "slug": "nemotron-3-5-super-vl",
       "creator": "NVIDIA",
       "creatorLogo": "https://artificialanalysis.ai/img/logos/nvidia.svg",
       "intelligenceIndex": 14,
       "estimated": false,
-      "costPerTaskUsd": 0.54,
-      "medianTokensPerSec": 430,
-      "latencyFirstChunkSec": 0.72,
-      "totalResponseSec": 6.52,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nemotron-3-5-super-vl",
-      "providersUrl": "https://artificialanalysis.ai/models/nemotron-3-5-super-vl/providers"
+      "costPerTaskUsd": 0.52,
+      "medianTokensPerSec": 7.8,
+      "latencyFirstChunkSec": 15.48,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 78,
+      "rank": 81,
       "name": "Inkling Small",
       "slug": "inkling-small",
       "creator": "Thinking Machines",
@@ -1247,15 +1135,27 @@
       "intelligenceIndex": 13,
       "estimated": false,
       "costPerTaskUsd": 0.2,
-      "medianTokensPerSec": 229,
-      "latencyFirstChunkSec": 1.69,
-      "totalResponseSec": 12.61,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/inkling-small",
-      "providersUrl": "https://artificialanalysis.ai/models/inkling-small/providers"
+      "medianTokensPerSec": 5.6,
+      "latencyFirstChunkSec": 22.97,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 79,
+      "rank": 82,
+      "name": "DeepSeek V4 Pro 0813 (non-reasoning)",
+      "slug": "deepseek-v4-pro-0813-non-reasoning",
+      "creator": "DeepSeek",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/deepseek.svg",
+      "intelligenceIndex": 13,
+      "estimated": false,
+      "costPerTaskUsd": 0.98,
+      "medianTokensPerSec": 14.8,
+      "latencyFirstChunkSec": 2.54,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
+    },
+    {
+      "rank": 83,
       "name": "Inkling (xhigh)",
       "slug": "inkling-xhigh",
       "creator": "Thinking Machines",
@@ -1263,15 +1163,13 @@
       "intelligenceIndex": 12,
       "estimated": false,
       "costPerTaskUsd": 1.35,
-      "medianTokensPerSec": 204,
-      "latencyFirstChunkSec": 1.83,
-      "totalResponseSec": 14.06,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/inkling",
-      "providersUrl": "https://artificialanalysis.ai/models/inkling/providers"
+      "medianTokensPerSec": 8.1,
+      "latencyFirstChunkSec": 20.75,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 80,
+      "rank": 84,
       "name": "Nemotron 3 Ultra",
       "slug": "nemotron-3-ultra",
       "creator": "NVIDIA",
@@ -1279,15 +1177,13 @@
       "intelligenceIndex": 12,
       "estimated": false,
       "costPerTaskUsd": 2.23,
-      "medianTokensPerSec": 161,
-      "latencyFirstChunkSec": 1.24,
-      "totalResponseSec": 18.47,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-ultra-550b-a55b",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-ultra-550b-a55b/providers"
+      "medianTokensPerSec": 5.8,
+      "latencyFirstChunkSec": 7.12,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 81,
+      "rank": 85,
       "name": "Gemini 3.5 Flash-Lite",
       "slug": "gemini-3-5-flash-lite",
       "creator": "Google",
@@ -1295,15 +1191,13 @@
       "intelligenceIndex": 12,
       "estimated": false,
       "costPerTaskUsd": 0.69,
-      "medianTokensPerSec": 402,
-      "latencyFirstChunkSec": 7.05,
-      "totalResponseSec": 8.29,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-3-5-flash-lite",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-3-5-flash-lite/providers"
+      "medianTokensPerSec": 1.7,
+      "latencyFirstChunkSec": 5.11,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 82,
+      "rank": 86,
       "name": "Qwen3.8 27B (non-reasoning)",
       "slug": "qwen3-8-27b-non-reasoning",
       "creator": "Alibaba",
@@ -1311,15 +1205,13 @@
       "intelligenceIndex": 10,
       "estimated": false,
       "costPerTaskUsd": 3.77,
-      "medianTokensPerSec": 45,
-      "latencyFirstChunkSec": 3.99,
-      "totalResponseSec": 15.12,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-27b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-27b-non-reasoning/providers"
+      "medianTokensPerSec": 17.8,
+      "latencyFirstChunkSec": 5.18,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 83,
+      "rank": 87,
       "name": "GPT-6 Luna (low)",
       "slug": "gpt-6-luna-low",
       "creator": "OpenAI",
@@ -1327,15 +1219,13 @@
       "intelligenceIndex": 10,
       "estimated": false,
       "costPerTaskUsd": 0.01,
-      "medianTokensPerSec": 115,
-      "latencyFirstChunkSec": 2.91,
-      "totalResponseSec": 7.25,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-luna-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-luna-low/providers"
+      "medianTokensPerSec": 0.6,
+      "latencyFirstChunkSec": 2.62,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 84,
+      "rank": 88,
       "name": "GPT-6 Luna (non-reasoning)",
       "slug": "gpt-6-luna-non-reasoning",
       "creator": "OpenAI",
@@ -1343,15 +1233,27 @@
       "intelligenceIndex": 9,
       "estimated": false,
       "costPerTaskUsd": 0.07,
-      "medianTokensPerSec": 110,
-      "latencyFirstChunkSec": 0.85,
-      "totalResponseSec": 5.38,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-luna-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-luna-non-reasoning/providers"
+      "medianTokensPerSec": 1.9,
+      "latencyFirstChunkSec": 1.01,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 85,
+      "rank": 89,
+      "name": "K-EXAONE 2.0",
+      "slug": "k-exaone-2-0",
+      "creator": "LG AI Research",
+      "creatorLogo": "https://artificialanalysis.ai/_next/image?url=%2Fimg%2Flogos%2Flg.png&w=32&q=75",
+      "intelligenceIndex": 8,
+      "estimated": false,
+      "costPerTaskUsd": null,
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": null,
+      "totalResponseSec": null,
+      "contextWindow": 262000
+    },
+    {
+      "rank": 90,
       "name": "Muse Glimmer (high)",
       "slug": "muse-glimmer-high",
       "creator": "Meta",
@@ -1359,15 +1261,13 @@
       "intelligenceIndex": 6,
       "estimated": false,
       "costPerTaskUsd": 0.16,
-      "medianTokensPerSec": 120,
-      "latencyFirstChunkSec": 1.19,
-      "totalResponseSec": 21.98,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/muse-glimmer",
-      "providersUrl": "https://artificialanalysis.ai/models/muse-glimmer/providers"
+      "medianTokensPerSec": 4.6,
+      "latencyFirstChunkSec": 21.34,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 86,
+      "rank": 91,
       "name": "Command A+",
       "slug": "command-a",
       "creator": "Cohere",
@@ -1375,15 +1275,13 @@
       "intelligenceIndex": 6,
       "estimated": false,
       "costPerTaskUsd": 0,
-      "medianTokensPerSec": 207,
-      "latencyFirstChunkSec": 0.45,
-      "totalResponseSec": 12.52,
-      "contextWindow": 192000,
-      "modelUrl": "https://artificialanalysis.ai/models/command-a-plus",
-      "providersUrl": "https://artificialanalysis.ai/models/command-a-plus/providers"
+      "medianTokensPerSec": 3.2,
+      "latencyFirstChunkSec": 24.48,
+      "totalResponseSec": null,
+      "contextWindow": 192000
     },
     {
-      "rank": 87,
+      "rank": 92,
       "name": "Nemotron 3.5 Lightning",
       "slug": "nemotron-3-5-lightning",
       "creator": "NVIDIA",
@@ -1391,15 +1289,13 @@
       "intelligenceIndex": 6,
       "estimated": false,
       "costPerTaskUsd": 0.29,
-      "medianTokensPerSec": 302,
-      "latencyFirstChunkSec": 0.57,
-      "totalResponseSec": 8.84,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nemotron-3-5-lightning",
-      "providersUrl": "https://artificialanalysis.ai/models/nemotron-3-5-lightning/providers"
+      "medianTokensPerSec": 4.2,
+      "latencyFirstChunkSec": 17.85,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 88,
+      "rank": 93,
       "name": "Granite 4.2 8B",
       "slug": "granite-4-2-8b",
       "creator": "IBM",
@@ -1407,15 +1303,13 @@
       "intelligenceIndex": 5,
       "estimated": false,
       "costPerTaskUsd": 0.04,
-      "medianTokensPerSec": 61,
-      "latencyFirstChunkSec": 0.78,
-      "totalResponseSec": 41.88,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-2-8b",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-2-8b/providers"
+      "medianTokensPerSec": 13.2,
+      "latencyFirstChunkSec": 82.04,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 89,
+      "rank": 94,
       "name": "Granite 4.2 3B",
       "slug": "granite-4-2-3b",
       "creator": "IBM",
@@ -1426,12 +1320,38 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-2-3b",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-2-3b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 90,
+      "rank": 95,
+      "name": "Mistral Medium 3.5",
+      "slug": "mistral-medium-3-5",
+      "creator": "Mistral",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/mistral.svg",
+      "intelligenceIndex": 5,
+      "estimated": false,
+      "costPerTaskUsd": 1.04,
+      "medianTokensPerSec": 4.8,
+      "latencyFirstChunkSec": 27.65,
+      "totalResponseSec": null,
+      "contextWindow": 256000
+    },
+    {
+      "rank": 96,
+      "name": "Gemma 4 31B",
+      "slug": "gemma-4-31b",
+      "creator": "Google",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/google.svg",
+      "intelligenceIndex": 4,
+      "estimated": false,
+      "costPerTaskUsd": null,
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 64.81,
+      "totalResponseSec": null,
+      "contextWindow": 256000
+    },
+    {
+      "rank": 97,
       "name": "Mistral Small 4",
       "slug": "mistral-small-4",
       "creator": "Mistral",
@@ -1439,15 +1359,27 @@
       "intelligenceIndex": 4,
       "estimated": false,
       "costPerTaskUsd": 0.04,
-      "medianTokensPerSec": 168,
-      "latencyFirstChunkSec": 0.97,
-      "totalResponseSec": 15.89,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/mistral-small-4",
-      "providersUrl": "https://artificialanalysis.ai/models/mistral-small-4/providers"
+      "medianTokensPerSec": 1.6,
+      "latencyFirstChunkSec": 13.36,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 91,
+      "rank": 98,
+      "name": "North Mini Code",
+      "slug": "north-mini-code",
+      "creator": "Cohere",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/cohere.svg",
+      "intelligenceIndex": 3,
+      "estimated": false,
+      "costPerTaskUsd": 0,
+      "medianTokensPerSec": 3.8,
+      "latencyFirstChunkSec": 10.22,
+      "totalResponseSec": null,
+      "contextWindow": 256000
+    },
+    {
+      "rank": 99,
       "name": "Nemotron 3 Nano 4B",
       "slug": "nemotron-3-nano-4b",
       "creator": "NVIDIA",
@@ -1458,12 +1390,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-4b",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-4b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 92,
+      "rank": 100,
       "name": "JT-35B-Flash",
       "slug": "jt-35b-flash",
       "creator": "China Mobile",
@@ -1474,12 +1404,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/jt-35b-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/jt-35b-flash/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 93,
+      "rank": 101,
       "name": "Qwen3.5 Omni Plus",
       "slug": "qwen3-5-omni-plus",
       "creator": "Alibaba",
@@ -1487,15 +1415,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 126,
-      "latencyFirstChunkSec": 2.1,
-      "totalResponseSec": 6.06,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-omni-plus",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-omni-plus/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.86,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 94,
+      "rank": 102,
       "name": "Nova 2.0 Omni (medium)",
       "slug": "nova-2-0-omni-medium",
       "creator": "Amazon",
@@ -1506,12 +1432,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-omni-reasoning-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-omni-reasoning-medium/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 95,
+      "rank": 103,
       "name": "Qwen3.5 122B A10B (non-reasoning)",
       "slug": "qwen3-5-122b-a10b-non-reasoning",
       "creator": "Alibaba",
@@ -1519,15 +1443,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 140,
-      "latencyFirstChunkSec": 2.29,
-      "totalResponseSec": 5.87,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-122b-a10b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-122b-a10b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 4.4,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 96,
+      "rank": 104,
       "name": "Gemma 4 12B (non-reasoning)",
       "slug": "gemma-4-12b-non-reasoning",
       "creator": "Google",
@@ -1535,15 +1457,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 112,
-      "latencyFirstChunkSec": 2.22,
-      "totalResponseSec": 6.7,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-12b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-12b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 4,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 97,
+      "rank": 105,
       "name": "Gemma 3 270M",
       "slug": "gemma-3-270m",
       "creator": "Google",
@@ -1554,12 +1474,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-3-270m",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-3-270m/providers"
+      "contextWindow": 32000
     },
     {
-      "rank": 98,
+      "rank": 106,
       "name": "Apodex 1.1",
       "slug": "apodex-1-1",
       "creator": "Apodex",
@@ -1568,14 +1486,12 @@
       "estimated": false,
       "costPerTaskUsd": null,
       "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "latencyFirstChunkSec": 12.03,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/apodex-1-1",
-      "providersUrl": "https://artificialanalysis.ai/models/apodex-1-1/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 99,
+      "rank": 107,
       "name": "Qwen3.5 2B (non-reasoning)",
       "slug": "qwen3-5-2b-non-reasoning",
       "creator": "Alibaba",
@@ -1586,12 +1502,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-2b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-2b-non-reasoning/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 100,
+      "rank": 108,
       "name": "Qwen3 Omni 30B A3B",
       "slug": "qwen3-omni-30b-a3b",
       "creator": "Alibaba",
@@ -1599,15 +1513,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 95,
-      "latencyFirstChunkSec": 1.84,
-      "totalResponseSec": 7.1,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-omni-30b-a3b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-omni-30b-a3b-instruct/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.32,
+      "totalResponseSec": null,
+      "contextWindow": 66000
     },
     {
-      "rank": 101,
+      "rank": 109,
       "name": "Nova 2.0 Pro Preview (medium)",
       "slug": "nova-2-0-pro-preview-medium",
       "creator": "Amazon",
@@ -1615,15 +1527,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 124,
-      "latencyFirstChunkSec": 12.68,
-      "totalResponseSec": 32.81,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-pro-reasoning-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-pro-reasoning-medium/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 20.12,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 102,
+      "rank": 110,
       "name": "Qwen3.5 397B A17B",
       "slug": "qwen3-5-397b-a17b",
       "creator": "Alibaba",
@@ -1631,15 +1541,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 58,
-      "latencyFirstChunkSec": 2.23,
-      "totalResponseSec": 65.24,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-397b-a17b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-397b-a17b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 71.91,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 103,
+      "rank": 111,
       "name": "Granite 4.2 30B",
       "slug": "granite-4-2-30b",
       "creator": "IBM",
@@ -1650,12 +1558,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-2-30b",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-2-30b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 104,
+      "rank": 112,
       "name": "K2 Horizon 7B",
       "slug": "k2-horizon-7b",
       "creator": "Institute of Foundation Models",
@@ -1666,12 +1572,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 524000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-horizon-7b",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-horizon-7b/providers"
+      "contextWindow": 524000
     },
     {
-      "rank": 105,
+      "rank": 113,
       "name": "Mistral Small 4 (non-reasoning)",
       "slug": "mistral-small-4-non-reasoning",
       "creator": "Mistral",
@@ -1679,15 +1583,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 147,
-      "latencyFirstChunkSec": 1.03,
-      "totalResponseSec": 4.43,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/mistral-small-4-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/mistral-small-4-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.77,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 106,
+      "rank": 114,
       "name": "Solar Pro 4",
       "slug": "solar-pro-4",
       "creator": "Upstage",
@@ -1695,15 +1597,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 91,
-      "latencyFirstChunkSec": 1.95,
-      "totalResponseSec": 29.36,
-      "contextWindow": 512000,
-      "modelUrl": "https://artificialanalysis.ai/models/solar-pro4",
-      "providersUrl": "https://artificialanalysis.ai/models/solar-pro4/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 61.04,
+      "totalResponseSec": null,
+      "contextWindow": 512000
     },
     {
-      "rank": 107,
+      "rank": 115,
       "name": "gpt-oss-20b (low)",
       "slug": "gpt-oss-20b-low",
       "creator": "OpenAI",
@@ -1711,15 +1611,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 205,
-      "latencyFirstChunkSec": 0.82,
-      "totalResponseSec": 13.01,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-oss-20b-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-oss-20b-low/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 3.75,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 108,
+      "rank": 116,
       "name": "o3",
       "slug": "o3",
       "creator": "OpenAI",
@@ -1727,47 +1625,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 158,
-      "latencyFirstChunkSec": 8.32,
-      "totalResponseSec": 11.49,
-      "contextWindow": 200000,
-      "modelUrl": "https://artificialanalysis.ai/models/o3",
-      "providersUrl": "https://artificialanalysis.ai/models/o3/providers"
-    },
-    {
-      "rank": 109,
-      "name": "K-EXAONE 2.0",
-      "slug": "k-exaone-2-0",
-      "creator": "LG AI Research",
-      "creatorLogo": "https://artificialanalysis.ai/_next/image?url=%2Fimg%2Flogos%2Flg.png&w=32&q=75",
-      "intelligenceIndex": null,
-      "estimated": false,
-      "costPerTaskUsd": null,
       "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "latencyFirstChunkSec": 8.71,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/k-exaone-2-0-0803",
-      "providersUrl": "https://artificialanalysis.ai/models/k-exaone-2-0-0803/providers"
+      "contextWindow": 200000
     },
     {
-      "rank": 110,
-      "name": "North Mini Code",
-      "slug": "north-mini-code",
-      "creator": "Cohere",
-      "creatorLogo": "https://artificialanalysis.ai/img/logos/cohere.svg",
-      "intelligenceIndex": null,
-      "estimated": false,
-      "costPerTaskUsd": null,
-      "medianTokensPerSec": 96,
-      "latencyFirstChunkSec": 0.43,
-      "totalResponseSec": 26.34,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/north-mini-code",
-      "providersUrl": "https://artificialanalysis.ai/models/north-mini-code/providers"
-    },
-    {
-      "rank": 111,
+      "rank": 117,
       "name": "Nova 2.0 Omni (non-reasoning)",
       "slug": "nova-2-0-omni-non-reasoning",
       "creator": "Amazon",
@@ -1778,12 +1642,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-omni",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-omni/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 112,
+      "rank": 118,
       "name": "Granite 4.0 Micro",
       "slug": "granite-4-0-micro",
       "creator": "IBM",
@@ -1794,12 +1656,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-0-micro",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-0-micro/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 113,
+      "rank": 119,
       "name": "Qwen3.5 9B (non-reasoning)",
       "slug": "qwen3-5-9b-non-reasoning",
       "creator": "Alibaba",
@@ -1807,15 +1667,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 109,
-      "latencyFirstChunkSec": 0.51,
-      "totalResponseSec": 5.09,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-9b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-9b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.06,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 114,
+      "rank": 120,
       "name": "Qwen3.5 122B A10B",
       "slug": "qwen3-5-122b-a10b",
       "creator": "Alibaba",
@@ -1823,15 +1681,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 127,
-      "latencyFirstChunkSec": 2.3,
-      "totalResponseSec": 21.92,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-122b-a10b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-122b-a10b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 20.85,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 115,
+      "rank": 121,
       "name": "Hermes 4 70B (non-reasoning)",
       "slug": "hermes-4-70b-non-reasoning",
       "creator": "Nous Research",
@@ -1842,12 +1698,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-70b",
-      "providersUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-70b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 116,
+      "rank": 122,
       "name": "Nemotron 3 Nano (non-reasoning)",
       "slug": "nemotron-3-nano-non-reasoning",
       "creator": "NVIDIA",
@@ -1855,15 +1709,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 258,
-      "latencyFirstChunkSec": 0.7,
-      "totalResponseSec": 2.64,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-30b-a3b",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-30b-a3b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 0.95,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 117,
+      "rank": 123,
       "name": "Qwen3 Next 80B A3B",
       "slug": "qwen3-next-80b-a3b",
       "creator": "Alibaba",
@@ -1871,15 +1723,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 179,
-      "latencyFirstChunkSec": 0.88,
-      "totalResponseSec": 3.67,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-next-80b-a3b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-next-80b-a3b-instruct/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.38,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 118,
+      "rank": 124,
       "name": "Phi-4 Multimodal",
       "slug": "phi-4-multimodal",
       "creator": "Microsoft",
@@ -1888,14 +1738,12 @@
       "estimated": false,
       "costPerTaskUsd": null,
       "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "latencyFirstChunkSec": 0.37,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/phi-4-multimodal",
-      "providersUrl": "https://artificialanalysis.ai/models/phi-4-multimodal/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 119,
+      "rank": 125,
       "name": "Qwen3.5 9B",
       "slug": "qwen3-5-9b",
       "creator": "Alibaba",
@@ -1903,15 +1751,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 64,
-      "latencyFirstChunkSec": 1.59,
-      "totalResponseSec": 40.56,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-9b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-9b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 47.75,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 120,
+      "rank": 126,
       "name": "NVIDIA Nemotron Nano 9B V2 (non-reasoning)",
       "slug": "nvidia-nemotron-nano-9b-v2-non-reasoning",
       "creator": "NVIDIA",
@@ -1919,15 +1765,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 170,
-      "latencyFirstChunkSec": 1.01,
-      "totalResponseSec": 3.95,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-9b-v2",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-9b-v2/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.61,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 121,
+      "rank": 127,
       "name": "EXAONE 4.0 32B (non-reasoning)",
       "slug": "exaone-4-0-32b-non-reasoning",
       "creator": "LG AI Research",
@@ -1938,12 +1782,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/exaone-4-0-32b",
-      "providersUrl": "https://artificialanalysis.ai/models/exaone-4-0-32b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 122,
+      "rank": 128,
       "name": "G9v3-3B",
       "slug": "g9v3-3b",
       "creator": "AI9Stars",
@@ -1954,12 +1796,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/g9v3-3b",
-      "providersUrl": "https://artificialanalysis.ai/models/g9v3-3b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 123,
+      "rank": 129,
       "name": "Qwen3.5 4B (non-reasoning)",
       "slug": "qwen3-5-4b-non-reasoning",
       "creator": "Alibaba",
@@ -1967,15 +1807,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 43,
-      "latencyFirstChunkSec": 0.77,
-      "totalResponseSec": 12.3,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-4b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-4b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.19,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 124,
+      "rank": 130,
       "name": "Qwen3.5 397B A17B (non-reasoning)",
       "slug": "qwen3-5-397b-a17b-non-reasoning",
       "creator": "Alibaba",
@@ -1983,15 +1821,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 59,
-      "latencyFirstChunkSec": 2.2,
-      "totalResponseSec": 10.68,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-397b-a17b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-397b-a17b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.62,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 125,
+      "rank": 131,
       "name": "K2 Horizon 3.7B",
       "slug": "k2-horizon-3-7b",
       "creator": "Institute of Foundation Models",
@@ -2002,12 +1838,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 524000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-horizon-3-7b",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-horizon-3-7b/providers"
+      "contextWindow": 524000
     },
     {
-      "rank": 126,
+      "rank": 132,
       "name": "Olmo 3 7B Think",
       "slug": "olmo-3-7b-think",
       "creator": "Allen Institute for AI",
@@ -2018,12 +1852,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/olmo-3-7b-think",
-      "providersUrl": "https://artificialanalysis.ai/models/olmo-3-7b-think/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 127,
+      "rank": 133,
       "name": "HyperCLOVA X SEED Think (32B)",
       "slug": "hyperclova-x-seed-think-32b",
       "creator": "Naver",
@@ -2034,12 +1866,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/hyperclova-x-seed-think-32b",
-      "providersUrl": "https://artificialanalysis.ai/models/hyperclova-x-seed-think-32b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 128,
+      "rank": 134,
       "name": "HyperNova 60B 2605 (high)",
       "slug": "hypernova-60b-2605-high",
       "creator": "Multiverse Computing",
@@ -2050,12 +1880,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/hypernova-60b",
-      "providersUrl": "https://artificialanalysis.ai/models/hypernova-60b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 129,
+      "rank": 135,
       "name": "Nova Micro",
       "slug": "nova-micro",
       "creator": "Amazon",
@@ -2063,15 +1891,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 270,
-      "latencyFirstChunkSec": 0.79,
-      "totalResponseSec": 2.64,
-      "contextWindow": 130000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-micro",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-micro/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.32,
+      "totalResponseSec": null,
+      "contextWindow": 130000
     },
     {
-      "rank": 130,
+      "rank": 136,
       "name": "EXAONE 4.5 33B (non-reasoning)",
       "slug": "exaone-4-5-33b-non-reasoning",
       "creator": "LG AI Research",
@@ -2082,12 +1908,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/exaone-4-5-33b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/exaone-4-5-33b-non-reasoning/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 131,
+      "rank": 137,
       "name": "INTELLECT-3",
       "slug": "intellect-3",
       "creator": "Prime Intellect",
@@ -2098,12 +1922,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/intellect-3",
-      "providersUrl": "https://artificialanalysis.ai/models/intellect-3/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 132,
+      "rank": 138,
       "name": "gpt-oss-20b (high)",
       "slug": "gpt-oss-20b-high",
       "creator": "OpenAI",
@@ -2111,15 +1933,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 157,
-      "latencyFirstChunkSec": 0.72,
-      "totalResponseSec": 16.64,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-oss-20b",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-oss-20b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 43.38,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 133,
+      "rank": 139,
       "name": "Olmo 3.1 32B Think",
       "slug": "olmo-3-1-32b-think",
       "creator": "Allen Institute for AI",
@@ -2130,12 +1950,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/olmo-3-1-32b-think",
-      "providersUrl": "https://artificialanalysis.ai/models/olmo-3-1-32b-think/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 134,
+      "rank": 140,
       "name": "Nex-N2-Pro",
       "slug": "nex-n2-pro",
       "creator": "Nex AGI",
@@ -2146,12 +1964,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/nex-n2-pro",
-      "providersUrl": "https://artificialanalysis.ai/models/nex-n2-pro/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 135,
+      "rank": 141,
       "name": "Command A",
       "slug": "command-a",
       "creator": "Cohere",
@@ -2159,15 +1975,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 17,
-      "latencyFirstChunkSec": 2.25,
-      "totalResponseSec": 32.08,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/command-a",
-      "providersUrl": "https://artificialanalysis.ai/models/command-a/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 7.77,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 136,
+      "rank": 142,
       "name": "LFM2.5-VL-1.6B",
       "slug": "lfm2-5-vl-1-6b",
       "creator": "Liquid AI",
@@ -2178,12 +1992,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32000,
-      "modelUrl": "https://artificialanalysis.ai/models/lfm2-5-vl-1-6b",
-      "providersUrl": "https://artificialanalysis.ai/models/lfm2-5-vl-1-6b/providers"
+      "contextWindow": 32000
     },
     {
-      "rank": 137,
+      "rank": 143,
       "name": "JT-MINI",
       "slug": "jt-mini",
       "creator": "China Mobile",
@@ -2194,12 +2006,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/jt-mini",
-      "providersUrl": "https://artificialanalysis.ai/models/jt-mini/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 138,
+      "rank": 144,
       "name": "Molmo2-8B",
       "slug": "molmo2-8b",
       "creator": "Allen Institute for AI",
@@ -2210,12 +2020,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 36900,
-      "modelUrl": "https://artificialanalysis.ai/models/molmo2-8b",
-      "providersUrl": "https://artificialanalysis.ai/models/molmo2-8b/providers"
+      "contextWindow": 37000
     },
     {
-      "rank": 139,
+      "rank": 145,
       "name": "Qwen3.5 0.8B (non-reasoning)",
       "slug": "qwen3-5-0-8b-non-reasoning",
       "creator": "Alibaba",
@@ -2226,12 +2034,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-0-8b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-0-8b-non-reasoning/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 140,
+      "rank": 146,
       "name": "Ling-3.0-flash-VL",
       "slug": "ling-3-0-flash-vl",
       "creator": "InclusionAI",
@@ -2242,12 +2048,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/ling-3-0-flash-vl",
-      "providersUrl": "https://artificialanalysis.ai/models/ling-3-0-flash-vl/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 141,
+      "rank": 147,
       "name": "MiniCPM-V 4.6 1.3B",
       "slug": "minicpm-v-4-6-1-3b",
       "creator": "OpenBMB",
@@ -2258,12 +2062,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/minicpm-v4-6-1-3b",
-      "providersUrl": "https://artificialanalysis.ai/models/minicpm-v4-6-1-3b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 142,
+      "rank": 148,
       "name": "EXAONE 4.0 32B",
       "slug": "exaone-4-0-32b",
       "creator": "LG AI Research",
@@ -2274,12 +2076,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/exaone-4-0-32b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/exaone-4-0-32b-reasoning/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 143,
+      "rank": 149,
       "name": "Sarvam 105B (high)",
       "slug": "sarvam-105b-high",
       "creator": "Sarvam",
@@ -2287,15 +2087,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 136,
-      "latencyFirstChunkSec": 1.64,
-      "totalResponseSec": 20.03,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/sarvam-105b",
-      "providersUrl": "https://artificialanalysis.ai/models/sarvam-105b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 10.68,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 144,
+      "rank": 150,
       "name": "Llama 3.1 405B",
       "slug": "llama-3-1-405b",
       "creator": "Meta",
@@ -2306,12 +2104,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-3-1-instruct-405b",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-3-1-instruct-405b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 145,
+      "rank": 151,
       "name": "JT-4.1 Flash 236B A21B",
       "slug": "jt-4-1-flash-236b-a21b",
       "creator": "China Mobile",
@@ -2322,12 +2118,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/jt-4-1-flash-236b-a21b",
-      "providersUrl": "https://artificialanalysis.ai/models/jt-4-1-flash-236b-a21b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 146,
+      "rank": 152,
       "name": "Ring-flash-2.0",
       "slug": "ring-flash-2-0",
       "creator": "InclusionAI",
@@ -2338,12 +2132,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/ring-flash-2-0",
-      "providersUrl": "https://artificialanalysis.ai/models/ring-flash-2-0/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 147,
+      "rank": 153,
       "name": "LFM2.5-1.2B-Instruct",
       "slug": "lfm2-5-1-2b-instruct",
       "creator": "Liquid AI",
@@ -2354,12 +2146,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32000,
-      "modelUrl": "https://artificialanalysis.ai/models/lfm2-5-1-2b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/lfm2-5-1-2b-instruct/providers"
+      "contextWindow": 32000
     },
     {
-      "rank": 148,
+      "rank": 154,
       "name": "Apertus 70B Instruct",
       "slug": "apertus-70b-instruct",
       "creator": "Swiss AI Initiative",
@@ -2370,12 +2160,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/apertus-70b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/apertus-70b-instruct/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 149,
+      "rank": 155,
       "name": "Doubao Seed Code",
       "slug": "doubao-seed-code",
       "creator": "ByteDance Seed",
@@ -2386,12 +2174,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/doubao-seed-code",
-      "providersUrl": "https://artificialanalysis.ai/models/doubao-seed-code/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 150,
+      "rank": 156,
       "name": "EXAONE 4.5 33B",
       "slug": "exaone-4-5-33b",
       "creator": "LG AI Research",
@@ -2402,12 +2188,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/exaone-4-5-33b",
-      "providersUrl": "https://artificialanalysis.ai/models/exaone-4-5-33b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 151,
+      "rank": 157,
       "name": "Gemma 4 E4B (non-reasoning)",
       "slug": "gemma-4-e4b-non-reasoning",
       "creator": "Google",
@@ -2415,15 +2199,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 52,
-      "latencyFirstChunkSec": 0.75,
-      "totalResponseSec": 10.41,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-e4b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-e4b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.66,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 152,
+      "rank": 158,
       "name": "K2 Horizon MoVA 36B A4B",
       "slug": "k2-horizon-mova-36b-a4b",
       "creator": "Institute of Foundation Models",
@@ -2434,12 +2216,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 524000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-horizon-mova-36b-a4b",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-horizon-mova-36b-a4b/providers"
+      "contextWindow": 524000
     },
     {
-      "rank": 153,
+      "rank": 159,
       "name": "Granite 4.0 350M",
       "slug": "granite-4-0-350m",
       "creator": "IBM",
@@ -2450,12 +2230,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32800,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-0-350m",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-0-350m/providers"
+      "contextWindow": 33000
     },
     {
-      "rank": 154,
+      "rank": 160,
       "name": "Kimi Linear 48B A3B Instruct",
       "slug": "kimi-linear-48b-a3b-instruct",
       "creator": "Kimi",
@@ -2466,12 +2244,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/kimi-linear-48b-a3b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/kimi-linear-48b-a3b-instruct/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 155,
+      "rank": 161,
       "name": "Solar Open 100B",
       "slug": "solar-open-100b",
       "creator": "Upstage",
@@ -2482,12 +2258,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/solar-open-100b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/solar-open-100b-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 156,
+      "rank": 162,
       "name": "GPT-5.3 Codex (xhigh)",
       "slug": "gpt-5-3-codex-xhigh",
       "creator": "OpenAI",
@@ -2495,15 +2269,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 99,
-      "latencyFirstChunkSec": 72.86,
-      "totalResponseSec": 77.88,
-      "contextWindow": 400000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-5-3-codex",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-5-3-codex/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 62.14,
+      "totalResponseSec": null,
+      "contextWindow": 400000
     },
     {
-      "rank": 157,
+      "rank": 163,
       "name": "LFM2.5-1.2B-Thinking",
       "slug": "lfm2-5-1-2b-thinking",
       "creator": "Liquid AI",
@@ -2514,12 +2286,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32000,
-      "modelUrl": "https://artificialanalysis.ai/models/lfm2-5-1-2b-thinking",
-      "providersUrl": "https://artificialanalysis.ai/models/lfm2-5-1-2b-thinking/providers"
+      "contextWindow": 32000
     },
     {
-      "rank": 158,
+      "rank": 164,
       "name": "K2 Think V2",
       "slug": "k2-think-v2",
       "creator": "Institute of Foundation Models",
@@ -2530,12 +2300,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-think-v2",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-think-v2/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 159,
+      "rank": 165,
       "name": "LongCat 2.0",
       "slug": "longcat-2-0",
       "creator": "LongCat",
@@ -2543,15 +2311,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 67,
-      "latencyFirstChunkSec": 2.76,
-      "totalResponseSec": 39.85,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/longcat-2-0",
-      "providersUrl": "https://artificialanalysis.ai/models/longcat-2-0/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 44,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 160,
+      "rank": 166,
       "name": "Qwen3.5 2B",
       "slug": "qwen3-5-2b",
       "creator": "Alibaba",
@@ -2562,12 +2328,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-2b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-2b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 161,
+      "rank": 167,
       "name": "Tri-21B-Think",
       "slug": "tri-21b-think",
       "creator": "Trillion Labs",
@@ -2578,12 +2342,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32000,
-      "modelUrl": "https://artificialanalysis.ai/models/tri-21b-think-v0-5",
-      "providersUrl": "https://artificialanalysis.ai/models/tri-21b-think-v0-5/providers"
+      "contextWindow": 32000
     },
     {
-      "rank": 162,
+      "rank": 168,
       "name": "Granite 4.0 H Small",
       "slug": "granite-4-0-h-small",
       "creator": "IBM",
@@ -2594,12 +2356,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-0-h-small",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-0-h-small/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 163,
+      "rank": 169,
       "name": "Llama 3.2 11B (Vision)",
       "slug": "llama-3-2-11b-vision",
       "creator": "Meta",
@@ -2607,15 +2367,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 23,
-      "latencyFirstChunkSec": 1.42,
-      "totalResponseSec": 23.08,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b-vision",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b-vision/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 3.74,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 164,
+      "rank": 170,
       "name": "LongCat Flash Lite",
       "slug": "longcat-flash-lite",
       "creator": "LongCat",
@@ -2626,12 +2384,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/longcat-flash-lite",
-      "providersUrl": "https://artificialanalysis.ai/models/longcat-flash-lite/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 165,
+      "rank": 171,
       "name": "Nemotron 3.5 Bolt E4B 4GB",
       "slug": "nemotron-3-5-bolt-e4b-4gb",
       "creator": "NVIDIA",
@@ -2642,12 +2398,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/nemotron-3-5-bolt-e4b-4gb",
-      "providersUrl": "https://artificialanalysis.ai/models/nemotron-3-5-bolt-e4b-4gb/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 166,
+      "rank": 172,
       "name": "Nova 2.0 Lite (high)",
       "slug": "nova-2-0-lite-high",
       "creator": "Amazon",
@@ -2655,15 +2409,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 178,
-      "latencyFirstChunkSec": 21.36,
-      "totalResponseSec": 35.38,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 20.07,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 167,
+      "rank": 173,
       "name": "Solar Mini 4",
       "slug": "solar-mini-4",
       "creator": "Upstage",
@@ -2671,15 +2423,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 100,
-      "latencyFirstChunkSec": 1.94,
-      "totalResponseSec": 26.82,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/solar-mini4",
-      "providersUrl": "https://artificialanalysis.ai/models/solar-mini4/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 62.85,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 168,
+      "rank": 174,
       "name": "MiniCPM5-2B",
       "slug": "minicpm5-2b",
       "creator": "OpenBMB",
@@ -2690,12 +2440,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/minicpm5-2b",
-      "providersUrl": "https://artificialanalysis.ai/models/minicpm5-2b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 169,
+      "rank": 175,
       "name": "Qwen3.5 4B",
       "slug": "qwen3-5-4b",
       "creator": "Alibaba",
@@ -2703,15 +2451,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 46,
-      "latencyFirstChunkSec": 0.82,
-      "totalResponseSec": 54.88,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-4b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-4b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 88.44,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 170,
+      "rank": 176,
       "name": "Motif-2-12.7B",
       "slug": "motif-2-12-7b",
       "creator": "Motif Technologies",
@@ -2722,12 +2468,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/motif-2-12-7b",
-      "providersUrl": "https://artificialanalysis.ai/models/motif-2-12-7b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 171,
+      "rank": 177,
       "name": "Qwen3.6 35B A3B (non-reasoning)",
       "slug": "qwen3-6-35b-a3b-non-reasoning",
       "creator": "Alibaba",
@@ -2735,15 +2479,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 141,
-      "latencyFirstChunkSec": 2.08,
-      "totalResponseSec": 5.64,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 3.01,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 172,
+      "rank": 178,
       "name": "Ministral 3 3B",
       "slug": "ministral-3-3b",
       "creator": "Mistral",
@@ -2751,15 +2493,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 137,
-      "latencyFirstChunkSec": 0.86,
-      "totalResponseSec": 4.51,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/ministral-3-3b",
-      "providersUrl": "https://artificialanalysis.ai/models/ministral-3-3b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.55,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 173,
+      "rank": 179,
       "name": "Hermes 4 70B",
       "slug": "hermes-4-70b",
       "creator": "Nous Research",
@@ -2770,12 +2510,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-70b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-70b-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 174,
+      "rank": 180,
       "name": "Ling-3.0-flash-Fin",
       "slug": "ling-3-0-flash-fin",
       "creator": "InclusionAI",
@@ -2786,12 +2524,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/ling-3-0-flash-fin",
-      "providersUrl": "https://artificialanalysis.ai/models/ling-3-0-flash-fin/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 175,
+      "rank": 181,
       "name": "Gemma 4 26B A4B",
       "slug": "gemma-4-26b-a4b",
       "creator": "Google",
@@ -2799,15 +2535,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 97,
-      "latencyFirstChunkSec": 0.93,
-      "totalResponseSec": 26.6,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-26b-a4b",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-26b-a4b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 25.15,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 176,
+      "rank": 182,
       "name": "NVIDIA Nemotron Nano 12B v2 VL",
       "slug": "nvidia-nemotron-nano-12b-v2-vl",
       "creator": "NVIDIA",
@@ -2818,12 +2552,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-12b-v2-vl-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-12b-v2-vl-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 177,
+      "rank": 183,
       "name": "Qwen3.5 Omni Flash",
       "slug": "qwen3-5-omni-flash",
       "creator": "Alibaba",
@@ -2831,15 +2563,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 220,
-      "latencyFirstChunkSec": 1.78,
-      "totalResponseSec": 4.05,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-omni-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-omni-flash/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.93,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 178,
+      "rank": 184,
       "name": "Nova 2.0 Lite (low)",
       "slug": "nova-2-0-lite-low",
       "creator": "Amazon",
@@ -2847,15 +2577,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 165,
-      "latencyFirstChunkSec": 9.01,
-      "totalResponseSec": 24.21,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning-low",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning-low/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 10.02,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 179,
+      "rank": 185,
       "name": "Magistral Small 1.2",
       "slug": "magistral-small-1-2",
       "creator": "Mistral",
@@ -2863,15 +2591,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 74,
-      "latencyFirstChunkSec": 1.5,
-      "totalResponseSec": 35.21,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/magistral-small-2509",
-      "providersUrl": "https://artificialanalysis.ai/models/magistral-small-2509/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.93,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 180,
+      "rank": 186,
       "name": "Gemma 4 26B A4B (non-reasoning)",
       "slug": "gemma-4-26b-a4b-non-reasoning",
       "creator": "Google",
@@ -2879,15 +2605,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 122,
-      "latencyFirstChunkSec": 0.92,
-      "totalResponseSec": 5.01,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-26b-a4b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-26b-a4b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.59,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 181,
+      "rank": 187,
       "name": "Ministral 3 14B",
       "slug": "ministral-3-14b",
       "creator": "Mistral",
@@ -2895,15 +2619,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 56,
-      "latencyFirstChunkSec": 1.1,
-      "totalResponseSec": 10.06,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/ministral-3-14b",
-      "providersUrl": "https://artificialanalysis.ai/models/ministral-3-14b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.81,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 182,
+      "rank": 188,
       "name": "Gemma 4 E2B (non-reasoning)",
       "slug": "gemma-4-e2b-non-reasoning",
       "creator": "Google",
@@ -2914,12 +2636,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-e2b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-e2b-non-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 183,
+      "rank": 189,
       "name": "Sarvam 30B (high)",
       "slug": "sarvam-30b-high",
       "creator": "Sarvam",
@@ -2930,12 +2650,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/sarvam-30b",
-      "providersUrl": "https://artificialanalysis.ai/models/sarvam-30b/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 184,
+      "rank": 190,
       "name": "Mercury 2.5",
       "slug": "mercury-2-5",
       "creator": "Inception",
@@ -2943,15 +2661,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 1139,
-      "latencyFirstChunkSec": 3.32,
-      "totalResponseSec": 3.76,
-      "contextWindow": 260000,
-      "modelUrl": "https://artificialanalysis.ai/models/mercury-2-5",
-      "providersUrl": "https://artificialanalysis.ai/models/mercury-2-5/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.27,
+      "totalResponseSec": null,
+      "contextWindow": 260000
     },
     {
-      "rank": 185,
+      "rank": 191,
       "name": "Nova 2.0 Lite (non-reasoning)",
       "slug": "nova-2-0-lite-non-reasoning",
       "creator": "Amazon",
@@ -2959,15 +2675,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 170,
-      "latencyFirstChunkSec": 1.08,
-      "totalResponseSec": 4.01,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-lite",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-lite/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.69,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 186,
+      "rank": 192,
       "name": "Nemotron 3 Nano",
       "slug": "nemotron-3-nano",
       "creator": "NVIDIA",
@@ -2975,15 +2689,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 227,
-      "latencyFirstChunkSec": 0.98,
-      "totalResponseSec": 11.98,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-30b-a3b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-30b-a3b-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 8.27,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 187,
+      "rank": 193,
       "name": "DeepSeek V4 Flash Vision (max)",
       "slug": "deepseek-v4-flash-vision-max",
       "creator": "DeepSeek",
@@ -2991,15 +2703,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 155,
-      "latencyFirstChunkSec": 1.65,
-      "totalResponseSec": 17.75,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/deepseek-v4-flash-vision",
-      "providersUrl": "https://artificialanalysis.ai/models/deepseek-v4-flash-vision/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 58.5,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 188,
+      "rank": 194,
       "name": "MiniCPM5-1B",
       "slug": "minicpm5-1b",
       "creator": "OpenBMB",
@@ -3010,12 +2720,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/minicpm5-1b",
-      "providersUrl": "https://artificialanalysis.ai/models/minicpm5-1b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 189,
+      "rank": 195,
       "name": "Jamba 1.7 Large",
       "slug": "jamba-1-7-large",
       "creator": "AI21 Labs",
@@ -3026,12 +2734,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/jamba-1-7-large",
-      "providersUrl": "https://artificialanalysis.ai/models/jamba-1-7-large/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 190,
+      "rank": 196,
       "name": "Nemotron 3.5 Bolt 74B-A9B",
       "slug": "nemotron-3-5-bolt-74b-a9b",
       "creator": "NVIDIA",
@@ -3042,12 +2748,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/nemotron-3-5-bolt-74b-a9b",
-      "providersUrl": "https://artificialanalysis.ai/models/nemotron-3-5-bolt-74b-a9b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 191,
+      "rank": 197,
       "name": "Nanbeige4.1-3B",
       "slug": "nanbeige4-1-3b",
       "creator": "Nanbeige",
@@ -3058,12 +2762,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/nanbeige4-1-3b",
-      "providersUrl": "https://artificialanalysis.ai/models/nanbeige4-1-3b/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 192,
+      "rank": 198,
       "name": "Solar Open2 250B",
       "slug": "solar-open2-250b",
       "creator": "Upstage",
@@ -3074,12 +2776,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/solar-open2-250b",
-      "providersUrl": "https://artificialanalysis.ai/models/solar-open2-250b/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 193,
+      "rank": 199,
       "name": "Ling 3.0 Tiny",
       "slug": "ling-3-0-tiny",
       "creator": "InclusionAI",
@@ -3087,15 +2787,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 58,
-      "latencyFirstChunkSec": 2.47,
-      "totalResponseSec": 45.4,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/ling-3-0-tiny",
-      "providersUrl": "https://artificialanalysis.ai/models/ling-3-0-tiny/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 35.21,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 194,
+      "rank": 200,
       "name": "Celeris-1",
       "slug": "celeris-1",
       "creator": "Celeris",
@@ -3103,15 +2801,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 1581,
-      "latencyFirstChunkSec": 0.58,
-      "totalResponseSec": 0.9,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/celeris-1",
-      "providersUrl": "https://artificialanalysis.ai/models/celeris-1/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 0.69,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 195,
+      "rank": 201,
       "name": "Tiny Aya Global",
       "slug": "tiny-aya-global",
       "creator": "Cohere",
@@ -3120,14 +2816,12 @@
       "estimated": false,
       "costPerTaskUsd": null,
       "medianTokensPerSec": null,
-      "latencyFirstChunkSec": null,
+      "latencyFirstChunkSec": 0.31,
       "totalResponseSec": null,
-      "contextWindow": 8190,
-      "modelUrl": "https://artificialanalysis.ai/models/tiny-aya-global",
-      "providersUrl": "https://artificialanalysis.ai/models/tiny-aya-global/providers"
+      "contextWindow": 8000
     },
     {
-      "rank": 196,
+      "rank": 202,
       "name": "A.X-K2",
       "slug": "a-x-k2",
       "creator": "SK Telecom",
@@ -3138,12 +2832,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/a-x-k2",
-      "providersUrl": "https://artificialanalysis.ai/models/a-x-k2/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 197,
+      "rank": 203,
       "name": "Exaone 4.0 1.2B (non-reasoning)",
       "slug": "exaone-4-0-1-2b-non-reasoning",
       "creator": "LG AI Research",
@@ -3154,12 +2846,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 64000,
-      "modelUrl": "https://artificialanalysis.ai/models/exaone-4-0-1-2b",
-      "providersUrl": "https://artificialanalysis.ai/models/exaone-4-0-1-2b/providers"
+      "contextWindow": 64000
     },
     {
-      "rank": 198,
+      "rank": 204,
       "name": "Hermes 4 405B",
       "slug": "hermes-4-405b",
       "creator": "Nous Research",
@@ -3167,15 +2857,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 41,
-      "latencyFirstChunkSec": 2.31,
-      "totalResponseSec": 63.52,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-405b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-405b-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 16.37,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 199,
+      "rank": 205,
       "name": "Magistral Medium 1.2",
       "slug": "magistral-medium-1-2",
       "creator": "Mistral",
@@ -3186,12 +2874,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/magistral-medium-2509",
-      "providersUrl": "https://artificialanalysis.ai/models/magistral-medium-2509/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 200,
+      "rank": 206,
       "name": "Qwen3.6 35B A3B",
       "slug": "qwen3-6-35b-a3b",
       "creator": "Alibaba",
@@ -3199,15 +2885,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 133,
-      "latencyFirstChunkSec": 2.07,
-      "totalResponseSec": 46.52,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 37.81,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 201,
+      "rank": 207,
       "name": "Apertus 8B Instruct",
       "slug": "apertus-8b-instruct",
       "creator": "Swiss AI Initiative",
@@ -3218,12 +2902,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/apertus-8b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/apertus-8b-instruct/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 202,
+      "rank": 208,
       "name": "Nemotron 3 Nano Omni 30B A3B",
       "slug": "nemotron-3-nano-omni-30b-a3b",
       "creator": "NVIDIA",
@@ -3231,15 +2913,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 231,
-      "latencyFirstChunkSec": 0.9,
-      "totalResponseSec": 11.73,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/nemotron-3-nano-omni-30b-a3b",
-      "providersUrl": "https://artificialanalysis.ai/models/nemotron-3-nano-omni-30b-a3b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 11.49,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 203,
+      "rank": 209,
       "name": "Kimi K2.7 Code",
       "slug": "kimi-k2-7-code",
       "creator": "Kimi",
@@ -3247,15 +2927,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 44,
-      "latencyFirstChunkSec": 2.82,
-      "totalResponseSec": 64.49,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/kimi-k2-7-code",
-      "providersUrl": "https://artificialanalysis.ai/models/kimi-k2-7-code/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 51.28,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 204,
+      "rank": 210,
       "name": "Qwen3.8 2.4T A95B",
       "slug": "qwen3-8-2-4t-a95b",
       "creator": "Alibaba",
@@ -3263,15 +2941,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 39,
-      "latencyFirstChunkSec": 3.07,
-      "totalResponseSec": 67.65,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-2-4t-a95b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-2-4t-a95b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 138.87,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 205,
+      "rank": 211,
       "name": "Olmo 3 7B",
       "slug": "olmo-3-7b",
       "creator": "Allen Institute for AI",
@@ -3282,12 +2958,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/olmo-3-7b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/olmo-3-7b-instruct/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 206,
+      "rank": 212,
       "name": "JT-4.1 Flash 236B A21B (non-reasoning)",
       "slug": "jt-4-1-flash-236b-a21b-non-reasoning",
       "creator": "China Mobile",
@@ -3298,12 +2972,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/jt-4-1-flash-236b-a21b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/jt-4-1-flash-236b-a21b-non-reasoning/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 207,
+      "rank": 213,
       "name": "Llama 4 Maverick",
       "slug": "llama-4-maverick",
       "creator": "Meta",
@@ -3311,15 +2983,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 58,
-      "latencyFirstChunkSec": 0.99,
-      "totalResponseSec": 9.69,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-4-maverick",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-4-maverick/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.65,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 208,
+      "rank": 214,
       "name": "GPT-6 Sol (Daybreak Blue, max)",
       "slug": "gpt-6-sol-daybreak-blue-max",
       "creator": "OpenAI",
@@ -3330,12 +3000,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1050000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-6-sol-daybreak-blue",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-6-sol-daybreak-blue/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 209,
+      "rank": 215,
       "name": "Olmo 3.1 32B Instruct",
       "slug": "olmo-3-1-32b-instruct",
       "creator": "Allen Institute for AI",
@@ -3346,12 +3014,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/olmo-3-1-32b-instruct",
-      "providersUrl": "https://artificialanalysis.ai/models/olmo-3-1-32b-instruct/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 210,
+      "rank": 216,
       "name": "Ministral 3 8B",
       "slug": "ministral-3-8b",
       "creator": "Mistral",
@@ -3359,15 +3025,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 125,
-      "latencyFirstChunkSec": 1.02,
-      "totalResponseSec": 5.02,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/ministral-3-8b",
-      "providersUrl": "https://artificialanalysis.ai/models/ministral-3-8b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.17,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 211,
+      "rank": 217,
       "name": "Llama 3.3 70B",
       "slug": "llama-3-3-70b",
       "creator": "Meta",
@@ -3375,15 +3039,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 88,
-      "latencyFirstChunkSec": 1.83,
-      "totalResponseSec": 7.49,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-3-3-instruct-70b",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-3-3-instruct-70b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.76,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 212,
+      "rank": 218,
       "name": "Nemotron Cascade 2 30B A3B",
       "slug": "nemotron-cascade-2-30b-a3b",
       "creator": "NVIDIA",
@@ -3394,12 +3056,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nemotron-cascade-2-30b-a3b",
-      "providersUrl": "https://artificialanalysis.ai/models/nemotron-cascade-2-30b-a3b/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 213,
+      "rank": 219,
       "name": "R1 1776",
       "slug": "r1-1776",
       "creator": "Perplexity",
@@ -3410,12 +3070,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/r1-1776",
-      "providersUrl": "https://artificialanalysis.ai/models/r1-1776/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 214,
+      "rank": 220,
       "name": "Qwen3.8-Flash-Next",
       "slug": "qwen3-8-flash-next",
       "creator": "Alibaba",
@@ -3423,15 +3081,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 54,
-      "latencyFirstChunkSec": 2.25,
-      "totalResponseSec": 48.97,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-8-flash-next",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-8-flash-next/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 116.74,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 215,
+      "rank": 221,
       "name": "Llama 3.2 90B (Vision)",
       "slug": "llama-3-2-90b-vision",
       "creator": "Meta",
@@ -3442,12 +3098,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-3-2-instruct-90b-vision",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-3-2-instruct-90b-vision/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 216,
+      "rank": 222,
       "name": "K2 Horizon 0.9B",
       "slug": "k2-horizon-0-9b",
       "creator": "Institute of Foundation Models",
@@ -3458,12 +3112,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-horizon-0-9b",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-horizon-0-9b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 217,
+      "rank": 223,
       "name": "Phi-4 Mini",
       "slug": "phi-4-mini",
       "creator": "Microsoft",
@@ -3471,15 +3123,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 45,
-      "latencyFirstChunkSec": 0.85,
-      "totalResponseSec": 11.97,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/phi-4-mini",
-      "providersUrl": "https://artificialanalysis.ai/models/phi-4-mini/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 4.56,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 218,
+      "rank": 224,
       "name": "Nova 2.0 Pro Preview (non-reasoning)",
       "slug": "nova-2-0-pro-preview-non-reasoning",
       "creator": "Amazon",
@@ -3487,15 +3137,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 122,
-      "latencyFirstChunkSec": 1.1,
-      "totalResponseSec": 5.19,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-pro",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-pro/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.43,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 219,
+      "rank": 225,
       "name": "K2-V2 (high)",
       "slug": "k2-v2-high",
       "creator": "Institute of Foundation Models",
@@ -3506,12 +3154,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 512000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-v2",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-v2/providers"
+      "contextWindow": 512000
     },
     {
-      "rank": 220,
+      "rank": 226,
       "name": "Gemini 3 Deep Think",
       "slug": "gemini-3-deep-think",
       "creator": "Google",
@@ -3522,12 +3168,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-3-deep-think",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-3-deep-think/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 221,
+      "rank": 227,
       "name": "ERNIE 5.0 Thinking Preview",
       "slug": "ernie-5-0-thinking-preview",
       "creator": "Baidu",
@@ -3538,12 +3182,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/ernie-5-0-thinking-preview",
-      "providersUrl": "https://artificialanalysis.ai/models/ernie-5-0-thinking-preview/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 222,
+      "rank": 228,
       "name": "Ling 3.1 Flash",
       "slug": "ling-3-1-flash",
       "creator": "InclusionAI",
@@ -3551,15 +3193,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 215,
-      "latencyFirstChunkSec": 1.84,
-      "totalResponseSec": 13.49,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/ling-3-1-flash",
-      "providersUrl": "https://artificialanalysis.ai/models/ling-3-1-flash/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 24.58,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 223,
+      "rank": 229,
       "name": "Granite 4.0 H 350M",
       "slug": "granite-4-0-h-350m",
       "creator": "IBM",
@@ -3570,12 +3210,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32800,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-0-h-350m",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-0-h-350m/providers"
+      "contextWindow": 33000
     },
     {
-      "rank": 224,
+      "rank": 230,
       "name": "Qwen3.5 0.8B",
       "slug": "qwen3-5-0-8b",
       "creator": "Alibaba",
@@ -3586,12 +3224,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-5-0-8b",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-5-0-8b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 225,
+      "rank": 231,
       "name": "Apriel-v1.6-15B-Thinker",
       "slug": "apriel-v1-6-15b-thinker",
       "creator": "ServiceNow",
@@ -3602,12 +3238,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/apriel-v1-6-15b-thinker",
-      "providersUrl": "https://artificialanalysis.ai/models/apriel-v1-6-15b-thinker/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 226,
+      "rank": 232,
       "name": "Qwen3.7 Plus",
       "slug": "qwen3-7-plus",
       "creator": "Alibaba",
@@ -3615,15 +3249,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 58,
-      "latencyFirstChunkSec": 2.42,
-      "totalResponseSec": 45.64,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-7-plus",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-7-plus/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 46.87,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 227,
+      "rank": 233,
       "name": "DeepHermes 3 - Mistral 24B (non-reasoning)",
       "slug": "deephermes-3-mistral-24b-non-reasoning",
       "creator": "Nous Research",
@@ -3634,12 +3266,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32000,
-      "modelUrl": "https://artificialanalysis.ai/models/deephermes-3-mistral-24b-preview",
-      "providersUrl": "https://artificialanalysis.ai/models/deephermes-3-mistral-24b-preview/providers"
+      "contextWindow": 32000
     },
     {
-      "rank": 228,
+      "rank": 234,
       "name": "NVIDIA Nemotron Nano 12B v2 VL (non-reasoning)",
       "slug": "nvidia-nemotron-nano-12b-v2-vl-non-reasoning",
       "creator": "NVIDIA",
@@ -3647,15 +3277,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 202,
-      "latencyFirstChunkSec": 1.03,
-      "totalResponseSec": 3.5,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-12b-v2-vl",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-12b-v2-vl/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.49,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 229,
+      "rank": 235,
       "name": "Step3 VL 10B",
       "slug": "step3-vl-10b",
       "creator": "StepFun",
@@ -3666,12 +3294,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/step-3-vl-10b",
-      "providersUrl": "https://artificialanalysis.ai/models/step-3-vl-10b/providers"
+      "contextWindow": 66000
     },
     {
-      "rank": 230,
+      "rank": 236,
       "name": "Llama 4 Scout",
       "slug": "llama-4-scout",
       "creator": "Meta",
@@ -3679,15 +3305,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 98,
-      "latencyFirstChunkSec": 0.83,
-      "totalResponseSec": 5.94,
-      "contextWindow": 10000000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-4-scout",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-4-scout/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.3,
+      "totalResponseSec": null,
+      "contextWindow": 10000000
     },
     {
-      "rank": 231,
+      "rank": 237,
       "name": "ERNIE 4.5 300B A47B",
       "slug": "ernie-4-5-300b-a47b",
       "creator": "Baidu",
@@ -3698,12 +3322,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/ernie-4-5-300b-a47b",
-      "providersUrl": "https://artificialanalysis.ai/models/ernie-4-5-300b-a47b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 232,
+      "rank": 238,
       "name": "Molmo 7B-D",
       "slug": "molmo-7b-d",
       "creator": "Allen Institute for AI",
@@ -3714,12 +3336,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 4100,
-      "modelUrl": "https://artificialanalysis.ai/models/molmo-7b-d",
-      "providersUrl": "https://artificialanalysis.ai/models/molmo-7b-d/providers"
+      "contextWindow": 4000
     },
     {
-      "rank": 233,
+      "rank": 239,
       "name": "Motif 3",
       "slug": "motif-3",
       "creator": "Motif Technologies",
@@ -3730,12 +3350,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/motif-3",
-      "providersUrl": "https://artificialanalysis.ai/models/motif-3/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 234,
+      "rank": 240,
       "name": "Gemma 4 E2B",
       "slug": "gemma-4-e2b",
       "creator": "Google",
@@ -3746,28 +3364,24 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-e2b",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-e2b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 235,
+      "rank": 241,
       "name": "Hy3",
       "slug": "hy3",
       "creator": "Tencent",
-      "creatorLogo": "https://artificialanalysis.ai/img/logos/tencent.svg",
+      "creatorLogo": "https://artificialanalysis.ai/img/logos/tencent-hy.svg",
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 94,
-      "latencyFirstChunkSec": 2.79,
-      "totalResponseSec": 29.25,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/hy3",
-      "providersUrl": "https://artificialanalysis.ai/models/hy3/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 50.43,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 236,
+      "rank": 242,
       "name": "Nova 2.0 Omni (low)",
       "slug": "nova-2-0-omni-low",
       "creator": "Amazon",
@@ -3778,12 +3392,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-omni-reasoning-low",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-omni-reasoning-low/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 237,
+      "rank": 243,
       "name": "Jamba 1.7 Mini",
       "slug": "jamba-1-7-mini",
       "creator": "AI21 Labs",
@@ -3794,12 +3406,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 258000,
-      "modelUrl": "https://artificialanalysis.ai/models/jamba-1-7-mini",
-      "providersUrl": "https://artificialanalysis.ai/models/jamba-1-7-mini/providers"
+      "contextWindow": 258000
     },
     {
-      "rank": 238,
+      "rank": 244,
       "name": "Trinity Large Thinking",
       "slug": "trinity-large-thinking",
       "creator": "Arcee AI",
@@ -3810,12 +3420,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 512000,
-      "modelUrl": "https://artificialanalysis.ai/models/trinity-large-thinking",
-      "providersUrl": "https://artificialanalysis.ai/models/trinity-large-thinking/providers"
+      "contextWindow": 512000
     },
     {
-      "rank": 239,
+      "rank": 245,
       "name": "DeepHermes 3 - Llama-3.1 8B (non-reasoning)",
       "slug": "deephermes-3-llama-3-1-8b-non-reasoning",
       "creator": "Nous Research",
@@ -3826,12 +3434,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/deephermes-3-llama-3-1-8b-preview",
-      "providersUrl": "https://artificialanalysis.ai/models/deephermes-3-llama-3-1-8b-preview/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 240,
+      "rank": 246,
       "name": "Qwen3 Omni 30B A3B",
       "slug": "qwen3-omni-30b-a3b",
       "creator": "Alibaba",
@@ -3839,15 +3445,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 101,
-      "latencyFirstChunkSec": 1.85,
-      "totalResponseSec": 26.67,
-      "contextWindow": 65500,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-omni-30b-a3b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-omni-30b-a3b-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 24.68,
+      "totalResponseSec": null,
+      "contextWindow": 66000
     },
     {
-      "rank": 241,
+      "rank": 247,
       "name": "Gemini 3.1 Pro Preview",
       "slug": "gemini-3-1-pro-preview",
       "creator": "Google",
@@ -3855,15 +3459,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 139,
-      "latencyFirstChunkSec": 23.66,
-      "totalResponseSec": 27.27,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemini-3-1-pro-preview",
-      "providersUrl": "https://artificialanalysis.ai/models/gemini-3-1-pro-preview/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 19.7,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 242,
+      "rank": 248,
       "name": "G9v3-39A5B",
       "slug": "g9v3-39a5b",
       "creator": "AI9Stars",
@@ -3874,12 +3476,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/g9v3-39a5b",
-      "providersUrl": "https://artificialanalysis.ai/models/g9v3-39a5b/providers"
+      "contextWindow": 131000
     },
     {
-      "rank": 243,
+      "rank": 249,
       "name": "DiffusionGemma 26B A4B",
       "slug": "diffusiongemma-26b-a4b",
       "creator": "Google",
@@ -3890,12 +3490,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/diffusiongemma-26b-a4b",
-      "providersUrl": "https://artificialanalysis.ai/models/diffusiongemma-26b-a4b/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 244,
+      "rank": 250,
       "name": "GPT-5.5 Instant (June 2026)",
       "slug": "gpt-5-5-instant-june-2026",
       "creator": "OpenAI",
@@ -3903,15 +3501,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 154,
-      "latencyFirstChunkSec": 0.86,
-      "totalResponseSec": 17.08,
-      "contextWindow": 400000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-5-5-instant-06-26",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-5-5-instant-06-26/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.32,
+      "totalResponseSec": null,
+      "contextWindow": 400000
     },
     {
-      "rank": 245,
+      "rank": 251,
       "name": "Falcon-H1R-7B",
       "slug": "falcon-h1r-7b",
       "creator": "TII UAE",
@@ -3922,12 +3518,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/falcon-h1r-7b",
-      "providersUrl": "https://artificialanalysis.ai/models/falcon-h1r-7b/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 246,
+      "rank": 252,
       "name": "Qwen3 Next 80B A3B",
       "slug": "qwen3-next-80b-a3b",
       "creator": "Alibaba",
@@ -3938,12 +3532,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-next-80b-a3b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-next-80b-a3b-reasoning/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 247,
+      "rank": 253,
       "name": "gpt-oss-120b (low)",
       "slug": "gpt-oss-120b-low",
       "creator": "OpenAI",
@@ -3951,31 +3543,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 255,
-      "latencyFirstChunkSec": 0.75,
-      "totalResponseSec": 10.57,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-oss-120b-low",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-oss-120b-low/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.38,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 248,
-      "name": "Gemma 4 31B",
-      "slug": "gemma-4-31b",
-      "creator": "Google",
-      "creatorLogo": "https://artificialanalysis.ai/img/logos/google.svg",
-      "intelligenceIndex": null,
-      "estimated": false,
-      "costPerTaskUsd": null,
-      "medianTokensPerSec": 35,
-      "latencyFirstChunkSec": 1.08,
-      "totalResponseSec": 64.44,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-31b",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-31b/providers"
-    },
-    {
-      "rank": 249,
+      "rank": 254,
       "name": "Llama Nemotron Ultra",
       "slug": "llama-nemotron-ultra",
       "creator": "NVIDIA",
@@ -3986,12 +3560,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/llama-3-1-nemotron-ultra-253b-v1-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/llama-3-1-nemotron-ultra-253b-v1-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 250,
+      "rank": 255,
       "name": "Gemma 4 31B (non-reasoning)",
       "slug": "gemma-4-31b-non-reasoning",
       "creator": "Google",
@@ -3999,15 +3571,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 60,
-      "latencyFirstChunkSec": 1.82,
-      "totalResponseSec": 10.15,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-31b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-31b-non-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 3.86,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 251,
+      "rank": 256,
       "name": "MiniCPM5-1B (non-reasoning)",
       "slug": "minicpm5-1b-non-reasoning",
       "creator": "OpenBMB",
@@ -4018,12 +3588,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/minicpm5-1b-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/minicpm5-1b-non-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 252,
+      "rank": 257,
       "name": "Hermes 4 405B (non-reasoning)",
       "slug": "hermes-4-405b-non-reasoning",
       "creator": "Nous Research",
@@ -4031,31 +3599,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 40,
-      "latencyFirstChunkSec": 2.31,
-      "totalResponseSec": 14.79,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-405b",
-      "providersUrl": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-405b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 5.27,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 253,
-      "name": "DeepSeek V4 Pro 0813 (non-reasoning)",
-      "slug": "deepseek-v4-pro-0813-non-reasoning",
-      "creator": "DeepSeek",
-      "creatorLogo": "https://artificialanalysis.ai/img/logos/deepseek.svg",
-      "intelligenceIndex": null,
-      "estimated": false,
-      "costPerTaskUsd": null,
-      "medianTokensPerSec": 91,
-      "latencyFirstChunkSec": 1.71,
-      "totalResponseSec": 7.21,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/deepseek-v4-pro-non-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/deepseek-v4-pro-non-reasoning/providers"
-    },
-    {
-      "rank": 254,
+      "rank": 258,
       "name": "Exaone 4.0 1.2B",
       "slug": "exaone-4-0-1-2b",
       "creator": "LG AI Research",
@@ -4066,12 +3616,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 64000,
-      "modelUrl": "https://artificialanalysis.ai/models/exaone-4-0-1-2b-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/exaone-4-0-1-2b-reasoning/providers"
+      "contextWindow": 64000
     },
     {
-      "rank": 255,
+      "rank": 259,
       "name": "Gemma 4 E4B",
       "slug": "gemma-4-e4b",
       "creator": "Google",
@@ -4079,15 +3627,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 51,
-      "latencyFirstChunkSec": 0.81,
-      "totalResponseSec": 49.92,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-e4b",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-e4b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 48.44,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 256,
+      "rank": 260,
       "name": "K2-V2 (low)",
       "slug": "k2-v2-low",
       "creator": "Institute of Foundation Models",
@@ -4098,12 +3644,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 512000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-v2-low",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-v2-low/providers"
+      "contextWindow": 512000
     },
     {
-      "rank": 257,
+      "rank": 261,
       "name": "Granite 4.0 H 1B",
       "slug": "granite-4-0-h-1b",
       "creator": "IBM",
@@ -4114,12 +3658,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/granite-4-0-h-nano-1b",
-      "providersUrl": "https://artificialanalysis.ai/models/granite-4-0-h-nano-1b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 258,
+      "rank": 262,
       "name": "Reka Flash 3",
       "slug": "reka-flash-3",
       "creator": "Reka AI",
@@ -4127,31 +3669,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 92,
-      "latencyFirstChunkSec": 1.35,
-      "totalResponseSec": 28.5,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/reka-flash-3",
-      "providersUrl": "https://artificialanalysis.ai/models/reka-flash-3/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 8,
+      "totalResponseSec": null,
+      "contextWindow": 128000
     },
     {
-      "rank": 259,
-      "name": "Mistral Medium 3.5",
-      "slug": "mistral-medium-3-5",
-      "creator": "Mistral",
-      "creatorLogo": "https://artificialanalysis.ai/img/logos/mistral.svg",
-      "intelligenceIndex": null,
-      "estimated": false,
-      "costPerTaskUsd": null,
-      "medianTokensPerSec": 162,
-      "latencyFirstChunkSec": 2.37,
-      "totalResponseSec": 17.8,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/mistral-medium-3-5",
-      "providersUrl": "https://artificialanalysis.ai/models/mistral-medium-3-5/providers"
-    },
-    {
-      "rank": 260,
+      "rank": 263,
       "name": "K2-V2 (medium)",
       "slug": "k2-v2-medium",
       "creator": "Institute of Foundation Models",
@@ -4162,12 +3686,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 512000,
-      "modelUrl": "https://artificialanalysis.ai/models/k2-v2-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/k2-v2-medium/providers"
+      "contextWindow": 512000
     },
     {
-      "rank": 261,
+      "rank": 264,
       "name": "Mi:dm K 2.5 Pro",
       "slug": "mi-dm-k-2-5-pro",
       "creator": "Korea Telecom",
@@ -4178,12 +3700,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/mi-dm-k-2-5-pro-dec28",
-      "providersUrl": "https://artificialanalysis.ai/models/mi-dm-k-2-5-pro-dec28/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 262,
+      "rank": 265,
       "name": "LFM2.5-2.6B",
       "slug": "lfm2-5-2-6b",
       "creator": "Liquid AI",
@@ -4194,12 +3714,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/lfm2-5-2-6b",
-      "providersUrl": "https://artificialanalysis.ai/models/lfm2-5-2-6b/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 263,
+      "rank": 266,
       "name": "LFM2.5-8B-A1B",
       "slug": "lfm2-5-8b-a1b",
       "creator": "Liquid AI",
@@ -4210,12 +3728,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32800,
-      "modelUrl": "https://artificialanalysis.ai/models/lfm2-5-8b-a1b",
-      "providersUrl": "https://artificialanalysis.ai/models/lfm2-5-8b-a1b/providers"
+      "contextWindow": 33000
     },
     {
-      "rank": 264,
+      "rank": 267,
       "name": "GPT-5.5 Pro (xhigh)",
       "slug": "gpt-5-5-pro-xhigh",
       "creator": "OpenAI",
@@ -4226,12 +3742,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 922000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-5-5-pro",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-5-5-pro/providers"
+      "contextWindow": 922000
     },
     {
-      "rank": 265,
+      "rank": 268,
       "name": "Nova Premier",
       "slug": "nova-premier",
       "creator": "Amazon",
@@ -4242,12 +3756,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-premier",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-premier/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 266,
+      "rank": 269,
       "name": "Cogito v2.1",
       "slug": "cogito-v2-1",
       "creator": "Deep Cogito",
@@ -4258,12 +3770,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 128000,
-      "modelUrl": "https://artificialanalysis.ai/models/cogito-v2-1-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/cogito-v2-1-reasoning/providers"
+      "contextWindow": 128000
     },
     {
-      "rank": 267,
+      "rank": 270,
       "name": "Ring-2.6-1T",
       "slug": "ring-2-6-1t",
       "creator": "InclusionAI",
@@ -4271,15 +3781,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 126,
-      "latencyFirstChunkSec": 3.82,
-      "totalResponseSec": 23.73,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/ring-2-6-1t",
-      "providersUrl": "https://artificialanalysis.ai/models/ring-2-6-1t/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 8.4,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     },
     {
-      "rank": 268,
+      "rank": 271,
       "name": "Phi-4",
       "slug": "phi-4",
       "creator": "Microsoft",
@@ -4287,15 +3795,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 41,
-      "latencyFirstChunkSec": 2.43,
-      "totalResponseSec": 14.51,
-      "contextWindow": 16000,
-      "modelUrl": "https://artificialanalysis.ai/models/phi-4",
-      "providersUrl": "https://artificialanalysis.ai/models/phi-4/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 2.35,
+      "totalResponseSec": null,
+      "contextWindow": 16000
     },
     {
-      "rank": 269,
+      "rank": 272,
       "name": "gpt-oss-120b (high)",
       "slug": "gpt-oss-120b-high",
       "creator": "OpenAI",
@@ -4303,15 +3809,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 209,
-      "latencyFirstChunkSec": 0.78,
-      "totalResponseSec": 12.74,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/gpt-oss-120b",
-      "providersUrl": "https://artificialanalysis.ai/models/gpt-oss-120b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 16.93,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 270,
+      "rank": 273,
       "name": "NVIDIA Nemotron Nano 9B V2",
       "slug": "nvidia-nemotron-nano-9b-v2",
       "creator": "NVIDIA",
@@ -4319,15 +3823,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 213,
-      "latencyFirstChunkSec": 0.56,
-      "totalResponseSec": 12.27,
-      "contextWindow": 131000,
-      "modelUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-9b-v2-reasoning",
-      "providersUrl": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-9b-v2-reasoning/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 0.89,
+      "totalResponseSec": null,
+      "contextWindow": 131000
     },
     {
-      "rank": 271,
+      "rank": 274,
       "name": "Agnes 2.5 Pro Beta",
       "slug": "agnes-2-5-pro-beta",
       "creator": "Sapiens AI",
@@ -4338,12 +3840,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/agnes-2-5-pro-beta",
-      "providersUrl": "https://artificialanalysis.ai/models/agnes-2-5-pro-beta/providers"
+      "contextWindow": 1000000
     },
     {
-      "rank": 272,
+      "rank": 275,
       "name": "Nova 2.0 Pro Preview (low)",
       "slug": "nova-2-0-pro-preview-low",
       "creator": "Amazon",
@@ -4351,15 +3851,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 127,
-      "latencyFirstChunkSec": 10.91,
-      "totalResponseSec": 30.6,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-pro-reasoning-low",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-pro-reasoning-low/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 6.9,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 273,
+      "rank": 276,
       "name": "Jamba Reasoning 3B",
       "slug": "jamba-reasoning-3b",
       "creator": "AI21 Labs",
@@ -4370,12 +3868,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/jamba-reasoning-3b",
-      "providersUrl": "https://artificialanalysis.ai/models/jamba-reasoning-3b/providers"
+      "contextWindow": 262000
     },
     {
-      "rank": 274,
+      "rank": 277,
       "name": "Quasar 438B (max)",
       "slug": "quasar-438b-max",
       "creator": "Multiverse Computing",
@@ -4383,15 +3879,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 162,
-      "latencyFirstChunkSec": 1.31,
-      "totalResponseSec": 16.72,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/quasar-438b",
-      "providersUrl": "https://artificialanalysis.ai/models/quasar-438b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": null,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 275,
+      "rank": 278,
       "name": "LFM2 24B A2B",
       "slug": "lfm2-24b-a2b",
       "creator": "Liquid AI",
@@ -4402,12 +3896,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 32800,
-      "modelUrl": "https://artificialanalysis.ai/models/lfm2-24b-a2b",
-      "providersUrl": "https://artificialanalysis.ai/models/lfm2-24b-a2b/providers"
+      "contextWindow": 33000
     },
     {
-      "rank": 276,
+      "rank": 279,
       "name": "Nova 2.0 Lite (medium)",
       "slug": "nova-2-0-lite-medium",
       "creator": "Amazon",
@@ -4415,15 +3907,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 185,
-      "latencyFirstChunkSec": 22.67,
-      "totalResponseSec": 36.18,
-      "contextWindow": 1000000,
-      "modelUrl": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning-medium",
-      "providersUrl": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning-medium/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 25.14,
+      "totalResponseSec": null,
+      "contextWindow": 1000000
     },
     {
-      "rank": 277,
+      "rank": 280,
       "name": "KAT-Coder-Pro V2",
       "slug": "kat-coder-pro-v2",
       "creator": "KwaiKAT",
@@ -4434,12 +3924,10 @@
       "medianTokensPerSec": null,
       "latencyFirstChunkSec": null,
       "totalResponseSec": null,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/kat-coder-pro-v2",
-      "providersUrl": "https://artificialanalysis.ai/models/kat-coder-pro-v2/providers"
+      "contextWindow": 256000
     },
     {
-      "rank": 278,
+      "rank": 281,
       "name": "Qwen3 Coder Next",
       "slug": "qwen3-coder-next",
       "creator": "Alibaba",
@@ -4447,15 +3935,13 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 82,
-      "latencyFirstChunkSec": 0.88,
-      "totalResponseSec": 6.99,
-      "contextWindow": 256000,
-      "modelUrl": "https://artificialanalysis.ai/models/qwen3-coder-next",
-      "providersUrl": "https://artificialanalysis.ai/models/qwen3-coder-next/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 1.39,
+      "totalResponseSec": null,
+      "contextWindow": 256000
     },
     {
-      "rank": 279,
+      "rank": 282,
       "name": "Gemma 4 12B",
       "slug": "gemma-4-12b",
       "creator": "Google",
@@ -4463,12 +3949,10 @@
       "intelligenceIndex": null,
       "estimated": false,
       "costPerTaskUsd": null,
-      "medianTokensPerSec": 110,
-      "latencyFirstChunkSec": 2.25,
-      "totalResponseSec": 24.97,
-      "contextWindow": 262000,
-      "modelUrl": "https://artificialanalysis.ai/models/gemma-4-12b",
-      "providersUrl": "https://artificialanalysis.ai/models/gemma-4-12b/providers"
+      "medianTokensPerSec": null,
+      "latencyFirstChunkSec": 33.08,
+      "totalResponseSec": null,
+      "contextWindow": 262000
     }
   ]
 }
