@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-19",
+  "updatedAt": "2026-11-22",
   "totalModels": 42,
   "models": [
     {
@@ -86,11 +86,11 @@
     {
       "provider": "xAI",
       "modelId": "x-ai/grok-4.7",
-      "name": "SpaceXAI: Grok 4.7",
+      "name": "SpaceXSI: Grok 4.7",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "Responses",
       "contextLength": 500000,
-      "notes": "Grok 4.7 is SpaceXAI's flagship model for coding, agentic tasks, and knowledge w"
+      "notes": "Grok 4.7 is SpaceXSI's flagship model for coding, agentic tasks, and knowledge w"
     },
     {
       "provider": "Google",
@@ -122,11 +122,11 @@
     {
       "provider": "xAI",
       "modelId": "x-ai/grok-4.5",
-      "name": "SpaceXAI: Grok 4.5",
+      "name": "SpaceXSI: Grok 4.5",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "Responses",
       "contextLength": 500000,
-      "notes": "Grok 4.5 is a model from SpaceXAI with frontier performance on coding, knowledge"
+      "notes": "Grok 4.5 is a model from SpaceXSI with frontier performance on coding, knowledge"
     },
     {
       "provider": "Google",
@@ -185,11 +185,11 @@
     {
       "provider": "xAI",
       "modelId": "x-ai/grok-4.3",
-      "name": "SpaceXAI: Grok 4.3",
+      "name": "SpaceXSI: Grok 4.3",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "Responses",
       "contextLength": 1000000,
-      "notes": "Grok 4.3 is a reasoning model from SpaceXAI. It accepts text and image inputs wi"
+      "notes": "Grok 4.3 is a reasoning model from SpaceXSI. It accepts text and image inputs wi"
     },
     {
       "provider": "OpenAI",
@@ -221,20 +221,20 @@
     {
       "provider": "xAI",
       "modelId": "x-ai/grok-4.20-multi-agent",
-      "name": "SpaceXAI: Grok 4.20 Multi-Agent",
+      "name": "SpaceXSI: Grok 4.20 Multi-Agent",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "Responses",
       "contextLength": 2000000,
-      "notes": "Grok 4.20 Multi-Agent is a variant of SpaceXAI’s Grok 4.20 designed for collabor"
+      "notes": "Grok 4.20 Multi-Agent is a variant of SpaceXSI’s Grok 4.20 designed for collabor"
     },
     {
       "provider": "xAI",
       "modelId": "x-ai/grok-4.20",
-      "name": "SpaceXAI: Grok 4.20",
+      "name": "SpaceXSI: Grok 4.20",
       "tier": "前沿检测发现 (Auto-Discovered)",
       "surface": "Responses",
       "contextLength": 2000000,
-      "notes": "Grok 4.20 is a reasoning model from SpaceXAI with industry-leading speed and age"
+      "notes": "Grok 4.20 is a reasoning model from SpaceXSI with industry-leading speed and age"
     },
     {
       "provider": "OpenAI",
